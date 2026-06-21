@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v1.0 20260621-1100 -->
+<!-- DDS v1.1 20260621-1500 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -412,6 +412,20 @@ function showResults() {
   var rush = ans.q5 === 'asap' || ans.q5 === '1month';
   var addons = Object.keys(multiSel).filter(function(k) { return k !== 'none'; });
 
+  // Build conversational reasoning
+  var pageLabel = { '1-3': '1 to 3 pages', '4-7': '4 to 7 pages', '8-15': '8 to 15 pages', '15+': '15+ pages' }[ans.q2] || '';
+  var typeLabel = { new: 'a new website', redesign: 'a full redesign', additions: 'additions to an existing site', ecommerce: 'an e-commerce build' }[ans.q1] || '';
+  var platformLabel = { custom: 'custom HTML', squarespace: 'Squarespace or Wix', wordpress: 'WordPress', unsure: 'a platform we will decide together' }[ans.q3] || '';
+  var timelineLabel = { flexible: 'no hard deadline', '2months': 'within 2 months', '1month': 'within 1 month', asap: 'as soon as possible' }[ans.q5] || '';
+
+  var reasoning = {
+    starter: 'Based on your answers — ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ' — this is a Starter-level project. These builds move fast, typically 2-4 weeks, and give you a clean professional presence without overbuilding for where your business is right now.',
+    growth: 'Based on ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ', this falls into the Growth tier. This is the most common engagement for established small businesses — custom design, built to rank on Google, with enough pages to tell your full story and convert visitors into customers.',
+    studio: 'What you described — ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ' — is a Studio-level project. This scope needs a full custom design system, and depending on the complexity of your e-commerce or feature requirements, it will take 6-10 weeks to do right.'
+  }[tier];
+
+  var rushNote = rush ? ' Because your timeline is tight (' + timelineLabel + '), a 25% rush surcharge applies — this prioritizes your project and compresses the timeline.' : '';
+
   var tiers = {
     starter: {
       name: 'Starter',
@@ -419,15 +433,17 @@ function showResults() {
       cadence: '50% upfront · 50% at launch · Standard 4-6 week timeline',
       cls: 'starter',
       items: [
-        'Up to 5 pages, mobile-first design',
-        'Contact form and Google Maps integration',
-        'Basic on-page SEO (titles, descriptions, schema)',
+        'Template build on Squarespace, Wix, or similar',
+        'Your branding applied — colors, fonts, logo',
+        'Up to 5 pages, mobile-optimized',
+        'Contact form and basic on-page SEO',
         'Google Analytics and Search Console setup',
-        '30-day post-launch support',
-        'Template-based build on Squarespace or similar'
+        '1 revision round + launch walkthrough video',
+        'You manage updates after launch'
       ],
       cta: 'Book a free call to confirm scope',
-      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min'
+      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min',
+      who: 'Best for: New businesses, pop-ups, or anyone who needs a clean professional presence fast without a large upfront investment.'
     },
     growth: {
       name: 'Growth',
@@ -435,15 +451,17 @@ function showResults() {
       cadence: '50% upfront · 50% at launch · Standard 6-8 week timeline',
       cls: 'growth',
       items: [
-        'Up to 10 pages, custom HTML/CSS design',
+        'Custom HTML/CSS design — no templates',
+        'Mobile-first, performance-optimized build',
         'Full on-page SEO with keyword research',
-        'Speed-optimized, Core Web Vitals compliant',
-        'Lead capture forms with email notifications',
-        'Google Analytics, GA4 events, and Search Console',
-        '60-day post-launch support'
+        'Google Analytics 4 with conversion events',
+        'Google Business Profile setup and optimization',
+        'Sitemap, robots.txt, schema markup',
+        '2 revision rounds + 30-day post-launch support'
       ],
       cta: 'Book a free call to confirm scope',
-      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min'
+      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min',
+      who: 'Best for: Established businesses ready to compete online and rank on Google — not just have a website, but have one that works.'
     },
     studio: {
       name: 'Studio',
@@ -451,45 +469,64 @@ function showResults() {
       cadence: '50% upfront · 25% at midpoint · 25% at launch',
       cls: 'studio',
       items: [
-        'Unlimited pages, fully custom design system',
-        'E-commerce, booking, or membership features',
+        'Fully custom design system and component library',
+        'E-commerce, booking, or membership functionality',
         'Comprehensive SEO strategy and implementation',
         'Custom animations, interactions, and widgets',
-        'Performance audit and Core Web Vitals optimization',
+        'Performance optimization and Core Web Vitals audit',
+        'Client portal with file sharing and approvals',
         '90-day post-launch support + optional retainer'
       ],
-      cta: 'Let\'s talk about your project',
-      ctaUrl: '/contact'
+      cta: "Let's talk about your project",
+      ctaUrl: '/contact',
+      who: 'Best for: Businesses with complex needs — multiple revenue streams, custom features, or a brand that needs to stand apart from every competitor in the market.'
     }
   };
 
   var t = tiers[tier];
-  var rushNote = rush ? '<div style="display:inline-block;background:rgba(240,180,41,0.15);color:#b8860b;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:12px;">⚡ Rush pricing applied</div><br>' : '';
+  var rushHtml = rush ? '<div style="display:inline-block;background:rgba(240,180,41,0.15);color:#b8860b;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:14px;">⚡ Rush pricing applied — ' + timelineLabel + '</div><br>' : '';
+
+  // Conversational reasoning block
+  var reasoningHtml = '<div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.75;border-left:3px solid var(--pxl);">' + reasoning + rushNote + '</div>';
 
   document.getElementById('tierCard').innerHTML =
     '<div class="tier-result ' + t.cls + '">' +
     '<div class="tier-glow"></div>' +
-    rushNote +
+    rushHtml +
     '<div class="tier-badge">' + t.name + ' Package</div>' +
     '<div class="tier-name">' + t.name + '</div>' +
     '<div class="tier-range">' + t.range + '</div>' +
     '<div class="tier-cadence">' + t.cadence + '</div>' +
+    reasoningHtml +
     '<ul class="tier-includes">' + t.items.map(function(i) { return '<li>' + i + '</li>'; }).join('') + '</ul>' +
+    '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:20px;font-style:italic;">' + t.who + '</div>' +
     '<a href="' + t.ctaUrl + '" class="tier-cta">' + t.cta + ' →</a>' +
     '</div>';
 
+  // What happens next block
+  var nextHtml = '<div style="background:#fff;border-radius:16px;border:1px solid rgba(91,63,160,0.1);padding:24px;margin-bottom:20px;">' +
+    '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">What happens next</div>' +
+    '<div style="display:flex;flex-direction:column;gap:12px;">' +
+    '<div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;margin-bottom:2px;">Book a free 30-minute discovery call</div><div style="font-size:12px;color:var(--muted);">No pitch, no pressure. I want to understand your business before I give you a real number.</div></div></div>' +
+    '<div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;margin-bottom:2px;">I send a confirmed scope and exact price</div><div style="font-size:12px;color:var(--muted);">No surprises. Everything is in writing before you decide.</div></div></div>' +
+    '<div style="display:flex;gap:12px;align-items:flex-start;"><div style="width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;margin-bottom:2px;">We start on your timeline</div><div style="font-size:12px;color:var(--muted);">50% upfront to kick things off. The rest due at launch.</div></div></div>' +
+    '</div></div>';
+
+  // Inject next steps after tier card
+  document.getElementById('tierCard').innerHTML += nextHtml;
+
   // Add-ons
-  var addonDetails = {
-    seo: { label: 'SEO Strategy', price: '$800' },
-    copy: { label: 'Copywriting', price: '$400/page' },
-    brand: { label: 'Brand Identity', price: '$500' },
-    booking: { label: 'Booking Integration', price: '$300' }
-  };
+  var addonDetails = { seo:{label:'SEO Strategy',price:'$800',desc:'Keyword research, competitor analysis, and a 6-month content roadmap.'}, copy:{label:'Copywriting',price:'$400/page',desc:'Professional website copy written for clarity, SEO, and conversion.'}, brand:{label:'Brand Identity',price:'$500',desc:'Logo, color palette, typography system, and usage guidelines.'}, booking:{label:'Booking Integration',price:'$300',desc:'Online scheduling, reservations, or appointment booking setup.'} };
   if (addons.length > 0) {
-    document.getElementById('addonsGrid').innerHTML = addons.map(function(k) {
-      var a = addonDetails[k];
-      return a ? '<div class="addon-pill"><span>' + a.label + '</span><span>' + a.price + '</span></div>' : '';
-    }).join('');
+    var addonsHtml = '<div style="background:#fff;border-radius:16px;border:1px solid rgba(91,63,160,0.1);padding:24px;margin-bottom:20px;">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Add-ons included in your estimate</div>' +
+      '<div class="addons-grid">' +
+      addons.map(function(k) {
+        var a = addonDetails[k];
+        return a ? '<div class="addon-pill" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px;"><div style="display:flex;justify-content:space-between;width:100%;"><span style="font-weight:600;">' + a.label + '</span><span style="color:var(--p);font-weight:700;">' + a.price + '</span></div><div style="font-size:11px;color:var(--muted);">' + a.desc + '</div></div>' : '';
+      }).join('') +
+      '</div></div>';
+    document.getElementById('addonsNote').innerHTML = addonsHtml;
     document.getElementById('addonsNote').style.display = 'block';
   }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v1.0 20260621-1100 -->
+<!-- DDS v1.1 20260621-1500 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -326,6 +326,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
   <!-- Results -->
   <div class="results" id="lvResults">
+    <div id="lvSummary" style="display:none;font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;padding:16px 20px;background:rgba(255,255,255,0.05);border-radius:12px;margin-bottom:20px;border-left:3px solid var(--pxl);"></div>
     <div class="score-hero">
       <div class="score-big" id="lvScoreNum">0</div>
       <div class="score-label">Local Visibility Score out of 100</div>
@@ -449,7 +450,18 @@ function showResults() {
 
   var score = calcScore();
   var scoreClass = score >= 70 ? 'good' : score >= 40 ? 'ok' : 'poor';
-  var gradeText = score >= 70 ? 'Strong local presence' : score >= 40 ? 'Room to improve' : 'Needs work';
+
+  // Conversational overall summary
+  var summaryText;
+  if (score >= 70) {
+    summaryText = bizName + ' has a solid local search presence in ' + city + ' — your Google Business Profile, reviews, and web signals are working together. The opportunities below will help you pull further ahead of competitors who are still getting the basics right.';
+  } else if (score >= 40) {
+    summaryText = bizName + ' has some local visibility in ' + city + ' but is likely leaving customers on the table. The gaps I found are common and fixable — most of them are free and take less than an hour. Here is what matters most right now.';
+  } else {
+    summaryText = bizName + ' is largely invisible in local Google search right now, which means customers looking for what you offer in ' + city + ' are finding your competitors first. The good news is that the highest-impact fixes are free and the results can show up within weeks.';
+  }
+
+  var gradeText = score >= 70 ? 'Strong local presence' : score >= 40 ? 'Room to improve' : 'Needs immediate attention';
 
   document.getElementById('lvBizName').textContent = bizName + ' · ' + city;
   document.getElementById('lvGrade').textContent = gradeText;
@@ -459,65 +471,82 @@ function showResults() {
   var scoreEl = document.getElementById('lvScoreNum');
   scoreEl.className = 'score-big ' + scoreClass;
   var n = 0;
-  var t = setInterval(function() {
-    n += 2;
-    if (n >= score) { n = score; clearInterval(t); }
-    scoreEl.textContent = n;
-  }, 20);
+  var t = setInterval(function() { n += 2; if (n >= score) { n = score; clearInterval(t); } scoreEl.textContent = n; }, 20);
 
-  // Signal cards
+  // Summary paragraph
+  var summaryEl = document.getElementById('lvSummary');
+  if (summaryEl) {
+    summaryEl.textContent = summaryText;
+    summaryEl.style.display = 'block';
+  }
+
+  // Signal cards with conversational analysis
   var signals = [
     {
       title: 'Google Business Profile',
       status: answers.q2 === 'yes_claimed' ? 'good' : answers.q2 === 'yes_unclaimed' ? 'ok' : 'poor',
-      badge: answers.q2 === 'yes_claimed' ? 'Active' : answers.q2 === 'yes_unclaimed' ? 'Unclaimed' : 'Missing',
-      desc: answers.q2 === 'yes_claimed' ? 'Your GBP is active and managed — this is your strongest local ranking asset.' :
-            answers.q2 === 'yes_unclaimed' ? 'You have a listing but not actively managing it. Posting and responding to reviews could significantly boost rankings.' :
-            'You have no Google Business Profile. This is the single most impactful thing you can fix — it\'s free and takes 30 minutes to set up.'
+      badge: answers.q2 === 'yes_claimed' ? 'Active' : answers.q2 === 'yes_unclaimed' ? 'Not managed' : 'Missing',
+      analysis: answers.q2 === 'yes_claimed'
+        ? 'Your GBP is active and managed — this is the single most powerful local ranking asset you have. Businesses with complete, actively managed profiles get 7x more clicks than those without. Keep posting weekly and responding to every review.'
+        : answers.q2 === 'yes_unclaimed'
+        ? 'You have a listing but you are not actively managing it, which means Google has less confidence in your business and ranks you lower than competitors who are. Logging in and filling out every field — especially photos, hours, and services — can move the needle within days.'
+        : 'You have no Google Business Profile, which means you are invisible on Google Maps and the local pack — where most customers search before choosing a business. This is the single highest-impact fix available to you and it is completely free. Go to business.google.com and claim your listing today.'
     },
     {
       title: 'Review Signals',
       status: answers.q3 === 'great' ? 'good' : answers.q3 === 'decent' ? 'ok' : 'poor',
       badge: answers.q3 === 'great' ? 'Strong' : answers.q3 === 'decent' ? 'Moderate' : answers.q3 === 'bad' ? 'Needs work' : 'Low volume',
-      desc: answers.q3 === 'great' ? 'Strong review count and rating. Keep asking happy customers to leave reviews.' :
-            answers.q3 === 'decent' ? 'Decent reviews but more volume will help rankings. Aim for 50+ with a 4.5+ average.' :
-            answers.q3 === 'bad' ? 'Your review profile needs attention. Responding to negative reviews and generating fresh positives helps.' :
-            'With fewer than 10 reviews, you\'re leaving ranking power on the table. Every happy customer is an opportunity.'
+      analysis: answers.q3 === 'great'
+        ? 'With 50+ reviews above 4.5 stars, your review profile is a genuine competitive advantage. Google uses review volume, recency, and rating as direct local ranking signals. Your job now is to keep the momentum — make asking for reviews part of every positive customer interaction.'
+        : answers.q3 === 'decent'
+        ? 'Your reviews are decent but not yet a differentiator. Competitors with 50+ reviews will consistently outrank you in the local pack even if your service is better. The fix is simple: create a one-click Google review link and share it with every satisfied customer.'
+        : answers.q3 === 'bad'
+        ? 'Mixed or low ratings are actively hurting your local rankings and deterring potential customers who check reviews before deciding. Responding to every negative review professionally — and generating fresh positive ones — is the most urgent fix for your local presence.'
+        : 'With fewer than 10 reviews you are at a significant disadvantage versus competitors who have 30, 50, or 100+. Reviews are the second strongest local ranking signal after your GBP. Text your best customers a direct Google review link this week.'
     },
     {
       title: 'Website Local SEO',
       status: answers.q4 === 'optimized' ? 'good' : answers.q4 === 'partial' ? 'ok' : 'poor',
       badge: answers.q4 === 'optimized' ? 'Optimized' : answers.q4 === 'partial' ? 'Basic' : 'Missing',
-      desc: answers.q4 === 'optimized' ? 'Your site mentions your city and services clearly — Google can connect your site to local searches.' :
-            answers.q4 === 'partial' ? 'Your site exists but likely isn\'t telling Google enough about where you serve and what you do.' :
-            'Without a website (or with a very outdated one), you\'re missing a key signal Google uses to validate local businesses.'
+      analysis: answers.q4 === 'optimized'
+        ? 'Your site clearly communicates your location and services — Google can confidently match you to local searches. This is harder to get right than most people realize, and you have it covered. Make sure your NAP (name, address, phone) is consistent across your site and your GBP.'
+        : answers.q4 === 'partial'
+        ? 'Your site exists but likely is not telling Google enough about where you are and what you do locally. Adding your city name, neighborhood, and service keywords to your page titles, headings, and meta descriptions would meaningfully improve how Google maps your site to local searches.'
+        : 'Without a website — or with a very outdated one — you are missing a key signal Google uses to validate local businesses. A basic site that clearly names your city, services, and contact information does more for local rankings than most people expect.'
     },
     {
       title: 'Directory Listings',
       status: answers.q5 === 'many' ? 'good' : answers.q5 === 'some' ? 'ok' : 'poor',
       badge: answers.q5 === 'many' ? 'Strong' : answers.q5 === 'some' ? 'Partial' : 'Weak',
-      desc: answers.q5 === 'many' ? 'Multiple consistent citations reinforce your NAP (name, address, phone) across the web.' :
-            answers.q5 === 'some' ? 'Limited citations. Getting listed on Yelp, Apple Maps, and Bing at minimum makes a difference.' :
-            'Few or no directory listings means Google has little outside confirmation of your location and legitimacy.'
+      analysis: answers.q5 === 'many'
+        ? 'Multiple consistent directory listings reinforce your business name, address, and phone number across the web — what SEOs call citation signals. This gives Google more confidence that your business is legitimate and where you say it is. Make sure all listings use exactly the same NAP format.'
+        : answers.q5 === 'some'
+        ? 'A handful of listings helps but leaves signals on the table. Getting listed on Yelp, Apple Maps, Bing Places, and one or two industry-specific directories would meaningfully strengthen how Google sees your location and legitimacy.'
+        : 'Few or no directory listings means Google has little outside confirmation of your business details. Claiming your free listings on Yelp, Apple Maps, and Bing Places takes about an hour and is one of the higher-ROI things you can do for local visibility.'
     }
   ];
 
   document.getElementById('signalsGrid').innerHTML = signals.map(function(s) {
-    return '<div class="signal-card">' +
-      '<div class="signal-head"><div class="signal-title">' + s.title + '</div><span class="signal-badge badge-' + s.status + '">' + s.badge + '</span></div>' +
-      '<p class="signal-desc">' + s.desc + '</p>' +
+    var statusColors = { good: '#6abf69', ok: '#f0b429', poor: '#e05555' };
+    var badgeBg = { good: 'rgba(106,191,105,0.12)', ok: 'rgba(240,180,41,0.12)', poor: 'rgba(224,85,85,0.12)' };
+    var col = statusColors[s.status];
+    var bg = badgeBg[s.status];
+    return '<div class="signal-card" style="border-left:3px solid ' + col + ';">' +
+      '<div class="signal-head"><div class="signal-title">' + s.title + '</div>' +
+      '<span class="signal-badge" style="background:' + bg + ';color:' + col + ';">' + s.badge + '</span></div>' +
+      '<p class="signal-desc" style="margin-top:8px;">' + s.analysis + '</p>' +
     '</div>';
   }).join('');
 
-  // Top opportunity
+  // Opportunity
   var opps = {
-    no_gbp: { title: 'Set up your Google Business Profile today', desc: 'A verified, complete GBP is the single highest-impact thing a local business can do. Businesses with a complete profile get 7x more clicks and 70% more visits. It\'s free and takes about 30 minutes.' },
-    bad_reviews: { title: 'Build a review generation system', desc: 'Reviews are the second-strongest local ranking signal after your GBP. A simple text or email after every service asking happy customers to leave a Google review can double your count within 60 days.' },
-    few_reviews: { title: 'Get more Google reviews', desc: 'With under 10 reviews you\'re at a disadvantage versus competitors with 50+. Create a simple one-click Google review link and share it with every satisfied customer.' },
-    no_website: { title: 'Build a locally optimized website', desc: 'Without a website, you\'re invisible to a massive portion of local searchers. A well-built site with your city, services, and schema markup can move the needle on local rankings significantly.' },
-    partial_website: { title: 'Add local SEO to your existing site', desc: 'Adding your city name, neighborhood, service keywords, and a LocalBusiness schema block to your site can meaningfully improve how Google matches you to local searches.' },
-    no_citations: { title: 'Build your citation profile', desc: 'Getting listed consistently on Yelp, Apple Maps, Bing Places, and industry directories reinforces your business name, address, and phone number across the web — a key local ranking factor.' },
-    manage_gbp: { title: 'Activate your Google Business Profile', desc: 'You have a listing but it\'s not working for you. Add photos, post weekly updates, respond to every review, and fill out every field. Active GBPs rank significantly higher than dormant ones.' }
+    no_gbp: { title: 'Claim your Google Business Profile today', desc: 'This is the single most impactful thing a local business can do online. A verified, complete GBP gets you on Google Maps, into the local pack, and in front of customers who are actively searching for what you offer. It is free and takes about 30 minutes at business.google.com. Businesses with complete profiles receive 7x more clicks than those without.' },
+    bad_reviews: { title: 'Build a review recovery and generation system', desc: 'Your review profile is the second strongest local ranking signal after your GBP, and right now it is working against you. Start by responding professionally to every existing negative review — this shows Google and potential customers that you care. Then create a direct Google review link and send it to every customer who has had a positive experience. Even 5 fresh 5-star reviews can shift your local ranking.' },
+    few_reviews: { title: 'Start asking for Google reviews this week', desc: 'With fewer than 10 reviews, you are at a measurable disadvantage against competitors who have built up their review count. The easiest approach is to get your Google review link from your GBP, shorten it, and text it to your best customers with a brief personal message. Aim for 20 reviews in the next 60 days — this alone can move you up in the local pack.' },
+    no_website: { title: 'Build a locally optimized website', desc: 'Without a website, Google cannot confirm your location, services, or legitimacy — all of which affect your local rankings. Even a simple 3-page site that clearly names your city, what you do, and how to contact you makes a significant difference. Your GBP and website work together, and without both pieces you are leaving ranking potential on the table.' },
+    partial_website: { title: 'Add local SEO signals to your existing site', desc: 'Your site exists but likely is not doing enough to help Google connect you to local searches. The highest-impact additions are: putting your city and neighborhood in your page title and H1 heading, adding a LocalBusiness schema block to your code, and making sure your name, address, and phone match exactly what is on your GBP. These are technical but achievable.' },
+    no_citations: { title: 'Build out your directory listing profile', desc: 'Consistent citations across Yelp, Apple Maps, Bing Places, and industry directories send Google a strong confirmation signal about your business location and legitimacy. Each listing you add is another data point that reinforces your GBP. Start with the three big ones and work your way through industry-specific directories after that.' },
+    manage_gbp: { title: 'Activate your existing Google Business Profile', desc: 'You have a listing but you are not using it — and that gap is costing you rankings. Active GBPs rank significantly higher than dormant ones because Google rewards recency and engagement. This week: add 5+ photos, fill out every field including services and description, post an update, and respond to any existing reviews. The results can show up in local search within 2-4 weeks.' }
   };
 
   var opp;
@@ -534,12 +563,12 @@ function showResults() {
 
   // Action items
   var actions = [];
-  if (answers.q2 === 'no') actions.push({ h: 'Claim or create your Google Business Profile', p: 'Go to business.google.com and verify your business. Fill in every field — hours, photos, description, services.' });
-  if (answers.q2 === 'yes_unclaimed') actions.push({ h: 'Start actively managing your GBP', p: 'Log in and complete your profile. Add 10+ photos, post an update this week, and respond to every existing review.' });
-  if (answers.q3 !== 'great') actions.push({ h: 'Build a review ask into your process', p: 'After every positive interaction, send a direct Google review link. A simple "Would you mind leaving us a quick Google review?" doubles response rate.' });
-  if (answers.q4 !== 'optimized') actions.push({ h: 'Add city and service keywords to your website', p: 'Make sure "' + city + '" and your main service appear in your page title, headings, and first paragraph.' });
-  if (answers.q5 !== 'many') actions.push({ h: 'Get listed on Yelp, Apple Maps, and Bing Places', p: 'These are the three most impactful directories after Google. Consistent NAP (name, address, phone) across all of them builds trust with Google.' });
-  actions.push({ h: 'Add LocalBusiness schema to your site', p: 'This structured data markup tells Google exactly what your business is, where it is, and when it\'s open — directly in the page code.' });
+  if (answers.q2 === 'no') actions.push({ h: 'Claim your Google Business Profile', p: 'Go to business.google.com and verify your listing. Fill in every field: hours, photos, description, services, and website. Businesses with complete profiles rank higher immediately.' });
+  if (answers.q2 === 'yes_unclaimed') actions.push({ h: 'Activate and complete your GBP this week', p: 'Log in at business.google.com, complete every field, add at least 5 photos, and post your first update. Set a reminder to post weekly and respond to every review within 24 hours.' });
+  if (answers.q3 !== 'great') actions.push({ h: 'Create and share a Google review link', p: 'Go to your GBP → Get more reviews → copy the link. Shorten it and text it to your 10 best customers this week with a personal note asking for their feedback.' });
+  if (answers.q4 !== 'optimized') actions.push({ h: 'Add ' + city + ' to your page titles and headings', p: 'Your most important pages — especially the homepage — should include your city name in the title tag, H1 heading, and first paragraph. This signals to Google exactly who you serve locally.' });
+  if (answers.q5 !== 'many') actions.push({ h: 'Claim Yelp, Apple Maps, and Bing Places', p: 'These three directories are the most impactful after Google. Make sure your business name, address, and phone number match your GBP exactly — inconsistencies confuse Google.' });
+  actions.push({ h: 'Add LocalBusiness schema to your website', p: 'This structured data tells Google your exact business name, address, phone, hours, and category in machine-readable format — it directly improves how Google understands and ranks your local presence.' });
 
   document.getElementById('actionsList').innerHTML = actions.slice(0, 4).map(function(a, i) {
     return '<div class="action-item">' +
