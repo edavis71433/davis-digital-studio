@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.2 20260621-1300 -->
+<!-- DDS v3.8 20260621-1700 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -508,10 +508,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
     ]
   }
   
-// ── PWA Service Worker ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(function(){});
-}
+
 
 // ── Exit Intent ──
 var _exitShown = false;
@@ -538,45 +535,14 @@ if (!sessionStorage.getItem('exit_shown')) {
 </script>
   <!-- Google Analytics 4 -->
   <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL">
-// ── PWA Service Worker ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(function(){});
-}
-
-// ── Exit Intent ──
-var _exitShown = false;
-function closeExit() {
-  document.getElementById('exitOverlay').classList.remove('show');
-  sessionStorage.setItem('exit_shown','1');
-}
-if (!sessionStorage.getItem('exit_shown')) {
-  document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10 && !_exitShown) {
-      _exitShown = true;
-      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
-    }
-  });
-  // Mobile: show on back button / after 45s inactivity
-  var _idleTimer;
-  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
-  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
-  resetIdle();
-}
-
-
-
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-EQYY0DL8JL');
   
-// ── PWA Service Worker ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(function(){});
-}
+
 
 // ── Exit Intent ──
 var _exitShown = false;
@@ -967,7 +933,7 @@ document.querySelectorAll('.reveal').forEach(function(el) {
       </div>
       <div class="sw-title">Is your site hurting your business?</div>
       <div class="sw-sub">Get 5 personalized findings for your website — free, instant, no signup required.</div>
-      <a href="audit.html#free-audit" class="sw-cta">
+      <a href="/audit#free-audit" class="sw-cta">
         <span class="sw-cta-text">Get your free score →</span>
       </a>
     </div>
