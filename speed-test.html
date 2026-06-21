@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.7 20260621-1619 -->
+<!-- DDS v3.0 20260621-1655 -->
 <!-- DDS v2.5 tool: speed-test -->
 <html lang="en">
 <head>
@@ -368,6 +368,83 @@ function captureEmail(){
   document.getElementById('emailForm').style.display='none';
   document.getElementById('emailThanks').style.display='block';
   if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'speed_test'});}
+
+  var testedUrl=document.getElementById('urlInput')?document.getElementById('urlInput').value:'your site';
+
+  // Pull scores and issues
+  var scoreEls=document.querySelectorAll('.score-circle');
+  var scoreLabelEls=document.querySelectorAll('.score-label');
+  var scoresText='';
+  var scoresHtmlFull='<table style="width:100%;border-collapse:collapse;">';
+  scoreEls.forEach(function(el,i){
+    var label=scoreLabelEls[i]?scoreLabelEls[i].textContent:'';
+    var val=el.textContent;
+    var color=el.classList.contains('score-good')?'#22c55e':el.classList.contains('score-ok')?'#f59e0b':'#ef4444';
+    scoresText+=label+': '+val+' | ';
+    scoresHtmlFull+='<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">'+label+'</td><td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong style="color:'+color+';">'+val+'/100</strong></td></tr>';
+  });
+  scoresHtmlFull+='</table>';
+
+  var findingEls=document.querySelectorAll('.finding-body h4');
+  var findingsText='';
+  var findingsHtmlFull='<ul style="padding-left:20px;">';
+  findingEls.forEach(function(el,i){
+    var desc=el.nextElementSibling?el.nextElementSibling.textContent:'';
+    findingsText+=(i+1)+'. '+el.textContent+': '+desc.substring(0,80)+' | ';
+    findingsHtmlFull+='<li style="margin-bottom:8px;"><strong>'+el.textContent+'</strong><br><span style="color:#666;font-size:13px;">'+desc+'</span></li>';
+  });
+  findingsHtmlFull+='</ul>';
+
+  // CWV data
+  var cwvEls=document.querySelectorAll('.cwv-box');
+  var cwvText='';
+  cwvEls.forEach(function(el){
+    var name=el.querySelector('.cwv-name');
+    var val=el.querySelector('.cwv-val');
+    if(name&&val) cwvText+=name.textContent+': '+val.textContent+' | ';
+  });
+
+  // ERIC gets the FULL report
+  var ericHtml='<div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9f9f9;">'+
+    '<h2 style="color:#1e1338;margin:0 0 4px;">Speed Test Lead</h2>'+
+    '<p style="color:#666;margin:0 0 20px;font-size:13px;">URL: <strong>'+testedUrl+'</strong> &nbsp;|&nbsp; Email: <strong>'+email+'</strong></p>'+
+    '<h3 style="color:#1e1338;font-size:14px;margin:0 0 8px;">Lighthouse Scores</h3>'+scoresHtmlFull+
+    '<h3 style="color:#1e1338;font-size:14px;margin:16px 0 8px;">Core Web Vitals</h3><p style="color:#444;font-size:13px;">'+cwvText+'</p>'+
+    '<h3 style="color:#1e1338;font-size:14px;margin:16px 0 8px;">Top Issues Found</h3>'+findingsHtmlFull+
+    '<hr style="margin:20px 0;"><p style="color:#999;font-size:12px;">Reply to: '+email+'</p></div>';
+
+  // VISITOR gets minimal teaser
+  var visitorHtml='<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
+    '<div style="max-width:520px;margin:0 auto;padding:40px 24px;">'+
+    '<p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p>'+
+    '<div style="background:#1e1338;border-radius:16px;padding:32px;">'+
+    '<h2 style="color:#fff;font-weight:400;font-size:22px;margin:0 0 12px;">Your speed results are in.</h2>'+
+    '<p style="color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 20px;">I ran a full Lighthouse audit on <strong style="color:#fff;">'+testedUrl+'</strong>. The results are on the page — but speed is just one dimension of what makes a website perform.</p>'+
+    '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:14px 16px;border-radius:8px;margin-bottom:24px;">'+
+    '<p style="color:#c4aee8;font-size:12px;font-weight:700;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;">Want the full picture?</p>'+
+    '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;line-height:1.6;">A full audit covers your Google visibility, SEO, content, and what's costing you customers — not just speed. Starts at $99.</p>'+
+    '</div>'+
+    '<a href="https://davisdigitalstudio.com/audit" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:12px;">See audit options from $99</a><br>'+
+    '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="font-size:13px;color:rgba(255,255,255,0.4);text-decoration:none;">Or book a free 30-min call first</a>'+
+    '</div>'+
+    '<p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
+    '</div></body></html>';
+
+  // Eric gets the full data
+  fetch('https://api.resend.com/emails',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
+    body:JSON.stringify({from:'DDS Notifications <eric@davisdigitalstudio.com>',to:['eric@davisdigitalstudio.com'],
+      subject:'Speed Test Lead: '+testedUrl,html:ericHtml})}).catch(function(){});
+
+  // Formspree backup to Eric
+  fetch('https://formspree.io/f/mvznevlo',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({_subject:'Speed Test: '+testedUrl,email:email,url:testedUrl,scores:scoresText,cwv:cwvText,issues:findingsText})}).catch(function(){});
+
+  // Visitor gets teaser only
+  fetch('https://api.resend.com/emails',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
+    body:JSON.stringify({from:'Eric Davis <eric@davisdigitalstudio.com>',to:[email],
+      subject:'Your speed test results — Davis Digital Studio',html:visitorHtml})}).catch(function(){});
 }
 function resetTool() {
   document.getElementById('resultsState').style.display = 'none';

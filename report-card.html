@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.7 20260621-1619 -->
+<!-- DDS v3.0 20260621-1655 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -912,17 +912,27 @@ function submitReportCard() {
         '</div>' +
         '</div></body></html>';
 
+      // Also notify Eric via Resend with full details
       fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3' },
+        body: JSON.stringify({
+          from: 'DDS Notifications <eric@davisdigitalstudio.com>',
+          to: ['eric@davisdigitalstudio.com'],
+          subject: 'New Report Card Request: ' + name + ' (' + city + ')',
+          html: '<div style="font-family:sans-serif;padding:24px;background:#f4f3f0;"><h2 style="color:#1e1338;">New Report Card Request</h2><table style="border-collapse:collapse;width:100%;"><tr><td style="padding:8px;border-bottom:1px solid #ddd;font-weight:600;">Business</td><td style="padding:8px;border-bottom:1px solid #ddd;">'+name+'</td></tr><tr><td style="padding:8px;border-bottom:1px solid #ddd;font-weight:600;">Type</td><td style="padding:8px;border-bottom:1px solid #ddd;">'+type+'</td></tr><tr><td style="padding:8px;border-bottom:1px solid #ddd;font-weight:600;">City</td><td style="padding:8px;border-bottom:1px solid #ddd;">'+city+'</td></tr><tr><td style="padding:8px;border-bottom:1px solid #ddd;font-weight:600;">Website</td><td style="padding:8px;border-bottom:1px solid #ddd;">'+(url||'Not provided')+'</td></tr><tr><td style="padding:8px;font-weight:600;">Email</td><td style="padding:8px;">'+email+'</td></tr></table><p style="margin-top:16px;color:#666;">Reply to this email to send them their report card.</p></div>'
+        })
+      }).catch(function(){});
+
+      // Confirmation email to visitor - minimal teaser
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3' },
         body: JSON.stringify({
           from: 'Eric Davis <eric@davisdigitalstudio.com>',
           to: [email],
-          subject: 'Your Digital Report Card for ' + name + ' is coming',
-          html: confirmHtml
+          subject: 'Your Digital Report Card for ' + name + ' is on its way',
+          html: '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:520px;margin:0 auto;padding:40px 24px;"><p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p><div style="background:#1e1338;border-radius:16px;padding:32px;"><h2 style="color:#fff;font-weight:400;font-size:22px;margin:0 0 12px;">Got it. Your report card<br><em style="color:#c4aee8;">is on its way.</em></h2><p style="color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 20px;">I received your request for <strong style="color:#fff;">' + name + '</strong> and I am putting together your free Digital Report Card now.</p><p style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;margin:0 0 20px;">It covers your Google presence, website health, and your single biggest opportunity. Expect it within a few hours — check your spam folder if you do not see it.</p><a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;">Book a free discovery call</a></div><p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p></div></body></html>'
         })
       }).catch(function(){});
 
