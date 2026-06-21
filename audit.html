@@ -642,14 +642,25 @@ function runAudit() {
     else timerEl.textContent = 'Taking a bit longer than usual — hang tight...';
   }, 1000);
 
-  // Call PSI
+  // Call PSI with 35s timeout
   var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
     encodeURIComponent(url) +
     '&strategy=mobile&category=performance&category=seo&category=accessibility&key=' + PSI_KEY;
 
-  fetch(psiUrl)
-    .then(function(r) { return r.json(); })
+  var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var fetchTimeout = setTimeout(function() {
+    if (abortCtrl) abortCtrl.abort();
+  }, 35000);
+
+  fetch(psiUrl, abortCtrl ? { signal: abortCtrl.signal } : {})
+    .then(function(r) {
+      if (!r.ok) {
+        throw new Error('HTTP ' + r.status);
+      }
+      return r.json();
+    })
     .then(function(data) {
+      clearTimeout(fetchTimeout);
       clearInterval(timerInterval);
       if (data.error) {
         showLoadingError('Google could not analyze that URL: ' + (data.error.message || 'unknown error') + '. Make sure the site is publicly accessible and try again.');
@@ -669,9 +680,20 @@ function runAudit() {
       showResults({name:name||displayUrl, type:type, city:city, email:email, url:url, overall:overall, perf:perf, seo:seo, a11y:a11y, lcp:lcp, lcpMs:lcpMs, fcp:fcp, cls:cls, tbt:tbt, audits:audits});
     })
     .catch(function(err) {
+      clearTimeout(fetchTimeout);
       clearInterval(timerInterval);
       console.error('PSI error:', err);
-      showLoadingError('Could not connect to Google. Please check the URL is correct and publicly accessible, then try again.');
+      var msg = 'Could not get results for that URL. ';
+      if (err && err.name === 'AbortError') {
+        msg = 'Google took too long to analyze that page — this happens with very large or complex sites. Try a smaller or simpler URL (like a local business site) and it should work fine.';
+      } else if (err && err.message && err.message.indexOf('504') !== -1) {
+        msg = 'Google timed out analyzing that page (504 error). Large sites like Yelp or Amazon sometimes hit this limit. Try a local business URL instead — those work reliably.';
+      } else if (err && err.message && err.message.indexOf('HTTP') !== -1) {
+        msg = 'Google returned an error (' + err.message + '). Make sure the URL is publicly accessible and try again.';
+      } else {
+        msg = 'Could not connect to Google PageSpeed. Please check the URL is correct, publicly accessible, and try again.';
+      }
+      showLoadingError(msg);
     });
 }
 
