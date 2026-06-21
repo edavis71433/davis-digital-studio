@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Contact Davis Digital Studio | Free Discovery Call — Web Design & SEO</title>
+<meta name="description" content="Book a free discovery call with Davis Digital Studio. No pitch decks, just a conversation about your business.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<meta name="theme-color" content="#5b3fa0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; }
+:root {
+  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
+  --pdark: #1e1338; --ink: #1a1523; --muted: #7a6d8e;
+  --cream: #faf8f5; --warm: #f5f0e8;
+  --serif: 'DM Serif Display', Georgia, serif;
+}
+a { color: inherit; }
+.label { font-size: 10px; color: var(--p); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: block; }
+.btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
+.btn-p:hover { opacity: 0.88; transform: translateY(-2px); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--p); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 100px; border: 1.5px solid var(--pxl); text-decoration: none; transition: background 0.15s; }
+.btn-ghost:hover { background: var(--pxxxl); }
+.btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: transform 0.15s; }
+.btn-white:hover { transform: translateY(-2px); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
+.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
+.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
+@media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
+
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: #fff;
+  border-bottom: 1px solid rgba(91,63,160,0.10);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px;
+  color: #1a1523;
+  text-decoration: none;
+  line-height: 1;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.nav-logo span { color: #5b3fa0; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7a6d8e;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #5b3fa0; }
+.nav-links a.active { color: #5b3fa0; }
+.nav-cta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  padding: 10px 22px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s !important;
+  white-space: nowrap;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px) !important; }
+.nav-ham {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.nav-ham .bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #1a1523;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-mob {
+  display: none;
+  position: fixed;
+  top: 68px; left: 0; right: 0;
+  background: #fff;
+  z-index: 9998;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  border-bottom: 1px solid rgba(91,63,160,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.nav-mob.open { display: flex; }
+.nav-mob a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1523;
+  text-decoration: none;
+  padding: 13px 12px;
+  border-radius: 8px;
+}
+.nav-mob a:hover, .nav-mob a.active { background: #f7f4fd; color: #5b3fa0; }
+.nav-mob .mob-cta {
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  text-align: center;
+  border-radius: 100px;
+  margin-top: 6px;
+}
+.nav-mob .mob-cta:hover { background: #4a3280 !important; }
+body { padding-top: 68px; }
+@media (max-width: 900px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-ham { display: flex; }
+}
+
+
+.contact-layout {
+  min-height: calc(100vh - 68px);
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+}
+.contact-left {
+  background: #0f0820;
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.contact-left::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%);
+  pointer-events: none;
+}
+.contact-left-top { position: relative; z-index: 1; }
+.contact-left .label { color: var(--pxl); }
+.contact-left h1 {
+  font-family: var(--serif);
+  font-size: clamp(36px,4vw,60px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+}
+.contact-left h1 em { font-style: italic; color: var(--pxl); }
+.contact-left p { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.8; max-width: 420px; }
+.contact-details { position: relative; z-index: 1; margin-top: 60px; }
+.contact-detail-item { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.cd-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.cd-text { font-size: 14px; }
+.cd-text a { color: rgba(255,255,255,0.7); text-decoration: none; transition: color 0.15s; }
+.cd-text a:hover { color: #fff; }
+.cd-label { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 2px; letter-spacing: 0.5px; }
+.contact-avail {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+.avail-dot { width: 7px; height: 7px; border-radius: 50%; background: #6abf69; animation: pulse 2.2s ease-in-out infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+.contact-avail p { font-size: 13px; color: rgba(255,255,255,0.65); margin: 0; }
+
+.contact-right { padding: 80px 60px; background: #fff; display: flex; flex-direction: column; justify-content: center; }
+.contact-right h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; letter-spacing: -0.5px; margin-bottom: 32px; }
+.contact-right h2 em { font-style: italic; color: var(--p); }
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 7px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid rgba(91,63,160,0.15);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: #faf8f5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--p);
+  box-shadow: 0 0 0 3px rgba(91,63,160,0.1);
+  background: #fff;
+}
+.form-textarea { resize: vertical; min-height: 120px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.form-note { font-size: 12px; color: var(--muted); }
+.btn-submit {
+  background: var(--p);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.faq { padding: 80px 52px; background: var(--pxxxl); }
+.faq-inner { max-width: 700px; margin: 0 auto; }
+.faq-item { border-bottom: 1px solid rgba(91,63,160,0.1); padding: 20px 0; }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.faq-q::after { content: '+'; color: var(--p); font-size: 22px; font-weight: 300; transition: transform 0.2s; }
+.faq-item.open .faq-q::after { transform: rotate(45deg); }
+.faq-a { font-size: 14px; color: var(--muted); line-height: 1.8; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height: 300px; padding-top: 12px; }
+
+.section-header { text-align:center; margin-bottom:40px; }
+.section-header h2 { font-family:var(--serif); font-size:clamp(28px,3vw,40px); font-weight:400; letter-spacing:-0.8px; }
+.section-header h2 em { font-style:italic; color:var(--p); }
+
+@media (max-width: 900px) {
+  .contact-layout { grid-template-columns: 1fr; min-height: auto; }
+  .contact-left { padding: 60px 24px 48px; }
+  .contact-right { padding: 48px 24px 64px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .form-submit { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .faq { padding: 60px 24px; }
+}
+
+
+.cursor-dot { width:8px;height:8px;border-radius:50%;background:var(--p);position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%); }
+.cursor-ring { width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(91,63,160,0.4);position:fixed;pointer-events:none;z-index:99997;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s; }
+.cursor-ring.hover { width:56px;height:56px;border-color:var(--p); }
+@media (hover: none) { .cursor-dot,.cursor-ring { display:none; } }
+
+
+/* LIVE SCORE WIDGET */
+.score-widget {
+  position: fixed;
+  bottom: 88px;
+  right: 20px;
+  z-index: 8999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  max-width: 280px;
+}
+.score-widget.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.score-widget.hide {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+.sw-card {
+  background: #1e1338;
+  border: 1px solid rgba(196,174,232,0.25);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  position: relative;
+}
+.sw-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  transition: color 0.15s;
+}
+.sw-close:hover { color: rgba(255,255,255,0.8); }
+.sw-pulse {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sw-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #f0b429;
+  animation: sw-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes sw-pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.sw-pulse-text {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.sw-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.sw-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.sw-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--p);
+  border-radius: 100px;
+  padding: 9px 16px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.sw-cta:hover { opacity: 0.88; }
+.sw-cta-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.sw-cta-arrow {
+  font-size: 14px;
+  color: var(--pxl);
+}
+
+.sent-banner { display:none; background:#f3fff5; border:1px solid rgba(106,191,105,0.25); border-radius:16px; padding:20px 24px; margin-bottom:24px; font-size:14px; color:#1a1523; }
+.sent-banner strong { color:#28a745; }
+
+/* Performance: reduce paint on scroll */
+.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
+/* Smooth font rendering on all devices */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Prevent layout shift from fonts */
+html { font-display: swap; }
+/* Better tap targets on mobile */
+@media (max-width: 900px) {
+  a, button { min-height: 44px; }
+  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
+}
+
+
+/* Footer mobile fix */
+@media (max-width: 900px) {
+  .site-footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .site-footer > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+  .site-footer .footer-links a {
+    margin-left: 0 !important;
+  }
+  /* Hide float CTA on mobile so it doesn't overlap footer */
+  .float-cta { display: none; }
+}
+
+
+/* ── Accessibility: focus styles ── */
+*:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+}
+/* Skip to content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 6px;
+}
+/* Fix small text contrast — boost muted color slightly */
+:root { --muted: #6b5f7e; }
+
+/* ── 480px breakpoints for pages missing them ── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px !important; }
+  .section-header h2 { font-size: 24px !important; }
+  .page-hero h1 { font-size: 28px !important; }
+  .num-val { font-size: 32px !important; }
+  .card-body { padding: 16px !important; }
+  .price-card { padding: 28px 20px !important; }
+}
+
+
+/* EXIT INTENT */
+.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+.exit-overlay.show { display:flex; }
+.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
+.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
+.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
+.exit-card h3 em { font-style:italic;color:var(--p); }
+.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
+.exit-card .exit-cta:hover { opacity:0.88; }
+.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
+
+/* SOCIAL PROOF TICKER */
+/* Accessibility */
+:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+/* Better contrast on muted text */
+.hero-sub { color: rgba(255,255,255,0.65) !important; }
+/* Tap targets */
+@media (max-width:900px) {
+  .nav-mob a { min-height:48px; }
+  button, a { min-height:44px; }
+  .faq-q { min-height:48px; padding:14px 0; }
+}
+/* Prevent horizontal scroll everywhere */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+</style>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Davis Digital Studio">
+  <meta property="og:title" content="Contact Davis Digital Studio | Free Discovery Call — Web Design & SEO">
+  <meta property="og:description" content="Book a free 30-minute call with Eric Davis — web designer and SEO strategist for small business owners across the US. No pressure, no sales pitch, just honest advice.">
+  <meta property="og:url" content="https://www.davisdigitalstudio.com/contact.html">
+  <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Contact Davis Digital Studio | Free Discovery Call — Web Design & SEO">
+  <meta name="twitter:description" content="Book a free 30-minute call with Eric Davis — web designer and SEO strategist for small business owners across the US. No pressure, no sales pitch, just honest advice.">
+  <meta name="twitter:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <!-- Canonical -->
+  <link rel="canonical" href="https://www.davisdigitalstudio.com/contact.html">
+  <!-- Google Analytics 4 -->
+  <!-- STEP: Replace G-EQYY0DL8JL with your real GA4 Measurement ID -->
+  <!-- Get it at: analytics.google.com → Admin → Data Streams → your stream -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL">// Show success banner if redirected back after form submit
+if (window.location.search.includes('sent=true')) {
+  var banner = document.getElementById('sentBanner');
+  if (banner) banner.style.display = 'block';
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EQYY0DL8JL');
+  // Show success banner if redirected back after form submit
+if (window.location.search.includes('sent=true')) {
+  var banner = document.getElementById('sentBanner');
+  if (banner) banner.style.display = 'block';
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DavisDigital">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact Davis Digital Studio",
+    "description": "Book a free discovery call with Davis Digital Studio. Web design and SEO strategy for small businesses.",
+    "url": "https://www.davisdigitalstudio.com/contact.html",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.davisdigitalstudio.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://www.davisdigitalstudio.com/contact.html" }
+      ]
+    }
+  }
+  </script>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <div class="nav-links">
+    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="">Services</a><a href="work.html" class="">Work</a>
+    <a href="portal.html" class="navlink" style="font-size:13px;">Client Login</a>
+    <a href="report-card.html" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">✦ Free Report Card</a>
+    <a href="audit.html" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audit $299</a><a href="contact.html" class="nav-cta">Let's talk</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
+</nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="index.html" class="">Home</a>
+<a href="about.html" class="">About</a>
+<a href="services.html" class="">Services</a>
+<a href="work.html" class="">Work</a>
+  <a href="report-card.html" class="mlink">📊 Free Report Card</a>
+  <a href="audit.html" class="mlink" style="background:var(--pxxxl);color:var(--p);">🔍 Digital Health Check — $299</a>
+  <a href="contact.html" class="mob-cta">Let's talk</a>
+</div>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
+<main id="main-content">
+
+<div class="contact-layout">
+  <div class="contact-left">
+    <div class="contact-left-top">
+      <span class="label">Contact</span>
+      <h1>Let's build<br>something<br><em>great.</em></h1>
+      <p>Tell me what you're working on. Discovery calls are free, and I'll be straight with you about what makes sense.</p>
+
+      <div class="contact-details">
+        <div class="contact-detail-item">
+          <div class="cd-icon">✉️</div>
+          <div class="cd-text">
+            <div class="cd-label">Email</div>
+            <a href="mailto:eric@davisdigitalstudio.com">eric@davisdigitalstudio.com</a>
+          </div>
+        </div>
+        <div class="contact-detail-item">
+          <div class="cd-icon">💼</div>
+          <div class="cd-text">
+            <div class="cd-label">LinkedIn</div>
+            <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">Eric L. Davis</a>
+          </div>
+        </div>
+        <div class="contact-detail-item">
+          <div class="cd-icon">📍</div>
+          <div class="cd-text">
+            <div class="cd-label">Location</div>
+            <a href="#">Los Angeles, CA · Available remotely</a>
+          </div>
+        </div>
+
+        <div class="contact-avail">
+          <div class="avail-dot"></div>
+          <p>Taking on new projects &middot; Response within 24 hrs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-right">
+    <h2>Tell me about<br>your <em>project.</em></h2>
+    <div class="sent-banner" id="sentBanner"><strong>Message sent!</strong> I'll get back to you within 24 hours at eric@davisdigitalstudio.com.</div>
+<form id="contactForm">
+      <!-- Honeypot for spam prevention -->
+      <input type="text" name="_gotcha" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="name">Your name</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Jane Smith" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="jane@yourbusiness.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="business">Business name</label>
+        <input class="form-input" type="text" id="business" name="business" placeholder="Your business">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="service">What are you looking for?</label>
+        <select class="form-select" id="service" name="service">
+          <option value="">Select a service...</option>
+          <option value="redesign">Full Website Redesign</option>
+          <option value="seo">SEO Strategy</option>
+          <option value="retainer">Monthly Retainer</option>
+          <option value="other">Something else</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="message">Tell me about your situation</label>
+        <textarea class="form-textarea" id="message" name="message" placeholder="What's not working? What are you trying to achieve? Any budget or timeline constraints I should know about?"></textarea>
+      </div>
+      <div class="form-submit">
+        <span class="form-note">No spam. No pitch decks. Just a conversation.</span>
+        <button type="submit" class="btn-submit" id="contactSubmitBtn">Send message &rarr;</button>
+      </div>
+    </form>
+    <script>
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var business = document.getElementById('business').value.trim();
+      var service = document.getElementById('service').value;
+      var message = document.getElementById('message').value.trim();
+      var btn = document.getElementById('contactSubmitBtn');
+
+      if (!name || !email) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      // Send to Formspree
+      try {
+        await fetch('https://formspree.io/f/mvznevlo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            _subject: 'New contact from davisdigitalstudio.com',
+            name: name,
+            email: email,
+            business: business || 'Not provided',
+            service: service || 'Not specified',
+            message: message || 'No message provided'
+          })
+        });
+      } catch(e) {}
+
+      // Send auto-reply via Resend
+      var serviceLabels = { redesign: 'Full Website Redesign', seo: 'SEO Strategy', retainer: 'Monthly Retainer', other: 'Something else' };
+      var serviceLabel = serviceLabels[service] || 'General inquiry';
+      var replyHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>' +
+        '<body style="margin:0;padding:0;background:#0f0820;font-family:\'Helvetica Neue\',Arial,sans-serif;">' +
+        '<div style="max-width:560px;margin:0 auto;padding:40px 24px;">' +
+        '<div style="margin-bottom:28px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:20px;color:#fff;text-decoration:none;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a></div>' +
+        '<div style="background:#1e1338;border-radius:16px;padding:32px;margin-bottom:24px;">' +
+          '<h1 style="font-family:Georgia,serif;font-size:26px;font-weight:400;color:#fff;margin:0 0 16px;line-height:1.2;">Got your message,<br><em style="color:#c4aee8;">' + name.split(' ')[0] + '.</em></h1>' +
+          '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 16px;">Thanks for reaching out. I\'ll review your message and get back to you within 24 hours.</p>' +
+          '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:14px 16px;border-radius:8px;margin-bottom:24px;">' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;">What you sent</div>' +
+            '<div style="color:#fff;font-size:14px;margin-bottom:4px;"><strong>Business:</strong> ' + (business || 'Not provided') + '</div>' +
+            '<div style="color:#fff;font-size:14px;margin-bottom:4px;"><strong>Looking for:</strong> ' + serviceLabel + '</div>' +
+            (message ? '<div style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:8px;font-style:italic;">"' + message.substring(0, 200) + (message.length > 200 ? '...' : '') + '"</div>' : '') +
+          '</div>' +
+          '<p style="font-size:14px;color:rgba(255,255,255,0.5);margin:0 0 20px;">Rather talk first? Grab a free 30-minute slot on my calendar.</p>' +
+          '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;">Book a free discovery call →</a>' +
+        '</div>' +
+        '<div style="text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">' +
+          '<p style="color:rgba(255,255,255,0.3);font-size:12px;margin:0;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br>' +
+          '<a href="https://davisdigitalstudio.com" style="color:rgba(196,174,232,0.5);">davisdigitalstudio.com</a></p>' +
+        '</div></div>
+<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+</body></html>';
+
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer re_aL6S2BX2_GB4y1T88EirAgfZNMz7yFfST' },
+          body: JSON.stringify({
+            from: 'Eric Davis <eric@davisdigitalstudio.com>',
+            to: [email],
+            subject: 'Got your message — I\'ll be in touch within 24 hours',
+            html: replyHtml
+          })
+        });
+      } catch(e) {}
+
+      // Show success
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', {
+          event_category: 'lead',
+          event_label: 'contact_form',
+          event_label2: service || 'not_specified'
+        });
+      }
+      document.getElementById('sentBanner').style.display = 'block';
+      document.getElementById('contactForm').style.display = 'none';
+      window.scrollTo({ top: document.getElementById('sentBanner').offsetTop - 100, behavior: 'smooth' });
+    });
+    </script>
+  </div>
+</div>
+
+<section class="faq">
+  <div class="faq-inner">
+    <div class="section-header">
+      <span class="label">Common questions</span>
+      <h2>Things people<br>usually <em>ask.</em></h2>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's the discovery call actually like?</div>
+      <div class="faq-a">Thirty minutes, no presentation. I want to understand your business, what's frustrating you about your current online presence, and what success looks like for you. At the end I'll tell you honestly whether I think I can help and what I'd recommend.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long does a project take?</div>
+      <div class="faq-a">A full website redesign typically takes 45–60 days from strategy to launch. The timeline depends on the scope and how quickly we can get feedback and content from your end. I'll give you a realistic estimate before we start.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I need to provide my own content?</div>
+      <div class="faq-a">Not necessarily. Copywriting is available as an add-on. If you do have existing content, I'll review it and let you know what needs updating. Most clients do a mix — I write the homepage and key pages, they handle the rest.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What platform do you build on?</div>
+      <div class="faq-a">It depends on your needs. Squarespace for most small businesses (easy for you to maintain). Webflow for more complex sites. Custom HTML/CSS when something specific is required. I'll recommend the right tool for your situation, not the one that's easiest for me.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What happens after the site launches?</div>
+      <div class="faq-a">You get a 30-day post-launch check-in included with every project. After that, optional monthly retainers are available for ongoing strategy, content updates, and SEO improvements. Some clients want to maintain things themselves — totally fine too.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- EXIT INTENT POPUP -->
+<div class="exit-overlay" id="exitOverlay">
+  <div class="exit-card">
+    <button class="exit-close" onclick="closeExit()">×</button>
+    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
+    <h3>Before you go — <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
+    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
+  </div>
+</div>
+
+<footer class="site-footer" role="contentinfo">
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div class="footer-links" style="margin-top:4px;">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="work.html">Work</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+    <a href="portal.html" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+  </div>
+</footer>
+<script>
+
+var _pb = document.createElement('div');
+_pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(to right,#5b3fa0,#c4aee8);z-index:99999;width:0;pointer-events:none;transition:width 0.08s;';
+document.body.appendChild(_pb);
+window.addEventListener('scroll', function() {
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  if (h > 0) _pb.style.width = (window.scrollY / h * 100) + '%';
+});
+
+
+var _ro = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); _ro.unobserve(e.target); } });
+}, { threshold: 0.04, rootMargin: '0px 0px -20px 0px' });
+document.querySelectorAll('.reveal').forEach(function(el) {
+  var rect = el.getBoundingClientRect();
+  if (rect.top < window.innerHeight && rect.bottom > 0) {
+    el.classList.add('visible');
+  } else {
+    _ro.observe(el);
+  }
+});
+
+
+(function() {
+  var ham = document.getElementById('navHam');
+  var mob = document.getElementById('navMob');
+  if (!ham || !mob) return;
+  ham.addEventListener('click', function() {
+    var open = mob.classList.toggle('open');
+    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
+    ham.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  mob.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      mob.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+      ham.setAttribute('aria-label', 'Open menu');
+    });
+  });
+})();
+
+
+document.querySelectorAll('.faq-item').forEach(function(item) {
+  item.querySelector('.faq-q').addEventListener('click', function() {
+    var wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  var dot = document.createElement('div'); dot.className = 'cursor-dot';
+  var ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.appendChild(dot); document.body.appendChild(ring);
+  var mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+  (function anim(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+  document.querySelectorAll('a,button,.faq-item').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ring.classList.add('hover');});
+    el.addEventListener('mouseleave',function(){ring.classList.remove('hover');});
+  });
+}
+
+
+// ── Live Score Widget ──
+(function() {
+  // Only show once per session
+  if (sessionStorage.getItem('sw_dismissed')) return;
+
+  var widget = document.createElement('div');
+  widget.className = 'score-widget';
+  widget.innerHTML = `
+    <div class="sw-card">
+      <button class="sw-close" id="swClose" aria-label="Close">×</button>
+      <div class="sw-pulse">
+        <div class="sw-dot"></div>
+        <span class="sw-pulse-text">Free check available</span>
+      </div>
+      <div class="sw-title">Is your site hurting your business?</div>
+      <div class="sw-sub">Get 5 personalized findings for your website — free, instant, no signup required.</div>
+      <a href="audit.html#free-audit" class="sw-cta">
+        <span class="sw-cta-text">Get your free score →</span>
+      </a>
+    </div>
+  `;
+  document.body.appendChild(widget);
+
+  // Show after 30 seconds
+  var showTimer = setTimeout(function() {
+    widget.classList.add('show');
+  }, 30000);
+
+  // Close button
+  document.getElementById('swClose').addEventListener('click', function() {
+    widget.classList.remove('show');
+    widget.classList.add('hide');
+    sessionStorage.setItem('sw_dismissed', '1');
+    clearTimeout(showTimer);
+  });
+
+  // Auto-dismiss after 15 seconds of showing
+  setTimeout(function() {
+    if (widget.classList.contains('show')) {
+      widget.classList.remove('show');
+      widget.classList.add('hide');
+    }
+  }, 46000);
+})();
+
+// Show success banner if redirected back after form submit
+if (window.location.search.includes('sent=true')) {
+  var banner = document.getElementById('sentBanner');
+  if (banner) banner.style.display = 'block';
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+</body>
+</html>

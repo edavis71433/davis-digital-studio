@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Web Design & SEO Services for Small Businesses | Davis Digital Studio</title>
+<meta name="description" content="Web redesign, SEO strategy, and monthly retainers for independent businesses. Transparent pricing from Davis Digital Studio.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<meta name="theme-color" content="#5b3fa0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; }
+:root {
+  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
+  --pdark: #1e1338; --ink: #1a1523; --muted: #5e5270;
+  --cream: #faf8f5; --warm: #f5f0e8;
+  --serif: 'DM Serif Display', Georgia, serif;
+}
+a { color: inherit; }
+.label { font-size: 10px; color: var(--p); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: block; }
+.btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
+.btn-p:hover { opacity: 0.88; transform: translateY(-2px); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--p); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 100px; border: 1.5px solid var(--pxl); text-decoration: none; transition: background 0.15s; }
+.btn-ghost:hover { background: var(--pxxxl); }
+.btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: transform 0.15s; }
+.btn-white:hover { transform: translateY(-2px); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
+.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
+.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
+@media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
+
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: #fff;
+  border-bottom: 1px solid rgba(91,63,160,0.10);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px;
+  color: #1a1523;
+  text-decoration: none;
+  line-height: 1;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.nav-logo span { color: #5b3fa0; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7a6d8e;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #5b3fa0; }
+.nav-links a.active { color: #5b3fa0; }
+.nav-cta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  padding: 10px 22px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s !important;
+  white-space: nowrap;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px) !important; }
+.nav-ham {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.nav-ham .bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #1a1523;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-mob {
+  display: none;
+  position: fixed;
+  top: 68px; left: 0; right: 0;
+  background: #fff;
+  z-index: 9998;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  border-bottom: 1px solid rgba(91,63,160,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.nav-mob.open { display: flex; }
+.nav-mob a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1523;
+  text-decoration: none;
+  padding: 13px 12px;
+  border-radius: 8px;
+}
+.nav-mob a:hover, .nav-mob a.active { background: #f7f4fd; color: #5b3fa0; }
+.nav-mob .mob-cta {
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  text-align: center;
+  border-radius: 100px;
+  margin-top: 6px;
+}
+.nav-mob .mob-cta:hover { background: #4a3280 !important; }
+body { padding-top: 68px; }
+@media (max-width: 900px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-ham { display: flex; }
+}
+
+
+.page-hero { background:#0f0820; padding:80px 52px 100px; position:relative; overflow:hidden; }
+.page-hero::before { content:''; position:absolute; top:-80px; right:-60px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
+.page-hero-inner { max-width:800px; position:relative; z-index:1; }
+.page-hero .label { color:var(--pxl); }
+.page-hero h1 { font-family:var(--serif); font-size:clamp(36px,5vw,64px); font-weight:400; color:#fff; line-height:1.05; letter-spacing:-1.5px; margin-bottom:20px; }
+.page-hero h1 em { font-style:italic; color:var(--pxl); }
+.page-hero p { font-size:17px; color:rgba(255,255,255,0.5); line-height:1.8; max-width:520px; }
+
+/* SERVICES */
+.services-main { padding: 100px 52px; background: #fff; }
+.services-inner { max-width: 1100px; margin: 0 auto; }
+.svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.svc-card {
+  border-radius: 20px;
+  border: 1px solid rgba(91,63,160,0.1);
+  padding: 40px 36px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.svc-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(91,63,160,0.12); border-color: var(--pxl); }
+.svc-card.featured {
+  background: var(--pdark);
+  border-color: var(--p);
+  color: #fff;
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+.svc-card.featured::before {
+  content: 'Most Popular';
+  position: absolute;
+  top: 20px; right: 20px;
+  background: var(--p);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+.svc-icon { font-size: 32px; margin-bottom: 20px; }
+.svc-card h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; margin-bottom: 12px; }
+.svc-card.featured h3 { color: #fff; }
+.svc-card.featured p { color: rgba(255,255,255,0.6); }
+.svc-card p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 20px; }
+.svc-includes { list-style: none; }
+.svc-includes li { font-size: 13px; color: var(--muted); padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; }
+.svc-includes li::before { content: '→'; color: var(--p); flex-shrink: 0; margin-top: 1px; }
+.svc-card.featured .svc-includes li { color: rgba(255,255,255,0.55); }
+.svc-card.featured .svc-includes li::before { color: var(--pxl); }
+.svc-price { font-family: var(--serif); font-size: 32px; color: var(--p); margin-top: 20px; }
+.svc-card.featured .svc-price { color: var(--pxl); }
+.svc-price-note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.svc-card.featured .svc-price-note { color: rgba(255,255,255,0.4); }
+
+/* ADD-ONS */
+.addons { padding: 80px 52px; background: var(--pxxxl); }
+.addons-inner { max-width: 1100px; margin: 0 auto; }
+.addons-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.addon-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid rgba(91,63,160,0.08); }
+.addon-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.addon-card p { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
+.addon-price { font-family: var(--serif); font-size: 20px; color: var(--p); }
+
+/* COMPARE */
+.compare { padding: 80px 52px; background: #fff; }
+.compare-inner { max-width: 800px; margin: 0 auto; }
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th, .compare-table td { padding: 14px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid rgba(91,63,160,0.08); }
+.compare-table th { font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.compare-table th:not(:first-child) { text-align: center; }
+.compare-table td:not(:first-child) { text-align: center; }
+.compare-table .check { color: #6abf69; font-size: 18px; }
+.compare-table .cross { color: #e0d5f0; font-size: 18px; }
+.compare-table tr:hover td { background: var(--pxxxl); }
+.col-highlight { background: var(--pxxxl) !important; font-weight: 500; color: var(--p) !important; }
+
+/* CTA */
+.cta-band { padding:100px 52px; background:var(--p); text-align:center; position:relative; overflow:hidden; }
+.cta-band::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events:none; }
+.cta-band h2 { font-family:var(--serif); font-size:clamp(28px,4vw,48px); font-weight:400; color:#fff; letter-spacing:-1px; margin-bottom:14px; position:relative; }
+.cta-band h2 em { font-style:italic; color:var(--pxl); }
+.cta-band p { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:32px; position:relative; }
+
+.section-header { text-align:center; margin-bottom:56px; }
+.section-header h2 { font-family:var(--serif); font-size:clamp(28px,3.5vw,44px); font-weight:400; letter-spacing:-0.8px; }
+.section-header h2 em { font-style:italic; color:var(--p); }
+.section-header p { font-size:16px; color:var(--muted); margin-top:14px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+@media (max-width: 900px) {
+  .page-hero { padding:60px 24px 72px; }
+  .services-main { padding:60px 24px; }
+  .svc-grid { grid-template-columns: 1fr; }
+  .svc-card { grid-template-columns: 1fr; gap: 24px; }
+  .svc-card.featured { grid-column: span 1; grid-template-columns: 1fr; padding: 28px 20px; }
+  .addons { padding:60px 24px; }
+  .addons-grid { grid-template-columns: 1fr; }
+  .compare { padding:60px 24px; }
+  .cta-band { padding:64px 24px; }
+}
+
+
+/* LIVE SCORE WIDGET */
+.score-widget {
+  position: fixed;
+  bottom: 88px;
+  right: 20px;
+  z-index: 8999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  max-width: 280px;
+}
+.score-widget.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.score-widget.hide {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+.sw-card {
+  background: #1e1338;
+  border: 1px solid rgba(196,174,232,0.25);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  position: relative;
+}
+.sw-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  transition: color 0.15s;
+}
+.sw-close:hover { color: rgba(255,255,255,0.8); }
+.sw-pulse {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sw-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #f0b429;
+  animation: sw-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes sw-pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.sw-pulse-text {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.sw-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.sw-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.sw-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--p);
+  border-radius: 100px;
+  padding: 9px 16px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.sw-cta:hover { opacity: 0.88; }
+.sw-cta-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.sw-cta-arrow {
+  font-size: 14px;
+  color: var(--pxl);
+}
+
+
+/* Performance: reduce paint on scroll */
+.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
+/* Smooth font rendering on all devices */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Prevent layout shift from fonts */
+html { font-display: swap; }
+/* Better tap targets on mobile */
+@media (max-width: 900px) {
+  a, button { min-height: 44px; }
+  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
+}
+
+
+/* Footer mobile fix */
+@media (max-width: 900px) {
+  .site-footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .site-footer > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+  .site-footer .footer-links a {
+    margin-left: 0 !important;
+  }
+  /* Hide float CTA on mobile so it doesn't overlap footer */
+  .float-cta { display: none; }
+}
+
+
+/* ── Accessibility: focus styles ── */
+*:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+}
+/* Skip to content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 6px;
+}
+/* Fix small text contrast — boost muted color slightly */
+:root { --muted: #6b5f7e; }
+
+/* ── 480px breakpoints for pages missing them ── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px !important; }
+  .section-header h2 { font-size: 24px !important; }
+  .page-hero h1 { font-size: 28px !important; }
+  .num-val { font-size: 32px !important; }
+  .card-body { padding: 16px !important; }
+  .price-card { padding: 28px 20px !important; }
+}
+
+
+/* EXIT INTENT */
+.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+.exit-overlay.show { display:flex; }
+.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
+.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
+.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
+.exit-card h3 em { font-style:italic;color:var(--p); }
+.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
+.exit-card .exit-cta:hover { opacity:0.88; }
+.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
+
+/* SOCIAL PROOF TICKER */
+/* Accessibility */
+:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+/* Better contrast on muted text */
+.hero-sub { color: rgba(255,255,255,0.65) !important; }
+/* Tap targets */
+@media (max-width:900px) {
+  .nav-mob a { min-height:48px; }
+  button, a { min-height:44px; }
+  .faq-q { min-height:48px; padding:14px 0; }
+}
+/* Prevent horizontal scroll everywhere */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+</style>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Davis Digital Studio">
+  <meta property="og:title" content="Web Design & SEO Services for Small Businesses | Davis Digital Studio">
+  <meta property="og:description" content="Web design and SEO services built for small business owners. Website redesigns, local SEO, monthly retainers, and Google Ads. Remote-friendly, serving businesses across the US from $1,500.">
+  <meta property="og:url" content="https://www.davisdigitalstudio.com/services">
+  <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Web Design & SEO Services for Small Businesses | Davis Digital Studio">
+  <meta name="twitter:description" content="Web design and SEO services built for small business owners. Website redesigns, local SEO, monthly retainers, and Google Ads. Remote-friendly, serving businesses across the US from $1,500.">
+  <meta name="twitter:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <!-- Canonical -->
+  <link rel="canonical" href="https://www.davisdigitalstudio.com/services">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Web Design & SEO Services",
+    "provider": { "@type": "Organization", "name": "Davis Digital Studio" },
+    "areaServed": "Los Angeles, CA",
+    "description": "Website redesign, local SEO strategy, and monthly retainers for small businesses in Los Angeles.",
+    "offers": [
+      { "@type": "Offer", "name": "Website Redesign (Starter)", "price": "1200", "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "SEO Strategy", "price": "650", "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "Digital Health Check Audit", "price": "299", "priceCurrency": "USD" }
+    ]
+  }
+  
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <!-- Google Analytics 4 -->
+  <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL">
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EQYY0DL8JL');
+  
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DavisDigital">
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <div class="nav-links">
+    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="active">Services</a><a href="work.html" class="">Work</a>
+    <a href="portal.html" class="navlink" style="font-size:13px;">Client Login</a>
+    <a href="report-card.html" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">✦ Free Report Card</a>
+    <a href="audit.html" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audit $299</a><a href="contact.html" class="nav-cta">Let's talk</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
+</nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="index.html" class="">Home</a>
+<a href="about.html" class="">About</a>
+<a href="services.html" class="active">Services</a>
+<a href="work.html" class="">Work</a>
+  <a href="report-card.html" class="mlink">📊 Free Report Card</a>
+  <a href="audit.html" class="mlink" style="background:var(--pxxxl);color:var(--p);">🔍 Digital Health Check — $299</a>
+  <a href="contact.html" class="mob-cta">Let's talk</a>
+</div>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
+<main id="main-content">
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <span class="label">Services</span>
+    <h1>What we build<br><em>together.</em></h1>
+    <p>Every project is different. These are the core services — built around what independent businesses actually need to grow online.</p>
+  </div>
+</section>
+
+<section class="services-main">
+  <div class="services-inner">
+    <div class="section-header reveal">
+      <span class="label">Packages</span>
+      <h2>Priced for <em>real businesses.</em></h2>
+      <p>Transparent pricing, no surprises. Every engagement includes strategy, not just execution. Payment plans available — 50% upfront, 50% at launch.</p>
+    </div>
+
+    <div class="svc-grid">
+
+      <div class="svc-card reveal" style="transition-delay:0s">
+        <div>
+          <div class="svc-icon">🚀</div>
+          <h3>Starter</h3>
+          <p>Get online fast with a polished template build. Best for new businesses that need a clean, professional presence right away.</p>
+          <ul class="svc-includes">
+            <li>Template build (Squarespace, Wix, or Webflow)</li>
+            <li>Your branding applied — colors, fonts, logo</li>
+            <li>Up to 5 pages, mobile-optimized</li>
+            <li>Contact form and basic SEO setup</li>
+            <li>Google Analytics installation</li>
+            <li>1 revision round</li>
+            <li>Launch walkthrough video</li>
+          </ul>
+        </div>
+        <div>
+          <div class="svc-price" style="color:var(--p);">$1,200–$1,800</div>
+          <div class="svc-price-note">Template platform · client manages after launch</div>
+          <a href="contact.html" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'starter_package'});}">Get started &rarr;</a>
+        </div>
+      </div>
+
+      <div class="svc-card featured reveal" style="transition-delay:0.1s">
+        <div>
+          <div class="svc-icon">📈</div>
+          <h3>Growth</h3>
+          <p>A custom-designed, hand-coded site built to rank and convert. For businesses ready to compete online.</p>
+          <ul class="svc-includes">
+            <li>Custom HTML/CSS design — no templates</li>
+            <li>Mobile-first, performance-optimized build</li>
+            <li>On-page SEO implementation</li>
+            <li>Google Analytics 4 and Search Console setup</li>
+            <li>Google Business Profile setup</li>
+            <li>Sitemap, robots.txt, and schema markup</li>
+            <li>2 revision rounds</li>
+            <li>30-day post-launch support</li>
+          </ul>
+        </div>
+        <div>
+          <div class="svc-price">$2,800–$4,000</div>
+          <div class="svc-price-note">Custom code · ongoing updates need a developer</div>
+          <a href="contact.html" class="btn-white" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'growth_package'});}">Get started &rarr;</a>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:0.2s">
+        <div>
+          <div class="svc-icon">🏛️</div>
+          <h3>Studio</h3>
+          <p>The full package. Strategy, design, copy, brand kit, and a client portal — everything your business needs to launch and grow.</p>
+          <ul class="svc-includes">
+            <li>Everything in Growth</li>
+            <li>Brand identity (logo, colors, typography)</li>
+            <li>Professional copywriting for all pages</li>
+            <li>Client portal with file sharing and approvals</li>
+            <li>Custom interactive features or widgets</li>
+            <li>Full launch support</li>
+            <li>Unlimited revisions during build</li>
+          </ul>
+        </div>
+        <div>
+          <div class="svc-price" style="color:var(--p);">$5,500+</div>
+          <div class="svc-price-note">Custom scope · pricing confirmed after discovery call</div>
+          <a href="contact.html" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'studio_package'});}">Get started &rarr;</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAINTENANCE PLANS -->
+    <div class="section-header reveal" style="margin-top:72px;">
+      <span class="label">After Launch</span>
+      <h2>Keep it <em>running.</em></h2>
+      <p>Every site needs maintenance. I offer three options depending on how hands-on you want to be.</p>
+    </div>
+
+    <div class="addons-grid" style="margin-top:0;">
+      <div class="addon-card reveal">
+        <h4>Self-Managed</h4>
+        <p>Included with every Starter build. I hand off your site with a full walkthrough video so your team can manage updates independently.</p>
+        <div class="addon-price">Included</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Template platforms only</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.1s">
+        <h4>Monthly Retainer</h4>
+        <p>I handle updates, seasonal content, SEO monitoring, and a monthly performance report. You focus on running your business.</p>
+        <div class="addon-price">$250–$500/mo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">3-month minimum · $250 templates · $500 custom</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.2s">
+        <h4>Annual Plan</h4>
+        <p>Same as the monthly retainer but billed once a year. Saves you roughly two months compared to paying monthly.</p>
+        <div class="addon-price">$2,400–$4,800/yr</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">$2,400 templates · $4,800 custom HTML</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="addons">
+  <div class="addons-inner">
+    <div class="section-header reveal">
+      <span class="label">Add-ons</span>
+      <h2>Build it <em>your way.</em></h2>
+      <p>Layer these onto any package. Pricing is per engagement.</p>
+    </div>
+    <div class="addons-grid">
+      <div class="addon-card reveal">
+        <h4>Brand Identity</h4>
+        <p>Logo, color palette, typography system, and brand guidelines that carry across your site and all marketing materials.</p>
+        <div class="addon-price">From $500</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.1s">
+        <h4>Copywriting</h4>
+        <p>Professional website copy written for clarity and conversion. Includes SEO keyword integration throughout.</p>
+        <div class="addon-price">From $400/page</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.2s">
+        <h4>Google Ads Setup</h4>
+        <p>Campaign structure, keyword targeting, and ad copy for your first paid search campaign. Built to drive local traffic.</p>
+        <div class="addon-price">From $600</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.3s">
+        <h4>SEO Strategy</h4>
+        <p>A data-driven roadmap built with SEMrush. Keyword research, competitive analysis, and a 6-month content plan.</p>
+        <div class="addon-price">From $800</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Included in Growth and Studio packages</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.4s">
+        <h4>Custom Widget or Feature</h4>
+        <p>Interactive tools, calculators, quiz flows, booking integrations, or anything else your site needs to stand out.</p>
+        <div class="addon-price">From $300</div>
+      </div>
+      <div class="addon-card reveal" style="transition-delay:0.5s">
+        <h4>Rush Delivery</h4>
+        <p>Need it faster than the standard timeline? Rush projects are prioritized and completed in half the normal time.</p>
+        <div class="addon-price">+25% of project total</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="compare">
+  <div class="compare-inner">
+    <div class="section-header reveal">
+      <span class="label">How we compare</span>
+      <h2>You're not choosing <em>between options.</em></h2>
+      <p>You're choosing between a generic template and something built for your specific business.</p>
+    </div>
+    <table class="compare-table reveal">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>DIY Builder</th>
+          <th class="col-highlight">Davis Digital</th>
+          <th>Agency</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Strategy-first approach</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="check">✓</td></tr>
+        <tr><td>SEO implementation</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Single point of contact</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
+        <tr><td>Real business experience</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
+        <tr><td>Transparent pricing</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
+        <tr><td>Human-scale investment</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="cta-band">
+  <h2>Not sure what<br>you <em>need?</em></h2>
+  <p>Let's talk. I'll tell you honestly what makes sense for your business — and what doesn't.</p>
+  <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" class="btn-white">Book a free discovery call &rarr;</a>
+</section>
+
+</main>
+
+<!-- EXIT INTENT POPUP -->
+<div class="exit-overlay" id="exitOverlay">
+  <div class="exit-card">
+    <button class="exit-close" onclick="closeExit()">×</button>
+    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
+    <h3>Before you go — <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
+    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
+  </div>
+</div>
+
+<footer class="site-footer" role="contentinfo">
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div class="footer-links" style="margin-top:4px;">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="work.html">Work</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+    <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
+    <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
+    <a href="/accessibility" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Accessibility</a>
+    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+  </div>
+</footer>
+<script>
+
+var _pb = document.createElement('div');
+_pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(to right,#5b3fa0,#c4aee8);z-index:99999;width:0;pointer-events:none;transition:width 0.08s;';
+document.body.appendChild(_pb);
+window.addEventListener('scroll', function() {
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  if (h > 0) _pb.style.width = (window.scrollY / h * 100) + '%';
+});
+
+
+var _ro = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); _ro.unobserve(e.target); } });
+}, { threshold: 0.04, rootMargin: '0px 0px -20px 0px' });
+document.querySelectorAll('.reveal').forEach(function(el) {
+  var rect = el.getBoundingClientRect();
+  if (rect.top < window.innerHeight && rect.bottom > 0) {
+    el.classList.add('visible');
+  } else {
+    _ro.observe(el);
+  }
+});
+
+
+(function() {
+  var ham = document.getElementById('navHam');
+  var mob = document.getElementById('navMob');
+  if (!ham || !mob) return;
+  ham.addEventListener('click', function() {
+    var open = mob.classList.toggle('open');
+    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
+    ham.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  mob.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      mob.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+      ham.setAttribute('aria-label', 'Open menu');
+    });
+  });
+})();
+
+
+
+// ── Live Score Widget ──
+(function() {
+  // Only show once per session
+  if (sessionStorage.getItem('sw_dismissed')) return;
+
+  var widget = document.createElement('div');
+  widget.className = 'score-widget';
+  widget.innerHTML = `
+    <div class="sw-card">
+      <button class="sw-close" id="swClose" aria-label="Close">×</button>
+      <div class="sw-pulse">
+        <div class="sw-dot"></div>
+        <span class="sw-pulse-text">Free check available</span>
+      </div>
+      <div class="sw-title">Is your site hurting your business?</div>
+      <div class="sw-sub">Get 5 personalized findings for your website — free, instant, no signup required.</div>
+      <a href="audit.html#free-audit" class="sw-cta">
+        <span class="sw-cta-text">Get your free score →</span>
+      </a>
+    </div>
+  `;
+  document.body.appendChild(widget);
+
+  // Show after 30 seconds
+  var showTimer = setTimeout(function() {
+    widget.classList.add('show');
+  }, 30000);
+
+  // Close button
+  document.getElementById('swClose').addEventListener('click', function() {
+    widget.classList.remove('show');
+    widget.classList.add('hide');
+    sessionStorage.setItem('sw_dismissed', '1');
+    clearTimeout(showTimer);
+  });
+
+  // Auto-dismiss after 15 seconds of showing
+  setTimeout(function() {
+    if (widget.classList.contains('show')) {
+      widget.classList.remove('show');
+      widget.classList.add('hide');
+    }
+  }, 46000);
+})();
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+
+<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
+  <div style="display:flex;gap:10px;flex-shrink:0;">
+    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
+    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
+  </div>
+</div>
+<script>
+(function(){var consent=localStorage.getItem('cookie_consent');if(!consent){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(consent==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();
+function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
+function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
+</script>
+</body>
+</html>

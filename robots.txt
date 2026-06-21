@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /portal.html
+Disallow: /portal
+Disallow: /checklist.html
+Disallow: /dds-studio-manage-9k2p.html
+
+Sitemap: https://www.davisdigitalstudio.com/sitemap.xml

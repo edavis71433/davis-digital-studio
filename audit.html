@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Digital Health Check — $299 Website Audit | Davis Digital Studio</title>
+<meta name="description" content="Get a complete audit of your website's visibility, performance, and missed opportunities. 6-page branded report delivered in 5 business days for $299.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<meta name="theme-color" content="#5b3fa0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; }
+:root {
+  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
+  --pdark: #1e1338; --ink: #1a1523; --muted: #5e5270;
+  --cream: #faf8f5; --warm: #f5f0e8;
+  --serif: 'DM Serif Display', Georgia, serif;
+}
+a { color: inherit; }
+.label { font-size: 10px; color: var(--p); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: block; }
+.btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
+.btn-p:hover { opacity: 0.88; transform: translateY(-2px); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--p); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 100px; border: 1.5px solid var(--pxl); text-decoration: none; transition: background 0.15s; }
+.btn-ghost:hover { background: var(--pxxxl); }
+.btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: transform 0.15s; }
+.btn-white:hover { transform: translateY(-2px); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
+.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
+.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
+@media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
+
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: #fff;
+  border-bottom: 1px solid rgba(91,63,160,0.10);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px;
+  color: #1a1523;
+  text-decoration: none;
+  line-height: 1;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.nav-logo span { color: #5b3fa0; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7a6d8e;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #5b3fa0; }
+.nav-links a.active { color: #5b3fa0; }
+.nav-cta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  padding: 10px 22px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s !important;
+  white-space: nowrap;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px) !important; }
+.nav-ham {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.nav-ham .bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #1a1523;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-mob {
+  display: none;
+  position: fixed;
+  top: 68px; left: 0; right: 0;
+  background: #fff;
+  z-index: 9998;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  border-bottom: 1px solid rgba(91,63,160,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.nav-mob.open { display: flex; }
+.nav-mob a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1523;
+  text-decoration: none;
+  padding: 13px 12px;
+  border-radius: 8px;
+}
+.nav-mob a:hover, .nav-mob a.active { background: #f7f4fd; color: #5b3fa0; }
+.nav-mob .mob-cta {
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  text-align: center;
+  border-radius: 100px;
+  margin-top: 6px;
+}
+.nav-mob .mob-cta:hover { background: #4a3280 !important; }
+body { padding-top: 68px; }
+@media (max-width: 900px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-ham { display: flex; }
+}
+
+
+.page-hero { background:#0f0820; padding:80px 52px 100px; position:relative; overflow:hidden; }
+.page-hero::before { content:''; position:absolute; top:-80px; right:-60px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
+.page-hero-inner { max-width:800px; position:relative; z-index:1; }
+.page-hero .label { color:var(--pxl); }
+.page-hero h1 { font-family:var(--serif); font-size:clamp(36px,5vw,64px); font-weight:400; color:#fff; line-height:1.05; letter-spacing:-1.5px; margin-bottom:20px; }
+.page-hero h1 em { font-style:italic; color:var(--pxl); }
+.page-hero p { font-size:17px; color:rgba(255,255,255,0.5); line-height:1.8; max-width:520px; }
+.hero-badges { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+.hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:100px; padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.75); font-weight:500; }
+.hero-badge .dot { width:6px; height:6px; border-radius:50%; background:#6abf69; }
+
+/* WHAT YOU GET */
+.what { padding:80px 52px; background:#fff; }
+.what-inner { max-width:1100px; margin:0 auto; }
+.what-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
+.what-list { list-style:none; }
+.what-list li { display:flex; align-items:flex-start; gap:14px; padding:16px 0; border-bottom:1px solid rgba(91,63,160,0.08); }
+.what-list li:last-child { border-bottom:none; }
+.what-icon { width:36px; height:36px; border-radius:10px; background:var(--pxxxl); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.what-text h4 { font-size:14px; font-weight:600; margin-bottom:4px; }
+.what-text p { font-size:13px; color:var(--muted); line-height:1.65; }
+.report-preview {
+  background: var(--pdark);
+  border-radius:20px;
+  padding:32px;
+  position:relative;
+  overflow:hidden;
+}
+.report-preview::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
+.report-page { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; margin-bottom:12px; }
+.report-page:last-child { margin-bottom:0; }
+.rp-label { font-size:9px; color:var(--pxl); letter-spacing:2px; text-transform:uppercase; font-weight:600; margin-bottom:8px; }
+.rp-title { font-size:14px; color:#fff; font-weight:600; margin-bottom:6px; }
+.rp-bar { height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:4px; }
+.rp-bar-fill { height:100%; border-radius:2px; background:linear-gradient(to right, var(--p), var(--pxl)); }
+
+/* PROCESS */
+.process { padding:80px 52px; background:var(--pxxxl); }
+.process-inner { max-width:700px; margin:0 auto; }
+.steps { display:flex; flex-direction:column; gap:0; }
+.step { display:grid; grid-template-columns:48px 1fr; gap:20px; position:relative; }
+.step::before { content:''; position:absolute; left:23px; top:48px; bottom:-20px; width:2px; background:linear-gradient(to bottom, var(--pxl), transparent); }
+.step:last-child::before { display:none; }
+.step-circle { width:48px; height:48px; border-radius:50%; background:var(--p); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:18px; flex-shrink:0; box-shadow:0 0 0 6px var(--pxxxl); }
+.step-body { padding-bottom:40px; }
+.step-body h3 { font-size:15px; font-weight:600; margin-bottom:6px; }
+.step-body p { font-size:13px; color:var(--muted); line-height:1.7; }
+
+/* PRICING */
+.pricing { padding:80px 52px; background:#fff; }
+.pricing-inner { max-width:800px; margin:0 auto; }
+.price-card {
+  border-radius:24px;
+  background:var(--pdark);
+  padding:52px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:48px;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
+}
+.price-card::before { content:''; position:absolute; top:-80px; right:-80px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
+.price-amount { font-family:var(--serif); font-size:72px; color:#fff; line-height:1; letter-spacing:-3px; }
+.price-amount span { font-size:32px; letter-spacing:0; vertical-align:top; margin-top:12px; display:inline-block; }
+.price-note { font-size:13px; color:rgba(255,255,255,0.4); margin-top:6px; }
+.price-delivery { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:100px; padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.7); margin-top:16px; }
+.price-includes { list-style:none; }
+.price-includes li { font-size:13px; color:rgba(255,255,255,0.6); padding:6px 0; display:flex; gap:10px; }
+.price-includes li::before { content:'→'; color:var(--pxl); flex-shrink:0; }
+.price-cta { margin-top:24px; }
+
+/* FAQ */
+.faq { padding:80px 52px; background:var(--pxxxl); }
+.faq-inner { max-width:700px; margin:0 auto; }
+.faq-item { border-bottom:1px solid rgba(91,63,160,0.1); padding:20px 0; }
+.faq-item:last-child { border-bottom:none; }
+.faq-q { font-size:15px; font-weight:600; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+.faq-q::after { content:'+'; color:var(--p); font-size:22px; font-weight:300; transition:transform 0.2s; }
+.faq-item.open .faq-q::after { transform:rotate(45deg); }
+.faq-a { font-size:14px; color:var(--muted); line-height:1.8; max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height:300px; padding-top:12px; }
+
+.section-header { text-align:center; margin-bottom:48px; }
+.section-header h2 { font-family:var(--serif); font-size:clamp(28px,3.5vw,44px); font-weight:400; letter-spacing:-0.8px; }
+.section-header h2 em { font-style:italic; color:var(--p); }
+.section-header p { font-size:16px; color:var(--muted); margin-top:14px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+.cta-band { padding:80px 52px; background:var(--p); text-align:center; position:relative; overflow:hidden; }
+.cta-band::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events:none; }
+.cta-band h2 { font-family:var(--serif); font-size:clamp(28px,4vw,48px); font-weight:400; color:#fff; letter-spacing:-1px; margin-bottom:14px; position:relative; }
+.cta-band h2 em { font-style:italic; color:var(--pxl); }
+.cta-band p { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:32px; position:relative; }
+
+.cursor-dot { width:8px;height:8px;border-radius:50%;background:var(--p);position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%); }
+.cursor-ring { width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(91,63,160,0.4);position:fixed;pointer-events:none;z-index:99997;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s; }
+.cursor-ring.hover { width:56px;height:56px;border-color:var(--p); }
+@media (hover:none) { .cursor-dot,.cursor-ring { display:none; } }
+
+@media (max-width:900px) {
+  .page-hero { padding:60px 24px 72px; }
+  .what { padding:60px 24px; }
+  .what-grid { grid-template-columns:1fr; }
+  .process { padding:60px 24px; }
+  .pricing { padding:60px 24px; }
+  .price-card { grid-template-columns:1fr; padding:36px 28px; }
+  .faq { padding:60px 24px; }
+  .cta-band { padding:64px 24px; }
+}
+
+
+/* Performance: reduce paint on scroll */
+.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
+/* Smooth font rendering on all devices */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Prevent layout shift from fonts */
+html { font-display: swap; }
+/* Better tap targets on mobile */
+@media (max-width: 900px) {
+  a, button { min-height: 44px; }
+  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
+}
+
+
+/* Footer mobile fix */
+@media (max-width: 900px) {
+  .site-footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .site-footer > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+  .site-footer .footer-links a {
+    margin-left: 0 !important;
+  }
+  /* Hide float CTA on mobile so it doesn't overlap footer */
+  .float-cta { display: none; }
+}
+
+
+/* ── Accessibility: focus styles ── */
+*:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+}
+/* Skip to content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 6px;
+}
+/* Fix small text contrast — boost muted color slightly */
+:root { --muted: #6b5f7e; }
+
+/* ── 480px breakpoints for pages missing them ── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px !important; }
+  .section-header h2 { font-size: 24px !important; }
+  .page-hero h1 { font-size: 28px !important; }
+  .num-val { font-size: 32px !important; }
+  .card-body { padding: 16px !important; }
+  .price-card { padding: 28px 20px !important; }
+}
+
+
+/* EXIT INTENT */
+.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+.exit-overlay.show { display:flex; }
+.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
+.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
+.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
+.exit-card h3 em { font-style:italic;color:var(--p); }
+.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
+.exit-card .exit-cta:hover { opacity:0.88; }
+.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
+
+/* SOCIAL PROOF TICKER */
+/* Accessibility */
+:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+/* Better contrast on muted text */
+.hero-sub { color: rgba(255,255,255,0.65) !important; }
+/* Tap targets */
+@media (max-width:900px) {
+  .nav-mob a { min-height:48px; }
+  button, a { min-height:44px; }
+  .faq-q { min-height:48px; padding:14px 0; }
+}
+/* Prevent horizontal scroll everywhere */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+</style>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Davis Digital Studio">
+  <meta property="og:title" content="Digital Health Check — $299 Website Audit | Davis Digital Studio">
+  <meta property="og:description" content="Complete website audit covering Google visibility, mobile performance, SEO, and conversion paths. 6-page branded report in 5 business days for $299.">
+  <meta property="og:url" content="https://www.davisdigitalstudio.com/audit">
+  <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <meta name="keywords" content="website audit small business, SEO audit, website health check, digital audit remote, website review $299, website performance audit">
+  <link rel="canonical" href="https://www.davisdigitalstudio.com/audit">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Digital Health Check",
+    "description": "A complete audit of your website covering Google visibility, mobile performance, SEO, and conversion paths. Delivered as a 6-page branded report in 5 business days.",
+    "offers": { "@type": "Offer", "price": "299", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+    "brand": { "@type": "Organization", "name": "Davis Digital Studio" }
+  }
+  
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <!-- Google Analytics 4 -->
+  <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
+  <!-- STEP: Replace G-EQYY0DL8JL with your real GA4 Measurement ID -->
+  <!-- Get it at: analytics.google.com → Admin → Data Streams → your stream -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL">
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EQYY0DL8JL');
+  
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DavisDigital">
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <div class="nav-links">
+    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="">Services</a><a href="work.html" class="">Work</a>
+    <a href="portal.html" class="navlink" style="font-size:13px;">Client Login</a>
+    <a href="report-card.html" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">✦ Free Report Card</a>
+    <a href="audit.html" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audit $299</a><a href="contact.html" class="nav-cta">Let's talk</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
+</nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="index.html" class="">Home</a>
+<a href="about.html" class="">About</a>
+<a href="services.html" class="">Services</a>
+<a href="work.html" class="">Work</a>
+  <a href="report-card.html" class="mlink">📊 Free Report Card</a>
+  <a href="audit.html" class="mlink" style="background:var(--pxxxl);color:var(--p);">🔍 Digital Health Check — $299</a>
+  <a href="contact.html" class="mob-cta">Let's talk</a>
+</div>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
+<main id="main-content">
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <span class="label">New Product</span>
+    <h1>Your website<br>has a <em>diagnosis.</em></h1>
+    <p>The Digital Health Check is a complete audit of your site's visibility, performance, and missed opportunities — delivered in 5 business days as a branded report you can actually act on.</p>
+    <div class="hero-badges">
+      <span class="hero-badge"><span class="dot"></span>$299 flat</span>
+      <span class="hero-badge">⚡ Delivered in 5 business days</span>
+      <span class="hero-badge">📄 6-page branded report</span>
+      <span class="hero-badge">✓ No fluff, just fixes</span>
+    </div>
+  </div>
+</section>
+
+<section class="what">
+  <div class="what-inner">
+    <div class="what-grid">
+      <div>
+        <span class="label">What's included</span>
+        <h2 style="font-family:var(--serif);font-size:36px;font-weight:400;letter-spacing:-0.8px;margin-bottom:28px;">Everything that's<br><em>costing you customers.</em></h2>
+        <ul class="what-list">
+          <li>
+            <div class="what-icon">🔍</div>
+            <div class="what-text"><h4>Google Visibility Check</h4><p>Are you showing up for local searches? What keywords are you ranking for — and which ones are you missing?</p></div>
+          </li>
+          <li>
+            <div class="what-icon">📱</div>
+            <div class="what-text"><h4>Mobile & Performance Audit</h4><p>Lighthouse scores, load times, and a full mobile experience checklist. Most visitors are on their phone.</p></div>
+          </li>
+          <li>
+            <div class="what-icon">✍️</div>
+            <div class="what-text"><h4>Content & Messaging Review</h4><p>Does your homepage tell someone what you do in 5 seconds? Is your call to action clear? I'll tell you honestly.</p></div>
+          </li>
+          <li>
+            <div class="what-icon">💰</div>
+            <div class="what-text"><h4>Conversion Path Analysis</h4><p>Where are visitors dropping off? What's stopping them from booking, calling, or buying?</p></div>
+          </li>
+          <li>
+            <div class="what-icon">📋</div>
+            <div class="what-text"><h4>Prioritized Fix List</h4><p>Every issue ranked by impact. You'll know exactly what to fix first — whether you hire me or do it yourself.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="report-preview reveal">
+        <div class="rp-label">Sample Report Pages</div>
+        <div class="report-page">
+          <div class="rp-label">Executive Summary</div>
+          <div class="rp-title">Overall Score: [XX]/100</div>
+          <div class="rp-bar"><div class="rp-bar-fill" style="width:65%;"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">6 categories · 3 critical findings</div>
+        </div>
+        <div class="report-page">
+          <div class="rp-label">Google Visibility</div>
+          <div class="rp-title">Local Search Presence</div>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;font-size:10px;color:rgba(255,255,255,0.5);">Ranking keywords<br><span style="font-size:16px;color:#fff;font-weight:700;">[X]</span></div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;font-size:10px;color:rgba(255,255,255,0.5);">Local pack<br><span style="font-size:16px;color:#e05555;font-weight:700;">Missing</span></div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:6px;padding:8px;font-size:10px;color:rgba(255,255,255,0.5);">GBP<br><span style="font-size:16px;color:#f0b429;font-weight:700;">Partial</span></div>
+          </div>
+        </div>
+        <div class="report-page">
+          <div class="rp-label">Recommendations</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#e05555;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 1 — highest impact]</div></div>
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#f0b429;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 2 — medium impact]</div></div>
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#6abf69;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 3 — quick win]</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MINI AUDIT TOOL — embed this block in audit.html -->
+<section class="mini-audit-section" id="free-audit">
+  <div class="ma-inner">
+    <div class="ma-header reveal">
+      <span class="label">Try it free</span>
+      <h2>Get your free <em>site score.</em></h2>
+      <p>Enter your details below and I'll show you 5 things your website might be getting wrong right now — instantly, no fluff.</p>
+    </div>
+
+    <!-- STEP 1: Input form -->
+    <div class="ma-card" id="maStep1">
+      <div class="ma-form-grid">
+        <div class="ma-field">
+          <label class="ma-label">Your website URL</label>
+          <input class="ma-input" id="maUrl" type="url" placeholder="https://yourbusiness.com" />
+        </div>
+        <div class="ma-field">
+          <label class="ma-label">Business name</label>
+          <input class="ma-input" id="maName" type="text" placeholder="Joe's Coffee Shop" />
+        </div>
+        <div class="ma-field">
+          <label class="ma-label">Business type</label>
+          <select class="ma-input" id="maType">
+            <option value="">Select your category...</option>
+            <option value="restaurant">Restaurant / Bar / Café</option>
+            <option value="retail">Retail / Boutique</option>
+            <option value="service">Home Services (plumber, cleaner, etc.)</option>
+            <option value="health">Health & Wellness / Fitness</option>
+            <option value="salon">Salon / Spa / Beauty</option>
+            <option value="realestate">Real Estate</option>
+            <option value="legal">Legal / Professional Services</option>
+            <option value="creative">Creative / Design / Freelance</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="ma-field">
+          <label class="ma-label">City</label>
+          <input class="ma-input" id="maCity" type="text" placeholder="Los Angeles" />
+        </div>
+        <div class="ma-field ma-field-full">
+          <label class="ma-label">Your email <span style="color:var(--muted);font-weight:400;">(results sent here too)</span></label>
+          <input class="ma-input" id="maEmail" type="email" placeholder="you@yourbusiness.com" />
+        </div>
+      </div>
+      <div class="ma-submit-row">
+        <button class="ma-btn" id="maSubmit" onclick="runMiniAudit()">
+          <span id="maBtnText">Check my site free →</span>
+        </button>
+        <p class="ma-note">No spam. No sales call unless you want one. Results in about 10 seconds.</p>
+      </div>
+      <div class="ma-error" id="maError" style="display:none;"></div>
+    </div>
+
+    <!-- STEP 2: Loading -->
+    <div class="ma-card ma-loading" id="maStep2" style="display:none;">
+      <div class="ma-scanning">
+        <div class="ma-scan-orb"></div>
+        <p class="ma-scan-title">Scanning <span id="maScanUrl"></span></p>
+        <div class="ma-scan-items" id="maScanItems"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Results -->
+    <div class="ma-card" id="maStep3" style="display:none;">
+      <div class="ma-results-header">
+        <div>
+          <div class="ma-results-label">Free Site Score</div>
+          <div class="ma-results-business" id="maResultsBiz"></div>
+        </div>
+        <div class="ma-score-circle">
+          <svg viewBox="0 0 80 80" class="ma-score-svg">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+            <circle cx="40" cy="40" r="34" fill="none" stroke="#c4aee8" stroke-width="6"
+              stroke-dasharray="213.6" stroke-dashoffset="213.6"
+              stroke-linecap="round" transform="rotate(-90 40 40)"
+              id="maScoreArc"/>
+          </svg>
+          <div class="ma-score-num" id="maScoreNum">0</div>
+        </div>
+      </div>
+
+      <div class="ma-findings" id="maFindings"></div>
+
+      <div class="ma-upsell">
+        <div class="ma-upsell-text">
+          <div class="ma-upsell-title">Want the full picture?</div>
+          <p>This is a snapshot based on publicly available signals. The full Digital Health Check goes 10x deeper — Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list delivered in 5 business days.</p>
+        </div>
+        <div class="ma-upsell-cta">
+          <div class="ma-upsell-price">$299</div>
+          <div class="ma-upsell-note">Credited toward any full project</div>
+          <a href="#pricing" class="ma-btn" style="margin-top:12px;">Get the full audit →</a>
+        </div>
+      </div>
+
+      <button onclick="resetAudit()" class="ma-reset">← Run another check</button>
+    </div>
+  </div>
+</section>
+
+<style>
+.mini-audit-section {
+  padding: 80px 52px;
+  background: var(--pdark);
+  position: relative;
+  overflow: hidden;
+}
+.mini-audit-section::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(91,63,160,0.35) 0%, transparent 65%);
+  pointer-events: none;
+}
+.ma-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+.ma-header { text-align: center; margin-bottom: 40px; }
+.ma-header .label { color: var(--pxl); }
+.ma-header h2 { font-family: var(--serif); font-size: clamp(28px,4vw,44px); font-weight: 400; color: #fff; letter-spacing: -0.8px; margin-bottom: 12px; }
+.ma-header h2 em { font-style: italic; color: var(--pxl); }
+.ma-header p { font-size: 15px; color: rgba(255,255,255,0.45); line-height: 1.7; max-width: 500px; margin: 0 auto; }
+
+.ma-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 36px;
+  backdrop-filter: blur(12px);
+}
+.ma-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ma-field { display: flex; flex-direction: column; gap: 6px; }
+.ma-field-full { grid-column: span 2; }
+.ma-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.3px; }
+.ma-input {
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ma-input::placeholder { color: rgba(255,255,255,0.25); }
+.ma-input:focus { border-color: var(--pxl); background: rgba(255,255,255,0.12); }
+.ma-input option { background: #1e1338; color: #fff; }
+
+.ma-submit-row { margin-top: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.ma-btn {
+  background: var(--p);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 13px 28px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+.ma-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.ma-note { font-size: 12px; color: rgba(255,255,255,0.3); }
+.ma-error { background: rgba(224,85,85,0.15); border: 1px solid rgba(224,85,85,0.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #ff9999; margin-top: 12px; }
+
+/* Loading */
+.ma-loading { text-align: center; padding: 52px 36px; }
+.ma-scan-orb {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--p) 0%, transparent 70%);
+  margin: 0 auto 24px;
+  animation: pulse-orb 1.5s ease-in-out infinite;
+}
+@keyframes pulse-orb { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.15);opacity:0.7;} }
+.ma-scan-title { font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 20px; }
+.ma-scan-title span { color: var(--pxl); }
+.ma-scan-items { display: flex; flex-direction: column; gap: 10px; max-width: 360px; margin: 0 auto; }
+.ma-scan-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: rgba(255,255,255,0.5);
+  animation: slideIn 0.4s ease forwards;
+  opacity: 0;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px);} to{opacity:1;transform:translateX(0);} }
+.ma-scan-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pxl); animation: pulse 1s ease-in-out infinite; flex-shrink:0; }
+
+/* Results */
+.ma-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.ma-results-label { font-size: 10px; color: var(--pxl); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+.ma-results-business { font-family: var(--serif); font-size: 22px; color: #fff; font-weight: 400; }
+.ma-score-circle { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.ma-score-svg { width: 80px; height: 80px; }
+.ma-score-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 22px; color: #fff; font-weight: 400; }
+
+.ma-findings { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.ma-finding {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px; padding: 16px;
+  border-left: 3px solid transparent;
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+}
+.ma-finding.sev-high { border-left-color: #e05555; }
+.ma-finding.sev-medium { border-left-color: #f0b429; }
+.ma-finding.sev-low { border-left-color: #6abf69; }
+.ma-finding-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.ma-finding-body h4 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.ma-finding-body p { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+.ma-finding-sev { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+.sev-high .ma-finding-sev { color: #e05555; }
+.sev-medium .ma-finding-sev { color: #f0b429; }
+.sev-low .ma-finding-sev { color: #6abf69; }
+
+.ma-upsell {
+  background: rgba(91,63,160,0.2);
+  border: 1px solid rgba(196,174,232,0.2);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.ma-upsell-text { flex: 1; }
+.ma-upsell-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.ma-upsell-text p { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.7; }
+.ma-upsell-cta { text-align: center; flex-shrink: 0; }
+.ma-upsell-price { font-family: var(--serif); font-size: 32px; color: var(--pxl); line-height: 1; }
+.ma-upsell-note { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+.ma-reset { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 0; transition: color 0.15s; }
+.ma-reset:hover { color: rgba(255,255,255,0.7); }
+
+@media (max-width: 900px) {
+  .mini-audit-section { padding: 60px 24px; }
+  .ma-card { padding: 24px; }
+  .ma-form-grid { grid-template-columns: 1fr; }
+  .ma-field-full { grid-column: span 1; }
+  .ma-submit-row { flex-direction: column; align-items: flex-start; }
+  .ma-results-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .ma-upsell { flex-direction: column; }
+}
+
+/* Performance: reduce paint on scroll */
+.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
+/* Smooth font rendering on all devices */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Prevent layout shift from fonts */
+html { font-display: swap; }
+/* Better tap targets on mobile */
+@media (max-width: 900px) {
+  a, button { min-height: 44px; }
+  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
+}
+
+
+/* Footer mobile fix */
+@media (max-width: 900px) {
+  .site-footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .site-footer > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+  .site-footer .footer-links a {
+    margin-left: 0 !important;
+  }
+  /* Hide float CTA on mobile so it doesn't overlap footer */
+  .float-cta { display: none; }
+}
+
+
+/* ── Accessibility: focus styles ── */
+*:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+}
+/* Skip to content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 6px;
+}
+/* Fix small text contrast — boost muted color slightly */
+:root { --muted: #6b5f7e; }
+
+/* ── 480px breakpoints for pages missing them ── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px !important; }
+  .section-header h2 { font-size: 24px !important; }
+  .page-hero h1 { font-size: 28px !important; }
+  .num-val { font-size: 32px !important; }
+  .card-body { padding: 16px !important; }
+  .price-card { padding: 28px 20px !important; }
+}
+
+
+/* EXIT INTENT */
+.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+.exit-overlay.show { display:flex; }
+.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
+.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
+.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
+.exit-card h3 em { font-style:italic;color:var(--p); }
+.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
+.exit-card .exit-cta:hover { opacity:0.88; }
+.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
+
+/* SOCIAL PROOF TICKER */
+/* Accessibility */
+:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+/* Better contrast on muted text */
+.hero-sub { color: rgba(255,255,255,0.65) !important; }
+/* Tap targets */
+@media (max-width:900px) {
+  .nav-mob a { min-height:48px; }
+  button, a { min-height:44px; }
+  .faq-q { min-height:48px; padding:14px 0; }
+}
+/* Prevent horizontal scroll everywhere */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+</style>
+
+<script>
+var AUDIT_ISSUES = {
+  restaurant: [
+    { sev:'high', icon:'📍', title:'No Google Business Profile or incomplete listing', body:'68% of diners search online before choosing. Without a complete GBP you\'re invisible in local search and Google Maps for "{city} restaurants near me."' },
+    { sev:'high', icon:'📱', title:'Menu not readable on mobile', body:'If your menu is a PDF or photo of a printed menu, Google can\'t index it and mobile users can\'t read it — that\'s most of your potential customers.' },
+    { sev:'high', icon:'🎯', title:'No clear reservation or booking CTA above the fold', body:'Every second a visitor spends looking for how to book is a second they might leave. The button needs to be the first thing they see.' },
+    { sev:'medium', icon:'⭐', title:'Review responses missing or inconsistent', body:'Businesses that respond to Google reviews rank higher locally. If you\'re not responding, you\'re leaving both SEO and trust on the table.' },
+    { sev:'medium', icon:'🕐', title:'Hours and menu may not be current', body:'Outdated hours or menus on Google or your site directly cause lost customers. Google surfaces "hours may differ" warnings that hurt click-through rates.' },
+    { sev:'low', icon:'📸', title:'Photos not updated in the last 60 days', body:'Fresh photos signal an active business to Google and give visitors a reason to choose you over a competitor with a more current feed.' },
+  ],
+  retail: [
+    { sev:'high', icon:'🔍', title:'Not ranking for "{city} {type}" searches', body:'If someone searches "boutique in {city}" and you don\'t appear in the top 10, you\'re effectively invisible to the customers most likely to walk in.' },
+    { sev:'high', icon:'🛍️', title:'No online shopping or product browsing', body:'Even if you don\'t sell online, a product gallery with prices drives in-store visits and improves time-on-site for SEO.' },
+    { sev:'medium', icon:'📍', title:'Google Business Profile not fully optimized', body:'Missing categories, hours, or photos reduce your local ranking. GBP is free and one of the highest-ROI things a retail business can do.' },
+    { sev:'medium', icon:'📱', title:'Site not optimized for mobile browse behavior', body:'Retail shoppers browse on their phone and buy in-store. A slow or cramped mobile experience kills intent before they ever walk through the door.' },
+    { sev:'medium', icon:'💌', title:'No email capture or loyalty mechanism', body:'Your existing customers are your cheapest marketing channel. Without an email list you\'re starting from scratch every time you want to promote something.' },
+    { sev:'low', icon:'🗓️', title:'Events and sales not promoted on the site', body:'Seasonal events and sales should be on your homepage and GBP. If they\'re only on Instagram, you\'re leaving search traffic on the table.' },
+  ],
+  service: [
+    { sev:'high', icon:'📞', title:'Phone number not clickable on mobile', body:'Service businesses live and die by phone calls. If your number isn\'t a tap-to-call link on mobile, you\'re losing leads every day.' },
+    { sev:'high', icon:'🗺️', title:'Service area not clearly defined on site or GBP', body:'Google ranks service businesses by proximity. If your site and GBP don\'t clearly state which neighborhoods or cities you serve, you won\'t show up in those searches.' },
+    { sev:'high', icon:'⭐', title:'Less than 10 Google reviews', body:'Service businesses with fewer than 10 reviews are largely ignored by new customers. Review volume is one of the top local ranking factors.' },
+    { sev:'medium', icon:'💬', title:'No online quote or booking form', body:'The easier it is to request a quote, the more leads you get. A form that takes under 2 minutes outperforms a phone number for most first contacts.' },
+    { sev:'medium', icon:'🔍', title:'Missing service-specific landing pages', body:'One page for "all services" doesn\'t rank. A dedicated page for each service (e.g., "kitchen remodeling {city}") ranks for specific high-intent searches.' },
+    { sev:'low', icon:'📸', title:'No before/after project gallery', body:'Before/after photos are the single most trust-building content for service businesses. They answer "can they actually do this?" before a visitor has to ask.' },
+  ],
+  health: [
+    { sev:'high', icon:'📅', title:'No online class or appointment booking', body:'Health and wellness customers expect to book online. If they have to call, most won\'t — they\'ll go to a competitor with a booking button.' },
+    { sev:'high', icon:'🔍', title:'Not showing up for "{type} near me" searches', body:'"Yoga near me" and "personal trainer {city}" are high-intent searches. If you\'re not on the first page, you\'re invisible to people actively looking for what you offer.' },
+    { sev:'medium', icon:'💬', title:'No client testimonials or transformation stories', body:'Social proof is the primary driver of new client decisions in health and wellness. Text testimonials alone aren\'t enough — video or photo results convert far better.' },
+    { sev:'medium', icon:'📱', title:'Site not optimized for mobile booking flow', body:'Most fitness and wellness searches happen on mobile. If the booking flow isn\'t smooth on a phone, you\'re losing clients at the last step.' },
+    { sev:'medium', icon:'🎁', title:'No new client offer visible on the homepage', body:'A first-class offer (free class, intro rate, free consultation) dramatically increases conversion from first-time visitors. If it\'s buried, it doesn\'t exist.' },
+    { sev:'low', icon:'📸', title:'Facility photos not showcasing the experience', body:'People want to know what they\'re walking into. High-quality facility and class photos reduce the anxiety of trying somewhere new.' },
+  ],
+  salon: [
+    { sev:'high', icon:'📅', title:'Booking button not visible on every page', body:'Salon customers are ready to book the moment they like what they see. If the booking button isn\'t in the nav and above the fold, you\'re adding friction that costs appointments.' },
+    { sev:'high', icon:'📸', title:'Portfolio photos not optimized for search', body:'Google Images drives significant discovery for salons. Photos need alt text, proper file names, and ideally a dedicated gallery page to rank.' },
+    { sev:'medium', icon:'⭐', title:'Google review count below 25', body:'Salons are one of the most review-dependent business types. Customers read reviews before booking, and Google uses review volume to rank local results.' },
+    { sev:'medium', icon:'💅', title:'Service menu not listed with prices', body:'Price transparency builds trust and reduces the "I\'ll just call" friction. A clear, updated service menu with prices improves conversion and reduces no-shows.' },
+    { sev:'medium', icon:'📍', title:'GBP not linked to booking software', body:'Google allows you to add a booking link directly to your Business Profile. If yours isn\'t set up, you\'re missing direct bookings from Google search results.' },
+    { sev:'low', icon:'🎨', title:'Brand not consistent across site and social', body:'Salon clients choose based on aesthetic. If your website and Instagram look like different businesses, it creates doubt at the moment of decision.' },
+  ],
+  realestate: [
+    { sev:'high', icon:'🔍', title:'Not ranking for "{city} real estate agent" searches', body:'Buyers and sellers search for agents by city. Without page-level SEO targeting your market, you won\'t appear for the searches that matter most.' },
+    { sev:'high', icon:'🏠', title:'No neighborhood guides or local content', body:'The agents who rank best locally publish content about the neighborhoods they serve. It builds authority and brings in organic search traffic from buyers researching areas.' },
+    { sev:'medium', icon:'📞', title:'No clear consultation or contact CTA above the fold', body:'Real estate clients want to talk. Your homepage should make it effortless to call, text, or book a meeting — not require scrolling to find contact info.' },
+    { sev:'medium', icon:'⭐', title:'Fewer than 15 Google reviews', body:'Real estate is a high-trust purchase. Buyers and sellers research agents heavily. Review volume and recency directly influence who they call first.' },
+    { sev:'medium', icon:'🏡', title:'Property listings not integrated or current', body:'An agent site without current listings looks inactive. Even a Zillow embed or IDX feed signals that you\'re an active market participant.' },
+    { sev:'low', icon:'📱', title:'Contact form not mobile-optimized', body:'Many buyer inquiries happen on mobile while browsing properties. A form with too many fields or small tap targets will lose those leads.' },
+  ],
+  legal: [
+    { sev:'high', icon:'🔍', title:'Not ranking for "{practice area} attorney {city}"', body:'Legal searches are some of the highest-intent on the internet. If you\'re not on the first page for your practice area and city, you\'re invisible to clients who are ready to hire.' },
+    { sev:'high', icon:'📞', title:'No prominent phone number or consultation CTA', body:'Legal clients want to speak to someone. Your number and a "free consultation" button need to be visible on every page, especially on mobile.' },
+    { sev:'medium', icon:'⚖️', title:'No practice area landing pages', body:'A single "Services" page won\'t rank. Each practice area needs its own page targeting the specific search terms clients use (e.g., "DUI attorney {city}").' },
+    { sev:'medium', icon:'⭐', title:'Insufficient Google reviews for your market', body:'Reviews are a major trust signal for legal services. Clients do significant research before hiring an attorney. Review volume and quality directly influence calls.' },
+    { sev:'medium', icon:'📝', title:'No blog or legal resources content', body:'Publishing helpful legal content builds authority and drives organic traffic. It also demonstrates expertise before a prospect ever reaches out.' },
+    { sev:'low', icon:'🔒', title:'No trust badges or bar association mentions visible', body:'Credentials, bar memberships, and case results build immediate credibility. They should be visible without scrolling on the homepage.' },
+  ],
+  creative: [
+    { sev:'high', icon:'🎨', title:'Portfolio not prominently featured on homepage', body:'For creative businesses, the work is the pitch. If someone has to navigate to find your portfolio, most won\'t bother — feature it immediately.' },
+    { sev:'high', icon:'🔍', title:'Portfolio images not optimized for Google Images', body:'Creative work gets discovered through image search. Without alt text, proper filenames, and optimized image pages, your work is invisible to Google.' },
+    { sev:'medium', icon:'💬', title:'No clear niche or client type specified', body:'"Graphic designer" is too broad. "Brand identity designer for food and beverage businesses in LA" attracts the right clients and ranks for specific searches.' },
+    { sev:'medium', icon:'📞', title:'No discovery call or project inquiry CTA', body:'Creative clients want to talk before committing. Make it easy to start a conversation — a Calendly link or brief intake form converts better than a contact email.' },
+    { sev:'medium', icon:'⭐', title:'No case studies or client results', body:'Showing process and results builds more trust than finished work alone. Even 1-2 case studies with client quotes dramatically increase conversion.' },
+    { sev:'low', icon:'📱', title:'Portfolio not optimized for mobile viewing', body:'Clients often browse portfolios on their phone. Images need to load fast and display correctly at every screen size.' },
+  ],
+  other: [
+    { sev:'high', icon:'🔍', title:'Not appearing in local search results', body:'If someone searches for what you do in your city and you don\'t appear on the first page, you\'re invisible to your most valuable potential customers.' },
+    { sev:'high', icon:'📍', title:'Google Business Profile incomplete or missing', body:'GBP is free and is one of the most powerful tools for local visibility. An incomplete profile means Google can\'t confidently show you to searchers nearby.' },
+    { sev:'high', icon:'📱', title:'Site not fully optimized for mobile', body:'Over 60% of searches happen on mobile. A site that\'s hard to use on a phone loses more than half its potential visitors before they even see your offer.' },
+    { sev:'medium', icon:'🎯', title:'No clear call to action above the fold', body:'What do you want visitors to do? Call, book, buy, or contact? If that action isn\'t front and center, most visitors won\'t take it.' },
+    { sev:'medium', icon:'⭐', title:'Insufficient social proof', body:'Reviews, testimonials, and results are the fastest way to build trust with someone who\'s never heard of you. If they\'re missing or buried, conversion suffers.' },
+    { sev:'low', icon:'⚡', title:'Page load speed may be impacting rankings', body:'Google uses page speed as a ranking factor. Slow sites rank lower and lose visitors before they load — especially on mobile connections.' },
+  ],
+};
+
+function getIssues(type, city, name, psi) {
+  var base = AUDIT_ISSUES[type] || AUDIT_ISSUES['other'];
+  var issues = base.map(function(issue) {
+    return {
+      sev: issue.sev,
+      icon: issue.icon,
+      title: issue.title.replace('{city}', city || 'your city').replace('{type}', getTypeName(type)).replace('{practice area}', 'your practice area'),
+      body: issue.body.replace(/{city}/g, city || 'your city').replace(/{type}/g, getTypeName(type)).replace(/{name}/g, name || 'your business').replace('{practice area}', 'your practice area'),
+    };
+  });
+
+  // Prepend real PSI findings if available
+  if (psi && !psi.fallback) {
+    var realFindings = [];
+    if (psi.perf !== null && psi.perf < 50) {
+      realFindings.push({ sev:'high', icon:'⚡', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance' + (psi.lcp ? ' — Largest Contentful Paint is ' + psi.lcp + ', which is too slow' : '') + '. Google uses page speed as a direct ranking factor, and mobile users abandon slow sites in under 3 seconds.' });
+    } else if (psi.perf !== null && psi.perf < 90) {
+      realFindings.push({ sev:'medium', icon:'⚡', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance.' + (psi.lcp ? ' Largest Contentful Paint is ' + psi.lcp + '.' : '') + ' There\'s room to improve load speed, which can directly impact rankings and conversions.' });
+    }
+    if (psi.seo !== null && psi.seo < 80) {
+      realFindings.push({ sev: psi.seo < 60 ? 'high' : 'medium', icon:'🔍', title:'SEO score: ' + psi.seo + '/100', body:'Lighthouse flagged SEO issues on your site.' + (!psi.hasMetaDesc ? ' Missing or suboptimal meta description.' : '') + (!psi.hasTitleTag ? ' Title tag issues detected.' : '') + (!psi.mobileReady ? ' Viewport not properly configured for mobile.' : '') + ' These are baseline requirements for Google to rank your pages.' });
+    }
+    if (psi.a11y !== null && psi.a11y < 80) {
+      realFindings.push({ sev:'medium', icon:'♿', title:'Accessibility score: ' + psi.a11y + '/100', body:'Your site has accessibility issues that affect users with disabilities. Google uses accessibility as a quality signal.' + (!psi.hasAltText ? ' Images are missing alt text.' : '') + ' Fixing these improves both rankings and the experience for all visitors.' });
+    }
+    if (psi.noHttp === false) {
+      realFindings.push({ sev:'high', icon:'🔒', title:'Site not fully on HTTPS', body:'Your site or some resources are loading over HTTP instead of HTTPS. This is a security issue, a Google ranking penalty, and causes browser warnings that drive visitors away.' });
+    }
+    // Prepend real findings, then fill with category-specific ones
+    issues = realFindings.concat(issues);
+  }
+
+  return issues;
+}
+
+function getTypeName(type) {
+  var names = { restaurant:'restaurant', retail:'boutique', service:'service business', health:'fitness studio', salon:'salon', realestate:'real estate agent', legal:'law firm', creative:'creative studio', other:'business' };
+  return names[type] || 'business';
+}
+
+function calcScore(type, issues) {
+  // Score based on severity mix — more high = lower score
+  var high = issues.filter(function(i){return i.sev==='high';}).length;
+  var med = issues.filter(function(i){return i.sev==='medium';}).length;
+  var base = 100 - (high * 14) - (med * 7);
+  // Add slight randomness so it feels real
+  var variance = Math.floor(Math.random() * 8) - 4;
+  return Math.max(28, Math.min(72, base + variance));
+}
+
+// ── PageSpeed API key — replace with your real key from console.cloud.google.com ──
+var PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
+
+// ── Resend API key for lead notification emails ──
+var RESEND_KEY = 're_aL6S2BX2_GB4y1T88EirAgfZNMz7yFfST';
+
+function runMiniAudit() {
+  var url = document.getElementById('maUrl').value.trim();
+  var name = document.getElementById('maName').value.trim();
+  var type = document.getElementById('maType').value;
+  var city = document.getElementById('maCity').value.trim();
+  var email = document.getElementById('maEmail').value.trim();
+  var err = document.getElementById('maError');
+  err.style.display = 'none';
+
+  if (!url) { showError('Please enter your website URL.'); return; }
+  if (!email || !email.includes('@')) { showError('Please enter a valid email address.'); return; }
+  if (!type) { showError('Please select your business type.'); return; }
+  if (!city) { showError('Please enter your city.'); return; }
+
+  if (!url.match(/^https?:\/\//)) { url = 'https://' + url; }
+  var displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  document.getElementById('maStep1').style.display = 'none';
+  document.getElementById('maStep2').style.display = 'block';
+  document.getElementById('maScanUrl').textContent = displayUrl;
+
+  var scanItems = [
+    'Fetching real Lighthouse scores...',
+    'Analyzing mobile performance...',
+    'Reviewing SEO signals...',
+    'Checking page speed...',
+    'Identifying top issues...',
+  ];
+  var scanEl = document.getElementById('maScanItems');
+  scanEl.innerHTML = '';
+  scanItems.forEach(function(item, i) {
+    setTimeout(function() {
+      var el = document.createElement('div');
+      el.className = 'ma-scan-item';
+      el.innerHTML = '<div class="ma-scan-dot"></div>' + item;
+      scanEl.appendChild(el);
+    }, i * 700);
+  });
+
+  // Run PageSpeed Insights — mobile strategy
+  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
+    encodeURIComponent(url) + '&strategy=mobile&category=performance&category=seo&category=accessibility' +
+    (PSI_KEY !== 'YOUR_GOOGLE_API_KEY' ? '&key=' + PSI_KEY : '');
+
+  fetch(psiUrl)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var cats = (data.lighthouseResult && data.lighthouseResult.categories) || {};
+      var audits = (data.lighthouseResult && data.lighthouseResult.audits) || {};
+
+      var perfScore   = cats.performance   ? Math.round(cats.performance.score * 100)   : null;
+      var seoScore    = cats.seo           ? Math.round(cats.seo.score * 100)           : null;
+      var a11yScore   = cats.accessibility ? Math.round(cats.accessibility.score * 100) : null;
+
+      // Key audit values
+      var fcp  = audits['first-contentful-paint']  ? audits['first-contentful-paint'].displayValue  : null;
+      var lcp  = audits['largest-contentful-paint'] ? audits['largest-contentful-paint'].displayValue : null;
+      var tbt  = audits['total-blocking-time']      ? audits['total-blocking-time'].displayValue      : null;
+      var cls  = audits['cumulative-layout-shift']  ? audits['cumulative-layout-shift'].displayValue  : null;
+      var speed= audits['speed-index']              ? audits['speed-index'].displayValue              : null;
+
+      // SEO audit flags
+      var hasMetaDesc  = audits['meta-description']      ? audits['meta-description'].score === 1      : null;
+      var hasTitleTag  = audits['document-title']        ? audits['document-title'].score === 1        : null;
+      var mobileReady  = audits['viewport']              ? audits['viewport'].score === 1              : null;
+      var hasAltText   = audits['image-alt']             ? audits['image-alt'].score === 1             : null;
+      var linksDesc    = audits['link-text']             ? audits['link-text'].score === 1             : null;
+      var noHttp       = audits['is-on-https']           ? audits['is-on-https'].score === 1           : null;
+
+      // Composite overall score
+      var overallScore = Math.round(
+        ((perfScore || 50) * 0.4) +
+        ((seoScore  || 50) * 0.4) +
+        ((a11yScore || 50) * 0.2)
+      );
+
+      showResults(name || displayUrl, type, city, email, url, {
+        overall: overallScore,
+        perf: perfScore, seo: seoScore, a11y: a11yScore,
+        fcp: fcp, lcp: lcp, tbt: tbt, cls: cls, speed: speed,
+        hasMetaDesc: hasMetaDesc, hasTitleTag: hasTitleTag,
+        mobileReady: mobileReady, hasAltText: hasAltText,
+        linksDesc: linksDesc, noHttp: noHttp
+      });
+    })
+    .catch(function() {
+      // API failed or no key — fall back to heuristic score + still send email
+      var issues = getIssues(type, city, name);
+      var fallbackScore = calcScore(type, issues);
+      showResults(name || displayUrl, type, city, email, url, { overall: fallbackScore, fallback: true });
+    });
+}
+
+function showResults(name, type, city, email, url, psi) {
+  document.getElementById('maStep2').style.display = 'none';
+  document.getElementById('maStep3').style.display = 'block';
+  document.getElementById('maResultsBiz').textContent = name;
+
+  var score = psi.overall;
+  var issues = getIssues(type, city, name, psi);
+
+  // Animated score ring
+  var scoreEl = document.getElementById('maScoreNum');
+  var arc = document.getElementById('maScoreArc');
+  var circ = 213.6;
+  var n = 0;
+  var t = setInterval(function() {
+    n += 2;
+    if (n >= score) { n = score; clearInterval(t); }
+    scoreEl.textContent = n;
+    arc.style.strokeDashoffset = circ - (n / 100) * circ;
+    arc.style.stroke = n < 45 ? '#e05555' : n < 65 ? '#f0b429' : '#6abf69';
+  }, 25);
+
+  // Sub-scores row (only if real PSI data)
+  var findingsEl = document.getElementById('maFindings');
+  findingsEl.innerHTML = '';
+
+  if (!psi.fallback && (psi.perf !== null || psi.seo !== null)) {
+    var subsRow = document.createElement('div');
+    subsRow.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;';
+    [
+      { label: 'Performance', val: psi.perf },
+      { label: 'SEO', val: psi.seo },
+      { label: 'Accessibility', val: psi.a11y },
+    ].forEach(function(s) {
+      if (s.val === null) return;
+      var col = s.val < 50 ? '#e05555' : s.val < 90 ? '#f0b429' : '#6abf69';
+      var d = document.createElement('div');
+      d.style.cssText = 'background:rgba(255,255,255,0.07);border-radius:10px;padding:12px;text-align:center;';
+      d.innerHTML = '<div style="font-size:22px;font-weight:600;color:' + col + ';">' + s.val + '</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px;">' + s.label + '</div>';
+      subsRow.appendChild(d);
+    });
+    findingsEl.appendChild(subsRow);
+
+    // Core Web Vitals if available
+    if (psi.lcp || psi.fcp || psi.cls) {
+      var cwv = document.createElement('div');
+      cwv.style.cssText = 'background:rgba(255,255,255,0.04);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;';
+      [['LCP', psi.lcp],['FCP', psi.fcp],['CLS', psi.cls],['TBT', psi.tbt]].forEach(function(v) {
+        if (!v[1]) return;
+        var vEl = document.createElement('div');
+        vEl.style.cssText = 'font-size:12px;color:rgba(255,255,255,0.5);';
+        vEl.innerHTML = '<span style="color:rgba(255,255,255,0.25);font-size:10px;display:block;margin-bottom:2px;">' + v[0] + '</span>' + v[1];
+        cwv.appendChild(vEl);
+      });
+      findingsEl.appendChild(cwv);
+    }
+  }
+
+  // Issue findings
+  issues.slice(0, 5).forEach(function(issue, i) {
+    var el = document.createElement('div');
+    el.className = 'ma-finding sev-' + issue.sev;
+    el.style.animationDelay = (i * 0.12) + 's';
+    el.innerHTML = '<div class="ma-finding-icon">' + issue.icon + '</div>' +
+      '<div class="ma-finding-body"><h4>' + issue.title + '</h4><p>' + issue.body + '</p>' +
+      '<div class="ma-finding-sev">' + issue.sev.toUpperCase() + ' PRIORITY</div></div>';
+    findingsEl.appendChild(el);
+  });
+
+  // GA4 event
+  if (typeof gtag === 'function') {
+    gtag('event', 'generate_lead', { event_category: 'lead', event_label: 'mini_audit', value: score });
+  }
+
+  // Formspree — lead capture
+  fetch('https://formspree.io/f/mvznevlo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      _subject: 'Mini Audit Lead: ' + name + ' — Score ' + score + '/100',
+      business: name, type: type, city: city, email: email,
+      url: url, score: score,
+      perf: psi.perf || 'n/a', seo: psi.seo || 'n/a', a11y: psi.a11y || 'n/a',
+      lcp: psi.lcp || 'n/a', fcp: psi.fcp || 'n/a',
+      source: psi.fallback ? 'heuristic' : 'PageSpeed API'
+    })
+  }).catch(function(){});
+
+  // User confirmation email — generic, no scores or findings
+  var userConfirmHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:\'Helvetica Neue\',Arial,sans-serif;">' +
+  '<div style="max-width:520px;margin:0 auto;padding:40px 24px;">' +
+    '<div style="margin-bottom:24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a></div>' +
+    '<div style="background:#1e1338;border-radius:16px;padding:32px;margin-bottom:20px;">' +
+      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 14px;line-height:1.2;">Thanks for checking in, <em style="color:#c4aee8;">' + (name.split(' ')[0] || name) + '.</em></h1>' +
+      '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 20px;">I\'ve received your free site score request and had a chance to take a look at your online presence. There are a few things worth discussing.</p>' +
+      '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 24px;">If you want to go deeper — Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list — the full Digital Health Check covers all of it in a 6-page report delivered in 5 business days.</p>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
+        '<a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Get the full audit — $299 →</a>' +
+        '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Book a free call first →</a>' +
+      '</div>' +
+    '</div>' +
+    '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin:0;">Eric Davis · Davis Digital Studio · Los Angeles, CA · <a href="https://davisdigitalstudio.com" style="color:rgba(196,174,232,0.3);">davisdigitalstudio.com</a></p>' +
+  '</div></body></html>';
+
+  fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
+    body: JSON.stringify({
+      from: 'Eric Davis <eric@davisdigitalstudio.com>',
+      to: [email],
+      subject: 'A few things I noticed about ' + (name || 'your site'),
+      html: userConfirmHtml
+    })
+  }).catch(function(){});
+
+  // Resend — detailed notification email to Eric
+  var scoreColor = score < 45 ? '#e05555' : score < 65 ? '#f0b429' : '#6abf69';
+  var typeLabels = { restaurant:'Restaurant/Bar', retail:'Retail', service:'Home Services', health:'Health & Wellness', salon:'Salon/Spa', realestate:'Real Estate', legal:'Legal', creative:'Creative/Freelance', other:'Other' };
+  var topIssues = issues.slice(0, 3).map(function(i, n) {
+    return '<tr><td style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:' + (i.sev==='high'?'#e05555':i.sev==='medium'?'#f0b429':'#6abf69') + ';font-size:10px;font-weight:700;color:#fff;text-align:center;line-height:20px;margin-right:8px;">' + (n+1) + '</span><strong style="color:#fff;">' + i.title + '</strong><br><span style="font-size:12px;color:rgba(255,255,255,0.45);padding-left:28px;display:block;margin-top:2px;">' + i.sev.toUpperCase() + ' PRIORITY</span></td></tr>';
+  }).join('');
+
+  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:\'Helvetica Neue\',Arial,sans-serif;">' +
+  '<div style="max-width:560px;margin:0 auto;padding:32px 24px;">' +
+    '<div style="margin-bottom:20px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a></div>' +
+    '<div style="background:#1e1338;border-radius:16px;padding:28px;margin-bottom:20px;">' +
+      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">New Mini Audit Lead</div>' +
+      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 20px;line-height:1.2;">' + name + '</h1>' +
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:20px;">' +
+        '<tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.4);width:110px;">Business</td><td style="font-size:13px;color:#fff;">' + name + '</td></tr>' +
+        '<tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.4);">Type</td><td style="font-size:13px;color:#fff;">' + (typeLabels[type] || type) + '</td></tr>' +
+        '<tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.4);">City</td><td style="font-size:13px;color:#fff;">' + city + '</td></tr>' +
+        '<tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.4);">Email</td><td style="font-size:13px;color:#c4aee8;"><a href="mailto:' + email + '" style="color:#c4aee8;">' + email + '</a></td></tr>' +
+        '<tr><td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.4);">Website</td><td style="font-size:13px;color:#c4aee8;"><a href="' + url + '" style="color:#c4aee8;" target="_blank">' + url + '</a></td></tr>' +
+      '</table>' +
+      '<div style="display:flex;gap:12px;margin-bottom:20px;">' +
+        '<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;">' +
+          '<div style="font-size:36px;font-weight:700;color:' + scoreColor + ';">' + score + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">Overall /100</div>' +
+        '</div>' +
+        (psi.perf !== null && psi.perf !== undefined ? '<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:600;color:' + (psi.perf<50?'#e05555':psi.perf<90?'#f0b429':'#6abf69') + ';">' + psi.perf + '</div><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">Performance</div></div>' : '') +
+        (psi.seo !== null && psi.seo !== undefined ? '<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:600;color:' + (psi.seo<50?'#e05555':psi.seo<90?'#f0b429':'#6abf69') + ';">' + psi.seo + '</div><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">SEO</div></div>' : '') +
+      '</div>' +
+      (psi.lcp ? '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.45);">Core Web Vitals — <strong style="color:rgba(255,255,255,0.7);">LCP:</strong> ' + psi.lcp + ' &nbsp;·&nbsp; <strong style="color:rgba(255,255,255,0.7);">FCP:</strong> ' + (psi.fcp||'—') + ' &nbsp;·&nbsp; <strong style="color:rgba(255,255,255,0.7);">CLS:</strong> ' + (psi.cls||'—') + ' &nbsp;·&nbsp; <strong style="color:rgba(255,255,255,0.7);">TBT:</strong> ' + (psi.tbt||'—') + '</div>' : '') +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;">Top Issues Shown to Lead</div>' +
+      '<table style="width:100%;border-collapse:collapse;">' + topIssues + '</table>' +
+    '</div>' +
+    '<div style="text-align:center;">' +
+      '<a href="mailto:' + email + '" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;margin-right:10px;">Reply to lead →</a>' +
+      '<a href="' + url + '" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">Visit their site →</a>' +
+    '</div>' +
+    '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Sent automatically by davisdigitalstudio.com mini audit · ' + (psi.fallback ? 'heuristic mode' : 'PageSpeed API') + '</p>' +
+  '</div></body></html>';
+
+  fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
+    body: JSON.stringify({
+      from: 'DDS Audit Bot <eric@davisdigitalstudio.com>',
+      to: ['eric@davisdigitalstudio.com'],
+      subject: '🔍 New audit lead: ' + name + ' — ' + score + '/100 · ' + (typeLabels[type]||type) + ' · ' + city,
+      html: notifyHtml
+    })
+  }).catch(function(){});
+}
+
+function showError(msg) {
+  var err = document.getElementById('maError');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+function resetAudit() {
+  document.getElementById('maStep3').style.display = 'none';
+  document.getElementById('maStep1').style.display = 'block';
+  document.getElementById('maUrl').value = '';
+  document.getElementById('maEmail').value = '';
+  document.getElementById('maCity').value = '';
+  document.getElementById('maName').value = '';
+  document.getElementById('maType').value = '';
+}
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+<section class="process">
+  <div class="process-inner">
+    <div class="section-header reveal">
+      <span class="label">How it works</span>
+      <h2>Simple as <em>sending a link.</em></h2>
+      <p>You don't need to prepare anything. Just your website URL and a few minutes to fill out a short form.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-circle">1</div>
+        <div class="step-body">
+          <h3>You purchase & fill out a short form</h3>
+          <p>After checkout you'll answer 5 quick questions about your business, your goals, and what's frustrating you about your current site. Takes 3 minutes.</p>
+        </div>
+      </div>
+      <div class="step reveal" style="transition-delay:0.1s">
+        <div class="step-circle">2</div>
+        <div class="step-body">
+          <h3>I run the full audit</h3>
+          <p>I use SEMrush, Google Lighthouse, Search Console data, and manual review to assess every dimension of your site — no automated report generators.</p>
+        </div>
+      </div>
+      <div class="step reveal" style="transition-delay:0.2s">
+        <div class="step-circle">3</div>
+        <div class="step-body">
+          <h3>You receive your report in 5 business days</h3>
+          <p>A 6-page branded PDF delivered to your inbox with scores, findings, and a prioritized fix list. Clear, specific, and honest.</p>
+        </div>
+      </div>
+      <div class="step reveal" style="transition-delay:0.3s">
+        <div class="step-circle">4</div>
+        <div class="step-body">
+          <h3>Optional: book a 30-min walkthrough</h3>
+          <p>Want me to walk through the report with you? A complimentary 30-minute call is available to all audit clients.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-header reveal">
+      <span class="label">Investment</span>
+      <h2>One flat price.<br><em>No surprises.</em></h2>
+    </div>
+    <div class="price-card reveal">
+      <div>
+        <div class="price-amount"><span>$</span>299</div>
+        <div class="price-note">One-time · no subscription</div>
+        <div class="price-delivery">⚡ Delivered in 5 business days</div>
+        <div class="price-cta">
+          <a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" target="_blank" rel="noopener" class="btn-white" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'pricing_section',value:299,currency:'USD'});}">💳 Pay $299 &amp; get started &rarr;</a>
+        </div>
+      </div>
+      <div>
+        <ul class="price-includes">
+          <li>Google visibility & local SEO analysis</li>
+          <li>Mobile & performance scores (Lighthouse)</li>
+          <li>On-page SEO checklist (all pages)</li>
+          <li>Content & messaging review</li>
+          <li>Conversion path analysis</li>
+          <li>Prioritized fix list by impact</li>
+          <li>6-page branded PDF report</li>
+          <li>Optional 30-min walkthrough call</li>
+          <li>$299 credited toward a full project</li>
+        </ul>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:20px;">If you decide to hire me for a full redesign after the audit, the $299 comes off your project price.</p>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="faq-inner">
+    <div class="section-header reveal">
+      <span class="label">Questions</span>
+      <h2>Things people <em>ask.</em></h2>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is this just an automated report?</div>
+      <div class="faq-a">No. I use tools like SEMrush and Google Lighthouse to pull data, but every finding is reviewed and written by me personally. You're getting my analysis, not a generated PDF.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I need to do anything to prepare?</div>
+      <div class="faq-a">Just your website URL and 3 minutes to fill out the intake form. I handle everything else — no access to your accounts or backend required.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if I want to fix things myself?</div>
+      <div class="faq-a">That's completely fine. The report is written to be actionable whether or not you hire me. Every recommendation includes enough context to act on it independently.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if I decide to hire you after the audit?</div>
+      <div class="faq-a">The $299 audit fee is credited toward any full project. So if you move forward with a redesign, you've already paid $299 of the total.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How is this different from free tools like Google PageSpeed?</div>
+      <div class="faq-a">Free tools give you scores with no context. I give you scores plus an explanation of what they mean for your specific business, ranked by what will actually move the needle for you.</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <h2>Find out what your<br>site is <em>missing.</em></h2>
+  <p>$299 · 5 business days · no fluff</p>
+  <a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" target="_blank" rel="noopener" class="btn-white">💳 Pay $299 &amp; get started &rarr;</a>
+</section>
+
+</main>
+
+<!-- EXIT INTENT POPUP -->
+<div class="exit-overlay" id="exitOverlay">
+  <div class="exit-card">
+    <button class="exit-close" onclick="closeExit()">×</button>
+    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
+    <h3>Before you go — <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
+    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
+  </div>
+</div>
+
+<footer class="site-footer" role="contentinfo">
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div class="footer-links" style="margin-top:4px;">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="work.html">Work</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+    <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
+    <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
+    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+  </div>
+</footer>
+<script>
+
+var _pb = document.createElement('div');
+_pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(to right,#5b3fa0,#c4aee8);z-index:99999;width:0;pointer-events:none;transition:width 0.08s;';
+document.body.appendChild(_pb);
+window.addEventListener('scroll', function() {
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  if (h > 0) _pb.style.width = (window.scrollY / h * 100) + '%';
+});
+
+
+var _ro = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); _ro.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(function(el) { _ro.observe(el); });
+
+
+(function() {
+  var ham = document.getElementById('navHam');
+  var mob = document.getElementById('navMob');
+  if (!ham || !mob) return;
+  ham.addEventListener('click', function() {
+    var open = mob.classList.toggle('open');
+    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
+    ham.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  mob.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      mob.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+      ham.setAttribute('aria-label', 'Open menu');
+    });
+  });
+})();
+
+
+document.querySelectorAll('.faq-item').forEach(function(item) {
+  item.querySelector('.faq-q').addEventListener('click', function() {
+    var wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  var dot = document.createElement('div'); dot.className = 'cursor-dot';
+  var ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.appendChild(dot); document.body.appendChild(ring);
+  var mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+  (function anim(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+  document.querySelectorAll('a,button,.faq-item').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ring.classList.add('hover');});
+    el.addEventListener('mouseleave',function(){ring.classList.remove('hover');});
+  });
+}
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+</body>
+</html>

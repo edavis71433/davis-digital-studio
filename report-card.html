@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Free Digital Report Card | Davis Digital Studio — How Does Your Business Look Online?</title>
+<meta name="description" content="Free 1-page snapshot of how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. No cost, no signup.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<meta name="theme-color" content="#5b3fa0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; }
+:root {
+  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
+  --pdark: #1e1338; --ink: #1a1523; --muted: #7a6d8e;
+  --cream: #faf8f5; --warm: #f5f0e8;
+  --serif: 'DM Serif Display', Georgia, serif;
+}
+a { color: inherit; }
+.label { font-size: 10px; color: var(--p); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: block; }
+.btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
+.btn-p:hover { opacity: 0.88; transform: translateY(-2px); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--p); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 100px; border: 1.5px solid var(--pxl); text-decoration: none; transition: background 0.15s; }
+.btn-ghost:hover { background: var(--pxxxl); }
+.btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: transform 0.15s; }
+.btn-white:hover { transform: translateY(-2px); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
+.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
+.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
+@media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
+
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: #fff;
+  border-bottom: 1px solid rgba(91,63,160,0.10);
+  box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px;
+  color: #1a1523;
+  text-decoration: none;
+  line-height: 1;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.nav-logo span { color: #5b3fa0; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7a6d8e;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #5b3fa0; }
+.nav-links a.active { color: #5b3fa0; }
+.nav-cta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  padding: 10px 22px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s !important;
+  white-space: nowrap;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px) !important; }
+.nav-ham {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.nav-ham .bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #1a1523;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-mob {
+  display: none;
+  position: fixed;
+  top: 68px; left: 0; right: 0;
+  background: #fff;
+  z-index: 9998;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  border-bottom: 1px solid rgba(91,63,160,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.nav-mob.open { display: flex; }
+.nav-mob a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1523;
+  text-decoration: none;
+  padding: 13px 12px;
+  border-radius: 8px;
+}
+.nav-mob a:hover, .nav-mob a.active { background: #f7f4fd; color: #5b3fa0; }
+.nav-mob .mob-cta {
+  font-weight: 600;
+  background: #5b3fa0;
+  color: #fff !important;
+  text-align: center;
+  border-radius: 100px;
+  margin-top: 6px;
+}
+.nav-mob .mob-cta:hover { background: #4a3280 !important; }
+body { padding-top: 68px; }
+@media (max-width: 900px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .nav-ham { display: flex; }
+}
+
+
+.page-hero { background:#0f0820; padding:80px 52px 100px; position:relative; overflow:hidden; }
+.page-hero::before { content:''; position:absolute; top:-80px; right:-60px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
+.page-hero-inner { max-width:700px; position:relative; z-index:1; }
+.page-hero .label { color:var(--pxl); }
+.page-hero h1 { font-family:var(--serif); font-size:clamp(36px,5vw,60px); font-weight:400; color:#fff; line-height:1.05; letter-spacing:-1.5px; margin-bottom:20px; }
+.page-hero h1 em { font-style:italic; color:var(--pxl); }
+.page-hero p { font-size:17px; color:rgba(255,255,255,0.5); line-height:1.8; max-width:500px; }
+.hero-badges { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+.hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:100px; padding:6px 14px; font-size:12px; color:rgba(255,255,255,0.75); font-weight:500; }
+.hero-badge .dot { width:6px;height:6px;border-radius:50%;background:#6abf69; }
+
+/* FORM SECTION */
+.rc-section { padding:80px 52px; background:#fff; }
+.rc-inner { max-width:960px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+
+.rc-form-side {}
+.rc-form-side h2 { font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-0.5px; margin-bottom:8px; }
+.rc-form-side h2 em { font-style:italic; color:var(--p); }
+.rc-form-side p { font-size:14px; color:var(--muted); line-height:1.75; margin-bottom:28px; }
+
+.rc-form { display:flex; flex-direction:column; gap:16px; }
+.rc-field { display:flex; flex-direction:column; gap:6px; }
+.rc-label { font-size:12px; font-weight:600; color:var(--ink); letter-spacing:0.3px; }
+.rc-input, .rc-select {
+  padding:12px 16px;
+  border:1.5px solid rgba(91,63,160,0.15);
+  border-radius:12px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+  background:#faf8f5;
+  outline:none;
+  transition:border-color 0.15s, box-shadow 0.15s;
+  width:100%;
+  box-sizing:border-box;
+  appearance:none;
+}
+.rc-input:focus, .rc-select:focus {
+  border-color:var(--p);
+  box-shadow:0 0 0 3px rgba(91,63,160,0.1);
+  background:#fff;
+}
+.rc-input::placeholder { color:rgba(122,109,142,0.5); }
+.rc-select option { background:#fff; }
+.rc-btn {
+  background:var(--p);
+  color:#fff;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  padding:14px 28px;
+  border-radius:100px;
+  border:none;
+  cursor:pointer;
+  transition:opacity 0.15s, transform 0.15s;
+  text-align:center;
+  margin-top:4px;
+}
+.rc-btn:hover { opacity:0.88; transform:translateY(-1px); }
+.rc-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.rc-note { font-size:11px; color:var(--muted); text-align:center; margin-top:4px; }
+.rc-error { background:#fff3f3; border:1px solid rgba(220,53,69,0.2); border-radius:10px; padding:12px 16px; font-size:13px; color:#dc3545; display:none; }
+.rc-success { background:#f3fff5; border:1px solid rgba(106,191,105,0.25); border-radius:16px; padding:28px; text-align:center; display:none; }
+.rc-success-icon { font-size:48px; margin-bottom:12px; }
+.rc-success h3 { font-family:var(--serif); font-size:24px; font-weight:400; margin-bottom:8px; }
+.rc-success p { font-size:14px; color:var(--muted); line-height:1.7; }
+.rc-success .rc-success-next { margin-top:20px; }
+
+/* PREVIEW SIDE */
+.rc-preview-side { position:sticky; top:88px; }
+.rc-preview-label { font-size:10px; color:var(--p); letter-spacing:2px; text-transform:uppercase; font-weight:600; margin-bottom:16px; }
+.rc-card {
+  background:var(--pdark);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.15);
+}
+.rc-card-header {
+  background:var(--p);
+  padding:20px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.rc-card-header-left h3 { font-family:var(--serif); font-size:16px; color:#fff; font-weight:400; }
+.rc-card-header-left p { font-size:10px; color:rgba(255,255,255,0.5); margin-top:2px; }
+.rc-card-logo { font-size:11px; color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:1px; }
+.rc-card-body { padding:20px 24px; }
+.rc-metric-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+.rc-metric-row:last-child { border-bottom:none; }
+.rc-metric-name { font-size:11px; color:rgba(255,255,255,0.45); }
+.rc-metric-val { font-size:13px; font-weight:600; }
+.rc-metric-val.green { color:#6abf69; }
+.rc-metric-val.yellow { color:#f0b429; }
+.rc-metric-val.red { color:#e05555; }
+.rc-metric-val.purple { color:var(--pxl); }
+.rc-grade-band {
+  margin:16px 0 0;
+  background:rgba(255,255,255,0.04);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.rc-grade { font-family:var(--serif); font-size:52px; color:#fff; line-height:1; }
+.rc-grade-label { font-size:10px; color:rgba(255,255,255,0.3); margin-top:4px; letter-spacing:1px; text-transform:uppercase; }
+.rc-card-footer { background:rgba(255,255,255,0.03); padding:14px 24px; display:flex; justify-content:space-between; align-items:center; }
+.rc-card-footer-text { font-size:10px; color:rgba(255,255,255,0.25); }
+.rc-cta-pill { background:var(--p); color:#fff; font-size:10px; font-weight:600; padding:5px 12px; border-radius:100px; }
+
+/* WHAT'S IN IT */
+.rc-what { padding:72px 52px; background:var(--pxxxl); }
+.rc-what-inner { max-width:960px; margin:0 auto; }
+.rc-what-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:40px; }
+.rc-what-card { background:#fff; border-radius:16px; padding:28px 24px; border:1px solid rgba(91,63,160,0.08); }
+.rc-what-icon { font-size:28px; margin-bottom:12px; }
+.rc-what-card h4 { font-size:14px; font-weight:600; margin-bottom:8px; }
+.rc-what-card p { font-size:13px; color:var(--muted); line-height:1.7; }
+
+.cta-band { padding:72px 52px; background:var(--p); text-align:center; position:relative; overflow:hidden; }
+.cta-band::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events:none; }
+.cta-band h2 { font-family:var(--serif); font-size:clamp(28px,4vw,44px); font-weight:400; color:#fff; letter-spacing:-1px; margin-bottom:14px; position:relative; }
+.cta-band h2 em { font-style:italic; color:var(--pxl); }
+.cta-band p { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:28px; position:relative; }
+
+.section-header { text-align:center; margin-bottom:0; }
+.section-header h2 { font-family:var(--serif); font-size:clamp(24px,3vw,36px); font-weight:400; letter-spacing:-0.8px; }
+.section-header h2 em { font-style:italic; color:var(--p); }
+
+.cursor-dot { width:8px;height:8px;border-radius:50%;background:var(--p);position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%); }
+.cursor-ring { width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(91,63,160,0.4);position:fixed;pointer-events:none;z-index:99997;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s; }
+.cursor-ring.hover { width:56px;height:56px;border-color:var(--p); }
+@media (hover:none) { .cursor-dot,.cursor-ring { display:none; } }
+
+@media (max-width:900px) {
+  .page-hero { padding:60px 24px 72px; }
+  .rc-section { padding:60px 24px; }
+  .rc-inner { grid-template-columns:1fr; gap:40px; }
+  .rc-preview-side { position:static; }
+  .rc-what { padding:60px 24px; }
+  .rc-what-grid { grid-template-columns:1fr; }
+  .cta-band { padding:60px 24px; }
+}
+
+
+/* Performance: reduce paint on scroll */
+.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
+/* Smooth font rendering on all devices */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Prevent layout shift from fonts */
+html { font-display: swap; }
+/* Better tap targets on mobile */
+@media (max-width: 900px) {
+  a, button { min-height: 44px; }
+  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
+}
+
+
+/* Footer mobile fix */
+@media (max-width: 900px) {
+  .site-footer {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .site-footer > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .site-footer .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+  .site-footer .footer-links a {
+    margin-left: 0 !important;
+  }
+  /* Hide float CTA on mobile so it doesn't overlap footer */
+  .float-cta { display: none; }
+}
+
+
+/* ── Accessibility: focus styles ── */
+*:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--p);
+  outline-offset: 3px;
+}
+/* Skip to content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 6px;
+}
+/* Fix small text contrast — boost muted color slightly */
+:root { --muted: #6b5f7e; }
+
+/* ── 480px breakpoints for pages missing them ── */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 28px !important; }
+  .section-header h2 { font-size: 24px !important; }
+  .page-hero h1 { font-size: 28px !important; }
+  .num-val { font-size: 32px !important; }
+  .card-body { padding: 16px !important; }
+  .price-card { padding: 28px 20px !important; }
+}
+
+
+/* EXIT INTENT */
+.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
+.exit-overlay.show { display:flex; }
+.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
+.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
+.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
+.exit-card h3 em { font-style:italic;color:var(--p); }
+.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
+.exit-card .exit-cta:hover { opacity:0.88; }
+.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
+
+/* SOCIAL PROOF TICKER */
+/* Accessibility */
+:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+/* Better contrast on muted text */
+.hero-sub { color: rgba(255,255,255,0.65) !important; }
+/* Tap targets */
+@media (max-width:900px) {
+  .nav-mob a { min-height:48px; }
+  button, a { min-height:44px; }
+  .faq-q { min-height:48px; padding:14px 0; }
+}
+/* Prevent horizontal scroll everywhere */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+</style>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Davis Digital Studio">
+  <meta property="og:title" content="Free Digital Report Card | Davis Digital Studio — How Does Your Business Look Online?">
+  <meta property="og:description" content="Free 1-page snapshot of how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. No cost, no signup.">
+  <meta property="og:url" content="https://www.davisdigitalstudio.com/report-card">
+  <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+  <meta name="keywords" content="free website audit, free digital report card, Google presence check, small business SEO check, free website health check">
+  <link rel="canonical" href="https://www.davisdigitalstudio.com/report-card">
+  <!-- Google Analytics 4 -->
+  <!-- STEP: Replace G-EQYY0DL8JL with your real GA4 Measurement ID -->
+  <!-- Get it at: analytics.google.com → Admin → Data Streams → your stream -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL">
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EQYY0DL8JL');
+  
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DavisDigital">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Free Digital Report Card — Davis Digital Studio",
+    "description": "Get a free 1-page snapshot of how your business looks online. Google presence, website speed, mobile, and more.",
+    "url": "https://www.davisdigitalstudio.com/report-card.html",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.davisdigitalstudio.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Free Report Card", "item": "https://www.davisdigitalstudio.com/report-card.html" }
+      ]
+    }
+  }
+  </script>
+</head>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <div class="nav-links">
+    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="">Services</a><a href="work.html" class="">Work</a>
+    <a href="contact.html" class="nav-cta">Let's talk</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
+</nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="index.html" class="">Home</a>
+<a href="about.html" class="">About</a>
+<a href="services.html" class="">Services</a>
+<a href="work.html" class="">Work</a>
+  <a href="contact.html" class="mob-cta">Let's talk</a>
+</div>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
+<main id="main-content">
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <span class="label">Free Tool</span>
+    <h1>Your digital<br><em>report card.</em></h1>
+    <p>Enter your business name, city, and email. I'll send you a 1-page snapshot of how your business looks online — completely free.</p>
+    <div class="hero-badges">
+      <span class="hero-badge"><span class="dot"></span>100% free</span>
+      <span class="hero-badge">📧 Delivered to your inbox</span>
+      <span class="hero-badge">⚡ Sent within minutes</span>
+    </div>
+  </div>
+</section>
+
+<section class="rc-section">
+  <div class="rc-inner">
+    <div class="rc-form-side">
+      <h2>Get your free<br><em>report card.</em></h2>
+      <p>No login, no credit card. Just your business name, type, city, and email. I'll put together a snapshot of how your business appears online and send it straight to your inbox.</p>
+
+      
+<div style="background:var(--pxxxl);border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:20px 24px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:11px;color:var(--p);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Also free</div>
+    <div style="font-size:14px;color:var(--ink);font-weight:600;">Want instant results instead?</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Try the mini audit tool — enter your URL and get 5 findings in 10 seconds.</div>
+  </div>
+  <a href="audit.html#free-audit" style="background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:100px;text-decoration:none;white-space:nowrap;">Try the mini audit →</a>
+</div>
+
+<div class="rc-form" id="rcForm">
+        <div class="rc-field">
+          <label class="rc-label">Business name</label>
+          <input class="rc-input" id="rcName" type="text" placeholder="Joe's Coffee Shop" />
+        </div>
+        <div class="rc-field">
+          <label class="rc-label">Business type</label>
+          <select class="rc-select" id="rcType">
+            <option value="">Select category...</option>
+            <option value="Restaurant / Bar / Café">Restaurant / Bar / Café</option>
+            <option value="Retail / Boutique">Retail / Boutique</option>
+            <option value="Home Services">Home Services</option>
+            <option value="Health & Wellness / Fitness">Health & Wellness / Fitness</option>
+            <option value="Salon / Spa / Beauty">Salon / Spa / Beauty</option>
+            <option value="Real Estate">Real Estate</option>
+            <option value="Legal / Professional Services">Legal / Professional Services</option>
+            <option value="Creative / Freelance">Creative / Freelance</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="rc-field">
+          <label class="rc-label">City</label>
+          <input class="rc-input" id="rcCity" type="text" placeholder="Los Angeles" />
+        </div>
+        <div class="rc-field">
+          <label class="rc-label">Website URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <input class="rc-input" id="rcUrl" type="url" placeholder="https://yourbusiness.com" />
+        </div>
+        <div class="rc-field">
+          <label class="rc-label">Your email address</label>
+          <input class="rc-input" id="rcEmail" type="email" placeholder="you@yourbusiness.com" />
+        </div>
+        <div class="rc-error" id="rcError"></div>
+        <button class="rc-btn" id="rcSubmit" onclick="submitReportCard()">Send my free report card →</button>
+        <p class="rc-note">No spam. No sales call unless you ask. Unsubscribe anytime.</p>
+      </div>
+
+      <div class="rc-success" id="rcSuccess">
+        <div class="rc-success-icon">📬</div>
+        <h3>It's on its way.</h3>
+        <p>Your Digital Report Card for <strong id="rcSuccessName"></strong> is being prepared and will arrive in your inbox within a few minutes. Check your spam folder if you don't see it.</p>
+        <div class="rc-success-next">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Want to go deeper than a report card?</p>
+          <a href="audit.html" class="btn-p">Get the full Digital Health Check — $299 →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="rc-preview-side reveal">
+      <div class="rc-preview-label">Sample Report Card</div>
+      <div class="rc-card">
+        <div class="rc-card-header">
+          <div class="rc-card-header-left">
+            <h3>[Your Business Name]</h3>
+            <p>[Business Type] · [City], CA</p>
+          </div>
+          <div class="rc-card-logo">DDS</div>
+        </div>
+        <div class="rc-card-body">
+          <div class="rc-grade-band">
+            <div class="rc-grade">C+</div>
+            <div class="rc-grade-label">Overall Digital Presence Grade</div>
+          </div>
+          <div style="height:16px;"></div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Google Business Profile</span>
+            <span class="rc-metric-val yellow">Incomplete</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Local search ranking</span>
+            <span class="rc-metric-val red">Not found</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Google review count</span>
+            <span class="rc-metric-val yellow">12 reviews</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Average star rating</span>
+            <span class="rc-metric-val green">4.3 ★</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Mobile performance</span>
+            <span class="rc-metric-val red">Poor</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">Website SEO score</span>
+            <span class="rc-metric-val yellow">42/100</span>
+          </div>
+          <div class="rc-metric-row">
+            <span class="rc-metric-name">#1 opportunity</span>
+            <span class="rc-metric-val purple">GBP setup</span>
+          </div>
+        </div>
+        <div class="rc-card-footer">
+          <span class="rc-card-footer-text">Prepared by Davis Digital Studio</span>
+          <span class="rc-cta-pill">Free</span>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;">Sample only. Your real card will reflect your actual business.</p>
+    </div>
+  </div>
+</section>
+
+<section class="rc-what">
+  <div class="rc-what-inner">
+    <div class="section-header reveal">
+      <span class="label">What's inside</span>
+      <h2>A real snapshot, not<br>a <em>generic checklist.</em></h2>
+    </div>
+    <div class="rc-what-grid">
+      <div class="rc-what-card reveal">
+        <div class="rc-what-icon">📍</div>
+        <h4>Google Presence</h4>
+        <p>Whether you have a Google Business Profile, how complete it is, your review count and rating, and whether you're showing up in local search.</p>
+      </div>
+      <div class="rc-what-card reveal" style="transition-delay:0.1s">
+        <div class="rc-what-icon">📱</div>
+        <h4>Website Health</h4>
+        <p>Mobile performance grade, basic SEO signals, and whether your site is doing its job — or quietly costing you customers.</p>
+      </div>
+      <div class="rc-what-card reveal" style="transition-delay:0.2s">
+        <div class="rc-what-icon">🎯</div>
+        <h4>Your #1 Opportunity</h4>
+        <p>The single highest-impact thing you could do right now to improve your online presence — specific to your business type and city.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <h2>Want more than<br>a <em>report card?</em></h2>
+  <p>The full Digital Health Check goes 10x deeper — $299, delivered in 5 business days.</p>
+  <a href="audit.html" class="btn-white">See the full audit →</a>
+</section>
+
+</main>
+
+<!-- EXIT INTENT POPUP -->
+<div class="exit-overlay" id="exitOverlay">
+  <div class="exit-card">
+    <button class="exit-close" onclick="closeExit()">×</button>
+    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
+    <h3>Before you go — <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
+    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
+  </div>
+</div>
+
+<footer class="site-footer" role="contentinfo">
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div class="footer-links" style="margin-top:4px;">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="work.html">Work</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+    <a href="privacy.html" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
+    <a href="terms.html" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
+    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+  </div>
+</footer>
+<script>
+
+var _pb = document.createElement('div');
+_pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(to right,#5b3fa0,#c4aee8);z-index:99999;width:0;pointer-events:none;transition:width 0.08s;';
+document.body.appendChild(_pb);
+window.addEventListener('scroll', function() {
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  if (h > 0) _pb.style.width = (window.scrollY / h * 100) + '%';
+});
+
+
+var _ro = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); _ro.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(function(el) { _ro.observe(el); });
+
+
+(function() {
+  var ham = document.getElementById('navHam');
+  var mob = document.getElementById('navMob');
+  if (!ham || !mob) return;
+  ham.addEventListener('click', function() {
+    var open = mob.classList.toggle('open');
+    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
+    ham.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  mob.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      mob.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+      ham.setAttribute('aria-label', 'Open menu');
+    });
+  });
+})();
+
+
+function submitReportCard() {
+  var name = document.getElementById('rcName').value.trim();
+  var type = document.getElementById('rcType').value;
+  var city = document.getElementById('rcCity').value.trim();
+  var url  = document.getElementById('rcUrl').value.trim();
+  var email = document.getElementById('rcEmail').value.trim();
+  var err = document.getElementById('rcError');
+  err.style.display = 'none';
+
+  if (!name) { showRcError('Please enter your business name.'); return; }
+  if (!type) { showRcError('Please select your business type.'); return; }
+  if (!city) { showRcError('Please enter your city.'); return; }
+  if (!email || !email.includes('@')) { showRcError('Please enter a valid email address.'); return; }
+
+  var btn = document.getElementById('rcSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  fetch('https://formspree.io/f/mvznevlo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      _subject: 'Digital Report Card Request: ' + name,
+      _replyto: email,
+      business_name: name,
+      business_type: type,
+      city: city,
+      website: url || 'Not provided',
+      email: email,
+      message: 'REPORT CARD REQUEST — Please send the Digital Report Card to this email. Business: ' + name + ' | Type: ' + type + ' | City: ' + city + ' | Website: ' + (url || 'Not provided')
+    })
+  })
+  .then(function(r) {
+    if (r.ok) {
+      document.getElementById('rcForm').style.display = 'none';
+      document.getElementById('rcSuccessName').textContent = name;
+      document.getElementById('rcSuccess').style.display = 'block';
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', {
+          event_category: 'lead',
+          event_label: 'report_card',
+          event_label2: type || 'unknown_type'
+        });
+      }
+
+      // Send confirmation email to submitter via Resend
+      var confirmHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>' +
+        '<body style="margin:0;padding:0;background:#0f0820;font-family:\'Helvetica Neue\',Arial,sans-serif;">' +
+        '<div style="max-width:560px;margin:0 auto;padding:40px 24px;">' +
+        '<div style="margin-bottom:28px;">' +
+          '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:20px;color:#fff;text-decoration:none;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>' +
+        '</div>' +
+        '<div style="background:#1e1338;border-radius:16px;padding:32px;margin-bottom:24px;">' +
+          '<h1 style="font-family:Georgia,serif;font-size:26px;font-weight:400;color:#fff;margin:0 0 16px;line-height:1.2;">Got it — your report card<br><em style="color:#c4aee8;">is on its way.</em></h1>' +
+          '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 16px;">I\'ve received your request for <strong style="color:#fff;">' + name + '</strong> and I\'m putting together your free Digital Report Card now.</p>' +
+          '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 24px;">You\'ll get a 1-page snapshot covering:<br>' +
+          '<span style="color:rgba(255,255,255,0.5);">📍 Google presence &amp; local search ranking<br>' +
+          '📱 Mobile performance<br>' +
+          '🔍 Website SEO score<br>' +
+          '⭐ Your #1 opportunity</span></p>' +
+          '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:14px 16px;border-radius:8px;margin-bottom:24px;">' +
+            '<p style="color:rgba(255,255,255,0.7);font-size:14px;margin:0;">Expect it within a few minutes. If you don\'t see it, check your spam folder — or reply to this email and I\'ll resend it.</p>' +
+          '</div>' +
+          '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;">Book a free discovery call →</a>' +
+        '</div>' +
+        '<div style="text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">' +
+          '<p style="color:rgba(255,255,255,0.3);font-size:12px;margin:0;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br>' +
+          '<a href="https://davisdigitalstudio.com" style="color:rgba(196,174,232,0.5);">davisdigitalstudio.com</a></p>' +
+        '</div>' +
+        '</div></body></html>';
+
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer re_aL6S2BX2_GB4y1T88EirAgfZNMz7yFfST'
+        },
+        body: JSON.stringify({
+          from: 'Eric Davis <eric@davisdigitalstudio.com>',
+          to: [email],
+          subject: 'Your Digital Report Card for ' + name + ' is coming',
+          html: confirmHtml
+        })
+      }).catch(function(){});
+
+    } else {
+      showRcError('Something went wrong. Please try again or email eric@davisdigitalstudio.com directly.');
+      btn.disabled = false;
+      btn.textContent = 'Send my free report card →';
+    }
+  })
+  .catch(function() {
+    showRcError('Connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Send my free report card →';
+  });
+}
+
+function showRcError(msg) {
+  var err = document.getElementById('rcError');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  var dot = document.createElement('div'); dot.className = 'cursor-dot';
+  var ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.appendChild(dot); document.body.appendChild(ring);
+  var mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+  (function anim(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+  document.querySelectorAll('a,button,.rc-what-card').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ring.classList.add('hover');});
+    el.addEventListener('mouseleave',function(){ring.classList.remove('hover');});
+  });
+}
+
+
+// Prevent double form submission
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      setTimeout(function() {
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+      }, 100);
+    }
+  });
+});
+
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// ── Exit Intent ──
+var _exitShown = false;
+function closeExit() {
+  document.getElementById('exitOverlay').classList.remove('show');
+  sessionStorage.setItem('exit_shown','1');
+}
+if (!sessionStorage.getItem('exit_shown')) {
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 10 && !_exitShown) {
+      _exitShown = true;
+      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
+    }
+  });
+  // Mobile: show on back button / after 45s inactivity
+  var _idleTimer;
+  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
+  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
+  resetIdle();
+}
+
+
+
+</script>
+
+<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+</body>
+</html>
