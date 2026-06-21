@@ -642,32 +642,40 @@ function runAudit() {
     else timerEl.textContent = 'Taking a bit longer than usual — hang tight...';
   }, 1000);
 
-  // Call PSI with 35s timeout
-  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
-    encodeURIComponent(url) +
-    '&strategy=mobile&category=performance&category=seo&category=accessibility&key=' + PSI_KEY;
-
+  // Call PSI via Edge Function (server-side proxy — no CORS issues)
   var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var fetchTimeout = setTimeout(function() {
     if (abortCtrl) abortCtrl.abort();
-  }, 35000);
+  }, 40000);
 
-  fetch(psiUrl, abortCtrl ? { signal: abortCtrl.signal } : {})
+  fetch(EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'psi_fetch', url: url }),
+    signal: abortCtrl ? abortCtrl.signal : undefined,
+  })
     .then(function(r) {
-      if (!r.ok) {
-        throw new Error('HTTP ' + r.status);
-      }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
-    .then(function(data) {
+    .then(function(res) {
       clearTimeout(fetchTimeout);
       clearInterval(timerInterval);
-      if (data.error) {
-        showLoadingError('Google could not analyze that URL: ' + (data.error.message || 'unknown error') + '. Make sure the site is publicly accessible and try again.');
+
+      if (res.error) {
+        if (res.error === 'timeout') {
+          showLoadingError('Google took too long to analyze that page. This happens with very large or complex sites. Try a local business URL — those work reliably.');
+        } else {
+          showLoadingError('Google could not analyze that URL: ' + res.error + '. Make sure the site is publicly accessible and try again.');
+        }
         return;
       }
+
+      var data = res.data;
+      if (!data) { showLoadingError('No data returned. Please try again.'); return; }
       var cats = (data.lighthouseResult && data.lighthouseResult.categories) || {};
       var audits = (data.lighthouseResult && data.lighthouseResult.audits) || {};
+
       var perf = cats.performance ? Math.round(cats.performance.score * 100) : null;
       var seo = cats.seo ? Math.round(cats.seo.score * 100) : null;
       var a11y = cats.accessibility ? Math.round(cats.accessibility.score * 100) : null;
@@ -682,16 +690,12 @@ function runAudit() {
     .catch(function(err) {
       clearTimeout(fetchTimeout);
       clearInterval(timerInterval);
-      console.error('PSI error:', err);
-      var msg = 'Could not get results for that URL. ';
+      console.error('Audit error:', err);
+      var msg;
       if (err && err.name === 'AbortError') {
-        msg = 'Google took too long to analyze that page — this happens with very large or complex sites. Try a smaller or simpler URL (like a local business site) and it should work fine.';
-      } else if (err && err.message && err.message.indexOf('504') !== -1) {
-        msg = 'Google timed out analyzing that page (504 error). Large sites like Yelp or Amazon sometimes hit this limit. Try a local business URL instead — those work reliably.';
-      } else if (err && err.message && err.message.indexOf('HTTP') !== -1) {
-        msg = 'Google returned an error (' + err.message + '). Make sure the URL is publicly accessible and try again.';
+        msg = 'The request timed out. Google can take up to 40 seconds for some sites. Please try again, or try a different URL.';
       } else {
-        msg = 'Could not connect to Google PageSpeed. Please check the URL is correct, publicly accessible, and try again.';
+        msg = 'Something went wrong connecting to our analysis service. Please try again in a moment.';
       }
       showLoadingError(msg);
     });
