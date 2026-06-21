@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.2 20260621-1040 -->
+<!-- DDS v3.4 20260621-1230 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -519,7 +519,7 @@ if (!sessionStorage.getItem('exit_shown')) {
 </script>
 
   <link rel="manifest" href="/manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DavisDigital">
 <script type="application/ld+json">
@@ -545,7 +545,7 @@ if (!sessionStorage.getItem('exit_shown')) {
     <a href="/portal" class="navlink" style="font-size:13px;">Client Login</a>
     <a href="/tools" class="navlink" style="font-size:13px;">Free Tools</a>
     <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">Free Report Card</a>
-    <a href="/audit" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audits</a><a href="/contact" class="nav-cta">Let's talk</a>
+    <a href="/audit" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audits from $99</a><a href="/contact" class="nav-cta">Let's talk</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -1012,8 +1012,119 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 </style>
 
 <script>
-var AUDIT_ISSUES = {
-  restaurant: [
+// ── Real PSI audit → findings engine ──
+// All findings come from actual PageSpeed data for that specific URL.
+// Business type only adjusts plain-English framing, never invents issues.
+
+var PSI_AUDIT_MAP = [
+  // Performance
+  { key:'render-blocking-resources', sev:'high', title:'Render-blocking resources slowing your page', body:'Scripts or stylesheets are preventing your page from showing up quickly. Deferring non-critical JS and CSS can meaningfully reduce load time.' },
+  { key:'unused-javascript', sev:'high', title:'Unused JavaScript is loaded on every visit', body:'Your site loads JavaScript that isn\'t used on this page. Removing or deferring it reduces the amount of work the browser has to do before visitors see anything.' },
+  { key:'unused-css-rules', sev:'medium', title:'Unused CSS is weighing down your page', body:'Stylesheets contain rules that don\'t apply to this page. Trimming unused CSS reduces file size and speeds up rendering.' },
+  { key:'uses-optimized-images', sev:'high', title:'Images are not optimized', body:'Your images could be compressed or converted to next-gen formats like WebP. Unoptimized images are one of the most common causes of slow load times.' },
+  { key:'uses-responsive-images', sev:'medium', title:'Images are larger than needed for the screen', body:'Images are being served at a larger size than the screen requires. Serving correctly sized images saves bandwidth and speeds up page load.' },
+  { key:'efficient-animated-content', sev:'medium', title:'Animated GIFs detected', body:'GIFs are significantly heavier than video formats. Converting them to MP4 or WebM can reduce file size by 80% or more.' },
+  { key:'uses-text-compression', sev:'high', title:'Text files are not compressed', body:'Your server isn\'t compressing HTML, CSS, and JavaScript before sending them. Enabling GZIP or Brotli compression can reduce transfer size by 60-80%.' },
+  { key:'uses-long-cache-ttl', sev:'medium', title:'Static assets are not cached efficiently', body:'Browsers aren\'t told to cache your images, scripts, and stylesheets for long. Fixing cache headers means returning visitors load your site much faster.' },
+  { key:'server-response-time', sev:'high', title:'Server response time is slow', body:'Your server is taking too long to respond. This is often a hosting issue — cheap or shared hosting can significantly drag down your speed scores.' },
+  { key:'unminified-javascript', sev:'medium', title:'JavaScript files are not minified', body:'Your JS files contain whitespace and comments that aren\'t needed in production. Minifying them reduces file size.' },
+  { key:'unminified-css', sev:'medium', title:'CSS files are not minified', body:'Your CSS files contain unnecessary whitespace and comments. Minifying reduces file size and speeds up load.' },
+  { key:'dom-size', sev:'medium', title:'Page has an excessively large DOM', body:'Your page contains a very large number of HTML elements. Large DOMs slow down rendering and make pages feel sluggish, especially on mobile.' },
+  { key:'third-party-summary', sev:'medium', title:'Third-party scripts are slowing your page', body:'External scripts (ads, analytics, social widgets, chat tools) are adding significant load time. Each one adds a network request your visitors have to wait for.' },
+  { key:'bootup-time', sev:'high', title:'JavaScript execution time is too high', body:'Your scripts take too long to parse and execute. This blocks the browser from showing your page and making it interactive for visitors.' },
+  { key:'mainthread-work-breakdown', sev:'medium', title:'Main thread is overloaded', body:'Too much work is happening on the browser\'s main thread, causing delayed interactions and sluggish scrolling.' },
+  { key:'largest-contentful-paint-element', sev:'high', title:'Largest Contentful Paint element loads slowly', body:'The main content element (your hero image or headline) takes too long to appear. This is one of Google\'s Core Web Vitals and directly affects your ranking.' },
+  { key:'layout-shift-elements', sev:'medium', title:'Page elements shift as the page loads', body:'Content moves around while loading, which is disorienting for visitors and hurts your CLS (Cumulative Layout Shift) Core Web Vital score.' },
+  { key:'long-tasks', sev:'medium', title:'Long JavaScript tasks blocking interaction', body:'Tasks taking over 50ms are blocking visitors from interacting with your page. This makes your site feel slow and unresponsive.' },
+  // SEO
+  { key:'meta-description', sev:'high', title:'Missing or inadequate meta description', body:'Your page has no meta description, or it\'s poorly written. This is what appears under your title in Google search results — it directly affects click-through rate.' },
+  { key:'document-title', sev:'high', title:'Page title is missing or not optimized', body:'Your page title is missing or not descriptive. The title tag is one of the strongest on-page SEO signals Google uses to understand what your page is about.' },
+  { key:'link-text', sev:'medium', title:'Links use non-descriptive text', body:'Links like "click here" or "read more" don\'t tell Google what the linked page is about. Descriptive link text improves both SEO and accessibility.' },
+  { key:'crawlable-anchors', sev:'high', title:'Some links can\'t be crawled by Google', body:'Google can\'t follow some of your links, which means those pages may not be indexed. This limits how much of your site appears in search results.' },
+  { key:'hreflang', sev:'low', title:'hreflang configuration issues', body:'Language and region targeting tags have configuration problems. This can cause Google to show the wrong version of your page to international visitors.' },
+  { key:'canonical', sev:'medium', title:'Canonical URL not properly configured', body:'Without a canonical tag, Google may index multiple versions of the same page, splitting your ranking authority.' },
+  { key:'robots-txt', sev:'high', title:'robots.txt has issues', body:'Your robots.txt file has errors or is blocking pages you want Google to index. This can prevent important pages from appearing in search results.' },
+  { key:'tap-targets', sev:'medium', title:'Tap targets are too small on mobile', body:'Buttons and links are too small or too close together for mobile visitors to tap accurately. Google flags this as a mobile usability issue.' },
+  { key:'viewport', sev:'high', title:'Viewport not configured for mobile', body:'Your page isn\'t properly configured for mobile devices. This causes Google to classify your site as not mobile-friendly — a significant ranking penalty.' },
+  { key:'font-size', sev:'medium', title:'Text is too small to read on mobile', body:'Text is smaller than 12px in some areas, making it unreadable on mobile without zooming. Google flags this as a mobile usability issue.' },
+  // Accessibility
+  { key:'image-alt', sev:'high', title:'Images are missing alt text', body:'Images without alt text are invisible to Google Image search and to screen readers. Alt text is both an SEO and an accessibility requirement.' },
+  { key:'button-name', sev:'medium', title:'Buttons don\'t have accessible names', body:'Some buttons have no text label, making them unusable for screen reader users and harder for Google to understand.' },
+  { key:'color-contrast', sev:'medium', title:'Text contrast is too low', body:'Some text doesn\'t have enough contrast against its background. This affects readability for all visitors and is flagged by Google Lighthouse.' },
+  { key:'heading-order', sev:'low', title:'Heading structure is incorrect', body:'Headings (H1, H2, H3) are out of order or missing. Proper heading structure helps Google understand your page hierarchy and improves accessibility.' },
+  { key:'duplicate-id', sev:'medium', title:'Duplicate element IDs on the page', body:'Multiple elements share the same ID, which is invalid HTML and can cause unpredictable behavior for screen readers and JavaScript.' },
+  { key:'html-has-lang', sev:'medium', title:'Page language not declared', body:'The HTML lang attribute is missing. This tells screen readers and Google what language the page is in — required for proper accessibility compliance.' },
+  // Best practices
+  { key:'is-on-https', sev:'high', title:'Site is not fully on HTTPS', body:'Your site or some resources are loading over HTTP. Modern browsers show security warnings on HTTP sites, and Google uses HTTPS as a ranking signal.' },
+  { key:'geolocation-on-start', sev:'medium', title:'Page requests location on load', body:'Requesting geolocation permission immediately on page load frustrates visitors and reduces trust. It should only be requested in response to a user action.' },
+  { key:'no-document-write', sev:'medium', title:'document.write() is used', body:'Using document.write() in JavaScript blocks page rendering and is considered a serious performance anti-pattern.' },
+  { key:'deprecations', sev:'medium', title:'Deprecated APIs in use', body:'Your site uses browser APIs that are deprecated and will be removed in future browser versions, potentially breaking functionality.' },
+  { key:'errors-in-console', sev:'high', title:'JavaScript errors on the page', body:'Your page is generating JavaScript errors. These can silently break functionality for visitors and indicate code quality issues.' },
+  { key:'valid-source-maps', sev:'low', title:'Source map issues', body:'Source map configuration has issues. This is a developer concern that can make debugging harder.' },
+];
+
+// Audits that indicate a PASS when score===1 (absence = issue)
+var PASS_WHEN_ONE = new Set(PSI_AUDIT_MAP.map(function(a){ return a.key; }));
+
+function getIssues(type, city, name, psi, rawAudits) {
+  // If we have real audit data, use ONLY that
+  if (rawAudits && !psi.fallback) {
+    var findings = [];
+    PSI_AUDIT_MAP.forEach(function(def) {
+      var a = rawAudits[def.key];
+      if (!a) return;
+      // Skip if passed
+      if (a.score === 1) return;
+      // Skip if no score (informational only)
+      if (a.score === null || a.score === undefined) return;
+
+      var sev = a.score === 0 ? 'high' : a.score < 0.5 ? 'medium' : 'low';
+
+      // Build specific body using actual audit display values where available
+      var body = def.body;
+      if (a.displayValue) {
+        body = body + ' (' + a.displayValue + ')';
+      }
+
+      findings.push({
+        sev: sev,
+        title: def.title,
+        body: body,
+        score: a.score
+      });
+    });
+
+    // Sort: high first, then medium, then low
+    findings.sort(function(a, b) {
+      var o = { high: 0, medium: 1, low: 2 };
+      return o[a.sev] - o[b.sev];
+    });
+
+    // Return top 6 real findings
+    return findings.slice(0, 6).map(function(f) {
+      return {
+        sev: f.sev,
+        icon: sevIcon(f.sev),
+        title: f.title,
+        body: f.body
+      };
+    });
+  }
+
+  // Fallback: if API failed, show generic message
+  return [
+    { sev:'medium', icon:sevIcon('medium'), title:'Unable to retrieve live audit data', body:'We couldn\'t fetch real data for this URL. Try again with a publicly accessible website.' }
+  ];
+}
+
+function sevIcon(sev) {
+  if (sev === 'high') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  if (sev === 'medium') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+}
+
+// Keep calcScore for fallback only
+var AUDIT_ISSUES = { restaurant: [
     { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>', title:'No Google Business Profile or incomplete listing', body:'68% of diners search online before choosing. Without a complete GBP you\'re invisible in local search and Google Maps for "{city} restaurants near me."' },
     { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Menu not readable on mobile', body:'If your menu is a PDF or photo of a printed menu, Google can\'t index it and mobile users can\'t read it — that\'s most of your potential customers.' },
     { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>', title:'No clear reservation or booking CTA above the fold', body:'Every second a visitor spends looking for how to book is a second they might leave. The button needs to be the first thing they see.' },
@@ -1225,7 +1336,8 @@ function runMiniAudit() {
         fcp: fcp, lcp: lcp, tbt: tbt, cls: cls, speed: speed,
         hasMetaDesc: hasMetaDesc, hasTitleTag: hasTitleTag,
         mobileReady: mobileReady, hasAltText: hasAltText,
-        linksDesc: linksDesc, noHttp: noHttp
+        linksDesc: linksDesc, noHttp: noHttp,
+        rawAudits: audits
       });
     })
     .catch(function() {
@@ -1242,7 +1354,7 @@ function showResults(name, type, city, email, url, psi) {
   document.getElementById('maResultsBiz').textContent = name;
 
   var score = psi.overall;
-  var issues = getIssues(type, city, name, psi);
+  var issues = getIssues(type, city, name, psi, psi.rawAudits);
 
   // Animated score ring
   var scoreEl = document.getElementById('maScoreNum');
