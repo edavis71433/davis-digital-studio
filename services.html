@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- DDS v2.1 20260621-1517 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -161,7 +162,7 @@ body { padding-top: 68px; }
 /* SERVICES */
 .services-main { padding: 100px 52px; background: #fff; }
 .services-inner { max-width: 1100px; margin: 0 auto; }
-.svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.svc-grid { display: flex; flex-direction: column; gap: 24px; }
 .svc-card {
   border-radius: 20px;
   border: 1px solid rgba(91,63,160,0.1);
@@ -170,8 +171,8 @@ body { padding-top: 68px; }
   position: relative;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1fr 300px;
+  gap: 48px;
   align-items: start;
 }
 .svc-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(91,63,160,0.12); border-color: var(--pxl); }
@@ -251,7 +252,7 @@ body { padding-top: 68px; }
   .page-hero { padding:60px 24px 72px; }
   .services-main { padding:60px 24px; }
   .svc-grid { grid-template-columns: 1fr; }
-  .svc-card { grid-template-columns: 1fr; gap: 24px; }
+  .svc-card { grid-template-columns: 1fr; gap: 24px; display: block; }
   .svc-card.featured { grid-column: span 1; grid-template-columns: 1fr; padding: 28px 20px; }
   .addons { padding:60px 24px; }
   .addons-grid { grid-template-columns: 1fr; }
@@ -622,6 +623,8 @@ if (!sessionStorage.getItem('exit_shown')) {
 <a href="/services" class="active">Services</a>
 <a href="/work" class="">Work</a>
   <a href="/report-card" class="mlink">Free Report Card</a>
+  <a href="/tools" class="mlink">Free Tools</a>
+  <a href="/roi-calculator" class="mlink">ROI Calculator</a>
   <a href="/audit" class="mlink" style="background:var(--pxxxl);color:var(--p);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg> Digital Health Check</a>
   <a href="/contact" class="mob-cta">Let's talk</a>
 </div>
@@ -855,6 +858,7 @@ if (!sessionStorage.getItem('exit_shown')) {
     <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
     <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
     <a href="/accessibility" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Accessibility</a>
+    <a href="/tools" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Free Tools</a>
     <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">Client Login</a>
   </div>
 </footer>
