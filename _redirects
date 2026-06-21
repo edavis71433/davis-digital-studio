@@ -12,5 +12,9 @@
 /free-audit             /audit.html                     302
 /report                 /report-card.html               302
 /portal                 /portal.html                    200
+/speed-test             /speed-test.html                200
+/local-visibility       /local-visibility.html          200
+/pricing-estimator      /pricing-estimator.html         200
+
 /*                      /404.html                       404
 /tools                  /tools.html                     200

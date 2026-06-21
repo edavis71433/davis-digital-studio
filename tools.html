@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.5 20260621-1541 -->
+<!-- DDS v2.6 20260621-1558 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -75,7 +75,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .tool-cta:hover{opacity:0.88;}
 .tool-cta.ghost{background:transparent;color:var(--p);border:1.5px solid var(--pxl);}
 .tool-cta.ghost:hover{background:var(--pxxxl);opacity:1;}
-.coming-soon{opacity:0.55;pointer-events:none;}
+
 .cs-pill{position:absolute;top:16px;right:16px;background:rgba(91,63,160,0.1);color:var(--p);font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;}
 .divider-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(91,63,160,0.1);}
 .cta-band{background:var(--p);padding:64px 24px;text-align:center;}
@@ -188,59 +188,56 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
   </div>
 
-  <div class="divider-label">More tools coming soon</div>
+  <div class="divider-label" style="margin-top:16px;">Also free</div>
 
   <div class="tools-grid">
 
-    <div class="tool-card coming-soon">
-      <span class="cs-pill">Coming soon</span>
+    <div class="tool-card">
       <span class="tool-badge badge-free">Free</span>
       <div class="tool-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div class="tool-name">Page Speed Test</div>
-      <p class="tool-desc">A cleaner, more readable version of Google PageSpeed. Enter any URL and get your scores broken down in plain English with specific fixes for each issue.</p>
+      <p class="tool-desc">Real Google Lighthouse scores for mobile and desktop. Core Web Vitals, performance issues, and plain-English fixes. Faster than Google's own tool and easier to read.</p>
       <ul class="tool-features">
-        <li>Mobile and desktop scores</li>
-        <li>Plain English explanations</li>
-        <li>Specific fix recommendations</li>
-        <li>Compare before and after</li>
+        <li>Real Lighthouse scores from Google</li>
+        <li>Mobile and desktop comparison</li>
+        <li>Core Web Vitals (LCP, FCP, CLS, TBT)</li>
+        <li>Top issues with plain-English explanations</li>
       </ul>
-      <a href="/contact" class="tool-cta ghost">Notify me when live</a>
+      <a href="/speed-test" class="tool-cta" onclick="if(typeof gtag==='function'){gtag('event','tool_click',{event_category:'tools',event_label:'speed_test'});}">Test my site speed</a>
     </div>
 
-    <div class="tool-card coming-soon">
-      <span class="cs-pill">Coming soon</span>
+    <div class="tool-card">
       <span class="tool-badge badge-free">Free</span>
       <div class="tool-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       </div>
       <div class="tool-name">Local Visibility Score</div>
-      <p class="tool-desc">Check if your business has a Google Business Profile, how complete it is, whether you appear in the local pack, and what your nearest competitors are doing better.</p>
+      <p class="tool-desc">Check how visible your business is in local Google search. GBP status, local pack presence, review signals, and your single biggest opportunity to rank higher.</p>
       <ul class="tool-features">
-        <li>GBP completeness check</li>
-        <li>Local pack ranking status</li>
-        <li>Review count and rating</li>
-        <li>Top 3 local competitors</li>
+        <li>Google Business Profile assessment</li>
+        <li>Local pack visibility estimate</li>
+        <li>Review signal analysis</li>
+        <li>Your number one local SEO opportunity</li>
       </ul>
-      <a href="/contact" class="tool-cta ghost">Notify me when live</a>
+      <a href="/local-visibility" class="tool-cta" onclick="if(typeof gtag==='function'){gtag('event','tool_click',{event_category:'tools',event_label:'local_visibility'});}">Check my local visibility</a>
     </div>
 
-    <div class="tool-card coming-soon">
-      <span class="cs-pill">Coming soon</span>
+    <div class="tool-card">
       <span class="tool-badge badge-free">Free</span>
       <div class="tool-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </div>
-      <div class="tool-name">Project Pricing Estimator</div>
-      <p class="tool-desc">Answer 5 quick questions about your project and get an instant ballpark range. No forms, no waiting. Just a real estimate based on what you actually need.</p>
+      <div class="tool-name">Pricing Estimator</div>
+      <p class="tool-desc">Answer 5 questions about your project and get a real ballpark price range in under a minute. No signup, no sales call. Just an honest estimate you can plan around.</p>
       <ul class="tool-features">
-        <li>Select your business type and goals</li>
-        <li>Choose pages and features needed</li>
-        <li>See estimated range instantly</li>
-        <li>Get a proper quote from Eric</li>
+        <li>5 quick questions about your business</li>
+        <li>Instant tier recommendation</li>
+        <li>Price range with what is included</li>
+        <li>Book a free call to confirm scope</li>
       </ul>
-      <a href="/contact" class="tool-cta ghost">Notify me when live</a>
+      <a href="/pricing-estimator" class="tool-cta" onclick="if(typeof gtag==='function'){gtag('event','tool_click',{event_category:'tools',event_label:'pricing_estimator'});}">Get my estimate</a>
     </div>
 
   </div>
@@ -288,6 +285,9 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
         <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
         <a href="/audit#free-audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Site Score</a>
         <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
+        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
+        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
       </div>
     </div>
     <div>
