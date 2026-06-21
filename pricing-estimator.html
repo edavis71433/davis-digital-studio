@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.6 20260621-1558 -->
+<!-- DDS v2.7 20260621-1619 -->
 <!-- DDS v2.5 tool: pricing-estimator -->
 <html lang="en">
 <head>
@@ -83,6 +83,9 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .site-footer a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:16px;}
 @media(max-width:600px){.nav{padding:0 20px;}.nav-links .navlink{display:none;}.options-grid{grid-template-columns:1fr;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Website Pricing Estimator","url":"https://www.davisdigitalstudio.com/pricing-estimator","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Get an instant ballpark estimate for your web design project. Answer 5 questions, see a real price range.","provider":{"@type":"Person","name":"Eric Davis","url":"https://www.davisdigitalstudio.com"}}
+</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -249,17 +252,75 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
   <!-- Result -->
   <div class="step" id="stepResult">
     <div class="result-card" id="resultCard"></div>
-    <p class="disclaimer">This is a ballpark estimate based on your answers. Final pricing is confirmed after a free discovery call where I can understand your full scope. Every estimate is honest — I will tell you if something costs more or less than this range.</p>
+    
+    <div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;">
+      <div style="font-size:14px;font-weight:600;color:#1a1523;margin-bottom:6px;">Want this estimate emailed to you?</div>
+      <div style="font-size:13px;color:#5e5270;margin-bottom:14px;">I will also send you a breakdown of what is typically included at this price range.</div>
+      <div style="display:flex;gap:8px;max-width:400px;margin:0 auto;" id="peEmailForm">
+        <input type="email" id="peEmail" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;">
+        <button onclick="capturePeEmail()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Email me this</button>
+      </div>
+      <div id="peEmailThanks" style="display:none;font-size:13px;color:#16a34a;font-weight:600;margin-top:8px;">On its way. Talk soon.</div>
+    </div>
+    <p class="disclaimer">This is a ballpark estimate based on your answers. Final pricing is confirmed after a free discovery call where I can understand your full scope. Every estimate is honest I will tell you if something costs more or less than this range.</p>
     <button class="restart-btn" onclick="restart()">← Start over</button>
   </div>
 
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo">
-  <p>© <span id="footer-year">2026</span> Davis Digital Studio · Los Angeles, CA</p>
-  <div><a href="/tools">All Tools</a><a href="/services">Services</a><a href="/privacy">Privacy</a></div>
+<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
+  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
+      <div style="display:flex;gap:12px;">
+        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
+        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
+        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
+        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
+        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
+        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
+        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
+        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
+        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+      </div>
+    </div>
+  </div>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
+      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
+      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
+    </div>
+  </div>
 </footer>
+<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
 
 <div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
   <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
@@ -320,12 +381,12 @@ function showResult() {
     tier = 'Starter';
     range = '$1,200 to $1,800';
     note = 'Template build on Squarespace or Webflow. Clean, professional, and fast to launch. Best for businesses that need a solid online presence without a heavy custom build.';
-    includes = ['Template build (Squarespace, Wix, or Webflow)','Your branding applied — colors, fonts, logo','Up to 5 pages, mobile-optimized','Contact form and basic SEO setup','Google Analytics installation','Launch walkthrough video'];
+    includes = ['Template build (Squarespace, Wix, or Webflow)','Your branding applied colors, fonts, logo','Up to 5 pages, mobile-optimized','Contact form and basic SEO setup','Google Analytics installation','Launch walkthrough video'];
   } else if(complexity <= 3) {
     tier = 'Growth';
     range = '$2,800 to $4,000';
     note = 'Custom HTML/CSS design built to rank and convert. For businesses ready to compete online with a site that performs and looks different from the template crowd.';
-    includes = ['Custom HTML/CSS design — no templates','Mobile-first, performance-optimized build','On-page SEO implementation','Google Analytics 4 and Search Console setup','Google Business Profile setup','2 revision rounds','30-day post-launch support'];
+    includes = ['Custom HTML/CSS design no templates','Mobile-first, performance-optimized build','On-page SEO implementation','Google Analytics 4 and Search Console setup','Google Business Profile setup','2 revision rounds','30-day post-launch support'];
   } else {
     tier = 'Studio';
     range = '$5,500+';
@@ -352,6 +413,13 @@ function showResult() {
   if(typeof gtag==='function'){gtag('event','pricing_estimator_complete',{event_category:'tools',event_label:tier,value:complexity});}
 }
 
+function capturePeEmail(){
+  var email=document.getElementById('peEmail').value;
+  if(!email||!email.includes('@'))return;
+  document.getElementById('peEmailForm').style.display='none';
+  document.getElementById('peEmailThanks').style.display='block';
+  if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'pricing_estimator'});}
+}
 function restart() {
   answers = {};
   currentStep = 1;

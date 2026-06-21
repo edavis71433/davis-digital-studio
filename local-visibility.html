@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- DDS v2.6 20260621-1558 -->
+<!-- DDS v2.7 20260621-1619 -->
 <!-- DDS v2.5 tool: local-visibility -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Local Visibility Score | Davis Digital Studio</title>
-<meta name="description" content="Check how visible your business is in local Google search. GBP completeness, local pack presence, review count, and your top opportunity — free and instant.">
+<meta name="description" content="Check how visible your business is in local Google search. GBP completeness, local pack presence, review count, and your top opportunity free and instant.">
 <link rel="canonical" href="https://www.davisdigitalstudio.com/local-visibility">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
@@ -92,6 +92,9 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .site-footer a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:16px;}
 @media(max-width:600px){.nav{padding:0 20px;}.nav-links .navlink{display:none;}.fields-row{grid-template-columns:1fr;}.grade-card{flex-direction:column;text-align:center;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Free Local Visibility Score","url":"https://www.davisdigitalstudio.com/local-visibility","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Check how visible your business is in local Google search. Free instant score.","provider":{"@type":"Person","name":"Eric Davis","url":"https://www.davisdigitalstudio.com"}}
+</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -109,7 +112,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 <div class="hero" role="banner">
   <div class="hero-tag">Free Tool</div>
   <h1>How visible is your business<br>in <em>local search?</em></h1>
-  <p class="hero-sub">Enter your business name and city. I will check your Google Business Profile, local pack presence, and give you your single biggest opportunity — free and instant.</p>
+  <p class="hero-sub">Enter your business name and city. I will check your Google Business Profile, local pack presence, and give you your single biggest opportunity. Free and instant.</p>
 </div>
 
 <main id="main-content">
@@ -145,7 +148,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
       <input id="bizWebsite" type="url" placeholder="https://yourbusiness.com">
     </div>
     <div class="field">
-      <label for="bizEmail">Your email — I will send you the full report</label>
+      <label for="bizEmail">Your email (results sent here)</label>
       <input id="bizEmail" type="email" placeholder="you@yourbusiness.com">
     </div>
     <button class="run-btn" onclick="runCheck()">Check my local visibility</button>
@@ -162,11 +165,21 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <div class="grade-card" id="gradeCard"></div>
     <div class="checks-list" id="checksList"></div>
     <div class="top-opp" id="topOpp"></div>
+    
+    <div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;">
+      <div style="font-size:14px;font-weight:600;color:#1a1523;margin-bottom:6px;">Want a full report sent to your inbox?</div>
+      <div style="font-size:13px;color:#5e5270;margin-bottom:14px;">I will put together a more detailed local SEO analysis and email it to you personally.</div>
+      <div style="display:flex;gap:8px;max-width:400px;margin:0 auto;" id="lvEmailForm">
+        <input type="email" id="lvEmail" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;">
+        <button onclick="captureLvEmail()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Send it</button>
+      </div>
+      <div id="lvEmailThanks" style="display:none;font-size:13px;color:#16a34a;font-weight:600;margin-top:8px;">Got it. Check your inbox soon.</div>
+    </div>
     <div class="upsell">
       <h3>Want the full picture?</h3>
       <p>This is based on publicly available signals. The full Digital Health Check includes a manual Google Business Profile audit, local keyword rankings, competitor comparison, and a step-by-step fix list.</p>
       <div class="upsell-btns">
-        <a href="/audit" class="btn-white">See audit options — from $99</a>
+        <a href="/audit" class="btn-white">See audit options from $99</a>
         <a href="/contact" class="btn-ghost">Book a free call</a>
       </div>
     </div>
@@ -176,10 +189,58 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo">
-  <p>© <span id="footer-year">2026</span> Davis Digital Studio · Los Angeles, CA</p>
-  <div><a href="/tools">All Tools</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>
+<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
+  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
+      <div style="display:flex;gap:12px;">
+        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
+        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
+        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
+        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
+        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
+        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
+        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
+        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
+        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+      </div>
+    </div>
+  </div>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
+      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
+      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
+    </div>
+  </div>
 </footer>
+<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
 
 <div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
   <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
@@ -309,6 +370,13 @@ function renderResults() {
   document.getElementById('resultsState').style.display = 'block';
 }
 
+function captureLvEmail(){
+  var email=document.getElementById('lvEmail').value;
+  if(!email||!email.includes('@'))return;
+  document.getElementById('lvEmailForm').style.display='none';
+  document.getElementById('lvEmailThanks').style.display='block';
+  if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'local_visibility'});}
+}
 function getKeyword(type) {
   var map = {restaurant:'restaurant',retail:'boutique',service:'plumber',health:'gym',salon:'salon',professional:'lawyer',creative:'photographer',other:'business'};
   return map[type] || 'business';

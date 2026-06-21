@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- DDS v2.6 20260621-1558 -->
+<!-- DDS v2.7 20260621-1619 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accessibility Statement. Davis Digital Studio</title>
+<title>Accessibility Statement | Davis Digital Studio</title>
 <meta name="description" content="Davis Digital Studio's commitment to web accessibility and WCAG 2.1 AA compliance. Request accommodations or report an accessibility issue.">
 <link rel="canonical" href="https://www.davisdigitalstudio.com/accessibility">
 <link rel="manifest" href="/manifest.json">
@@ -58,6 +58,16 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
 .site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
 @media (max-width: 900px) { .nav { padding: 0 20px; } .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
+
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.bar{width:22px;height:2px;background:#1a1523;border-radius:2px;transition:all 0.2s;}
+.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid rgba(91,63,160,0.1);padding:16px 24px;z-index:9998;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
+.nav-mob.open{display:flex;}
+.nav-mob a{font-size:15px;font-weight:500;color:#1a1523;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
+.nav-mob a:last-child{border-bottom:none;}
+.mob-cta{background:#5b3fa0;color:#fff !important;border-radius:100px;text-align:center;padding:12px !important;margin-top:8px;font-weight:600 !important;}
+@media(max-width:900px){.nav-links{display:none;}.nav-ham{display:flex;}}
+
 </style>
 </head>
 <body>
@@ -66,8 +76,37 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 
 <nav class="nav" role="navigation" aria-label="Site navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-  <a href="/" class="nav-back">← Back to home</a>
+    <div class="nav-links">
+    <a href="/" class="navlink">Home</a>
+    <a href="/about" class="navlink">About</a>
+    <a href="/services" class="navlink">Services</a>
+    <a href="/work" class="navlink">Work</a>
+    <a href="/tools" class="navlink">Free Tools</a>
+    <a href="/portal" class="navlink">Client Login</a>
+    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
+    <a href="/audit" style="background:#5b3fa0;color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:100px;text-decoration:none;margin-left:6px;">Audits from $99</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
 </nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+  <a href="/services">Services</a>
+  <a href="/work">Work</a>
+  <a href="/tools">Free Tools</a>
+  <a href="/report-card">Free Report Card</a>
+  <a href="/audit">Audits from $99</a>
+  <a href="/contact" class="mob-cta">Book a free call</a>
+</div>
+<script>
+document.getElementById('navHam').addEventListener('click',function(){
+  var mob=document.getElementById('navMob');
+  var open=mob.classList.toggle('open');
+  this.setAttribute('aria-expanded',open);
+});
+</script>
 
 <div class="hero" role="banner">
   <h1>Accessibility <em>Statement</em></h1>
@@ -139,15 +178,58 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo">
-  <p>© 2026 Davis Digital Studio · Los Angeles, CA</p>
-  <div class="footer-links">
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/accessibility">Accessibility</a>
-    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
+  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
+      <div style="display:flex;gap:12px;">
+        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
+        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
+        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
+        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
+        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
+        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
+        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
+        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
+        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+      </div>
+    </div>
+  </div>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
+      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
+      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
+    </div>
   </div>
 </footer>
+<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
 
 <!-- Cookie Consent Banner -->
 <div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
