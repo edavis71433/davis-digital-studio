@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.1 20260621-1517 -->
+<!-- DDS v2.5 20260621-1541 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +9,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
 <meta name="theme-color" content="#5b3fa0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
 <style>
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -525,6 +527,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 </style>
 
   <!-- Open Graph -->
+  <meta property="og:locale" content="en_US">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Davis Digital Studio">
   <meta property="og:title" content="About Eric Davis | Web Designer & SEO Strategist. Remote, Nationwide">
@@ -534,6 +537,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
+  <meta name="twitter:site" content="@davisdigitalstudio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="About Eric Davis | Web Designer & SEO Strategist. Remote, Nationwide">
   <meta name="twitter:description" content="Eric Davis helps small business owners across the US get found online and grow. 9+ years managing enterprise digital properties at Kaiser Permanente. Trusted partner, not a vendor.">
@@ -661,7 +665,7 @@ if (!sessionStorage.getItem('exit_shown')) {
     <a href="/portal" class="navlink" style="font-size:13px;">Client Login</a>
     <a href="/tools" class="navlink" style="font-size:13px;">Free Tools</a>
     <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">Free Report Card</a>
-    <a href="/audit" class="nav-cta" style="margin-left:4px;">Get an Audit</a>
+    <a href="/audit" class="nav-cta" style="margin-left:6px;background:#5b3fa0;color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:100px;text-decoration:none;">Audits from $99</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -818,25 +822,53 @@ if (!sessionStorage.getItem('exit_shown')) {
 </div>
 
 <footer class="site-footer" role="contentinfo">
-  <div style="display:flex;flex-direction:column;gap:6px;">
-    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
-    <div class="footer-links" style="margin-top:4px;">
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/services">Services</a>
-      <a href="/work">Work</a>
-      <a href="/contact">Contact</a>
+  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
+      <div style="display:flex;gap:12px;">
+        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
+        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Monthly Retainer</a>
+        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
+        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
+        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
+        <a href="/audit#free-audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Site Score</a>
+        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
+        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+      </div>
     </div>
   </div>
-  <div class="footer-links">
-    <a href="/report-card" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
-    <a href="/audit" style="color:var(--pxl) !important;">Audits</a>
-    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
-    <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
-    <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
-    <a href="/accessibility" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Accessibility</a>
-    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">Client Login</a>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
+      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
+      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
+    </div>
   </div>
 </footer>
 <script>

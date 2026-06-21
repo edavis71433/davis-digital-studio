@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v2.1 20260621-1517 -->
+<!-- DDS v2.5 20260621-1541 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +9,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%255b3fa0'/><text y='.85em' x='50%25' text-anchor='middle' font-size='72' font-family='Georgia,serif' fill='white'>D</text></svg>">
 <meta name="theme-color" content="#5b3fa0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
 <style>
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1316,6 +1318,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 </style>
 
   <!-- Open Graph -->
+  <meta property="og:locale" content="en_US">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Davis Digital Studio">
   <meta property="og:title" content="Davis Digital Studio. Web Design & SEO Strategy for Small Businesses | Nationwide">
@@ -1325,6 +1328,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
+  <meta name="twitter:site" content="@davisdigitalstudio">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Davis Digital Studio. Web Design & SEO Strategy for Small Businesses | Nationwide">
   <meta name="twitter:description" content="Web design and SEO strategy for small business owners across the US. Get found on Google, convert more customers, and grow revenue online. Free Digital Report Card. no cost, no signup.">
@@ -1568,6 +1572,9 @@ if (!sessionStorage.getItem('exit_shown')) {
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DavisDigital">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LocalBusiness","name":"Davis Digital Studio","url":"https://www.davisdigitalstudio.com","email":"eric@davisdigitalstudio.com","founder":{"@type":"Person","name":"Eric Davis"},"description":"Web design and SEO for small businesses nationwide. Free site audits, digital health checks, and full website redesigns from Los Angeles.","areaServed":{"@type":"Country","name":"United States"},"priceRange":"$$","serviceType":["Web Design","SEO","Website Audit","Digital Strategy"]}
+</script>
 </head>
 <body>
 <nav class="nav" role="navigation" aria-label="Main navigation">
@@ -1576,8 +1583,8 @@ if (!sessionStorage.getItem('exit_shown')) {
     <a href="/" class="active">Home</a><a href="/about" class="">About</a><a href="/services" class="">Services</a><a href="/work" class="">Work</a>
     <a href="/portal" class="navlink" style="font-size:13px;">Client Login</a>
     <a href="/tools" class="navlink" style="font-size:13px;">Free Tools</a>
-    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">Free Report Card</a>
-    <a href="/audit" class="nav-cta" style="margin-left:4px;">Get an Audit</a>
+    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
+    <a href="/audit" class="nav-cta" style="margin-left:6px;background:#5b3fa0;color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:100px;text-decoration:none;">Audits from $99</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -1588,8 +1595,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 <a href="/about" class="">About</a>
 <a href="/services" class="">Services</a>
 <a href="/work" class="">Work</a>
+  <a href="/tools" class="mlink">Free Tools</a>
   <a href="/report-card" class="mlink">Free Report Card</a>
-  <a href="/audit" class="mlink" style="background:var(--pxxxl);color:var(--p);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg> Digital Health Check</a>
+  <a href="/audit" class="mlink" style="background:var(--pxxxl);color:var(--p);">Get an Audit</a>
+  <a href="/roi-calculator" class="mlink">ROI Calculator</a>
   <a href="/contact" class="mob-cta">Let's talk</a>
 </div>
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
@@ -1609,8 +1618,8 @@ if (!sessionStorage.getItem('exit_shown')) {
     </div>
 
     <!-- HEADLINE -->
-    <h1>Is your business<br><em>invisible</em> online?</h1>
-    <p class="hero-sub">Most small businesses are losing customers to websites that can't be found. I'll show you exactly what's holding your business back online. then fix it. Remote-friendly. Available nationwide.</p>
+    <h1>I build websites that get<br>small businesses <em>found.</em></h1>
+    <p class="hero-sub">Web design and SEO for small businesses across the US. I'll show you exactly what's holding your business back online, then fix it. Remote-friendly. Projects from $1,200.</p>
 
     <!-- FREE REPORT CARD. PRIMARY CTA -->
     <a href="/report-card" class="hero-rc-cta">
@@ -1633,7 +1642,7 @@ if (!sessionStorage.getItem('exit_shown')) {
       <div class="hero-secondary-links">
         <a href="/contact" class="hero-sec-link">Book a free discovery call &rarr;</a>
         <span class="hero-sec-divider">·</span>
-        <a href="/audit" class="hero-sec-link">See all audit options →</a>
+        <a href="/audit" class="hero-sec-link">See audit tiers →</a>
         <span class="hero-sec-divider">·</span>
         <a href="/work" class="hero-sec-link">See my work &rarr;</a>
       </div>
@@ -1671,6 +1680,35 @@ if (!sessionStorage.getItem('exit_shown')) {
       </div>
     </div>
   </div>
+
+<!-- FREE OFFERINGS CALLOUT STRIP -->
+<section style="background:#fff;border-top:1px solid rgba(91,63,160,0.08);border-bottom:1px solid rgba(91,63,160,0.08);padding:20px 52px;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">What's free</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a href="/audit#free-audit" style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);color:#5b3fa0;font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Free Site Score
+      </a>
+      <a href="/report-card" style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);color:#5b3fa0;font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Free Report Card
+      </a>
+      <a href="/roi-calculator" style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);color:#5b3fa0;font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        ROI Calculator
+      </a>
+      <a href="/tools" style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);color:#5b3fa0;font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">
+        See all free tools →
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:12px;color:var(--muted);">Paid audits from</span>
+      <a href="/audit" style="display:inline-flex;align-items:center;gap:6px;background:#5b3fa0;color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:100px;text-decoration:none;">$99 →</a>
+    </div>
+  </div>
+</section>
+
 </section>
 
 
@@ -1748,6 +1786,7 @@ if (!sessionStorage.getItem('exit_shown')) {
 <section class="dhc-band" aria-labelledby="dhc-heading">
   <div class="dhc-inner">
     <div class="dhc-left reveal">
+      <div class="dhc-tag" style="background:rgba(91,63,160,0.15);color:#c4aee8;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;display:inline-block;margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;">Audits from $99</div>
       <div class="dhc-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Most popular · from $99</div>
       <h2 id="dhc-heading">The full picture.<br><em>In 5 days.</em></h2>
       <p>The free Report Card gives you the snapshot. The Digital Health Check gives you everything. a 6-page branded report with Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list you can act on immediately.</p>
@@ -1899,25 +1938,53 @@ if (!sessionStorage.getItem('exit_shown')) {
 
 <a href="/contact" class="float-cta">Let's talk</a>
 <footer class="site-footer" role="contentinfo">
-  <div style="display:flex;flex-direction:column;gap:6px;">
-    <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
-    <div class="footer-links" style="margin-top:4px;">
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/services">Services</a>
-      <a href="/work">Work</a>
-      <a href="/contact">Contact</a>
+  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
+      <div style="display:flex;gap:12px;">
+        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
+        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
+        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Monthly Retainer</a>
+        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
+        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
+        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
+        <a href="/audit#free-audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Site Score</a>
+        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
+        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+      </div>
     </div>
   </div>
-  <div class="footer-links">
-    <a href="/report-card" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
-    <a href="/audit" style="color:var(--pxl) !important;">Audits</a>
-    <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
-    <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
-    <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
-    <a href="/accessibility" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Accessibility</a>
-    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">Client Login</a>
+  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
+      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
+      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
+    </div>
   </div>
 </footer>
 <script>
