@@ -604,25 +604,26 @@ if (!sessionStorage.getItem('exit_shown')) {
 </head>
 <body>
 <nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
-    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="active">Services</a><a href="work.html" class="">Work</a>
-    <a href="portal.html" class="navlink" style="font-size:13px;">Client Login</a>
-    <a href="report-card.html" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">✦ Free Report Card</a>
-    <a href="audit.html" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audit $299</a><a href="contact.html" class="nav-cta">Let's talk</a>
+    <a href="/" class="">Home</a><a href="/about" class="">About</a><a href="/services" class="active">Services</a><a href="/work" class="">Work</a>
+    <a href="/portal" class="navlink" style="font-size:13px;">Client Login</a>
+    <a href="/tools" class="navlink" style="font-size:13px;">Free Tools</a>
+    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">Free Report Card</a>
+    <a href="/audit" class="nav-cta" style="margin-left:4px;">Get an Audit</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
   </button>
 </nav>
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="index.html" class="">Home</a>
-<a href="about.html" class="">About</a>
-<a href="services.html" class="active">Services</a>
-<a href="work.html" class="">Work</a>
-  <a href="report-card.html" class="mlink">📊 Free Report Card</a>
-  <a href="audit.html" class="mlink" style="background:var(--pxxxl);color:var(--p);">🔍 Digital Health Check — $299</a>
-  <a href="contact.html" class="mob-cta">Let's talk</a>
+  <a href="/" class="">Home</a>
+<a href="/about" class="">About</a>
+<a href="/services" class="active">Services</a>
+<a href="/work" class="">Work</a>
+  <a href="/report-card" class="mlink">Free Report Card</a>
+  <a href="/audit" class="mlink" style="background:var(--pxxxl);color:var(--p);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg> Digital Health Check</a>
+  <a href="/contact" class="mob-cta">Let's talk</a>
 </div>
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
 <main id="main-content">
@@ -631,7 +632,7 @@ if (!sessionStorage.getItem('exit_shown')) {
   <div class="page-hero-inner">
     <span class="label">Services</span>
     <h1>What we build<br><em>together.</em></h1>
-    <p>Every project is different. These are the core services — built around what independent businesses actually need to grow online.</p>
+    <p>Every project is different. These are the core services. built around what independent businesses actually need to grow online.</p>
   </div>
 </section>
 
@@ -640,19 +641,19 @@ if (!sessionStorage.getItem('exit_shown')) {
     <div class="section-header reveal">
       <span class="label">Packages</span>
       <h2>Priced for <em>real businesses.</em></h2>
-      <p>Transparent pricing, no surprises. Every engagement includes strategy, not just execution. Payment plans available — 50% upfront, 50% at launch.</p>
+      <p>Transparent pricing, no surprises. Every engagement includes strategy, not just execution. Payment plans available. 50% upfront, 50% at launch.</p>
     </div>
 
     <div class="svc-grid">
 
       <div class="svc-card reveal" style="transition-delay:0s">
         <div>
-          <div class="svc-icon">🚀</div>
+          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-5-5-10-5-10z"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M7 17l-2 3M17 17l2 3"/></svg></div>
           <h3>Starter</h3>
           <p>Get online fast with a polished template build. Best for new businesses that need a clean, professional presence right away.</p>
           <ul class="svc-includes">
             <li>Template build (Squarespace, Wix, or Webflow)</li>
-            <li>Your branding applied — colors, fonts, logo</li>
+            <li>Your branding applied. colors, fonts, logo</li>
             <li>Up to 5 pages, mobile-optimized</li>
             <li>Contact form and basic SEO setup</li>
             <li>Google Analytics installation</li>
@@ -663,17 +664,17 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div>
           <div class="svc-price" style="color:var(--p);">$1,200–$1,800</div>
           <div class="svc-price-note">Template platform · client manages after launch</div>
-          <a href="contact.html" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'starter_package'});}">Get started &rarr;</a>
+          <a href="/contact" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'starter_package'});}">Get started &rarr;</a>
         </div>
       </div>
 
       <div class="svc-card featured reveal" style="transition-delay:0.1s">
         <div>
-          <div class="svc-icon">📈</div>
+          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l4-4 4 4 4-5 4-3"/><path d="M3 7h18"/></svg></div>
           <h3>Growth</h3>
           <p>A custom-designed, hand-coded site built to rank and convert. For businesses ready to compete online.</p>
           <ul class="svc-includes">
-            <li>Custom HTML/CSS design — no templates</li>
+            <li>Custom HTML/CSS design. no templates</li>
             <li>Mobile-first, performance-optimized build</li>
             <li>On-page SEO implementation</li>
             <li>Google Analytics 4 and Search Console setup</li>
@@ -686,15 +687,15 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div>
           <div class="svc-price">$2,800–$4,000</div>
           <div class="svc-price-note">Custom code · ongoing updates need a developer</div>
-          <a href="contact.html" class="btn-white" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'growth_package'});}">Get started &rarr;</a>
+          <a href="/contact" class="btn-white" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'growth_package'});}">Get started &rarr;</a>
         </div>
       </div>
 
       <div class="svc-card reveal" style="transition-delay:0.2s">
         <div>
-          <div class="svc-icon">🏛️</div>
+          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M3 10h18M5 10V21M19 10V21M12 3L3 10h18L12 3z"/></svg></div>
           <h3>Studio</h3>
-          <p>The full package. Strategy, design, copy, brand kit, and a client portal — everything your business needs to launch and grow.</p>
+          <p>The full package. Strategy, design, copy, brand kit, and a client portal. everything your business needs to launch and grow.</p>
           <ul class="svc-includes">
             <li>Everything in Growth</li>
             <li>Brand identity (logo, colors, typography)</li>
@@ -708,7 +709,7 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div>
           <div class="svc-price" style="color:var(--p);">$5,500+</div>
           <div class="svc-price-note">Custom scope · pricing confirmed after discovery call</div>
-          <a href="contact.html" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'studio_package'});}">Get started &rarr;</a>
+          <a href="/contact" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'studio_package'});}">Get started &rarr;</a>
         </div>
       </div>
 
@@ -817,7 +818,7 @@ if (!sessionStorage.getItem('exit_shown')) {
 
 <section class="cta-band">
   <h2>Not sure what<br>you <em>need?</em></h2>
-  <p>Let's talk. I'll tell you honestly what makes sense for your business — and what doesn't.</p>
+  <p>Let's talk. I'll tell you honestly what makes sense for your business. and what doesn't.</p>
   <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" class="btn-white">Book a free discovery call &rarr;</a>
 </section>
 
@@ -827,10 +828,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 <div class="exit-overlay" id="exitOverlay">
   <div class="exit-card">
     <button class="exit-close" onclick="closeExit()">×</button>
-    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
-    <h3>Before you go — <em>it's free.</em></h3>
-    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
-    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <div style="font-size:36px;margin-bottom:12px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+    <h3>Before you go. <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity. delivered to your inbox. Takes 30 seconds.</p>
+    <a href="/report-card" class="exit-cta">Get my free Digital Report Card →</a>
     <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
   </div>
 </div>
@@ -839,22 +840,22 @@ if (!sessionStorage.getItem('exit_shown')) {
   <div style="display:flex;flex-direction:column;gap:6px;">
     <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
     <div class="footer-links" style="margin-top:4px;">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="services.html">Services</a>
-      <a href="work.html">Work</a>
-      <a href="contact.html">Contact</a>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/services">Services</a>
+      <a href="/work">Work</a>
+      <a href="/contact">Contact</a>
     </div>
   </div>
   <div class="footer-links">
-    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
-    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="/report-card" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="/audit" style="color:var(--pxl) !important;">Audits</a>
     <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
     <a href="mailto:eric@davisdigitalstudio.com">Email</a>
     <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
     <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
     <a href="/accessibility" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Accessibility</a>
-    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">Client Login</a>
   </div>
 </footer>
 <script>

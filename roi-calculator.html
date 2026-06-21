@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website ROI Calculator. Davis Digital Studio</title>
+<meta name="description" content="Find out how much a better website could be worth to your small business. Free ROI calculator from Davis Digital Studio.">
+<link rel="canonical" href="https://www.davisdigitalstudio.com/roi-calculator">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+<meta name="theme-color" content="#5b3fa0">
+<meta property="og:title" content="Website ROI Calculator. Davis Digital Studio">
+<meta property="og:description" content="Find out how much a better website could be worth to your business. Free, instant, no signup.">
+<meta property="og:url" content="https://www.davisdigitalstudio.com/roi-calculator">
+<meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EQYY0DL8JL',{anonymize_ip:true});</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;padding-top:68px;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pdark:#1e1338;--ink:#1a1523;--muted:#5e5270;--serif:'DM Serif Display',Georgia,serif;}
+.skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
+.skip-link:focus{left:8px;}
+*:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
+:focus:not(:focus-visible){outline:none;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);}
+.nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
+.nav-logo span{color:#5b3fa0;}
+.nav-back{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;}
+.nav-back:hover{color:var(--p);}
+.hero{background:var(--pdark);padding:72px 24px 60px;text-align:center;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;color:#fff;letter-spacing:-1px;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--pxl);}
+.hero p{font-size:16px;color:rgba(255,255,255,0.55);max-width:520px;margin:0 auto;line-height:1.7;}
+.wrap{max-width:760px;margin:0 auto;padding:56px 24px 80px;}
+.calc-card{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:20px;padding:40px;margin-bottom:32px;}
+.label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;display:block;letter-spacing:0.2px;}
+.sublabel{font-size:12px;color:var(--muted);margin-bottom:12px;display:block;}
+.slider-row{margin-bottom:28px;}
+input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;margin-bottom:6px;}
+.slider-val{font-size:15px;font-weight:600;color:var(--p);}
+.results{background:var(--pdark);border-radius:20px;padding:36px;color:#fff;margin-bottom:32px;}
+.results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;}
+.result-box{background:rgba(255,255,255,0.07);border-radius:12px;padding:18px;text-align:center;}
+.result-num{font-family:var(--serif);font-size:clamp(22px,4vw,32px);font-weight:400;color:#fff;line-height:1;}
+.result-num.highlight{color:var(--pxl);}
+.result-label{font-size:11px;color:rgba(255,255,255,0.45);margin-top:6px;line-height:1.4;}
+.roi-bar{background:rgba(255,255,255,0.08);border-radius:100px;height:10px;margin:20px 0 8px;overflow:hidden;}
+.roi-fill{height:100%;border-radius:100px;background:var(--p);transition:width 0.4s ease;}
+.roi-labels{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.4);}
+.cta-row{text-align:center;margin-top:24px;}
+.btn-main{display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:14px 32px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
+.btn-main:hover{opacity:0.88;}
+.btn-ghost{display:inline-block;background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:13px 28px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.2);text-decoration:none;margin-left:12px;transition:background 0.15s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.08);}
+.assumptions{background:rgba(91,63,160,0.05);border:1px solid rgba(91,63,160,0.12);border-radius:12px;padding:20px 24px;margin-bottom:32px;}
+.assumptions h3{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px;}
+.assumptions ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.assumptions li{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:6px;}
+.assumptions li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--p);flex-shrink:0;margin-top:5px;}
+.disclaimer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6;margin-top:8px;}
+.site-footer{padding:28px 52px;background:var(--pdark);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.site-footer p{font-size:12px;color:rgba(255,255,255,0.35);}
+.site-footer .footer-links a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:20px;transition:color 0.15s;}
+.site-footer .footer-links a:hover{color:rgba(255,255,255,0.8);}
+@media(max-width:700px){.nav{padding:0 20px;}.results-grid{grid-template-columns:1fr 1fr;}.calc-card{padding:24px;}.results{padding:24px;}.assumptions ul{grid-template-columns:1fr;}.btn-ghost{margin-left:0;margin-top:10px;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}.site-footer .footer-links a{margin-left:12px;}}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<nav class="nav" role="navigation" aria-label="Site navigation">
+  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <a href="/" class="nav-back">← Back to home</a>
+</nav>
+
+<div class="hero" role="banner">
+  <h1>What's a better website <em>worth to you?</em></h1>
+  <p>Adjust the sliders to see the potential return on a web design investment. based on your actual business numbers.</p>
+</div>
+
+<main id="main-content">
+<div class="wrap">
+
+  <div class="calc-card">
+    <div class="slider-row">
+      <label class="label" for="revenue">Monthly revenue</label>
+      <span class="sublabel">Your average monthly revenue right now</span>
+      <input type="range" id="revenue" min="2000" max="200000" step="1000" value="15000" oninput="calc()">
+      <div class="slider-val" id="revenue-val">$15,000 / mo</div>
+    </div>
+
+    <div class="slider-row">
+      <label class="label" for="web-pct">Percentage of customers from online</label>
+      <span class="sublabel">How much of your business comes from Google, social, or your website?</span>
+      <input type="range" id="web-pct" min="5" max="90" step="5" value="30" oninput="calc()">
+      <div class="slider-val" id="web-pct-val">30%</div>
+    </div>
+
+    <div class="slider-row">
+      <label class="label" for="improvement">Expected improvement with a better site</label>
+      <span class="sublabel">Studies show a well-optimized site with strong SEO increases online-sourced revenue by 15–40%</span>
+      <input type="range" id="improvement" min="10" max="50" step="5" value="25" oninput="calc()">
+      <div class="slider-val" id="improvement-val">25% increase</div>
+    </div>
+
+    <div class="slider-row">
+      <label class="label" for="package">Investment level</label>
+      <span class="sublabel">Which package are you considering?</span>
+      <input type="range" id="package" min="1200" max="5500" step="100" value="2800" oninput="calc()">
+      <div class="slider-val" id="package-val">$2,800 (Growth)</div>
+    </div>
+  </div>
+
+  <div class="results" role="region" aria-label="ROI calculation results">
+    <div class="results-grid">
+      <div class="result-box">
+        <div class="result-num" id="res-monthly">$1,125</div>
+        <div class="result-label">Additional revenue per month</div>
+      </div>
+      <div class="result-box">
+        <div class="result-num" id="res-annual">$13,500</div>
+        <div class="result-label">Additional revenue per year</div>
+      </div>
+      <div class="result-box">
+        <div class="result-num highlight" id="res-roi">382%</div>
+        <div class="result-label">First-year ROI</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:6px;font-size:13px;color:rgba(255,255,255,0.5);">Investment vs. annual return</div>
+    <div class="roi-bar">
+      <div class="roi-fill" id="roi-fill" style="width:79%;"></div>
+    </div>
+    <div class="roi-labels">
+      <span id="roi-left-label">Investment: $2,800</span>
+      <span id="res-payback">Pays for itself in 2.5 months</span>
+    </div>
+
+    <div class="cta-row">
+      <a href="/audit" class="btn-main">Get a full audit →</a>
+      <a href="/contact" class="btn-ghost">Book a free call</a>
+    </div>
+  </div>
+
+  <div class="assumptions">
+    <h3>How this is calculated</h3>
+    <ul>
+      <li>Online revenue = monthly revenue × % from online sources</li>
+      <li>Monthly gain = online revenue × improvement percentage</li>
+      <li>Annual gain = monthly gain × 12 months</li>
+      <li>ROI = (annual gain − investment) ÷ investment × 100</li>
+      <li>Payback period = investment ÷ monthly gain</li>
+      <li>Based on industry averages. actual results vary by business</li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">This calculator provides estimates for illustrative purposes only. Results are not guaranteed. Actual revenue impact depends on many factors including market conditions, business type, competition, and implementation quality. Davis Digital Studio does not guarantee specific revenue outcomes from web design or SEO services.</p>
+
+</div>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <p>© 2026 Davis Digital Studio · Los Angeles, CA</p>
+  <div class="footer-links">
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/accessibility">Accessibility</a>
+    <a href="mailto:eric@davisdigitalstudio.com">Email</a>
+  </div>
+</footer>
+
+<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
+  <div style="display:flex;gap:10px;flex-shrink:0;">
+    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
+    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
+  </div>
+</div>
+
+<script>
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function calc(){
+  var rev = parseInt(document.getElementById('revenue').value);
+  var webPct = parseInt(document.getElementById('web-pct').value)/100;
+  var imp = parseInt(document.getElementById('improvement').value)/100;
+  var inv = parseInt(document.getElementById('package').value);
+
+  document.getElementById('revenue-val').textContent = fmt(rev)+' / mo';
+  document.getElementById('web-pct-val').textContent = Math.round(webPct*100)+'%';
+  document.getElementById('improvement-val').textContent = Math.round(imp*100)+'% increase';
+
+  var pkg = inv;
+  var label = pkg <= 1800 ? 'Starter' : pkg <= 4000 ? 'Growth' : 'Studio';
+  document.getElementById('package-val').textContent = fmt(pkg)+' ('+label+')';
+
+  var onlineRev = rev * webPct;
+  var monthlyGain = onlineRev * imp;
+  var annualGain = monthlyGain * 12;
+  var roi = ((annualGain - inv) / inv) * 100;
+  var payback = inv / monthlyGain;
+
+  document.getElementById('res-monthly').textContent = fmt(monthlyGain);
+  document.getElementById('res-annual').textContent = fmt(annualGain);
+  document.getElementById('res-roi').textContent = Math.round(roi)+'%';
+  document.getElementById('roi-left-label').textContent = 'Investment: '+fmt(inv);
+
+  var paybackText;
+  if(payback < 1) paybackText = 'Pays for itself in under a month';
+  else if(payback < 2) paybackText = 'Pays for itself in about '+Math.round(payback*10)/10+' month';
+  else paybackText = 'Pays for itself in '+Math.round(payback*10)/10+' months';
+  document.getElementById('res-payback').textContent = paybackText;
+
+  var barPct = Math.min(100, (annualGain / (inv * 2)) * 100);
+  document.getElementById('roi-fill').style.width = barPct+'%';
+
+  if(typeof gtag==='function'){
+    gtag('event','roi_calculator_used',{event_category:'engagement',event_label:label,value:Math.round(annualGain)});
+  }
+}
+
+(function(){
+  var consent=localStorage.getItem('cookie_consent');
+  if(!consent){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}
+  if(consent==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}
+})();
+function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
+function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
+
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+calc();
+</script>
+</body>
+</html>

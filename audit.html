@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Digital Health Check — $299 Website Audit | Davis Digital Studio</title>
-<meta name="description" content="Get a complete audit of your website's visibility, performance, and missed opportunities. 6-page branded report delivered in 5 business days for $299.">
+<title>Website Audits & Digital Health Checks | Davis Digital Studio</title>
+<meta name="description" content="Website audits from $99. Free site score, Digital Health Check, Competitive Intelligence Audit, and full Digital Strategy. Davis Digital Studio.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
 <meta name="theme-color" content="#5b3fa0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,6 +36,30 @@ a { color: inherit; }
 .site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
 @media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
 
+
+
+/* ===== AUDIT TIERS ===== */
+.tiers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.tier-card { background: #fff; border: 1px solid rgba(91,63,160,0.12); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; position: relative; }
+.tier-featured { border: 2px solid #5b3fa0; }
+.tier-popular-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: #5b3fa0; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 14px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.5px; }
+.tier-badge { display: inline-block; background: rgba(91,63,160,0.08); color: var(--p); font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 100px; margin-bottom: 12px; }
+.tier-badge.free { background: rgba(26,126,73,0.1); color: #1a7e49; }
+.tier-badge.featured { background: #5b3fa0; color: #fff; }
+.tier-name { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+.tier-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.tier-price-wrap { padding: 14px 0; border-top: 1px solid rgba(91,63,160,0.08); border-bottom: 1px solid rgba(91,63,160,0.08); margin-bottom: 16px; }
+.tier-price { font-family: var(--serif); font-size: 32px; font-weight: 400; color: var(--ink); }
+.tier-cadence { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.tier-includes { list-style: none; flex: 1; margin-bottom: 20px; }
+.tier-includes li { font-size: 13px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid rgba(91,63,160,0.06); display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.tier-includes li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--p); flex-shrink: 0; margin-top: 5px; }
+.tier-includes li:last-child { border-bottom: none; }
+.tier-cta { display: block; text-align: center; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 12px 20px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s; margin-top: auto; }
+.tier-cta:hover { opacity: 0.88; }
+.tier-cta-ghost { background: transparent; color: var(--p); border: 1.5px solid var(--pxl); }
+.tier-cta-ghost:hover { background: var(--pxxxl); opacity: 1; }
+@media (max-width: 900px) { .tiers-grid { grid-template-columns: 1fr; } }
 
 /* ===== NAV ===== */
 .nav {
@@ -377,11 +400,11 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Davis Digital Studio">
-  <meta property="og:title" content="Digital Health Check — $299 Website Audit | Davis Digital Studio">
-  <meta property="og:description" content="Complete website audit covering Google visibility, mobile performance, SEO, and conversion paths. 6-page branded report in 5 business days for $299.">
+  <meta property="og:title" content="Digital Health Check Website Audit | Davis Digital Studio">
+  <meta property="og:description" content="Website audits starting at $99. Free instant site score, $499 Digital Health Check, $899 Competitive Intelligence, and $1,500 full Digital Strategy. Davis Digital Studio.">
   <meta property="og:url" content="https://www.davisdigitalstudio.com/audit">
   <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
-  <meta name="keywords" content="website audit small business, SEO audit, website health check, digital audit remote, website review $299, website performance audit">
+  <meta name="keywords" content="website audit small business, SEO audit, website health check, digital audit, website performance audit, free site score, digital health check">
   <link rel="canonical" href="https://www.davisdigitalstudio.com/audit">
   <script type="application/ld+json">
   {
@@ -389,7 +412,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
     "@type": "Product",
     "name": "Digital Health Check",
     "description": "A complete audit of your website covering Google visibility, mobile performance, SEO, and conversion paths. Delivered as a 6-page branded report in 5 business days.",
-    "offers": { "@type": "Offer", "price": "299", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+    "offers": [{"@type": "Offer", "name": "Starter Audit", "price": "99", "priceCurrency": "USD"}, {"@type": "Offer", "name": "Digital Health Check", "price": "499", "priceCurrency": "USD"}, {"@type": "Offer", "name": "Competitive Intelligence", "price": "899", "priceCurrency": "USD"}],
     "brand": { "@type": "Organization", "name": "Davis Digital Studio" }
   }
   
@@ -496,25 +519,26 @@ if (!sessionStorage.getItem('exit_shown')) {
 </head>
 <body>
 <nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="index.html" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
-    <a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="">Services</a><a href="work.html" class="">Work</a>
-    <a href="portal.html" class="navlink" style="font-size:13px;">Client Login</a>
-    <a href="report-card.html" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">✦ Free Report Card</a>
-    <a href="audit.html" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audit $299</a><a href="contact.html" class="nav-cta">Let's talk</a>
+    <a href="/" class="">Home</a><a href="/about" class="">About</a><a href="/services" class="">Services</a><a href="/work" class="">Work</a>
+    <a href="/portal" class="navlink" style="font-size:13px;">Client Login</a>
+    <a href="/tools" class="navlink" style="font-size:13px;">Free Tools</a>
+    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;">Free Report Card</a>
+    <a href="/audit" style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;transition:color 0.15s;" class="navlink">Audits</a><a href="/contact" class="nav-cta">Let's talk</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
   </button>
 </nav>
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="index.html" class="">Home</a>
-<a href="about.html" class="">About</a>
-<a href="services.html" class="">Services</a>
-<a href="work.html" class="">Work</a>
-  <a href="report-card.html" class="mlink">📊 Free Report Card</a>
-  <a href="audit.html" class="mlink" style="background:var(--pxxxl);color:var(--p);">🔍 Digital Health Check — $299</a>
-  <a href="contact.html" class="mob-cta">Let's talk</a>
+  <a href="/" class="">Home</a>
+<a href="/about" class="">About</a>
+<a href="/services" class="">Services</a>
+<a href="/work" class="">Work</a>
+  <a href="/report-card" class="mlink">Free Report Card</a>
+  <a href="/audit" class="mlink" style="background:var(--pxxxl);color:var(--p);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg> Digital Health Check</a>
+  <a href="/contact" class="mob-cta">Let's talk</a>
 </div>
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
 <main id="main-content">
@@ -522,13 +546,13 @@ if (!sessionStorage.getItem('exit_shown')) {
 <section class="page-hero">
   <div class="page-hero-inner">
     <span class="label">New Product</span>
-    <h1>Your website<br>has a <em>diagnosis.</em></h1>
-    <p>The Digital Health Check is a complete audit of your site's visibility, performance, and missed opportunities — delivered in 5 business days as a branded report you can actually act on.</p>
+    <h1>Find out exactly what your website<br>is <em>missing.</em></h1>
+    <p>From a free instant score to a full competitive intelligence audit. Every level gives you something real to act on.</p>
     <div class="hero-badges">
-      <span class="hero-badge"><span class="dot"></span>$299 flat</span>
-      <span class="hero-badge">⚡ Delivered in 5 business days</span>
-      <span class="hero-badge">📄 6-page branded report</span>
-      <span class="hero-badge">✓ No fluff, just fixes</span>
+      <span class="hero-badge"><span class="dot"></span>Starting at $99</span>
+      <span class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Delivered in 5 business days</span>
+      <span class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>6-page branded report</span>
+      <span class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>No fluff, just fixes</span>
     </div>
   </div>
 </section>
@@ -541,24 +565,24 @@ if (!sessionStorage.getItem('exit_shown')) {
         <h2 style="font-family:var(--serif);font-size:36px;font-weight:400;letter-spacing:-0.8px;margin-bottom:28px;">Everything that's<br><em>costing you customers.</em></h2>
         <ul class="what-list">
           <li>
-            <div class="what-icon">🔍</div>
-            <div class="what-text"><h4>Google Visibility Check</h4><p>Are you showing up for local searches? What keywords are you ranking for — and which ones are you missing?</p></div>
+            <div class="what-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg></div>
+            <div class="what-text"><h4>Google Visibility Check</h4><p>Are you showing up for local searches? What keywords are you ranking for. and which ones are you missing?</p></div>
           </li>
           <li>
-            <div class="what-icon">📱</div>
+            <div class="what-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg></div>
             <div class="what-text"><h4>Mobile & Performance Audit</h4><p>Lighthouse scores, load times, and a full mobile experience checklist. Most visitors are on their phone.</p></div>
           </li>
           <li>
-            <div class="what-icon">✍️</div>
+            <div class="what-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
             <div class="what-text"><h4>Content & Messaging Review</h4><p>Does your homepage tell someone what you do in 5 seconds? Is your call to action clear? I'll tell you honestly.</p></div>
           </li>
           <li>
-            <div class="what-icon">💰</div>
+            <div class="what-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 5v1m0 8v1m-3.5-5h7M9 13c0 1.1.9 2 2 2h2a2 2 0 0 0 0-4h-2a2 2 0 0 1 0-4h2a2 2 0 0 1 2 2"/></svg></div>
             <div class="what-text"><h4>Conversion Path Analysis</h4><p>Where are visitors dropping off? What's stopping them from booking, calling, or buying?</p></div>
           </li>
           <li>
-            <div class="what-icon">📋</div>
-            <div class="what-text"><h4>Prioritized Fix List</h4><p>Every issue ranked by impact. You'll know exactly what to fix first — whether you hire me or do it yourself.</p></div>
+            <div class="what-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div>
+            <div class="what-text"><h4>Prioritized Fix List</h4><p>Every issue ranked by impact. You'll know exactly what to fix first. whether you hire me or do it yourself.</p></div>
           </li>
         </ul>
       </div>
@@ -582,9 +606,9 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div class="report-page">
           <div class="rp-label">Recommendations</div>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
-            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#e05555;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 1 — highest impact]</div></div>
-            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#f0b429;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 2 — medium impact]</div></div>
-            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#6abf69;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 3 — quick win]</div></div>
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#e05555;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 1. highest impact]</div></div>
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#f0b429;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 2. medium impact]</div></div>
+            <div style="display:flex;gap:8px;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:#6abf69;flex-shrink:0;"></div><div style="font-size:11px;color:rgba(255,255,255,0.6);">[Fix 3. quick win]</div></div>
           </div>
         </div>
       </div>
@@ -592,13 +616,13 @@ if (!sessionStorage.getItem('exit_shown')) {
   </div>
 </section>
 
-<!-- MINI AUDIT TOOL — embed this block in audit.html -->
+<!-- MINI AUDIT TOOL. embed this block in audit.html -->
 <section class="mini-audit-section" id="free-audit">
   <div class="ma-inner">
     <div class="ma-header reveal">
       <span class="label">Try it free</span>
       <h2>Get your free <em>site score.</em></h2>
-      <p>Enter your details below and I'll show you 5 things your website might be getting wrong right now — instantly, no fluff.</p>
+      <p>Enter your details below and I'll show you 5 things your website might be getting wrong right now. instantly, no fluff.</p>
     </div>
 
     <!-- STEP 1: Input form -->
@@ -678,12 +702,12 @@ if (!sessionStorage.getItem('exit_shown')) {
       <div class="ma-upsell">
         <div class="ma-upsell-text">
           <div class="ma-upsell-title">Want the full picture?</div>
-          <p>This is a snapshot based on publicly available signals. The full Digital Health Check goes 10x deeper — Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list delivered in 5 business days.</p>
+          <p>This is a snapshot based on publicly available signals. The full Digital Health Check goes 10x deeper. Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list delivered in 5 business days.</p>
         </div>
         <div class="ma-upsell-cta">
-          <div class="ma-upsell-price">$299</div>
+          <div class="ma-upsell-price">From $99</div>
           <div class="ma-upsell-note">Credited toward any full project</div>
-          <a href="#pricing" class="ma-btn" style="margin-top:12px;">Get the full audit →</a>
+          <a href="#pricing" class="ma-btn" style="margin-top:12px;">See all audit options →</a>
         </div>
       </div>
 
@@ -970,76 +994,76 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 <script>
 var AUDIT_ISSUES = {
   restaurant: [
-    { sev:'high', icon:'📍', title:'No Google Business Profile or incomplete listing', body:'68% of diners search online before choosing. Without a complete GBP you\'re invisible in local search and Google Maps for "{city} restaurants near me."' },
-    { sev:'high', icon:'📱', title:'Menu not readable on mobile', body:'If your menu is a PDF or photo of a printed menu, Google can\'t index it and mobile users can\'t read it — that\'s most of your potential customers.' },
-    { sev:'high', icon:'🎯', title:'No clear reservation or booking CTA above the fold', body:'Every second a visitor spends looking for how to book is a second they might leave. The button needs to be the first thing they see.' },
-    { sev:'medium', icon:'⭐', title:'Review responses missing or inconsistent', body:'Businesses that respond to Google reviews rank higher locally. If you\'re not responding, you\'re leaving both SEO and trust on the table.' },
-    { sev:'medium', icon:'🕐', title:'Hours and menu may not be current', body:'Outdated hours or menus on Google or your site directly cause lost customers. Google surfaces "hours may differ" warnings that hurt click-through rates.' },
-    { sev:'low', icon:'📸', title:'Photos not updated in the last 60 days', body:'Fresh photos signal an active business to Google and give visitors a reason to choose you over a competitor with a more current feed.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>', title:'No Google Business Profile or incomplete listing', body:'68% of diners search online before choosing. Without a complete GBP you\'re invisible in local search and Google Maps for "{city} restaurants near me."' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Menu not readable on mobile', body:'If your menu is a PDF or photo of a printed menu, Google can\'t index it and mobile users can\'t read it — that\'s most of your potential customers.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>', title:'No clear reservation or booking CTA above the fold', body:'Every second a visitor spends looking for how to book is a second they might leave. The button needs to be the first thing they see.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Review responses missing or inconsistent', body:'Businesses that respond to Google reviews rank higher locally. If you\'re not responding, you\'re leaving both SEO and trust on the table.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', title:'Hours and menu may not be current', body:'Outdated hours or menus on Google or your site directly cause lost customers. Google surfaces "hours may differ" warnings that hurt click-through rates.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>', title:'Photos not updated in the last 60 days', body:'Fresh photos signal an active business to Google and give visitors a reason to choose you over a competitor with a more current feed.' },
   ],
   retail: [
-    { sev:'high', icon:'🔍', title:'Not ranking for "{city} {type}" searches', body:'If someone searches "boutique in {city}" and you don\'t appear in the top 10, you\'re effectively invisible to the customers most likely to walk in.' },
-    { sev:'high', icon:'🛍️', title:'No online shopping or product browsing', body:'Even if you don\'t sell online, a product gallery with prices drives in-store visits and improves time-on-site for SEO.' },
-    { sev:'medium', icon:'📍', title:'Google Business Profile not fully optimized', body:'Missing categories, hours, or photos reduce your local ranking. GBP is free and one of the highest-ROI things a retail business can do.' },
-    { sev:'medium', icon:'📱', title:'Site not optimized for mobile browse behavior', body:'Retail shoppers browse on their phone and buy in-store. A slow or cramped mobile experience kills intent before they ever walk through the door.' },
-    { sev:'medium', icon:'💌', title:'No email capture or loyalty mechanism', body:'Your existing customers are your cheapest marketing channel. Without an email list you\'re starting from scratch every time you want to promote something.' },
-    { sev:'low', icon:'🗓️', title:'Events and sales not promoted on the site', body:'Seasonal events and sales should be on your homepage and GBP. If they\'re only on Instagram, you\'re leaving search traffic on the table.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Not ranking for "{city} {type}" searches', body:'If someone searches "boutique in {city}" and you don\'t appear in the top 10, you\'re effectively invisible to the customers most likely to walk in.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>', title:'No online shopping or product browsing', body:'Even if you don\'t sell online, a product gallery with prices drives in-store visits and improves time-on-site for SEO.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>', title:'Google Business Profile not fully optimized', body:'Missing categories, hours, or photos reduce your local ranking. GBP is free and one of the highest-ROI things a retail business can do.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Site not optimized for mobile browse behavior', body:'Retail shoppers browse on their phone and buy in-store. A slow or cramped mobile experience kills intent before they ever walk through the door.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', title:'No email capture or loyalty mechanism', body:'Your existing customers are your cheapest marketing channel. Without an email list you\'re starting from scratch every time you want to promote something.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title:'Events and sales not promoted on the site', body:'Seasonal events and sales should be on your homepage and GBP. If they\'re only on Instagram, you\'re leaving search traffic on the table.' },
   ],
   service: [
-    { sev:'high', icon:'📞', title:'Phone number not clickable on mobile', body:'Service businesses live and die by phone calls. If your number isn\'t a tap-to-call link on mobile, you\'re losing leads every day.' },
-    { sev:'high', icon:'🗺️', title:'Service area not clearly defined on site or GBP', body:'Google ranks service businesses by proximity. If your site and GBP don\'t clearly state which neighborhoods or cities you serve, you won\'t show up in those searches.' },
-    { sev:'high', icon:'⭐', title:'Less than 10 Google reviews', body:'Service businesses with fewer than 10 reviews are largely ignored by new customers. Review volume is one of the top local ranking factors.' },
-    { sev:'medium', icon:'💬', title:'No online quote or booking form', body:'The easier it is to request a quote, the more leads you get. A form that takes under 2 minutes outperforms a phone number for most first contacts.' },
-    { sev:'medium', icon:'🔍', title:'Missing service-specific landing pages', body:'One page for "all services" doesn\'t rank. A dedicated page for each service (e.g., "kitchen remodeling {city}") ranks for specific high-intent searches.' },
-    { sev:'low', icon:'📸', title:'No before/after project gallery', body:'Before/after photos are the single most trust-building content for service businesses. They answer "can they actually do this?" before a visitor has to ask.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', title:'Phone number not clickable on mobile', body:'Service businesses live and die by phone calls. If your number isn\'t a tap-to-call link on mobile, you\'re losing leads every day.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>', title:'Service area not clearly defined on site or GBP', body:'Google ranks service businesses by proximity. If your site and GBP don\'t clearly state which neighborhoods or cities you serve, you won\'t show up in those searches.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Less than 10 Google reviews', body:'Service businesses with fewer than 10 reviews are largely ignored by new customers. Review volume is one of the top local ranking factors.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', title:'No online quote or booking form', body:'The easier it is to request a quote, the more leads you get. A form that takes under 2 minutes outperforms a phone number for most first contacts.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Missing service-specific landing pages', body:'One page for "all services" doesn\'t rank. A dedicated page for each service (e.g., "kitchen remodeling {city}") ranks for specific high-intent searches.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>', title:'No before/after project gallery', body:'Before/after photos are the single most trust-building content for service businesses. They answer "can they actually do this?" before a visitor has to ask.' },
   ],
   health: [
-    { sev:'high', icon:'📅', title:'No online class or appointment booking', body:'Health and wellness customers expect to book online. If they have to call, most won\'t — they\'ll go to a competitor with a booking button.' },
-    { sev:'high', icon:'🔍', title:'Not showing up for "{type} near me" searches', body:'"Yoga near me" and "personal trainer {city}" are high-intent searches. If you\'re not on the first page, you\'re invisible to people actively looking for what you offer.' },
-    { sev:'medium', icon:'💬', title:'No client testimonials or transformation stories', body:'Social proof is the primary driver of new client decisions in health and wellness. Text testimonials alone aren\'t enough — video or photo results convert far better.' },
-    { sev:'medium', icon:'📱', title:'Site not optimized for mobile booking flow', body:'Most fitness and wellness searches happen on mobile. If the booking flow isn\'t smooth on a phone, you\'re losing clients at the last step.' },
-    { sev:'medium', icon:'🎁', title:'No new client offer visible on the homepage', body:'A first-class offer (free class, intro rate, free consultation) dramatically increases conversion from first-time visitors. If it\'s buried, it doesn\'t exist.' },
-    { sev:'low', icon:'📸', title:'Facility photos not showcasing the experience', body:'People want to know what they\'re walking into. High-quality facility and class photos reduce the anxiety of trying somewhere new.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title:'No online class or appointment booking', body:'Health and wellness customers expect to book online. If they have to call, most won\'t — they\'ll go to a competitor with a booking button.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Not showing up for "{type} near me" searches', body:'"Yoga near me" and "personal trainer {city}" are high-intent searches. If you\'re not on the first page, you\'re invisible to people actively looking for what you offer.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', title:'No client testimonials or transformation stories', body:'Social proof is the primary driver of new client decisions in health and wellness. Text testimonials alone aren\'t enough — video or photo results convert far better.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Site not optimized for mobile booking flow', body:'Most fitness and wellness searches happen on mobile. If the booking flow isn\'t smooth on a phone, you\'re losing clients at the last step.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>', title:'No new client offer visible on the homepage', body:'A first-class offer (free class, intro rate, free consultation) dramatically increases conversion from first-time visitors. If it\'s buried, it doesn\'t exist.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>', title:'Facility photos not showcasing the experience', body:'People want to know what they\'re walking into. High-quality facility and class photos reduce the anxiety of trying somewhere new.' },
   ],
   salon: [
-    { sev:'high', icon:'📅', title:'Booking button not visible on every page', body:'Salon customers are ready to book the moment they like what they see. If the booking button isn\'t in the nav and above the fold, you\'re adding friction that costs appointments.' },
-    { sev:'high', icon:'📸', title:'Portfolio photos not optimized for search', body:'Google Images drives significant discovery for salons. Photos need alt text, proper file names, and ideally a dedicated gallery page to rank.' },
-    { sev:'medium', icon:'⭐', title:'Google review count below 25', body:'Salons are one of the most review-dependent business types. Customers read reviews before booking, and Google uses review volume to rank local results.' },
-    { sev:'medium', icon:'💅', title:'Service menu not listed with prices', body:'Price transparency builds trust and reduces the "I\'ll just call" friction. A clear, updated service menu with prices improves conversion and reduces no-shows.' },
-    { sev:'medium', icon:'📍', title:'GBP not linked to booking software', body:'Google allows you to add a booking link directly to your Business Profile. If yours isn\'t set up, you\'re missing direct bookings from Google search results.' },
-    { sev:'low', icon:'🎨', title:'Brand not consistent across site and social', body:'Salon clients choose based on aesthetic. If your website and Instagram look like different businesses, it creates doubt at the moment of decision.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', title:'Booking button not visible on every page', body:'Salon customers are ready to book the moment they like what they see. If the booking button isn\'t in the nav and above the fold, you\'re adding friction that costs appointments.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>', title:'Portfolio photos not optimized for search', body:'Google Images drives significant discovery for salons. Photos need alt text, proper file names, and ideally a dedicated gallery page to rank.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Google review count below 25', body:'Salons are one of the most review-dependent business types. Customers read reviews before booking, and Google uses review volume to rank local results.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 11.5A2 2 0 0 1 6.5 9h11a2 2 0 0 1 2 2.5l-.88 5.5a2 2 0 0 1-1.97 1.65H7.35a2 2 0 0 1-1.97-1.65z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9"/></svg>', title:'Service menu not listed with prices', body:'Price transparency builds trust and reduces the "I\'ll just call" friction. A clear, updated service menu with prices improves conversion and reduces no-shows.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>', title:'GBP not linked to booking software', body:'Google allows you to add a booking link directly to your Business Profile. If yours isn\'t set up, you\'re missing direct bookings from Google search results.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>', title:'Brand not consistent across site and social', body:'Salon clients choose based on aesthetic. If your website and Instagram look like different businesses, it creates doubt at the moment of decision.' },
   ],
   realestate: [
-    { sev:'high', icon:'🔍', title:'Not ranking for "{city} real estate agent" searches', body:'Buyers and sellers search for agents by city. Without page-level SEO targeting your market, you won\'t appear for the searches that matter most.' },
-    { sev:'high', icon:'🏠', title:'No neighborhood guides or local content', body:'The agents who rank best locally publish content about the neighborhoods they serve. It builds authority and brings in organic search traffic from buyers researching areas.' },
-    { sev:'medium', icon:'📞', title:'No clear consultation or contact CTA above the fold', body:'Real estate clients want to talk. Your homepage should make it effortless to call, text, or book a meeting — not require scrolling to find contact info.' },
-    { sev:'medium', icon:'⭐', title:'Fewer than 15 Google reviews', body:'Real estate is a high-trust purchase. Buyers and sellers research agents heavily. Review volume and recency directly influence who they call first.' },
-    { sev:'medium', icon:'🏡', title:'Property listings not integrated or current', body:'An agent site without current listings looks inactive. Even a Zillow embed or IDX feed signals that you\'re an active market participant.' },
-    { sev:'low', icon:'📱', title:'Contact form not mobile-optimized', body:'Many buyer inquiries happen on mobile while browsing properties. A form with too many fields or small tap targets will lose those leads.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Not ranking for "{city} real estate agent" searches', body:'Buyers and sellers search for agents by city. Without page-level SEO targeting your market, you won\'t appear for the searches that matter most.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', title:'No neighborhood guides or local content', body:'The agents who rank best locally publish content about the neighborhoods they serve. It builds authority and brings in organic search traffic from buyers researching areas.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', title:'No clear consultation or contact CTA above the fold', body:'Real estate clients want to talk. Your homepage should make it effortless to call, text, or book a meeting — not require scrolling to find contact info.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Fewer than 15 Google reviews', body:'Real estate is a high-trust purchase. Buyers and sellers research agents heavily. Review volume and recency directly influence who they call first.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', title:'Property listings not integrated or current', body:'An agent site without current listings looks inactive. Even a Zillow embed or IDX feed signals that you\'re an active market participant.' },
+    { sev:'low', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Contact form not mobile-optimized', body:'Many buyer inquiries happen on mobile while browsing properties. A form with too many fields or small tap targets will lose those leads.' },
   ],
   legal: [
-    { sev:'high', icon:'🔍', title:'Not ranking for "{practice area} attorney {city}"', body:'Legal searches are some of the highest-intent on the internet. If you\'re not on the first page for your practice area and city, you\'re invisible to clients who are ready to hire.' },
-    { sev:'high', icon:'📞', title:'No prominent phone number or consultation CTA', body:'Legal clients want to speak to someone. Your number and a "free consultation" button need to be visible on every page, especially on mobile.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Not ranking for "{practice area} attorney {city}"', body:'Legal searches are some of the highest-intent on the internet. If you\'re not on the first page for your practice area and city, you\'re invisible to clients who are ready to hire.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', title:'No prominent phone number or consultation CTA', body:'Legal clients want to speak to someone. Your number and a "free consultation" button need to be visible on every page, especially on mobile.' },
     { sev:'medium', icon:'⚖️', title:'No practice area landing pages', body:'A single "Services" page won\'t rank. Each practice area needs its own page targeting the specific search terms clients use (e.g., "DUI attorney {city}").' },
-    { sev:'medium', icon:'⭐', title:'Insufficient Google reviews for your market', body:'Reviews are a major trust signal for legal services. Clients do significant research before hiring an attorney. Review volume and quality directly influence calls.' },
-    { sev:'medium', icon:'📝', title:'No blog or legal resources content', body:'Publishing helpful legal content builds authority and drives organic traffic. It also demonstrates expertise before a prospect ever reaches out.' },
-    { sev:'low', icon:'🔒', title:'No trust badges or bar association mentions visible', body:'Credentials, bar memberships, and case results build immediate credibility. They should be visible without scrolling on the homepage.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Insufficient Google reviews for your market', body:'Reviews are a major trust signal for legal services. Clients do significant research before hiring an attorney. Review volume and quality directly influence calls.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', title:'No blog or legal resources content', body:'Publishing helpful legal content builds authority and drives organic traffic. It also demonstrates expertise before a prospect ever reaches out.' },
+    { sev:'low', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', title:'No trust badges or bar association mentions visible', body:'Credentials, bar memberships, and case results build immediate credibility. They should be visible without scrolling on the homepage.' },
   ],
   creative: [
-    { sev:'high', icon:'🎨', title:'Portfolio not prominently featured on homepage', body:'For creative businesses, the work is the pitch. If someone has to navigate to find your portfolio, most won\'t bother — feature it immediately.' },
-    { sev:'high', icon:'🔍', title:'Portfolio images not optimized for Google Images', body:'Creative work gets discovered through image search. Without alt text, proper filenames, and optimized image pages, your work is invisible to Google.' },
-    { sev:'medium', icon:'💬', title:'No clear niche or client type specified', body:'"Graphic designer" is too broad. "Brand identity designer for food and beverage businesses in LA" attracts the right clients and ranks for specific searches.' },
-    { sev:'medium', icon:'📞', title:'No discovery call or project inquiry CTA', body:'Creative clients want to talk before committing. Make it easy to start a conversation — a Calendly link or brief intake form converts better than a contact email.' },
-    { sev:'medium', icon:'⭐', title:'No case studies or client results', body:'Showing process and results builds more trust than finished work alone. Even 1-2 case studies with client quotes dramatically increase conversion.' },
-    { sev:'low', icon:'📱', title:'Portfolio not optimized for mobile viewing', body:'Clients often browse portfolios on their phone. Images need to load fast and display correctly at every screen size.' },
+    { sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>', title:'Portfolio not prominently featured on homepage', body:'For creative businesses, the work is the pitch. If someone has to navigate to find your portfolio, most won\'t bother — feature it immediately.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Portfolio images not optimized for Google Images', body:'Creative work gets discovered through image search. Without alt text, proper filenames, and optimized image pages, your work is invisible to Google.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', title:'No clear niche or client type specified', body:'"Graphic designer" is too broad. "Brand identity designer for food and beverage businesses in LA" attracts the right clients and ranks for specific searches.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', title:'No discovery call or project inquiry CTA', body:'Creative clients want to talk before committing. Make it easy to start a conversation — a Calendly link or brief intake form converts better than a contact email.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'No case studies or client results', body:'Showing process and results builds more trust than finished work alone. Even 1-2 case studies with client quotes dramatically increase conversion.' },
+    { sev:'low', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Portfolio not optimized for mobile viewing', body:'Clients often browse portfolios on their phone. Images need to load fast and display correctly at every screen size.' },
   ],
   other: [
-    { sev:'high', icon:'🔍', title:'Not appearing in local search results', body:'If someone searches for what you do in your city and you don\'t appear on the first page, you\'re invisible to your most valuable potential customers.' },
-    { sev:'high', icon:'📍', title:'Google Business Profile incomplete or missing', body:'GBP is free and is one of the most powerful tools for local visibility. An incomplete profile means Google can\'t confidently show you to searchers nearby.' },
-    { sev:'high', icon:'📱', title:'Site not fully optimized for mobile', body:'Over 60% of searches happen on mobile. A site that\'s hard to use on a phone loses more than half its potential visitors before they even see your offer.' },
-    { sev:'medium', icon:'🎯', title:'No clear call to action above the fold', body:'What do you want visitors to do? Call, book, buy, or contact? If that action isn\'t front and center, most visitors won\'t take it.' },
-    { sev:'medium', icon:'⭐', title:'Insufficient social proof', body:'Reviews, testimonials, and results are the fastest way to build trust with someone who\'s never heard of you. If they\'re missing or buried, conversion suffers.' },
-    { sev:'low', icon:'⚡', title:'Page load speed may be impacting rankings', body:'Google uses page speed as a ranking factor. Slow sites rank lower and lose visitors before they load — especially on mobile connections.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'Not appearing in local search results', body:'If someone searches for what you do in your city and you don\'t appear on the first page, you\'re invisible to your most valuable potential customers.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>', title:'Google Business Profile incomplete or missing', body:'GBP is free and is one of the most powerful tools for local visibility. An incomplete profile means Google can\'t confidently show you to searchers nearby.' },
+    { sev:'high', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>', title:'Site not fully optimized for mobile', body:'Over 60% of searches happen on mobile. A site that\'s hard to use on a phone loses more than half its potential visitors before they even see your offer.' },
+    { sev:'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>', title:'No clear call to action above the fold', body:'What do you want visitors to do? Call, book, buy, or contact? If that action isn\'t front and center, most visitors won\'t take it.' },
+    { sev:'medium', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title:'Insufficient social proof', body:'Reviews, testimonials, and results are the fastest way to build trust with someone who\'s never heard of you. If they\'re missing or buried, conversion suffers.' },
+    { sev:'low', icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>', title:'Page load speed may be impacting rankings', body:'Google uses page speed as a ranking factor. Slow sites rank lower and lose visitors before they load — especially on mobile connections.' },
   ],
 };
 
@@ -1058,18 +1082,18 @@ function getIssues(type, city, name, psi) {
   if (psi && !psi.fallback) {
     var realFindings = [];
     if (psi.perf !== null && psi.perf < 50) {
-      realFindings.push({ sev:'high', icon:'⚡', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance' + (psi.lcp ? ' — Largest Contentful Paint is ' + psi.lcp + ', which is too slow' : '') + '. Google uses page speed as a direct ranking factor, and mobile users abandon slow sites in under 3 seconds.' });
+      realFindings.push({ sev:'high', icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance' + (psi.lcp ? ' — Largest Contentful Paint is ' + psi.lcp + ', which is too slow' : '') + '. Google uses page speed as a direct ranking factor, and mobile users abandon slow sites in under 3 seconds.' });
     } else if (psi.perf !== null && psi.perf < 90) {
-      realFindings.push({ sev:'medium', icon:'⚡', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance.' + (psi.lcp ? ' Largest Contentful Paint is ' + psi.lcp + '.' : '') + ' There\'s room to improve load speed, which can directly impact rankings and conversions.' });
+      realFindings.push({ sev:'medium', icon:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>', title:'Mobile performance score: ' + psi.perf + '/100', body:'Your site scored ' + psi.perf + ' on Google Lighthouse mobile performance.' + (psi.lcp ? ' Largest Contentful Paint is ' + psi.lcp + '.' : '') + ' There\'s room to improve load speed, which can directly impact rankings and conversions.' });
     }
     if (psi.seo !== null && psi.seo < 80) {
-      realFindings.push({ sev: psi.seo < 60 ? 'high' : 'medium', icon:'🔍', title:'SEO score: ' + psi.seo + '/100', body:'Lighthouse flagged SEO issues on your site.' + (!psi.hasMetaDesc ? ' Missing or suboptimal meta description.' : '') + (!psi.hasTitleTag ? ' Title tag issues detected.' : '') + (!psi.mobileReady ? ' Viewport not properly configured for mobile.' : '') + ' These are baseline requirements for Google to rank your pages.' });
+      realFindings.push({ sev: psi.seo < 60 ? 'high' : 'medium', icon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg>', title:'SEO score: ' + psi.seo + '/100', body:'Lighthouse flagged SEO issues on your site.' + (!psi.hasMetaDesc ? ' Missing or suboptimal meta description.' : '') + (!psi.hasTitleTag ? ' Title tag issues detected.' : '') + (!psi.mobileReady ? ' Viewport not properly configured for mobile.' : '') + ' These are baseline requirements for Google to rank your pages.' });
     }
     if (psi.a11y !== null && psi.a11y < 80) {
       realFindings.push({ sev:'medium', icon:'♿', title:'Accessibility score: ' + psi.a11y + '/100', body:'Your site has accessibility issues that affect users with disabilities. Google uses accessibility as a quality signal.' + (!psi.hasAltText ? ' Images are missing alt text.' : '') + ' Fixing these improves both rankings and the experience for all visitors.' });
     }
     if (psi.noHttp === false) {
-      realFindings.push({ sev:'high', icon:'🔒', title:'Site not fully on HTTPS', body:'Your site or some resources are loading over HTTP instead of HTTPS. This is a security issue, a Google ranking penalty, and causes browser warnings that drive visitors away.' });
+      realFindings.push({ sev:'high', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', title:'Site not fully on HTTPS', body:'Your site or some resources are loading over HTTP instead of HTTPS. This is a security issue, a Google ranking penalty, and causes browser warnings that drive visitors away.' });
     }
     // Prepend real findings, then fill with category-specific ones
     issues = realFindings.concat(issues);
@@ -1289,7 +1313,7 @@ function showResults(name, type, city, email, url, psi) {
       '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 20px;">I\'ve received your free site score request and had a chance to take a look at your online presence. There are a few things worth discussing.</p>' +
       '<p style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 0 24px;">If you want to go deeper — Lighthouse scores, keyword analysis, conversion audit, and a prioritized fix list — the full Digital Health Check covers all of it in a 6-page report delivered in 5 business days.</p>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
-        '<a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Get the full audit — $299 →</a>' +
+        '<a href="https://www.davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">See all audit options. From $99 →</a>' +
         '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Book a free call first →</a>' +
       '</div>' +
     '</div>' +
@@ -1352,7 +1376,7 @@ function showResults(name, type, city, email, url, psi) {
     body: JSON.stringify({
       from: 'DDS Audit Bot <eric@davisdigitalstudio.com>',
       to: ['eric@davisdigitalstudio.com'],
-      subject: '🔍 New audit lead: ' + name + ' — ' + score + '/100 · ' + (typeLabels[type]||type) + ' · ' + city,
+      subject: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></svg> New audit lead: ' + name + ' — ' + score + '/100 · ' + (typeLabels[type]||type) + ' · ' + city,
       html: notifyHtml
     })
   }).catch(function(){});
@@ -1422,7 +1446,7 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div class="step-circle">2</div>
         <div class="step-body">
           <h3>I run the full audit</h3>
-          <p>I use SEMrush, Google Lighthouse, Search Console data, and manual review to assess every dimension of your site — no automated report generators.</p>
+          <p>I use SEMrush, Google Lighthouse, Search Console data, and manual review to assess every dimension of your site. no automated report generators.</p>
         </div>
       </div>
       <div class="step reveal" style="transition-delay:0.2s">
@@ -1446,33 +1470,92 @@ if (!sessionStorage.getItem('exit_shown')) {
 <section class="pricing" id="pricing">
   <div class="pricing-inner">
     <div class="section-header reveal">
-      <span class="label">Investment</span>
-      <h2>One flat price.<br><em>No surprises.</em></h2>
+      <span class="label">Audit tiers</span>
+      <h2>Choose your depth.<br><em>Every level delivers.</em></h2>
+      <p style="font-size:16px;color:var(--muted);max-width:560px;margin:0 auto 48px;line-height:1.7;">Pick what matches where you are right now. Every paid audit is credited toward a full project if you decide to move forward.</p>
     </div>
-    <div class="price-card reveal">
-      <div>
-        <div class="price-amount"><span>$</span>299</div>
-        <div class="price-note">One-time · no subscription</div>
-        <div class="price-delivery">⚡ Delivered in 5 business days</div>
-        <div class="price-cta">
-          <a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" target="_blank" rel="noopener" class="btn-white" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'pricing_section',value:299,currency:'USD'});}">💳 Pay $299 &amp; get started &rarr;</a>
-        </div>
-      </div>
-      <div>
-        <ul class="price-includes">
-          <li>Google visibility & local SEO analysis</li>
-          <li>Mobile & performance scores (Lighthouse)</li>
-          <li>On-page SEO checklist (all pages)</li>
-          <li>Content & messaging review</li>
-          <li>Conversion path analysis</li>
-          <li>Prioritized fix list by impact</li>
-          <li>6-page branded PDF report</li>
-          <li>Optional 30-min walkthrough call</li>
-          <li>$299 credited toward a full project</li>
+    <div class="tiers-grid">
+      <div class="tier-card reveal">
+        <div class="tier-badge free">Free</div>
+        <h3 class="tier-name">Site Score</h3>
+        <p class="tier-desc">Instant automated snapshot. Real Google PageSpeed data, 5 findings, no waiting.</p>
+        <div class="tier-price-wrap"><div class="tier-price">Free</div><div class="tier-cadence">Instant results</div></div>
+        <ul class="tier-includes">
+          <li>Real PageSpeed Insights data</li>
+          <li>Performance, SEO, and accessibility scores</li>
+          <li>Core Web Vitals (LCP, FCP, CLS)</li>
+          <li>5 personalized findings</li>
+          <li>Business-type specific recommendations</li>
         </ul>
+        <a href="#free-audit" class="tier-cta tier-cta-ghost" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'site_score_free'});}">Try it free now</a>
+      </div>
+      <div class="tier-card reveal" style="transition-delay:0.08s">
+        <div class="tier-badge">$99</div>
+        <h3 class="tier-name">Starter Audit</h3>
+        <p class="tier-desc">A real one-page report you can act on. Delivered in 24 hours.</p>
+        <div class="tier-price-wrap"><div class="tier-price">$99</div><div class="tier-cadence">Delivered in 24 hours</div></div>
+        <ul class="tier-includes">
+          <li>Everything in Site Score</li>
+          <li>Manual review of your homepage</li>
+          <li>Top 3 priority fixes with clear next steps</li>
+          <li>1-page branded PDF report</li>
+          <li>Credited toward any higher tier or project</li>
+        </ul>
+        <a href="/contact" class="tier-cta" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'starter_audit',value:99,currency:'USD'});}">Get started for $99</a>
+      </div>
+      <div class="tier-card tier-featured reveal" style="transition-delay:0.16s">
+        <div class="tier-popular-badge">Most popular</div>
+        <div class="tier-badge featured">$499</div>
+        <h3 class="tier-name">Digital Health Check</h3>
+        <p class="tier-desc">The complete picture. 6-page branded report covering everything that matters.</p>
+        <div class="tier-price-wrap"><div class="tier-price">$499</div><div class="tier-cadence">Delivered in 5 business days</div></div>
+        <ul class="tier-includes">
+          <li>Everything in Starter Audit</li>
+          <li>Full Google visibility analysis</li>
+          <li>Mobile and Lighthouse performance deep dive</li>
+          <li>On-page SEO checklist across all pages</li>
+          <li>Content and messaging review</li>
+          <li>Conversion path analysis</li>
+          <li>Prioritized fix list ranked by impact</li>
+          <li>6-page branded PDF report</li>
+          <li>30-minute walkthrough call included</li>
+        </ul>
+        <a href="/contact" class="tier-cta" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'digital_health_check',value:499,currency:'USD'});}">Get the full audit for $499</a>
+      </div>
+      <div class="tier-card reveal" style="transition-delay:0.24s">
+        <div class="tier-badge">$899</div>
+        <h3 class="tier-name">Competitive Intelligence</h3>
+        <p class="tier-desc">Everything in the Health Check plus a full competitor analysis and keyword gap report.</p>
+        <div class="tier-price-wrap"><div class="tier-price">$899</div><div class="tier-cadence">Delivered in 7 business days</div></div>
+        <ul class="tier-includes">
+          <li>Everything in Digital Health Check</li>
+          <li>3 competitor sites fully analyzed</li>
+          <li>Keyword gap analysis via SEMrush</li>
+          <li>Backlink profile comparison</li>
+          <li>Local SEO ranking report</li>
+          <li>60-minute strategy call</li>
+          <li>Full report deck delivered as PDF</li>
+        </ul>
+        <a href="/contact" class="tier-cta" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'competitive_intelligence',value:899,currency:'USD'});}">Request this audit</a>
+      </div>
+      <div class="tier-card reveal" style="transition-delay:0.32s">
+        <div class="tier-badge">$1,500</div>
+        <h3 class="tier-name">Full Digital Strategy</h3>
+        <p class="tier-desc">A complete 6-month roadmap. Everything above plus GA4 setup, content strategy, and a 90-day action plan.</p>
+        <div class="tier-price-wrap"><div class="tier-price">$1,500</div><div class="tier-cadence">Delivered in 10 business days</div></div>
+        <ul class="tier-includes">
+          <li>Everything in Competitive Intelligence</li>
+          <li>6-month content and SEO roadmap</li>
+          <li>GA4 funnel and conversion setup</li>
+          <li>Google Ads recommendations</li>
+          <li>90-day prioritized action plan</li>
+          <li>Delivered as a full strategy slide deck</li>
+          <li>2-hour strategy presentation call</li>
+        </ul>
+        <a href="/contact" class="tier-cta" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'full_digital_strategy',value:1500,currency:'USD'});}">Request this package</a>
       </div>
     </div>
-    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:20px;">If you decide to hire me for a full redesign after the audit, the $299 comes off your project price.</p>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:36px;">Every paid audit is credited toward a full redesign project. You never pay twice.</p>
   </div>
 </section>
 
@@ -1488,15 +1571,15 @@ if (!sessionStorage.getItem('exit_shown')) {
     </div>
     <div class="faq-item">
       <div class="faq-q">Do I need to do anything to prepare?</div>
-      <div class="faq-a">Just your website URL and 3 minutes to fill out the intake form. I handle everything else — no access to your accounts or backend required.</div>
+      <div class="faq-a">Just your website URL and 3 minutes to fill out the intake form. I handle everything else. no access to your accounts or backend required.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">What if I want to fix things myself?</div>
       <div class="faq-a">That's completely fine. The report is written to be actionable whether or not you hire me. Every recommendation includes enough context to act on it independently.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">What if I decide to hire you after the audit?</div>
-      <div class="faq-a">The $299 audit fee is credited toward any full project. So if you move forward with a redesign, you've already paid $299 of the total.</div>
+      <div class="faq-q">Is the audit fee credited toward a project?</div>
+      <div class="faq-a">Every paid audit fee is credited toward any full project. So if you move forward with a redesign, you've already applied what you paid toward the total.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">How is this different from free tools like Google PageSpeed?</div>
@@ -1507,8 +1590,8 @@ if (!sessionStorage.getItem('exit_shown')) {
 
 <section class="cta-band">
   <h2>Find out what your<br>site is <em>missing.</em></h2>
-  <p>$299 · 5 business days · no fluff</p>
-  <a href="https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00" target="_blank" rel="noopener" class="btn-white">💳 Pay $299 &amp; get started &rarr;</a>
+  <p>Audits from $99 · delivered in 24 hours to 10 business days · no fluff</p>
+  <a href="#pricing" class="btn-white">See all audit options</a>
 </section>
 
 </main>
@@ -1517,10 +1600,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 <div class="exit-overlay" id="exitOverlay">
   <div class="exit-card">
     <button class="exit-close" onclick="closeExit()">×</button>
-    <div style="font-size:36px;margin-bottom:12px;">🎯</div>
-    <h3>Before you go — <em>it's free.</em></h3>
-    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity — delivered to your inbox. Takes 30 seconds.</p>
-    <a href="report-card.html" class="exit-cta">Get my free Digital Report Card →</a>
+    <div style="font-size:36px;margin-bottom:12px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+    <h3>Before you go. <em>it's free.</em></h3>
+    <p>Find out exactly how your business looks online. Google presence, website health, and your #1 opportunity. delivered to your inbox. Takes 30 seconds.</p>
+    <a href="/report-card" class="exit-cta">Get my free Digital Report Card →</a>
     <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
   </div>
 </div>
@@ -1529,21 +1612,21 @@ if (!sessionStorage.getItem('exit_shown')) {
   <div style="display:flex;flex-direction:column;gap:6px;">
     <p>© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
     <div class="footer-links" style="margin-top:4px;">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="services.html">Services</a>
-      <a href="work.html">Work</a>
-      <a href="contact.html">Contact</a>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/services">Services</a>
+      <a href="/work">Work</a>
+      <a href="/contact">Contact</a>
     </div>
   </div>
   <div class="footer-links">
-    <a href="report-card.html" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
-    <a href="audit.html" style="color:var(--pxl) !important;">Audit $299</a>
+    <a href="/report-card" style="color:#0f0820 !important;background:var(--pxl);padding:4px 12px;border-radius:100px;font-weight:700;font-size:12px;">✦ Free Report Card</a>
+    <a href="/audit" style="color:var(--pxl) !important;">Audits</a>
     <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" rel="noopener">LinkedIn</a>
     <a href="mailto:eric@davisdigitalstudio.com">Email</a>
     <a href="/privacy" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Privacy</a>
     <a href="/terms" style="color:rgba(255,255,255,0.35) !important;font-size:11px;">Terms</a>
-    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">🔐 Client Login</a>
+    <a href="/portal" style="color:rgba(255,255,255,0.5) !important;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.15);padding:4px 12px;border-radius:100px;">Client Login</a>
   </div>
 </footer>
 <script>
