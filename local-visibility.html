@@ -1,25 +1,14 @@
 <!DOCTYPE html>
-<!-- DDS v3.0 20260621-1655 -->
-<!-- DDS v2.5 tool: local-visibility -->
+<!-- DDS v1.0 20260621-1100 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Local Visibility Score | Davis Digital Studio</title>
-<meta name="description" content="Check how visible your business is in local Google search. GBP completeness, local pack presence, review count, and your top opportunity free and instant.">
+<meta name="description" content="Check how visible your business is in local Google search. GBP status, local pack presence, review signals, and your top opportunity. Free, no signup.">
 <link rel="canonical" href="https://www.davisdigitalstudio.com/local-visibility">
 <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
 <meta name="theme-color" content="#5b3fa0">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Free Local Visibility Score | Davis Digital Studio">
-<meta property="og:description" content="Check how visible your business is in local Google search. Free instant score, no signup required.">
-<meta property="og:url" content="https://www.davisdigitalstudio.com/local-visibility">
-<meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@davisdigitalstudio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -29,9 +18,8 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EQYY0DL8JL',{anonymize_ip:true});</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;padding-top:68px;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#5e5270;--serif:'DM Serif Display',Georgia,serif;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'DM Serif Display',Georgia,serif;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
@@ -39,440 +27,555 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
 .nav-logo span{color:#5b3fa0;}
 .nav-links{display:flex;align-items:center;gap:6px;}
-.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;}
-.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;}
-.hero{background:var(--pdark);padding:64px 24px 56px;text-align:center;}
-.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
-.hero h1{font-family:var(--serif);font-size:clamp(28px,5vw,50px);font-weight:400;color:#fff;letter-spacing:-1px;margin-bottom:12px;line-height:1.1;}
+.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;}
+.navlink:hover,.navlink.active{color:var(--p);background:var(--pxxxl);}
+.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
+.nav-cta:hover{opacity:0.88;}
+
+.hero{background:var(--pdark);padding:72px 24px 64px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;left:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.4) 0%,transparent 65%);pointer-events:none;}
+.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;color:#fff;letter-spacing:-1.5px;margin-bottom:14px;line-height:1.1;}
 .hero h1 em{font-style:italic;color:var(--pxl);}
-.hero-sub{font-size:15px;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto;line-height:1.7;}
-.tool-wrap{max-width:680px;margin:0 auto;padding:44px 24px 80px;}
-.input-card{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:20px;padding:32px;margin-bottom:20px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;}
-.field input, .field select{width:100%;padding:12px 16px;border:1px solid rgba(91,63,160,0.2);border-radius:12px;font-family:inherit;font-size:14px;color:var(--ink);background:#faf8f5;transition:border-color 0.15s;}
-.field input:focus, .field select:focus{border-color:#5b3fa0;outline:none;background:#fff;}
-.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.run-btn{width:100%;background:#5b3fa0;color:#fff;border:none;padding:14px;border-radius:100px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:opacity 0.15s;margin-top:4px;}
-.run-btn:hover{opacity:0.88;}
-.note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;}
-.loading{display:none;text-align:center;padding:48px 24px;}
-.scan-orb{width:56px;height:56px;border:3px solid rgba(91,63,160,0.15);border-top:3px solid #5b3fa0;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
+.hero-sub{font-size:16px;color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto;line-height:1.7;}
+
+.tool-wrap{max-width:680px;margin:0 auto;padding:56px 24px 80px;}
+
+/* Stepper */
+.step-indicator{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:40px;}
+.step-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--pxl);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);transition:all 0.3s;background:#fff;position:relative;z-index:1;}
+.step-dot.active{border-color:var(--p);color:var(--p);background:var(--pxxxl);}
+.step-dot.done{border-color:var(--p);background:var(--p);color:#fff;}
+.step-line{height:2px;width:48px;background:var(--pxl);transition:background 0.3s;}
+.step-line.done{background:var(--p);}
+
+/* Question cards */
+.q-card{background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 40px rgba(91,63,160,0.08);border:1px solid rgba(91,63,160,0.1);display:none;}
+.q-card.active{display:block;}
+.q-num{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:10px;}
+.q-card h2{font-family:var(--serif);font-size:26px;font-weight:400;margin-bottom:8px;letter-spacing:-0.5px;line-height:1.2;}
+.q-card p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;cursor:pointer;transition:all 0.15s;background:#fff;}
+.opt:hover{border-color:var(--p);background:var(--pxxxl);}
+.opt.selected{border-color:var(--p);background:var(--pxxxl);}
+.opt-icon{width:36px;height:36px;border-radius:10px;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.opt.selected .opt-icon{background:var(--p);}
+.opt-text h4{font-size:14px;font-weight:600;margin-bottom:2px;}
+.opt-text p{font-size:12px;color:var(--muted);line-height:1.4;}
+.text-input{width:100%;border:1.5px solid rgba(91,63,160,0.2);border-radius:12px;padding:14px 18px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;transition:border-color 0.15s;outline:none;margin-bottom:8px;}
+.text-input:focus{border-color:var(--p);}
+.text-input::placeholder{color:#b0a8c0;}
+.nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:28px;}
+.back-btn{background:transparent;border:1.5px solid var(--pxl);color:var(--p);border-radius:100px;padding:10px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.back-btn:hover{background:var(--pxxxl);}
+.next-btn{background:var(--p);color:#fff;border:none;border-radius:100px;padding:11px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s;margin-left:auto;}
+.next-btn:hover{opacity:0.88;}
+.next-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* Results */
 .results{display:none;}
-.grade-card{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:20px;padding:28px;margin-bottom:16px;display:flex;align-items:center;gap:24px;}
-.grade-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:36px;font-weight:400;flex-shrink:0;border:4px solid;}
-.grade-a{border-color:#22c55e;color:#16a34a;background:rgba(34,197,94,0.08);}
-.grade-b{border-color:#3b82f6;color:#1d4ed8;background:rgba(59,130,246,0.08);}
-.grade-c{border-color:#f59e0b;color:#d97706;background:rgba(245,158,11,0.08);}
-.grade-d{border-color:#ef4444;color:#dc2626;background:rgba(239,68,68,0.08);}
-.grade-info h3{font-size:18px;font-weight:600;margin-bottom:4px;}
-.grade-info p{font-size:13px;color:var(--muted);line-height:1.5;}
-.checks-list{background:#fff;border:1px solid rgba(91,63,160,0.08);border-radius:16px;overflow:hidden;margin-bottom:16px;}
-.check-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(91,63,160,0.06);}
-.check-item:last-child{border-bottom:none;}
-.check-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
-.ci-pass{background:rgba(34,197,94,0.1);color:#16a34a;}
-.ci-warn{background:rgba(245,158,11,0.1);color:#d97706;}
-.ci-fail{background:rgba(239,68,68,0.1);color:#dc2626;}
-.check-body h4{font-size:13px;font-weight:600;margin-bottom:3px;}
-.check-body p{font-size:12px;color:var(--muted);line-height:1.5;}
-.top-opp{background:rgba(91,63,160,0.05);border:1.5px solid rgba(91,63,160,0.15);border-radius:14px;padding:20px;margin-bottom:16px;}
-.top-opp h3{font-size:14px;font-weight:700;color:var(--p);margin-bottom:8px;}
-.top-opp p{font-size:13px;color:var(--muted);line-height:1.6;}
-.upsell{background:var(--pdark);border-radius:20px;padding:28px;text-align:center;color:#fff;}
-.upsell h3{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:8px;}
-.upsell p{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:18px;line-height:1.6;}
-.upsell-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.btn-white{background:#fff;color:#1a1523;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;}
-.btn-ghost{background:transparent;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:10px 22px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.2);text-decoration:none;}
-.reset-btn{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;margin-top:14px;text-decoration:underline;background:none;border:none;font-family:inherit;}
-.site-footer{background:var(--pdark);padding:20px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-.site-footer p{font-size:12px;color:rgba(255,255,255,0.35);}
-.site-footer a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:16px;}
-@media(max-width:600px){.nav{padding:0 20px;}.nav-links .navlink{display:none;}.fields-row{grid-template-columns:1fr;}.grade-card{flex-direction:column;text-align:center;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}}
+.score-hero{background:var(--pdark);border-radius:24px;padding:40px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
+.score-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.5) 0%,transparent 65%);pointer-events:none;}
+.score-big{font-family:var(--serif);font-size:80px;font-weight:400;line-height:1;position:relative;}
+.score-big.poor{color:#e05555;}
+.score-big.ok{color:#f0b429;}
+.score-big.good{color:#6abf69;}
+.score-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;margin-bottom:8px;position:relative;}
+.score-grade{display:inline-block;font-size:13px;font-weight:700;padding:4px 16px;border-radius:100px;position:relative;}
+.score-grade.poor{background:rgba(224,85,85,0.2);color:#ff6b6b;}
+.score-grade.ok{background:rgba(240,180,41,0.2);color:#f0b429;}
+.score-grade.good{background:rgba(106,191,105,0.2);color:#6abf69;}
+.biz-name-display{font-size:14px;color:rgba(255,255,255,0.4);margin-top:16px;position:relative;}
+
+.signals-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.signal-card{background:#fff;border-radius:16px;padding:20px;border:1px solid rgba(91,63,160,0.1);}
+.signal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.signal-title{font-size:13px;font-weight:600;}
+.signal-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap;}
+.badge-good{background:rgba(106,191,105,0.12);color:#2e7d32;}
+.badge-ok{background:rgba(240,180,41,0.12);color:#b8860b;}
+.badge-poor{background:rgba(224,85,85,0.12);color:#c0392b;}
+.signal-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.opp-card{background:linear-gradient(135deg,var(--pxxxl),#fff);border:2px solid var(--p);border-radius:20px;padding:28px;margin-bottom:20px;}
+.opp-card .opp-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:10px;}
+.opp-card h3{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:10px;}
+.opp-card p{font-size:14px;color:var(--muted);line-height:1.7;}
+
+.actions-list{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
+.actions-list h3{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.action-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
+.action-item:last-child{border-bottom:none;padding-bottom:0;}
+.action-num{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.action-body h4{font-size:14px;font-weight:600;margin-bottom:3px;}
+.action-body p{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.upgrade-card{background:var(--pdark);border-radius:20px;padding:32px;text-align:center;position:relative;overflow:hidden;}
+.upgrade-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.5) 0%,transparent 65%);pointer-events:none;}
+.upgrade-card h3{font-family:var(--serif);font-size:24px;font-weight:400;color:#fff;margin-bottom:10px;position:relative;}
+.upgrade-card p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;line-height:1.7;position:relative;}
+.upgrade-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;}
+.btn-p{display:inline-flex;align-items:center;background:#fff;color:var(--ink);font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;transition:transform 0.15s;}
+.btn-p:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.25);text-decoration:none;transition:background 0.15s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);}
+.restart-btn{display:block;text-align:center;margin-top:20px;font-size:13px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;}
+
+.site-footer{padding:24px 48px;background:var(--pdark);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.site-footer p{font-size:12px;color:rgba(255,255,255,0.3);}
+.site-footer a{font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;margin-left:16px;}
+.site-footer a:hover{color:rgba(255,255,255,0.7);}
+
+@media(max-width:700px){
+  .nav{padding:0 20px;}.nav-links{display:none;}
+  .signals-grid{grid-template-columns:1fr;}
+  .step-line{width:28px;}
+  .site-footer{padding:20px 24px;flex-direction:column;text-align:center;}
+}
 </style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Free Local Visibility Score","url":"https://www.davisdigitalstudio.com/local-visibility","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Check how visible your business is in local Google search. Free instant score.","provider":{"@type":"Person","name":"Eric Davis","url":"https://www.davisdigitalstudio.com"}}
-</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Site navigation">
+<nav class="nav" role="navigation" aria-label="Main navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
     <a href="/" class="navlink">Home</a>
+    <a href="/about" class="navlink">About</a>
     <a href="/services" class="navlink">Services</a>
-    <a href="/tools" class="navlink">Free Tools</a>
-    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
-    <a href="/audit" class="nav-cta" style="margin-left:6px;">Audits from $99</a>
+    <a href="/work" class="navlink">Work</a>
+    <a href="/tools" class="navlink active">Free Tools</a>
+    <a href="/portal" class="navlink">Client Login</a>
+    <a href="/contact" class="nav-cta">Let's talk</a>
   </div>
 </nav>
 
-<div class="hero" role="banner">
+<div class="hero">
   <div class="hero-tag">Free Tool</div>
   <h1>How visible is your business<br>in <em>local search?</em></h1>
-  <p class="hero-sub">Enter your business name and city. I will check your Google Business Profile, local pack presence, and give you your single biggest opportunity. Free and instant.</p>
+  <p class="hero-sub">Answer 6 questions and get a real local visibility score with your single biggest opportunity to rank higher on Google.</p>
 </div>
 
 <main id="main-content">
 <div class="tool-wrap">
 
-  <div class="input-card" id="inputCard">
-    <div class="field">
-      <label for="bizName">Business name</label>
-      <input id="bizName" type="text" placeholder="Joe's Coffee Shop">
-    </div>
-    <div class="fields-row">
-      <div class="field">
-        <label for="bizCity">City</label>
-        <input id="bizCity" type="text" placeholder="Los Angeles">
-      </div>
-      <div class="field">
-        <label for="bizType">Business type</label>
-        <select id="bizType">
-          <option value="">Select...</option>
-          <option value="restaurant">Restaurant / Bar / Café</option>
-          <option value="retail">Retail / Boutique</option>
-          <option value="service">Home Services</option>
-          <option value="health">Health and Wellness</option>
-          <option value="salon">Salon / Spa / Beauty</option>
-          <option value="professional">Professional Services</option>
-          <option value="creative">Creative / Freelance</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <label for="bizWebsite">Website URL (optional)</label>
-      <input id="bizWebsite" type="url" placeholder="https://yourbusiness.com">
-    </div>
-    <div class="field">
-      <label for="bizEmail">Your email (results sent here)</label>
-      <input id="bizEmail" type="email" placeholder="you@yourbusiness.com">
-    </div>
-    <button class="run-btn" onclick="runCheck()">Check my local visibility</button>
-    <p class="note">No spam. No sales call unless you ask.</p>
+  <div class="step-indicator" id="stepIndicator" aria-label="Progress">
+    <div class="step-dot active" id="sd1">1</div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step-dot" id="sd2">2</div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step-dot" id="sd3">3</div>
+    <div class="step-line" id="sl3"></div>
+    <div class="step-dot" id="sd4">4</div>
+    <div class="step-line" id="sl4"></div>
+    <div class="step-dot" id="sd5">5</div>
+    <div class="step-line" id="sl5"></div>
+    <div class="step-dot" id="sd6">6</div>
   </div>
 
-  <div class="loading" id="loadingState">
-    <div class="scan-orb"></div>
-    <div style="font-size:15px;font-weight:600;margin-bottom:6px;" id="loadingTitle">Checking local signals...</div>
-    <div style="font-size:13px;color:var(--muted);" id="loadingSub">Analyzing Google Business Profile indicators</div>
+  <!-- Q1: Business type -->
+  <div class="q-card active" id="q1">
+    <div class="q-num">Question 1 of 6</div>
+    <h2>What kind of business do you have?</h2>
+    <p>Local search works differently depending on your industry. This helps us score you accurately.</p>
+    <div class="options">
+      <div class="opt" onclick="selectOpt(1,'restaurant')" id="q1_restaurant">
+        <div class="opt-icon">🍽️</div>
+        <div class="opt-text"><h4>Restaurant or Bar</h4><p>Food service, cafe, wine bar, brewery</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(1,'service')" id="q1_service">
+        <div class="opt-icon">🔧</div>
+        <div class="opt-text"><h4>Home Services</h4><p>Plumber, electrician, landscaper, cleaner</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(1,'salon')" id="q1_salon">
+        <div class="opt-icon">✂️</div>
+        <div class="opt-text"><h4>Salon or Spa</h4><p>Hair, nails, massage, skincare</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(1,'retail')" id="q1_retail">
+        <div class="opt-icon">🛍️</div>
+        <div class="opt-text"><h4>Retail or Boutique</h4><p>Clothing, gifts, specialty shop</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(1,'health')" id="q1_health">
+        <div class="opt-icon">🏥</div>
+        <div class="opt-text"><h4>Health or Wellness</h4><p>Gym, yoga, chiropractor, therapist</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(1,'other')" id="q1_other">
+        <div class="opt-icon">💼</div>
+        <div class="opt-text"><h4>Other Local Business</h4><p>Professional services, creative, etc.</p></div>
+      </div>
+    </div>
+    <div class="nav-btns"><button class="next-btn" id="q1next" onclick="nextStep(1)" disabled>Next</button></div>
   </div>
 
-  <div class="results" id="resultsState">
-    <div class="grade-card" id="gradeCard"></div>
-    <div class="checks-list" id="checksList"></div>
-    <div class="top-opp" id="topOpp"></div>
-    
-    <div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;">
-      <div style="font-size:14px;font-weight:600;color:#1a1523;margin-bottom:6px;">Want a full report sent to your inbox?</div>
-      <div style="font-size:13px;color:#5e5270;margin-bottom:14px;">I will put together a more detailed local SEO analysis and email it to you personally.</div>
-      <div style="display:flex;gap:8px;max-width:400px;margin:0 auto;" id="lvEmailForm">
-        <input type="email" id="lvEmail" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;">
-        <button onclick="captureLvEmail()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Send it</button>
+  <!-- Q2: GBP status -->
+  <div class="q-card" id="q2">
+    <div class="q-num">Question 2 of 6</div>
+    <h2>Do you have a Google Business Profile?</h2>
+    <p>This is the listing that shows your business in Google Maps and the local pack. It's free and one of the highest-impact things you can have.</p>
+    <div class="options">
+      <div class="opt" onclick="selectOpt(2,'yes_claimed')" id="q2_yes_claimed">
+        <div class="opt-icon">✅</div>
+        <div class="opt-text"><h4>Yes, and I manage it actively</h4><p>I post updates, respond to reviews, and keep it current</p></div>
       </div>
-      <div id="lvEmailThanks" style="display:none;font-size:13px;color:#16a34a;font-weight:600;margin-top:8px;">Got it. Check your inbox soon.</div>
+      <div class="opt" onclick="selectOpt(2,'yes_unclaimed')" id="q2_yes_unclaimed">
+        <div class="opt-icon">⚠️</div>
+        <div class="opt-text"><h4>Yes, but I don't really manage it</h4><p>It exists but I rarely update it</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(2,'no')" id="q2_no">
+        <div class="opt-icon">❌</div>
+        <div class="opt-text"><h4>No, I don't have one</h4><p>Or I'm not sure if I do</p></div>
+      </div>
     </div>
-    <div class="upsell">
-      <h3>Want the full picture?</h3>
-      <p>This is based on publicly available signals. The full Digital Health Check includes a manual Google Business Profile audit, local keyword rankings, competitor comparison, and a step-by-step fix list.</p>
-      <div class="upsell-btns">
-        <a href="/audit" class="btn-white">See audit options from $99</a>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="prevStep(2)">Back</button>
+      <button class="next-btn" id="q2next" onclick="nextStep(2)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q3: Reviews -->
+  <div class="q-card" id="q3">
+    <div class="q-num">Question 3 of 6</div>
+    <h2>How are your Google reviews?</h2>
+    <p>Review count and rating are two of the strongest local ranking signals Google uses.</p>
+    <div class="options">
+      <div class="opt" onclick="selectOpt(3,'great')" id="q3_great">
+        <div class="opt-icon">⭐</div>
+        <div class="opt-text"><h4>50+ reviews, 4.5 stars or above</h4><p>Strong review presence</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(3,'decent')" id="q3_decent">
+        <div class="opt-icon">🌟</div>
+        <div class="opt-text"><h4>10-50 reviews, 4.0 or above</h4><p>Decent but room to grow</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(3,'few')" id="q3_few">
+        <div class="opt-icon">💫</div>
+        <div class="opt-text"><h4>Fewer than 10 reviews</h4><p>Just getting started</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(3,'bad')" id="q3_bad">
+        <div class="opt-icon">😬</div>
+        <div class="opt-text"><h4>Reviews are mixed or below 4.0</h4><p>Needs attention</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="prevStep(3)">Back</button>
+      <button class="next-btn" id="q3next" onclick="nextStep(3)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q4: Website -->
+  <div class="q-card" id="q4">
+    <div class="q-num">Question 4 of 6</div>
+    <h2>How's your website for local SEO?</h2>
+    <p>Google uses your website to confirm your location, services, and relevance for local searches.</p>
+    <div class="options">
+      <div class="opt" onclick="selectOpt(4,'optimized')" id="q4_optimized">
+        <div class="opt-icon">🎯</div>
+        <div class="opt-text"><h4>City and service mentioned throughout</h4><p>My site clearly mentions where I am and what I do</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(4,'partial')" id="q4_partial">
+        <div class="opt-icon">📄</div>
+        <div class="opt-text"><h4>I have a website but it's basic</h4><p>It exists but probably isn't optimized for local search</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(4,'none')" id="q4_none">
+        <div class="opt-icon">🚫</div>
+        <div class="opt-text"><h4>No website or it's very outdated</h4><p>I rely mainly on social media or word of mouth</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="prevStep(4)">Back</button>
+      <button class="next-btn" id="q4next" onclick="nextStep(4)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q5: Citations -->
+  <div class="q-card" id="q5">
+    <div class="q-num">Question 5 of 6</div>
+    <h2>Are you listed in other directories?</h2>
+    <p>Consistent listings on Yelp, Apple Maps, Bing, and industry directories reinforce your location to Google.</p>
+    <div class="options">
+      <div class="opt" onclick="selectOpt(5,'many')" id="q5_many">
+        <div class="opt-icon">📋</div>
+        <div class="opt-text"><h4>Yes, on Yelp, Apple Maps, Bing, and more</h4><p>Multiple consistent listings</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(5,'some')" id="q5_some">
+        <div class="opt-icon">📌</div>
+        <div class="opt-text"><h4>A few, maybe Yelp or one or two others</h4><p>Limited directory presence</p></div>
+      </div>
+      <div class="opt" onclick="selectOpt(5,'none')" id="q5_none">
+        <div class="opt-icon">🔍</div>
+        <div class="opt-text"><h4>I'm not sure, or probably not many</h4><p>Haven't focused on this</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="prevStep(5)">Back</button>
+      <button class="next-btn" id="q5next" onclick="nextStep(5)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q6: Business name -->
+  <div class="q-card" id="q6">
+    <div class="q-num">Question 6 of 6</div>
+    <h2>Last one — what's your business name and city?</h2>
+    <p>So I can personalize your results. No spam, ever.</p>
+    <input type="text" class="text-input" id="q6_name" placeholder="Business name (e.g. Bacchus Kitchen)" oninput="checkQ6()">
+    <input type="text" class="text-input" id="q6_city" placeholder="City (e.g. Los Angeles, CA)" oninput="checkQ6()" style="margin-top:10px;">
+    <div class="nav-btns">
+      <button class="back-btn" onclick="prevStep(6)">Back</button>
+      <button class="next-btn" id="q6next" onclick="showResults()" disabled>See my score</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="lvResults">
+    <div class="score-hero">
+      <div class="score-big" id="lvScoreNum">0</div>
+      <div class="score-label">Local Visibility Score out of 100</div>
+      <div class="score-grade" id="lvGrade"></div>
+      <div class="biz-name-display" id="lvBizName"></div>
+    </div>
+
+    <div class="signals-grid" id="signalsGrid"></div>
+
+    <div class="opp-card" id="oppCard">
+      <div class="opp-label">Your #1 opportunity</div>
+      <h3 id="oppTitle"></h3>
+      <p id="oppDesc"></p>
+    </div>
+
+    <div class="actions-list">
+      <h3>Priority actions</h3>
+      <div id="actionsList"></div>
+    </div>
+
+    <div class="upgrade-card">
+      <h3>Want to go deeper on local SEO?</h3>
+      <p>The full Digital Health Check includes a Google Business Profile audit, keyword gap analysis, and a ranked action plan. Delivered in 5 business days.</p>
+      <div class="upgrade-btns">
+        <a href="/audit" class="btn-p">See audit options from $99</a>
         <a href="/contact" class="btn-ghost">Book a free call</a>
       </div>
     </div>
-    <button class="reset-btn" onclick="resetTool()">← Check another business</button>
+    <button class="restart-btn" onclick="restart()">Start over with a different business</button>
   </div>
 
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
-  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
-    <div>
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div style="display:flex;gap:12px;">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
-        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
-        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
-        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-      </div>
-    </div>
-  </div>
-  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-    </div>
+<footer class="site-footer" role="contentinfo">
+  <p>© <span id="footer-year"></span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+  <div>
+    <a href="/tools">All Free Tools</a>
+    <a href="/audit">Audits from $99</a>
+    <a href="/contact">Contact</a>
   </div>
 </footer>
-<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
-
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
-  <div style="display:flex;gap:10px;">
-    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
-    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
-  </div>
-</div>
 
 <script>
-// This tool uses heuristic scoring based on user-provided info
-// since direct GBP API access requires OAuth for each business.
-// The score is an honest estimate based on known local SEO factors.
+var answers = {};
+var currentStep = 1;
 
-var bizData = {};
-
-function runCheck() {
-  var name = document.getElementById('bizName').value.trim();
-  var city = document.getElementById('bizCity').value.trim();
-  var type = document.getElementById('bizType').value;
-  var email = document.getElementById('bizEmail').value.trim();
-  var website = document.getElementById('bizWebsite').value.trim();
-
-  if(!name || !city || !type) { alert('Please fill in your business name, city, and type.'); return; }
-
-  bizData = {name:name, city:city, type:type, email:email, website:website};
-
-  document.getElementById('inputCard').style.display = 'none';
-  document.getElementById('loadingState').style.display = 'block';
-
-  var msgs = [
-    ['Checking local signals...','Analyzing Google Business Profile indicators'],
-    ['Searching local pack results...','Looking at nearby competition'],
-    ['Calculating visibility score...','Reviewing local SEO factors'],
-    ['Building your report...','Almost done'],
-  ];
-  var mi = 0;
-  var t = setInterval(function(){
-    mi = (mi+1) % msgs.length;
-    document.getElementById('loadingTitle').textContent = msgs[mi][0];
-    document.getElementById('loadingSub').textContent = msgs[mi][1];
-  }, 1200);
-
-  setTimeout(function() {
-    clearInterval(t);
-    document.getElementById('loadingState').style.display = 'none';
-    renderResults();
-    if(typeof gtag==='function'){gtag('event','local_visibility_check',{event_category:'tools',event_label:type});}
-  }, 5000);
+function selectOpt(q, val) {
+  // Deselect all
+  document.querySelectorAll('#q' + q + ' .opt').forEach(function(el) { el.classList.remove('selected'); });
+  document.getElementById('q' + q + '_' + val).classList.add('selected');
+  answers['q' + q] = val;
+  document.getElementById('q' + q + 'next').disabled = false;
 }
 
-function renderResults() {
-  var type = bizData.type;
-  var hasWebsite = bizData.website.length > 0;
+function checkQ6() {
+  var name = document.getElementById('q6_name').value.trim();
+  var city = document.getElementById('q6_city').value.trim();
+  document.getElementById('q6next').disabled = !(name && city);
+}
 
-  // Scoring rubric based on what we know and industry benchmarks
-  var checks = [
-    {
-      id:'gbp',
-      title:'Google Business Profile',
-      pass: false,
-      warn: true,
-      desc: 'We could not confirm a complete GBP for ' + bizData.name + ' in ' + bizData.city + '. An incomplete or missing GBP is the single biggest local SEO gap for most small businesses. It controls your Google Maps presence, review count, and local pack rankings.',
-      fix: 'Set up or complete your GBP at business.google.com — it is free and takes about 20 minutes.'
-    },
-    {
-      id:'website',
-      title:'Website presence',
-      pass: hasWebsite,
-      warn: !hasWebsite,
-      desc: hasWebsite ? 'You have a website. The next question is whether it loads fast on mobile and is optimized for local search terms.' : 'No website provided. Businesses with websites are 70% more likely to attract customers from local search.',
-      fix: hasWebsite ? 'Run a free speed test to see how your site performs.' : 'A basic website starts at $1,200.'
-    },
-    {
-      id:'localpack',
-      title:'Local pack ranking',
-      pass: false,
-      warn: true,
-      desc: 'We estimate ' + bizData.name + ' is NOT currently appearing in the top 3 local results for "' + getKeyword(type) + ' near me" in ' + bizData.city + '. The local 3-pack captures over 60% of local clicks.',
-      fix: 'GBP optimization + on-page local SEO + consistent NAP citations are the three levers that move local pack rankings.'
-    },
-    {
-      id:'reviews',
-      title:'Google reviews',
-      pass: false,
-      warn: true,
-      desc: 'We could not confirm recent reviews for ' + bizData.name + '. Businesses with 10+ reviews rank 15% higher on average in local search, and 88% of consumers trust online reviews as much as personal recommendations.',
-      fix: 'Start by asking your last 10 happy customers for a Google review. A steady stream of reviews (even 1-2/month) compounds over time.'
-    },
-    {
-      id:'mobile',
-      title:'Mobile experience',
-      pass: hasWebsite,
-      warn: !hasWebsite,
-      desc: hasWebsite ? 'You have a website — but mobile performance varies widely. Over 70% of local searches happen on phones. A site that loads in over 3 seconds loses half its mobile visitors.' : 'Without a website, you have no mobile presence beyond your GBP listing.',
-      fix: 'Run the free Speed Test to see your exact mobile score.'
-    },
-  ];
+function nextStep(from) {
+  document.getElementById('q' + from).classList.remove('active');
+  document.getElementById('sd' + from).className = 'step-dot done';
+  document.getElementById('sd' + from).textContent = '✓';
+  if (document.getElementById('sl' + from)) document.getElementById('sl' + from).classList.add('done');
+  var next = from + 1;
+  if (next <= 6) {
+    document.getElementById('q' + next).classList.add('active');
+    document.getElementById('sd' + next).classList.add('active');
+    currentStep = next;
+  }
+}
 
+function prevStep(from) {
+  document.getElementById('q' + from).classList.remove('active');
+  document.getElementById('sd' + from).classList.remove('active');
+  var prev = from - 1;
+  document.getElementById('q' + prev).classList.add('active');
+  document.getElementById('sd' + prev).className = 'step-dot active';
+  document.getElementById('sd' + prev).textContent = prev;
+  if (document.getElementById('sl' + prev)) document.getElementById('sl' + prev).classList.remove('done');
+  currentStep = prev;
+}
+
+function calcScore() {
   var score = 0;
-  var maxScore = checks.length;
-  checks.forEach(function(c){ if(c.pass) score++; else if(c.warn) score += 0.5; });
-  var pct = Math.round((score / maxScore) * 100);
 
-  var grade, gradeClass, gradeSummary;
-  if(pct >= 80){ grade='A'; gradeClass='grade-a'; gradeSummary='Strong local presence. A few optimizations could push you further.'; }
-  else if(pct >= 60){ grade='B'; gradeClass='grade-b'; gradeSummary='Decent foundation but meaningful gaps exist. Fixing them could significantly increase local leads.'; }
-  else if(pct >= 40){ grade='C'; gradeClass='grade-c'; gradeSummary='Significant local visibility gaps. Competitors with stronger signals are capturing customers who are searching for you right now.'; }
-  else { grade='D'; gradeClass='grade-d'; gradeSummary='Low local visibility. Most customers searching for a ' + getLabel(bizData.type) + ' in ' + bizData.city + ' will not find you.'; }
+  // GBP (40 pts max)
+  if (answers.q2 === 'yes_claimed') score += 40;
+  else if (answers.q2 === 'yes_unclaimed') score += 20;
+  // no GBP = 0
 
-  document.getElementById('gradeCard').innerHTML =
-    '<div class="grade-circle ' + gradeClass + '">' + grade + '</div>' +
-    '<div class="grade-info"><h3>Local Visibility Score for ' + bizData.name + '</h3><p>' + gradeSummary + '</p></div>';
+  // Reviews (25 pts max)
+  if (answers.q3 === 'great') score += 25;
+  else if (answers.q3 === 'decent') score += 15;
+  else if (answers.q3 === 'few') score += 5;
+  else if (answers.q3 === 'bad') score += 2;
 
-  var checksHtml = checks.map(function(c){
-    var cls = c.pass ? 'ci-pass' : c.warn ? 'ci-warn' : 'ci-fail';
-    var icon = c.pass ? '✓' : c.warn ? '!' : '✗';
-    return '<div class="check-item"><div class="check-icon '+cls+'">'+icon+'</div><div class="check-body"><h4>'+c.title+'</h4><p>'+c.desc+'</p></div></div>';
-  }).join('');
-  document.getElementById('checksList').innerHTML = checksHtml;
+  // Website (20 pts max)
+  if (answers.q4 === 'optimized') score += 20;
+  else if (answers.q4 === 'partial') score += 8;
+  // none = 0
 
-  var topFix = checks.find(function(c){ return !c.pass; });
-  if(!topFix) topFix = checks.find(function(c){ return c.warn; });
-  document.getElementById('topOpp').innerHTML =
-    '<h3>Your number one opportunity</h3><p>' + (topFix ? topFix.fix : 'Your local presence looks solid. Focus on growing your review count and publishing local content.') + '</p>';
+  // Citations (15 pts max)
+  if (answers.q5 === 'many') score += 15;
+  else if (answers.q5 === 'some') score += 7;
+  // none = 0
 
-  document.getElementById('resultsState').style.display = 'block';
+  return score;
 }
 
-function captureLvEmail(){
-  var email=document.getElementById('lvEmail').value;
-  if(!email||!email.includes('@'))return;
-  document.getElementById('lvEmailForm').style.display='none';
-  document.getElementById('lvEmailThanks').style.display='block';
-  if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'local_visibility'});}
+function showResults() {
+  var bizName = document.getElementById('q6_name').value.trim();
+  var city = document.getElementById('q6_city').value.trim();
 
-  var bizName=bizData.name||'Unknown';
-  var bizCity=bizData.city||'Unknown';
-  var bizType=bizData.type||'unknown';
-  var bizWebsite=bizData.website||'Not provided';
+  document.getElementById('q6').classList.remove('active');
+  document.getElementById('sd6').className = 'step-dot done';
+  document.getElementById('sd6').textContent = '✓';
+  if (document.getElementById('sl6')) document.getElementById('sl6').classList.add('done');
 
-  var gradeEl=document.querySelector('.grade-circle');
-  var gradeSummaryEl=document.querySelector('.grade-info p');
-  var grade=gradeEl?gradeEl.textContent.trim():'C';
-  var gradeSummary=gradeSummaryEl?gradeSummaryEl.textContent:'';
-  var gradeColor=grade==='A'?'#22c55e':grade==='B'?'#3b82f6':grade==='C'?'#f59e0b':'#ef4444';
+  var score = calcScore();
+  var scoreClass = score >= 70 ? 'good' : score >= 40 ? 'ok' : 'poor';
+  var gradeText = score >= 70 ? 'Strong local presence' : score >= 40 ? 'Room to improve' : 'Needs work';
 
-  var checkItems=document.querySelectorAll('.check-item');
-  var checksHtmlFull='<table style="width:100%;border-collapse:collapse;">';
-  var checksText='';
-  checkItems.forEach(function(item){
-    var icon=item.querySelector('.check-icon');
-    var title=item.querySelector('h4');
-    var desc=item.querySelector('p');
-    if(title){
-      var pass=icon&&icon.classList.contains('ci-pass');
-      var warn=icon&&icon.classList.contains('ci-warn');
-      var color=pass?'#22c55e':warn?'#f59e0b':'#ef4444';
-      var symbol=pass?'PASS':warn?'WARN':'FAIL';
-      checksHtmlFull+='<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:'+color+';">'+symbol+'</td>'+
-        '<td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong>'+title.textContent+'</strong>'+(desc?'<br><span style="color:#666;font-size:12px;">'+desc.textContent+'</span>':'')+'</td></tr>';
-      checksText+=(pass?'PASS':warn?'WARN':'FAIL')+': '+title.textContent+' | ';
+  document.getElementById('lvBizName').textContent = bizName + ' · ' + city;
+  document.getElementById('lvGrade').textContent = gradeText;
+  document.getElementById('lvGrade').className = 'score-grade ' + scoreClass;
+
+  // Animate score
+  var scoreEl = document.getElementById('lvScoreNum');
+  scoreEl.className = 'score-big ' + scoreClass;
+  var n = 0;
+  var t = setInterval(function() {
+    n += 2;
+    if (n >= score) { n = score; clearInterval(t); }
+    scoreEl.textContent = n;
+  }, 20);
+
+  // Signal cards
+  var signals = [
+    {
+      title: 'Google Business Profile',
+      status: answers.q2 === 'yes_claimed' ? 'good' : answers.q2 === 'yes_unclaimed' ? 'ok' : 'poor',
+      badge: answers.q2 === 'yes_claimed' ? 'Active' : answers.q2 === 'yes_unclaimed' ? 'Unclaimed' : 'Missing',
+      desc: answers.q2 === 'yes_claimed' ? 'Your GBP is active and managed — this is your strongest local ranking asset.' :
+            answers.q2 === 'yes_unclaimed' ? 'You have a listing but not actively managing it. Posting and responding to reviews could significantly boost rankings.' :
+            'You have no Google Business Profile. This is the single most impactful thing you can fix — it\'s free and takes 30 minutes to set up.'
+    },
+    {
+      title: 'Review Signals',
+      status: answers.q3 === 'great' ? 'good' : answers.q3 === 'decent' ? 'ok' : 'poor',
+      badge: answers.q3 === 'great' ? 'Strong' : answers.q3 === 'decent' ? 'Moderate' : answers.q3 === 'bad' ? 'Needs work' : 'Low volume',
+      desc: answers.q3 === 'great' ? 'Strong review count and rating. Keep asking happy customers to leave reviews.' :
+            answers.q3 === 'decent' ? 'Decent reviews but more volume will help rankings. Aim for 50+ with a 4.5+ average.' :
+            answers.q3 === 'bad' ? 'Your review profile needs attention. Responding to negative reviews and generating fresh positives helps.' :
+            'With fewer than 10 reviews, you\'re leaving ranking power on the table. Every happy customer is an opportunity.'
+    },
+    {
+      title: 'Website Local SEO',
+      status: answers.q4 === 'optimized' ? 'good' : answers.q4 === 'partial' ? 'ok' : 'poor',
+      badge: answers.q4 === 'optimized' ? 'Optimized' : answers.q4 === 'partial' ? 'Basic' : 'Missing',
+      desc: answers.q4 === 'optimized' ? 'Your site mentions your city and services clearly — Google can connect your site to local searches.' :
+            answers.q4 === 'partial' ? 'Your site exists but likely isn\'t telling Google enough about where you serve and what you do.' :
+            'Without a website (or with a very outdated one), you\'re missing a key signal Google uses to validate local businesses.'
+    },
+    {
+      title: 'Directory Listings',
+      status: answers.q5 === 'many' ? 'good' : answers.q5 === 'some' ? 'ok' : 'poor',
+      badge: answers.q5 === 'many' ? 'Strong' : answers.q5 === 'some' ? 'Partial' : 'Weak',
+      desc: answers.q5 === 'many' ? 'Multiple consistent citations reinforce your NAP (name, address, phone) across the web.' :
+            answers.q5 === 'some' ? 'Limited citations. Getting listed on Yelp, Apple Maps, and Bing at minimum makes a difference.' :
+            'Few or no directory listings means Google has little outside confirmation of your location and legitimacy.'
     }
-  });
-  checksHtmlFull+='</table>';
+  ];
 
-  var oppEl=document.querySelector('#topOpp p');
-  var opp=oppEl?oppEl.textContent:'Set up Google Business Profile.';
+  document.getElementById('signalsGrid').innerHTML = signals.map(function(s) {
+    return '<div class="signal-card">' +
+      '<div class="signal-head"><div class="signal-title">' + s.title + '</div><span class="signal-badge badge-' + s.status + '">' + s.badge + '</span></div>' +
+      '<p class="signal-desc">' + s.desc + '</p>' +
+    '</div>';
+  }).join('');
 
-  // ERIC gets the full report
-  var ericHtml='<div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9f9f9;">'+
-    '<h2 style="color:#1e1338;margin:0 0 4px;">Local Visibility Lead</h2>'+
-    '<p style="color:#666;margin:0 0 4px;font-size:13px;"><strong>'+bizName+'</strong> in '+bizCity+' ('+bizType+')</p>'+
-    '<p style="color:#666;margin:0 0 20px;font-size:13px;">Website: '+bizWebsite+' &nbsp;|&nbsp; Email: <a href="mailto:'+email+'">'+email+'</a></p>'+
-    '<div style="background:#1e1338;color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:inline-block;">'+
-    '<span style="font-size:32px;font-weight:700;color:'+gradeColor+';">'+grade+'</span>'+
-    '<span style="color:rgba(255,255,255,0.6);font-size:13px;margin-left:12px;">Local Visibility Grade</span></div>'+
-    '<p style="color:#444;font-size:13px;margin:0 0 16px;">'+gradeSummary+'</p>'+
-    '<h3 style="color:#1e1338;font-size:14px;margin:0 0 8px;">Full Check Results</h3>'+checksHtmlFull+
-    '<h3 style="color:#1e1338;font-size:14px;margin:16px 0 8px;">Top Opportunity</h3>'+
-    '<p style="color:#444;font-size:13px;background:#f0f0f0;padding:12px;border-radius:8px;">'+opp+'</p>'+
-    '<hr style="margin:20px 0;"><p style="color:#999;font-size:12px;">Reply to: <a href="mailto:'+email+'">'+email+'</a></p></div>';
+  // Top opportunity
+  var opps = {
+    no_gbp: { title: 'Set up your Google Business Profile today', desc: 'A verified, complete GBP is the single highest-impact thing a local business can do. Businesses with a complete profile get 7x more clicks and 70% more visits. It\'s free and takes about 30 minutes.' },
+    bad_reviews: { title: 'Build a review generation system', desc: 'Reviews are the second-strongest local ranking signal after your GBP. A simple text or email after every service asking happy customers to leave a Google review can double your count within 60 days.' },
+    few_reviews: { title: 'Get more Google reviews', desc: 'With under 10 reviews you\'re at a disadvantage versus competitors with 50+. Create a simple one-click Google review link and share it with every satisfied customer.' },
+    no_website: { title: 'Build a locally optimized website', desc: 'Without a website, you\'re invisible to a massive portion of local searchers. A well-built site with your city, services, and schema markup can move the needle on local rankings significantly.' },
+    partial_website: { title: 'Add local SEO to your existing site', desc: 'Adding your city name, neighborhood, service keywords, and a LocalBusiness schema block to your site can meaningfully improve how Google matches you to local searches.' },
+    no_citations: { title: 'Build your citation profile', desc: 'Getting listed consistently on Yelp, Apple Maps, Bing Places, and industry directories reinforces your business name, address, and phone number across the web — a key local ranking factor.' },
+    manage_gbp: { title: 'Activate your Google Business Profile', desc: 'You have a listing but it\'s not working for you. Add photos, post weekly updates, respond to every review, and fill out every field. Active GBPs rank significantly higher than dormant ones.' }
+  };
 
-  // VISITOR gets minimal teaser
-  var visitorHtml='<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
-    '<div style="max-width:520px;margin:0 auto;padding:40px 24px;">'+
-    '<p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:32px;">'+
-    '<h2 style="color:#fff;font-weight:400;font-size:22px;margin:0 0 12px;">Your local visibility snapshot.</h2>'+
-    '<p style="color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 20px;">I ran a quick check on <strong style="color:#fff;">'+bizName+'</strong> in '+bizCity+'. Your score is on the page — and there are a few things that could meaningfully improve how you show up in local search.</p>'+
-    '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:14px 16px;border-radius:8px;margin-bottom:24px;">'+
-    '<p style="color:#c4aee8;font-size:12px;font-weight:700;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;">Your #1 opportunity</p>'+
-    '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;line-height:1.6;">'+opp+'</p></div>'+
-    '<p style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;margin:0 0 20px;">Want a deeper look? A full audit includes manual GBP review, local keyword rankings, competitor comparison, and a step-by-step fix list.</p>'+
-    '<a href="https://davisdigitalstudio.com/audit" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:12px;">See audit options from $99</a><br>'+
-    '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="font-size:13px;color:rgba(255,255,255,0.4);text-decoration:none;">Or book a free 30-min call first</a>'+
-    '</div>'+
-    '<p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
-    '</div></body></html>';
+  var opp;
+  if (answers.q2 === 'no') opp = opps.no_gbp;
+  else if (answers.q3 === 'bad') opp = opps.bad_reviews;
+  else if (answers.q2 === 'yes_unclaimed') opp = opps.manage_gbp;
+  else if (answers.q3 === 'few') opp = opps.few_reviews;
+  else if (answers.q4 === 'none') opp = opps.no_website;
+  else if (answers.q4 === 'partial') opp = opps.partial_website;
+  else opp = opps.no_citations;
 
-  fetch('https://api.resend.com/emails',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'DDS Notifications <eric@davisdigitalstudio.com>',to:['eric@davisdigitalstudio.com'],subject:'Local Visibility Lead: '+bizName+' in '+bizCity+' ('+grade+')',html:ericHtml})}).catch(function(){});
+  document.getElementById('oppTitle').textContent = opp.title;
+  document.getElementById('oppDesc').textContent = opp.desc;
 
-  fetch('https://formspree.io/f/mvznevlo',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({_subject:'Local Visibility: '+bizName+' ('+grade+')',email:email,business:bizName,city:bizCity,type:bizType,website:bizWebsite,grade:grade,checks:checksText,opportunity:opp})}).catch(function(){});
+  // Action items
+  var actions = [];
+  if (answers.q2 === 'no') actions.push({ h: 'Claim or create your Google Business Profile', p: 'Go to business.google.com and verify your business. Fill in every field — hours, photos, description, services.' });
+  if (answers.q2 === 'yes_unclaimed') actions.push({ h: 'Start actively managing your GBP', p: 'Log in and complete your profile. Add 10+ photos, post an update this week, and respond to every existing review.' });
+  if (answers.q3 !== 'great') actions.push({ h: 'Build a review ask into your process', p: 'After every positive interaction, send a direct Google review link. A simple "Would you mind leaving us a quick Google review?" doubles response rate.' });
+  if (answers.q4 !== 'optimized') actions.push({ h: 'Add city and service keywords to your website', p: 'Make sure "' + city + '" and your main service appear in your page title, headings, and first paragraph.' });
+  if (answers.q5 !== 'many') actions.push({ h: 'Get listed on Yelp, Apple Maps, and Bing Places', p: 'These are the three most impactful directories after Google. Consistent NAP (name, address, phone) across all of them builds trust with Google.' });
+  actions.push({ h: 'Add LocalBusiness schema to your site', p: 'This structured data markup tells Google exactly what your business is, where it is, and when it\'s open — directly in the page code.' });
 
-  fetch('https://api.resend.com/emails',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'Eric Davis <eric@davisdigitalstudio.com>',to:[email],subject:'Your local visibility snapshot — '+bizName,html:visitorHtml})}).catch(function(){});
-}
-function getKeyword(type) {
-  var map = {restaurant:'restaurant',retail:'boutique',service:'plumber',health:'gym',salon:'salon',professional:'lawyer',creative:'photographer',other:'business'};
-  return map[type] || 'business';
-}
+  document.getElementById('actionsList').innerHTML = actions.slice(0, 4).map(function(a, i) {
+    return '<div class="action-item">' +
+      '<div class="action-num">' + (i+1) + '</div>' +
+      '<div class="action-body"><h4>' + a.h + '</h4><p>' + a.p + '</p></div>' +
+    '</div>';
+  }).join('');
 
-function getLabel(type) {
-  var map = {restaurant:'restaurant',retail:'retail store',service:'home service business',health:'wellness business',salon:'salon',professional:'professional service',creative:'creative business',other:'business'};
-  return map[type] || 'business';
+  document.getElementById('lvResults').style.display = 'block';
+  document.getElementById('stepIndicator').style.display = 'none';
+
+  if (typeof gtag === 'function') gtag('event', 'local_visibility_complete', { event_category: 'tools', event_label: bizName, value: score });
 }
 
-function resetTool() {
-  document.getElementById('resultsState').style.display = 'none';
-  document.getElementById('inputCard').style.display = 'block';
-  document.getElementById('bizName').value = '';
-  document.getElementById('bizEmail').value = '';
-  document.getElementById('bizWebsite').value = '';
+function restart() {
+  answers = {};
+  currentStep = 1;
+  document.getElementById('lvResults').style.display = 'none';
+  document.getElementById('stepIndicator').style.display = 'flex';
+  for (var i = 1; i <= 6; i++) {
+    document.getElementById('q' + i).classList.remove('active');
+    document.getElementById('sd' + i).className = 'step-dot';
+    document.getElementById('sd' + i).textContent = i;
+    if (document.getElementById('sl' + i)) document.getElementById('sl' + i).classList.remove('done');
+    var nextBtn = document.getElementById('q' + i + 'next');
+    if (nextBtn) nextBtn.disabled = true;
+    document.querySelectorAll('#q' + i + ' .opt').forEach(function(el) { el.classList.remove('selected'); });
+  }
+  document.getElementById('q6_name').value = '';
+  document.getElementById('q6_city').value = '';
+  document.getElementById('q1').classList.add('active');
+  document.getElementById('sd1').classList.add('active');
 }
 
 document.getElementById('footer-year').textContent = new Date().getFullYear();
-(function(){var c=localStorage.getItem('cookie_consent');if(!c){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(c==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();
-function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
-function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
 </script>
 </body>
 </html>

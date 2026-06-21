@@ -1,28 +1,18 @@
 <!DOCTYPE html>
-<!-- DDS v3.0 20260621-1655 -->
-<!-- DDS v2.5 tool: speed-test -->
+<!-- DDS v1.0 20260621-1100 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Page Speed Test | Davis Digital Studio</title>
-<meta name="description" content="Test your website speed with real Google Lighthouse scores. Mobile and desktop performance, Core Web Vitals, and specific fixes free, instant, no signup.">
+<meta name="description" content="Test your website speed with real Google Lighthouse scores. Mobile and desktop performance, Core Web Vitals, and plain-English fixes. Free, no signup.">
 <link rel="canonical" href="https://www.davisdigitalstudio.com/speed-test">
 <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
 <meta name="theme-color" content="#5b3fa0">
-<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Free Page Speed Test | Davis Digital Studio">
-<meta property="og:description" content="Real Google Lighthouse scores for your website. Mobile and desktop, Core Web Vitals, and plain-English fixes. Free and instant.">
+<meta property="og:description" content="Real Google Lighthouse scores for mobile and desktop. Core Web Vitals and plain-English fixes. Free, no signup.">
 <meta property="og:url" content="https://www.davisdigitalstudio.com/speed-test">
 <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@davisdigitalstudio">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Free Page Speed Test","url":"https://www.davisdigitalstudio.com/speed-test","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Real Google Lighthouse speed scores for any website. Free and instant.","provider":{"@type":"Person","name":"Eric Davis","url":"https://www.davisdigitalstudio.com"}}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -34,211 +24,229 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;padding-top:68px;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#5e5270;--serif:'DM Serif Display',Georgia,serif;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'DM Serif Display',Georgia,serif;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
-:focus:not(:focus-visible){outline:none;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
 .nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);}
 .nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
 .nav-logo span{color:#5b3fa0;}
 .nav-links{display:flex;align-items:center;gap:6px;}
-.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s;}
-.navlink:hover{color:var(--p);}
-.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;}
-.hero{background:var(--pdark);padding:64px 24px 56px;text-align:center;}
-.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
-.hero h1{font-family:var(--serif);font-size:clamp(30px,5vw,52px);font-weight:400;color:#fff;letter-spacing:-1px;margin-bottom:12px;line-height:1.1;}
+.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;}
+.navlink:hover,.navlink.active{color:var(--p);background:var(--pxxxl);}
+.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
+.nav-cta:hover{opacity:0.88;}
+
+.hero{background:var(--pdark);padding:72px 24px 64px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.4) 0%,transparent 65%);pointer-events:none;}
+.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;color:#fff;letter-spacing:-1.5px;margin-bottom:14px;line-height:1.1;}
 .hero h1 em{font-style:italic;color:var(--pxl);}
-.hero-sub{font-size:16px;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto;line-height:1.7;}
-.tool-wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px;}
-.input-card{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:20px;padding:32px;margin-bottom:24px;}
-.input-row{display:flex;gap:10px;margin-bottom:12px;}
-.url-input{flex:1;padding:13px 18px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:14px;color:var(--ink);background:#faf8f5;transition:border-color 0.15s;}
-.url-input:focus{border-color:#5b3fa0;outline:none;background:#fff;}
-.strategy-toggle{display:flex;gap:6px;margin-bottom:16px;}
-.strat-btn{flex:1;padding:9px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
-.strat-btn.active{background:#5b3fa0;color:#fff;border-color:#5b3fa0;}
-.run-btn{background:#5b3fa0;color:#fff;border:none;padding:13px 32px;border-radius:100px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:opacity 0.15s;white-space:nowrap;}
-.run-btn:hover{opacity:0.88;}
-.run-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.note{font-size:12px;color:var(--muted);text-align:center;}
+.hero-sub{font-size:16px;color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto;line-height:1.7;}
+
+.tool-wrap{max-width:760px;margin:0 auto;padding:56px 24px 80px;}
+
+/* Input card */
+.input-card{background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 40px rgba(91,63,160,0.08);border:1px solid rgba(91,63,160,0.1);margin-bottom:32px;}
+.input-card h2{font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:8px;letter-spacing:-0.5px;}
+.input-card p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.url-row{display:flex;gap:12px;}
+.url-input{flex:1;border:1.5px solid rgba(91,63,160,0.2);border-radius:12px;padding:14px 18px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;transition:border-color 0.15s;outline:none;}
+.url-input:focus{border-color:var(--p);}
+.url-input::placeholder{color:#b0a8c0;}
+.run-btn{background:var(--p);color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s,transform 0.15s;white-space:nowrap;}
+.run-btn:hover{opacity:0.88;transform:translateY(-1px);}
+.run-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.strategy-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.stab{background:var(--pxxxl);border:1.5px solid transparent;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.stab.active{background:#fff;border-color:var(--p);color:var(--p);}
+.error-msg{color:#c0392b;font-size:13px;margin-top:10px;display:none;}
+
+/* Loading */
 .loading{display:none;text-align:center;padding:48px 24px;}
-.scan-orb{width:56px;height:56px;border:3px solid rgba(91,63,160,0.15);border-top:3px solid #5b3fa0;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+.spinner{width:48px;height:48px;border:3px solid var(--pxxl);border-top-color:var(--p);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.scan-title{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px;}
-.scan-sub{font-size:13px;color:var(--muted);}
+.loading p{font-size:15px;color:var(--muted);margin-bottom:6px;}
+.loading small{font-size:12px;color:#b0a8c0;}
+.loading-steps{list-style:none;text-align:left;max-width:280px;margin:20px auto 0;}
+.loading-steps li{font-size:13px;color:var(--muted);padding:6px 0;display:flex;align-items:center;gap:10px;opacity:0.4;transition:opacity 0.4s;}
+.loading-steps li.active{opacity:1;color:var(--p);font-weight:500;}
+.loading-steps li.done{opacity:0.7;}
+.loading-steps li::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pxl);flex-shrink:0;}
+.loading-steps li.active::before{background:var(--p);}
+.loading-steps li.done::before{content:'✓';background:none;color:#6abf69;font-size:12px;font-weight:700;}
+
+/* Results */
 .results{display:none;}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.results-url{font-size:13px;color:var(--muted);background:var(--pxxxl);padding:6px 14px;border-radius:100px;}
+.rerun-btn{background:transparent;border:1.5px solid var(--pxl);color:var(--p);border-radius:100px;padding:7px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.rerun-btn:hover{background:var(--pxxxl);}
+
+/* Score cards */
 .scores-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.score-box{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:20px;text-align:center;}
-.score-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 10px;border:4px solid;}
-.score-label{font-size:12px;color:var(--muted);font-weight:600;}
-.score-good{border-color:#22c55e;color:#16a34a;background:rgba(34,197,94,0.08);}
-.score-ok{border-color:#f59e0b;color:#d97706;background:rgba(245,158,11,0.08);}
-.score-bad{border-color:#ef4444;color:#dc2626;background:rgba(239,68,68,0.08);}
-.cwv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
-.cwv-box{background:#fff;border:1px solid rgba(91,63,160,0.08);border-radius:12px;padding:16px;}
-.cwv-name{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;}
-.cwv-val{font-size:20px;font-weight:700;}
-.cwv-desc{font-size:11px;color:var(--muted);margin-top:3px;}
-.findings-list{background:#fff;border:1px solid rgba(91,63,160,0.08);border-radius:16px;overflow:hidden;margin-bottom:24px;}
-.finding-item{display:flex;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(91,63,160,0.06);align-items:flex-start;}
-.finding-item:last-child{border-bottom:none;}
-.finding-icon{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
-.fi-high{background:rgba(239,68,68,0.1);color:#dc2626;}
-.fi-med{background:rgba(245,158,11,0.1);color:#d97706;}
-.fi-low{background:rgba(34,197,94,0.1);color:#16a34a;}
-.finding-body h4{font-size:13px;font-weight:600;margin-bottom:3px;}
-.finding-body p{font-size:12px;color:var(--muted);line-height:1.5;}
-.upsell{background:var(--pdark);border-radius:20px;padding:32px;text-align:center;color:#fff;}
-.upsell h3{font-family:var(--serif);font-size:24px;font-weight:400;margin-bottom:10px;}
-.upsell p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:20px;line-height:1.6;}
-.upsell-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.btn-white{background:#fff;color:#1a1523;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;}
-.btn-ghost{background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:11px 24px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.2);text-decoration:none;}
-.reset-btn{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;margin-top:16px;text-decoration:underline;background:none;border:none;font-family:inherit;}
-.error-box{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:14px 18px;font-size:13px;color:#dc2626;display:none;margin-top:12px;}
-.site-footer{background:var(--pdark);padding:20px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-.site-footer p{font-size:12px;color:rgba(255,255,255,0.35);}
-.site-footer a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:16px;}
-@media(max-width:700px){.nav{padding:0 20px;}.nav-links .navlink{display:none;}.scores-row{grid-template-columns:1fr 1fr;}.cwv-grid{grid-template-columns:1fr 1fr;}.input-row{flex-direction:column;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}.site-footer a{margin-left:10px;}}
+.score-card{background:#fff;border-radius:16px;padding:20px 16px;text-align:center;border:1px solid rgba(91,63,160,0.1);}
+.score-num{font-family:var(--serif);font-size:40px;font-weight:400;line-height:1;margin-bottom:4px;}
+.score-num.good{color:#6abf69;}
+.score-num.ok{color:#f0b429;}
+.score-num.poor{color:#e05555;}
+.score-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+.score-bar{height:4px;border-radius:2px;background:#ede8f7;margin-top:10px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.score-bar-fill.good{background:#6abf69;}
+.score-bar-fill.ok{background:#f0b429;}
+.score-bar-fill.poor{background:#e05555;}
+
+/* Vitals */
+.vitals-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
+.vitals-card h3{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.vitals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;}
+.vital{background:var(--pxxxl);border-radius:10px;padding:14px 12px;text-align:center;}
+.vital-val{font-size:20px;font-weight:700;margin-bottom:2px;}
+.vital-val.good{color:#6abf69;}
+.vital-val.ok{color:#f0b429;}
+.vital-val.poor{color:#e05555;}
+.vital-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+.vital-thresh{font-size:10px;color:#b0a8c0;margin-top:2px;}
+
+/* Issues */
+.issues-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
+.issues-card h3{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.issue-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
+.issue-item:last-child{border-bottom:none;padding-bottom:0;}
+.issue-sev{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.issue-sev.high{background:#e05555;}
+.issue-sev.medium{background:#f0b429;}
+.issue-sev.low{background:#6abf69;}
+.issue-body h4{font-size:14px;font-weight:600;margin-bottom:4px;}
+.issue-body p{font-size:13px;color:var(--muted);line-height:1.6;}
+.issue-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-top:6px;letter-spacing:0.5px;}
+.issue-tag.high{background:rgba(224,85,85,0.1);color:#c0392b;}
+.issue-tag.medium{background:rgba(240,180,41,0.1);color:#b8860b;}
+.issue-tag.low{background:rgba(106,191,105,0.1);color:#2e7d32;}
+
+/* CTA */
+.upgrade-card{background:var(--pdark);border-radius:20px;padding:32px;text-align:center;position:relative;overflow:hidden;}
+.upgrade-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.5) 0%,transparent 65%);pointer-events:none;}
+.upgrade-card h3{font-family:var(--serif);font-size:24px;font-weight:400;color:#fff;margin-bottom:10px;position:relative;}
+.upgrade-card p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;line-height:1.7;position:relative;}
+.upgrade-card .btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;}
+.btn-p{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;transition:transform 0.15s;}
+.btn-p:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.25);text-decoration:none;transition:background 0.15s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);}
+
+.site-footer{padding:24px 48px;background:var(--pdark);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:0;}
+.site-footer p{font-size:12px;color:rgba(255,255,255,0.3);}
+.site-footer a{font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;margin-left:16px;}
+.site-footer a:hover{color:rgba(255,255,255,0.7);}
+
+@media(max-width:700px){
+  .nav{padding:0 20px;}.nav-links{display:none;}
+  .url-row{flex-direction:column;}
+  .scores-row{grid-template-columns:repeat(2,1fr);}
+  .site-footer{padding:20px 24px;flex-direction:column;text-align:center;}
+}
 </style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Site navigation">
+<nav class="nav" role="navigation" aria-label="Main navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
     <a href="/" class="navlink">Home</a>
+    <a href="/about" class="navlink">About</a>
     <a href="/services" class="navlink">Services</a>
-    <a href="/tools" class="navlink">Free Tools</a>
-    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
-    <a href="/audit" class="nav-cta" style="margin-left:6px;">Audits from $99</a>
+    <a href="/work" class="navlink">Work</a>
+    <a href="/tools" class="navlink active">Free Tools</a>
+    <a href="/portal" class="navlink">Client Login</a>
+    <a href="/contact" class="nav-cta">Let's talk</a>
   </div>
 </nav>
 
-<div class="hero" role="banner">
+<div class="hero">
   <div class="hero-tag">Free Tool</div>
-  <h1>How fast is your<br>website? <em>Find out now.</em></h1>
-  <p class="hero-sub">Real Google Lighthouse scores for mobile and desktop. Core Web Vitals, performance issues, and plain-English fixes. Free and instant.</p>
+  <h1>How fast is<br>your website, <em>really?</em></h1>
+  <p class="hero-sub">Real Google Lighthouse scores for mobile and desktop. Core Web Vitals, top issues, and plain-English fixes.</p>
 </div>
 
 <main id="main-content">
 <div class="tool-wrap">
 
-  <div class="input-card" id="inputCard">
-    <div class="strategy-toggle" role="group" aria-label="Test strategy">
-      <button class="strat-btn active" id="btnMobile" onclick="setStrategy('mobile')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        Mobile
+  <div class="input-card">
+    <h2>Test your site speed</h2>
+    <p>Enter your URL below. Results take about 20-30 seconds — Google is actually running Lighthouse on your site.</p>
+    <div class="strategy-tabs" role="group" aria-label="Device strategy">
+      <button class="stab active" id="tabMobile" onclick="setStrategy('mobile')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>Mobile
       </button>
-      <button class="strat-btn" id="btnDesktop" onclick="setStrategy('desktop')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Desktop
+      <button class="stab" id="tabDesktop" onclick="setStrategy('desktop')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Desktop
       </button>
     </div>
-    <div class="input-row">
-      <input class="url-input" id="urlInput" type="url" placeholder="https://yourbusiness.com" aria-label="Website URL to test">
-      <button class="run-btn" id="runBtn" onclick="runTest()">Test my site</button>
+    <div class="url-row">
+      <input type="url" class="url-input" id="stUrl" placeholder="https://yourbusiness.com" autocomplete="url" aria-label="Website URL">
+      <button class="run-btn" id="runBtn" onclick="runTest()">Run test</button>
     </div>
-    <p class="note">No signup required. Results in 10–15 seconds.</p>
-    <div class="error-box" id="errorBox"></div>
+    <div class="error-msg" id="stError"></div>
   </div>
 
-  <div class="loading" id="loadingState">
-    <div class="scan-orb"></div>
-    <div class="scan-title">Running Lighthouse audit...</div>
-    <div class="scan-sub" id="loadingSub">Fetching real Google PageSpeed data</div>
+  <div class="loading" id="stLoading">
+    <div class="spinner"></div>
+    <p>Running Lighthouse on your site...</p>
+    <small>This takes 20-30 seconds. Please wait.</small>
+    <ul class="loading-steps" id="loadingSteps">
+      <li id="ls1">Connecting to Google Lighthouse</li>
+      <li id="ls2">Loading your page</li>
+      <li id="ls3">Measuring performance</li>
+      <li id="ls4">Analyzing Core Web Vitals</li>
+      <li id="ls5">Compiling your results</li>
+    </ul>
   </div>
 
-  <div class="results" id="resultsState">
+  <div class="results" id="stResults">
+    <div class="results-header">
+      <span class="results-url" id="stResultUrl"></span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="strategyBadge" style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;"></span>
+        <button class="rerun-btn" onclick="resetTest()">Test another site</button>
+      </div>
+    </div>
+
     <div class="scores-row" id="scoresRow"></div>
-    <div class="cwv-grid" id="cwvGrid"></div>
-    <div class="findings-list" id="findingsList"></div>
-    
-    <div id="emailCapture" style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:24px;margin-bottom:20px;text-align:center;">
-      <div style="font-size:14px;font-weight:600;color:#1a1523;margin-bottom:6px;">Want these results emailed to you?</div>
-      <div style="font-size:13px;color:#5e5270;margin-bottom:14px;">Also get weekly tips on improving your site speed and SEO.</div>
-      <div style="display:flex;gap:8px;max-width:400px;margin:0 auto;" id="emailForm">
-        <input type="email" id="captureEmail" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;">
-        <button onclick="captureEmail()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Send results</button>
-      </div>
-      <div id="emailThanks" style="display:none;font-size:13px;color:#16a34a;font-weight:600;margin-top:8px;">Done. Check your inbox.</div>
+
+    <div class="vitals-card" id="vitalsCard" style="display:none;">
+      <h3>Core Web Vitals</h3>
+      <div class="vitals-grid" id="vitalsGrid"></div>
     </div>
-    <div class="upsell">
-      <h3>Want the full picture?</h3>
-      <p>Speed is just one dimension. The Digital Health Check covers Google visibility, SEO, content, conversion paths, and more. Delivered in a 6-page branded report in 5 business days.</p>
-      <div class="upsell-btns">
-        <a href="/audit" class="btn-white">See all audit options from $99</a>
-        <a href="/report-card" class="btn-ghost">Free Report Card</a>
+
+    <div class="issues-card" id="issuesCard" style="display:none;">
+      <h3>Top issues to fix</h3>
+      <div id="issuesList"></div>
+    </div>
+
+    <div class="upgrade-card">
+      <h3>Want to know what these scores mean for your business?</h3>
+      <p>The full Digital Health Check goes deeper — keyword analysis, conversion paths, competitor comparison, and a prioritized fix list. Delivered in 5 business days.</p>
+      <div class="btns">
+        <a href="/audit" class="btn-p">See audit options from $99</a>
+        <a href="/contact" class="btn-ghost">Book a free call first</a>
       </div>
     </div>
-    <button class="reset-btn" onclick="resetTool()">← Test another URL</button>
   </div>
 
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
-  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
-    <div>
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div style="display:flex;gap:12px;">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
-        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
-        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
-        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-      </div>
-    </div>
-  </div>
-  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-    </div>
+<footer class="site-footer" role="contentinfo">
+  <p>© <span id="footer-year"></span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+  <div>
+    <a href="/tools">All Free Tools</a>
+    <a href="/audit">Audits from $99</a>
+    <a href="/contact">Contact</a>
+    <a href="/portal">Client Login</a>
   </div>
 </footer>
-<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
-
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
-  <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
-    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
-  </div>
-</div>
 
 <script>
 var PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
@@ -246,225 +254,208 @@ var strategy = 'mobile';
 
 function setStrategy(s) {
   strategy = s;
-  document.getElementById('btnMobile').className = 'strat-btn' + (s==='mobile'?' active':'');
-  document.getElementById('btnDesktop').className = 'strat-btn' + (s==='desktop'?' active':'');
+  document.getElementById('tabMobile').classList.toggle('active', s === 'mobile');
+  document.getElementById('tabDesktop').classList.toggle('active', s === 'desktop');
 }
 
 function scoreClass(n) {
-  if(n >= 90) return 'score-good';
-  if(n >= 50) return 'score-ok';
-  return 'score-bad';
+  if (n === null || n === undefined) return '';
+  return n >= 90 ? 'good' : n >= 50 ? 'ok' : 'poor';
 }
 
-function fmtMs(n) {
-  if(!n && n!==0) return 'N/A';
-  return n >= 1000 ? (n/1000).toFixed(1)+'s' : Math.round(n)+'ms';
+function vitalClass(metric, val) {
+  var thresholds = {
+    lcp: [2500, 4000], fcp: [1800, 3000], cls: [0.1, 0.25], tbt: [200, 600], si: [3400, 5800]
+  };
+  if (!thresholds[metric] || val === null) return '';
+  var raw = parseFloat(val);
+  if (isNaN(raw)) return '';
+  return raw <= thresholds[metric][0] ? 'good' : raw <= thresholds[metric][1] ? 'ok' : 'poor';
+}
+
+var stepTimer;
+function animateSteps() {
+  var steps = ['ls1','ls2','ls3','ls4','ls5'];
+  var i = 0;
+  steps.forEach(function(id) { document.getElementById(id).className = ''; });
+  stepTimer = setInterval(function() {
+    if (i > 0) {
+      document.getElementById(steps[i-1]).className = 'done';
+    }
+    if (i < steps.length) {
+      document.getElementById(steps[i]).className = 'active';
+      i++;
+    } else {
+      clearInterval(stepTimer);
+    }
+  }, 4500);
 }
 
 function runTest() {
-  var url = document.getElementById('urlInput').value.trim();
-  if(!url) { showError('Please enter a URL.'); return; }
-  if(!url.startsWith('http')) url = 'https://' + url;
+  var url = document.getElementById('stUrl').value.trim();
+  var errEl = document.getElementById('stError');
+  errEl.style.display = 'none';
+  if (!url) { errEl.textContent = 'Please enter a URL.'; errEl.style.display = 'block'; return; }
+  if (!url.match(/^https?:\/\//)) url = 'https://' + url;
 
-  document.getElementById('errorBox').style.display = 'none';
-  document.getElementById('inputCard').style.display = 'none';
-  document.getElementById('loadingState').style.display = 'block';
-  document.getElementById('resultsState').style.display = 'none';
+  document.getElementById('stLoading').style.display = 'block';
+  document.getElementById('stResults').style.display = 'none';
+  document.getElementById('runBtn').disabled = true;
+  animateSteps();
 
-  var msgs = ['Fetching real Google PageSpeed data...','Running Lighthouse audit...','Measuring Core Web Vitals...','Analyzing performance opportunities...'];
-  var mi = 0;
-  var msgTimer = setInterval(function(){
-    mi = (mi+1) % msgs.length;
-    var el = document.getElementById('loadingSub');
-    if(el) el.textContent = msgs[mi];
-  }, 2500);
+  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
+    encodeURIComponent(url) + '&strategy=' + strategy +
+    '&category=performance&category=seo&category=accessibility&category=best-practices' +
+    '&key=' + PSI_KEY;
 
-  var apiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
-    encodeURIComponent(url) + '&strategy=' + strategy + '&key=' + PSI_KEY +
-    '&category=performance&category=seo&category=accessibility&category=best-practices';
-
-  fetch(apiUrl)
-    .then(function(r){ return r.json(); })
+  fetch(psiUrl)
+    .then(function(r) { return r.json(); })
     .then(function(data) {
-      clearInterval(msgTimer);
-      if(data.error) { showError('Could not fetch data for this URL. Make sure it is publicly accessible.'); resetUI(); return; }
-      renderResults(data, url);
-      if(typeof gtag==='function'){gtag('event','speed_test_run',{event_category:'tools',event_label:strategy});}
+      clearInterval(stepTimer);
+      document.getElementById('stLoading').style.display = 'none';
+      document.getElementById('runBtn').disabled = false;
+      if (data.error) { showError(data.error.message || 'Could not analyze that URL. Check it and try again.'); return; }
+      renderResults(url, data);
     })
     .catch(function() {
-      clearInterval(msgTimer);
-      showError('Connection error. Please try again.');
-      resetUI();
+      clearInterval(stepTimer);
+      document.getElementById('stLoading').style.display = 'none';
+      document.getElementById('runBtn').disabled = false;
+      showError('Could not connect to Google. Check your URL and try again.');
     });
-}
-
-function renderResults(data, url) {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('resultsState').style.display = 'block';
-
-  var cats = data.lighthouseResult && data.lighthouseResult.categories;
-  var audits = data.lighthouseResult && data.lighthouseResult.audits;
-
-  var scores = [
-    {label:'Performance', key:'performance'},
-    {label:'SEO', key:'seo'},
-    {label:'Accessibility', key:'accessibility'},
-    {label:'Best Practices', key:'best-practices'},
-  ];
-
-  var scoresHtml = scores.map(function(s){
-    var val = cats && cats[s.key] ? Math.round(cats[s.key].score * 100) : 0;
-    var cls = scoreClass(val);
-    return '<div class="score-box"><div class="score-circle '+cls+'">'+val+'</div><div class="score-label">'+s.label+'</div></div>';
-  }).join('');
-  document.getElementById('scoresRow').innerHTML = scoresHtml;
-
-  var cwvItems = [
-    {key:'first-contentful-paint', name:'FCP', desc:'First Contentful Paint'},
-    {key:'largest-contentful-paint', name:'LCP', desc:'Largest Contentful Paint'},
-    {key:'total-blocking-time', name:'TBT', desc:'Total Blocking Time'},
-    {key:'cumulative-layout-shift', name:'CLS', desc:'Cumulative Layout Shift'},
-    {key:'speed-index', name:'Speed Index', desc:'Overall Load Speed'},
-    {key:'interactive', name:'TTI', desc:'Time to Interactive'},
-  ];
-  var cwvHtml = cwvItems.map(function(item){
-    var a = audits && audits[item.key];
-    var val = a ? a.displayValue || 'N/A' : 'N/A';
-    var score = a ? a.score : null;
-    var col = score === null ? '#6b6478' : score >= 0.9 ? '#16a34a' : score >= 0.5 ? '#d97706' : '#dc2626';
-    return '<div class="cwv-box"><div class="cwv-name">'+item.name+'</div><div class="cwv-val" style="color:'+col+'">'+val+'</div><div class="cwv-desc">'+item.desc+'</div></div>';
-  }).join('');
-  document.getElementById('cwvGrid').innerHTML = cwvHtml;
-
-  // Top findings
-  var opportunities = [];
-  if(audits) {
-    Object.keys(audits).forEach(function(k){
-      var a = audits[k];
-      if(a.score !== null && a.score < 0.9 && a.title && a.description) {
-        opportunities.push({score:a.score, title:a.title, desc:a.description.split('.')[0]+'.'});
-      }
-    });
-  }
-  opportunities.sort(function(a,b){return a.score-b.score;});
-  var top = opportunities.slice(0,6);
-
-  var findHtml = top.map(function(o){
-    var sev = o.score < 0.5 ? 'high' : o.score < 0.9 ? 'med' : 'low';
-    var label = sev==='high' ? '!' : sev==='med' ? '~' : '✓';
-    return '<div class="finding-item"><div class="finding-icon fi-'+sev+'">'+label+'</div><div class="finding-body"><h4>'+o.title+'</h4><p>'+o.desc+'</p></div></div>';
-  }).join('');
-  document.getElementById('findingsList').innerHTML = findHtml || '<div class="finding-item"><div class="finding-body"><h4>No major issues found</h4><p>Your site scored well across the top performance checks.</p></div></div>';
-}
-
-function resetUI() {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('inputCard').style.display = 'block';
-}
-
-function captureEmail(){
-  var email=document.getElementById('captureEmail').value;
-  if(!email||!email.includes('@'))return;
-  document.getElementById('emailForm').style.display='none';
-  document.getElementById('emailThanks').style.display='block';
-  if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'speed_test'});}
-
-  var testedUrl=document.getElementById('urlInput')?document.getElementById('urlInput').value:'your site';
-
-  // Pull scores and issues
-  var scoreEls=document.querySelectorAll('.score-circle');
-  var scoreLabelEls=document.querySelectorAll('.score-label');
-  var scoresText='';
-  var scoresHtmlFull='<table style="width:100%;border-collapse:collapse;">';
-  scoreEls.forEach(function(el,i){
-    var label=scoreLabelEls[i]?scoreLabelEls[i].textContent:'';
-    var val=el.textContent;
-    var color=el.classList.contains('score-good')?'#22c55e':el.classList.contains('score-ok')?'#f59e0b':'#ef4444';
-    scoresText+=label+': '+val+' | ';
-    scoresHtmlFull+='<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">'+label+'</td><td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong style="color:'+color+';">'+val+'/100</strong></td></tr>';
-  });
-  scoresHtmlFull+='</table>';
-
-  var findingEls=document.querySelectorAll('.finding-body h4');
-  var findingsText='';
-  var findingsHtmlFull='<ul style="padding-left:20px;">';
-  findingEls.forEach(function(el,i){
-    var desc=el.nextElementSibling?el.nextElementSibling.textContent:'';
-    findingsText+=(i+1)+'. '+el.textContent+': '+desc.substring(0,80)+' | ';
-    findingsHtmlFull+='<li style="margin-bottom:8px;"><strong>'+el.textContent+'</strong><br><span style="color:#666;font-size:13px;">'+desc+'</span></li>';
-  });
-  findingsHtmlFull+='</ul>';
-
-  // CWV data
-  var cwvEls=document.querySelectorAll('.cwv-box');
-  var cwvText='';
-  cwvEls.forEach(function(el){
-    var name=el.querySelector('.cwv-name');
-    var val=el.querySelector('.cwv-val');
-    if(name&&val) cwvText+=name.textContent+': '+val.textContent+' | ';
-  });
-
-  // ERIC gets the FULL report
-  var ericHtml='<div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9f9f9;">'+
-    '<h2 style="color:#1e1338;margin:0 0 4px;">Speed Test Lead</h2>'+
-    '<p style="color:#666;margin:0 0 20px;font-size:13px;">URL: <strong>'+testedUrl+'</strong> &nbsp;|&nbsp; Email: <strong>'+email+'</strong></p>'+
-    '<h3 style="color:#1e1338;font-size:14px;margin:0 0 8px;">Lighthouse Scores</h3>'+scoresHtmlFull+
-    '<h3 style="color:#1e1338;font-size:14px;margin:16px 0 8px;">Core Web Vitals</h3><p style="color:#444;font-size:13px;">'+cwvText+'</p>'+
-    '<h3 style="color:#1e1338;font-size:14px;margin:16px 0 8px;">Top Issues Found</h3>'+findingsHtmlFull+
-    '<hr style="margin:20px 0;"><p style="color:#999;font-size:12px;">Reply to: '+email+'</p></div>';
-
-  // VISITOR gets minimal teaser
-  var visitorHtml='<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
-    '<div style="max-width:520px;margin:0 auto;padding:40px 24px;">'+
-    '<p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:32px;">'+
-    '<h2 style="color:#fff;font-weight:400;font-size:22px;margin:0 0 12px;">Your speed results are in.</h2>'+
-    '<p style="color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 20px;">I ran a full Lighthouse audit on <strong style="color:#fff;">'+testedUrl+'</strong>. The results are on the page — but speed is just one dimension of what makes a website perform.</p>'+
-    '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:14px 16px;border-radius:8px;margin-bottom:24px;">'+
-    '<p style="color:#c4aee8;font-size:12px;font-weight:700;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px;">Want the full picture?</p>'+
-    '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;line-height:1.6;">A full audit covers your Google visibility, SEO, content, and what's costing you customers — not just speed. Starts at $99.</p>'+
-    '</div>'+
-    '<a href="https://davisdigitalstudio.com/audit" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:12px;">See audit options from $99</a><br>'+
-    '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="font-size:13px;color:rgba(255,255,255,0.4);text-decoration:none;">Or book a free 30-min call first</a>'+
-    '</div>'+
-    '<p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
-    '</div></body></html>';
-
-  // Eric gets the full data
-  fetch('https://api.resend.com/emails',{method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'DDS Notifications <eric@davisdigitalstudio.com>',to:['eric@davisdigitalstudio.com'],
-      subject:'Speed Test Lead: '+testedUrl,html:ericHtml})}).catch(function(){});
-
-  // Formspree backup to Eric
-  fetch('https://formspree.io/f/mvznevlo',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({_subject:'Speed Test: '+testedUrl,email:email,url:testedUrl,scores:scoresText,cwv:cwvText,issues:findingsText})}).catch(function(){});
-
-  // Visitor gets teaser only
-  fetch('https://api.resend.com/emails',{method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'Eric Davis <eric@davisdigitalstudio.com>',to:[email],
-      subject:'Your speed test results — Davis Digital Studio',html:visitorHtml})}).catch(function(){});
-}
-function resetTool() {
-  document.getElementById('resultsState').style.display = 'none';
-  document.getElementById('inputCard').style.display = 'block';
-  document.getElementById('urlInput').value = '';
 }
 
 function showError(msg) {
-  var el = document.getElementById('errorBox');
-  el.textContent = msg;
-  el.style.display = 'block';
+  var e = document.getElementById('stError');
+  e.textContent = msg;
+  e.style.display = 'block';
 }
 
-document.getElementById('urlInput').addEventListener('keydown', function(e){ if(e.key==='Enter') runTest(); });
+function renderResults(url, data) {
+  var cats = (data.lighthouseResult && data.lighthouseResult.categories) || {};
+  var audits = (data.lighthouseResult && data.lighthouseResult.audits) || {};
+  var displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  document.getElementById('stResultUrl').textContent = displayUrl;
+  document.getElementById('strategyBadge').textContent = strategy === 'mobile' ? '📱 Mobile' : '🖥 Desktop';
+
+  // Score cards
+  var scoreItems = [
+    { key: 'performance', label: 'Performance', val: cats.performance ? Math.round(cats.performance.score * 100) : null },
+    { key: 'seo', label: 'SEO', val: cats.seo ? Math.round(cats.seo.score * 100) : null },
+    { key: 'accessibility', label: 'Accessibility', val: cats.accessibility ? Math.round(cats.accessibility.score * 100) : null },
+    { key: 'best-practices', label: 'Best Practices', val: cats['best-practices'] ? Math.round(cats['best-practices'].score * 100) : null }
+  ];
+  var scoresHtml = scoreItems.map(function(s) {
+    if (s.val === null) return '';
+    var cls = scoreClass(s.val);
+    return '<div class="score-card">' +
+      '<div class="score-num ' + cls + '" id="sn_' + s.key + '">0</div>' +
+      '<div class="score-label">' + s.label + '</div>' +
+      '<div class="score-bar"><div class="score-bar-fill ' + cls + '" style="width:0%" id="sb_' + s.key + '"></div></div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('scoresRow').innerHTML = scoresHtml;
+
+  // Animate score numbers
+  scoreItems.forEach(function(s) {
+    if (s.val === null) return;
+    var el = document.getElementById('sn_' + s.key);
+    var bar = document.getElementById('sb_' + s.key);
+    var n = 0;
+    var t = setInterval(function() {
+      n += 3;
+      if (n >= s.val) { n = s.val; clearInterval(t); }
+      el.textContent = n;
+    }, 20);
+    setTimeout(function() { if (bar) bar.style.width = s.val + '%'; }, 100);
+  });
+
+  // Core Web Vitals
+  var vitals = [
+    { key: 'first-contentful-paint', mkey: 'fcp', label: 'FCP', thresh: 'Good: <1.8s' },
+    { key: 'largest-contentful-paint', mkey: 'lcp', label: 'LCP', thresh: 'Good: <2.5s' },
+    { key: 'total-blocking-time', mkey: 'tbt', label: 'TBT', thresh: 'Good: <200ms' },
+    { key: 'cumulative-layout-shift', mkey: 'cls', label: 'CLS', thresh: 'Good: <0.1' },
+    { key: 'speed-index', mkey: 'si', label: 'Speed Index', thresh: 'Good: <3.4s' }
+  ];
+  var vitalsHtml = '';
+  vitals.forEach(function(v) {
+    var a = audits[v.key];
+    if (!a || !a.displayValue) return;
+    var rawVal = a.numericValue;
+    var cls = vitalClass(v.mkey, v.mkey === 'cls' ? rawVal : rawVal);
+    vitalsHtml += '<div class="vital">' +
+      '<div class="vital-val ' + cls + '">' + a.displayValue + '</div>' +
+      '<div class="vital-name">' + v.label + '</div>' +
+      '<div class="vital-thresh">' + v.thresh + '</div>' +
+    '</div>';
+  });
+  if (vitalsHtml) {
+    document.getElementById('vitalsGrid').innerHTML = vitalsHtml;
+    document.getElementById('vitalsCard').style.display = 'block';
+  }
+
+  // Top issues
+  var issueAudits = [
+    { key: 'render-blocking-resources', label: 'Render-blocking resources', tip: 'Scripts and stylesheets are delaying your page from showing up. Defer non-critical JS and CSS.' },
+    { key: 'unused-javascript', label: 'Unused JavaScript', tip: 'JavaScript is being loaded but not used on this page, slowing initial load.' },
+    { key: 'unused-css-rules', label: 'Unused CSS', tip: 'Stylesheets contain rules that don\'t apply to this page. Removing them reduces load time.' },
+    { key: 'uses-optimized-images', label: 'Unoptimized images', tip: 'Images could be compressed or converted to next-gen formats (WebP) to load faster.' },
+    { key: 'uses-responsive-images', label: 'Oversized images', tip: 'Images are larger than needed for the screen size, wasting bandwidth.' },
+    { key: 'efficient-animated-content', label: 'Animated GIFs', tip: 'GIFs are huge. Convert them to video formats for major file size savings.' },
+    { key: 'uses-text-compression', label: 'No text compression', tip: 'Your server isn\'t compressing text files. Enable GZIP or Brotli for faster transfers.' },
+    { key: 'meta-description', label: 'Missing meta description', tip: 'No meta description found. This affects how you appear in Google search results.' },
+    { key: 'document-title', label: 'Missing page title', tip: 'Your page is missing or has a poor title tag, which hurts SEO rankings.' },
+    { key: 'image-alt', label: 'Images missing alt text', tip: 'Images without alt text hurt accessibility and SEO. Google can\'t understand images without them.' },
+    { key: 'link-text', label: 'Non-descriptive link text', tip: 'Links like "click here" don\'t help Google understand your page structure.' },
+    { key: 'is-on-https', label: 'Not on HTTPS', tip: 'Your site isn\'t using HTTPS. Google penalizes HTTP sites and browsers warn visitors.' }
+  ];
+
+  var issues = [];
+  issueAudits.forEach(function(a) {
+    var audit = audits[a.key];
+    if (!audit || audit.score === 1 || audit.score === null) return;
+    var sev = audit.score === 0 ? 'high' : audit.score < 0.5 ? 'medium' : 'low';
+    issues.push({ label: a.label, tip: a.tip, sev: sev });
+  });
+
+  issues.sort(function(a, b) {
+    var order = { high: 0, medium: 1, low: 2 };
+    return order[a.sev] - order[b.sev];
+  });
+
+  if (issues.length > 0) {
+    var issuesHtml = issues.slice(0, 6).map(function(i) {
+      return '<div class="issue-item">' +
+        '<div class="issue-sev ' + i.sev + '"></div>' +
+        '<div class="issue-body">' +
+          '<h4>' + i.label + '</h4>' +
+          '<p>' + i.tip + '</p>' +
+          '<span class="issue-tag ' + i.sev + '">' + i.sev.toUpperCase() + ' PRIORITY</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('issuesList').innerHTML = issuesHtml;
+    document.getElementById('issuesCard').style.display = 'block';
+  }
+
+  document.getElementById('stResults').style.display = 'block';
+  if (typeof gtag === 'function') gtag('event', 'speed_test_complete', { event_category: 'tools', event_label: displayUrl });
+}
+
+function resetTest() {
+  document.getElementById('stResults').style.display = 'none';
+  document.getElementById('stUrl').value = '';
+  document.getElementById('stUrl').focus();
+}
+
+document.getElementById('stUrl').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') runTest();
+});
 
 document.getElementById('footer-year').textContent = new Date().getFullYear();
-(function(){var c=localStorage.getItem('cookie_consent');if(!c){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(c==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();
-function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
-function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
 </script>
 </body>
 </html>

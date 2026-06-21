@@ -1,25 +1,14 @@
 <!DOCTYPE html>
-<!-- DDS v3.0 20260621-1655 -->
-<!-- DDS v2.5 tool: pricing-estimator -->
+<!-- DDS v1.0 20260621-1100 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Website Pricing Estimator | Davis Digital Studio</title>
-<meta name="description" content="Get an instant ballpark estimate for your web design project. Answer 5 questions about your business and see a real price range in seconds. Free, no signup.">
+<title>Web Design Pricing Estimator | Davis Digital Studio</title>
+<meta name="description" content="Answer 5 questions and get a real ballpark price for your web design project. No signup, no sales call unless you want one. Honest estimates from Davis Digital Studio.">
 <link rel="canonical" href="https://www.davisdigitalstudio.com/pricing-estimator">
 <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
 <meta name="theme-color" content="#5b3fa0">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Website Pricing Estimator | Davis Digital Studio">
-<meta property="og:description" content="Get a real price range for your web design project in 60 seconds. Free, instant, no sales call required.">
-<meta property="og:url" content="https://www.davisdigitalstudio.com/pricing-estimator">
-<meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@davisdigitalstudio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -29,9 +18,8 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EQYY0DL8JL',{anonymize_ip:true});</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;padding-top:68px;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#5e5270;--serif:'DM Serif Display',Georgia,serif;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'DM Serif Display',Georgia,serif;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
@@ -39,465 +27,498 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
 .nav-logo span{color:#5b3fa0;}
 .nav-links{display:flex;align-items:center;gap:6px;}
-.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;}
-.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;}
-.hero{background:var(--pdark);padding:60px 24px 52px;text-align:center;}
-.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:14px;letter-spacing:1px;text-transform:uppercase;}
-.hero h1{font-family:var(--serif);font-size:clamp(28px,5vw,50px);font-weight:400;color:#fff;letter-spacing:-1px;margin-bottom:10px;line-height:1.1;}
+.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;}
+.navlink:hover,.navlink.active{color:var(--p);background:var(--pxxxl);}
+.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
+.nav-cta:hover{opacity:0.88;}
+
+.hero{background:var(--pdark);padding:72px 24px 64px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.4) 0%,transparent 65%);pointer-events:none;}
+.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;color:#fff;letter-spacing:-1.5px;margin-bottom:14px;line-height:1.1;}
 .hero h1 em{font-style:italic;color:var(--pxl);}
-.hero-sub{font-size:15px;color:rgba(255,255,255,0.5);max-width:460px;margin:0 auto;line-height:1.7;}
-.tool-wrap{max-width:680px;margin:0 auto;padding:44px 24px 80px;}
-.progress-bar{background:rgba(91,63,160,0.1);border-radius:100px;height:4px;margin-bottom:32px;overflow:hidden;}
-.progress-fill{height:100%;border-radius:100px;background:#5b3fa0;transition:width 0.4s ease;}
-.step{display:none;}
-.step.active{display:block;}
-.step-num{font-size:11px;font-weight:700;color:var(--p);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
-.step-q{font-family:var(--serif);font-size:clamp(22px,3vw,30px);font-weight:400;color:var(--ink);margin-bottom:24px;letter-spacing:-0.5px;line-height:1.2;}
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
-.opt-btn{background:#fff;border:1.5px solid rgba(91,63,160,0.12);border-radius:14px;padding:16px 20px;text-align:left;cursor:pointer;font-family:inherit;transition:all 0.15s;}
-.opt-btn:hover{border-color:rgba(91,63,160,0.35);background:var(--pxxxl);}
-.opt-btn.selected{border-color:#5b3fa0;background:var(--pxxl);}
-.opt-icon{font-size:24px;margin-bottom:8px;display:block;}
-.opt-title{font-size:14px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px;}
-.opt-sub{font-size:12px;color:var(--muted);}
-.nav-btns{display:flex;gap:10px;justify-content:space-between;}
-.btn-back{background:transparent;border:1.5px solid rgba(91,63,160,0.2);color:var(--muted);font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;cursor:pointer;font-family:inherit;}
-.btn-next{background:#5b3fa0;color:#fff;border:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:100px;cursor:pointer;font-family:inherit;margin-left:auto;}
-.btn-next:disabled{opacity:0.4;cursor:not-allowed;}
-.result-card{background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:20px;padding:36px;margin-bottom:20px;}
-.result-tag{font-size:11px;font-weight:700;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
-.result-tier{font-family:var(--serif);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:6px;}
-.result-range{font-size:40px;font-weight:700;color:#5b3fa0;margin-bottom:6px;letter-spacing:-1px;}
-.result-note{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
-.result-includes{list-style:none;margin-bottom:24px;}
-.result-includes li{font-size:13px;color:var(--muted);padding:7px 0;border-bottom:1px solid rgba(91,63,160,0.06);display:flex;gap:8px;align-items:flex-start;}
-.result-includes li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--p);flex-shrink:0;margin-top:5px;}
-.result-includes li:last-child{border-bottom:none;}
-.result-ctas{display:flex;gap:10px;flex-wrap:wrap;}
-.btn-p{display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;}
-.btn-g{display:inline-block;background:transparent;color:var(--p);font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;border:1.5px solid var(--pxl);text-decoration:none;}
-.disclaimer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6;margin-top:8px;}
-.restart-btn{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;margin-top:16px;text-decoration:underline;background:none;border:none;font-family:inherit;}
-.site-footer{background:var(--pdark);padding:20px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-.site-footer p{font-size:12px;color:rgba(255,255,255,0.35);}
-.site-footer a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;margin-left:16px;}
-@media(max-width:600px){.nav{padding:0 20px;}.nav-links .navlink{display:none;}.options-grid{grid-template-columns:1fr;}.site-footer{padding:20px 24px;flex-direction:column;text-align:center;}}
+.hero-sub{font-size:16px;color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto;line-height:1.7;}
+
+.tool-wrap{max-width:680px;margin:0 auto;padding:56px 24px 80px;}
+
+/* Progress bar */
+.progress-bar{height:4px;background:var(--pxxl);border-radius:2px;margin-bottom:40px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--p);border-radius:2px;transition:width 0.4s ease;}
+.progress-label{font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;}
+
+/* Question cards */
+.q-card{background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 40px rgba(91,63,160,0.08);border:1px solid rgba(91,63,160,0.1);display:none;animation:fadeUp 0.3s ease;}
+.q-card.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.q-num{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:10px;}
+.q-card h2{font-family:var(--serif);font-size:26px;font-weight:400;margin-bottom:8px;letter-spacing:-0.5px;line-height:1.2;}
+.q-card p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;cursor:pointer;transition:all 0.15s;background:#fff;}
+.opt:hover{border-color:var(--p);background:var(--pxxxl);}
+.opt.selected{border-color:var(--p);background:var(--pxxxl);}
+.opt-icon{width:36px;height:36px;border-radius:10px;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.opt.selected .opt-icon{background:rgba(91,63,160,0.15);}
+.opt-text h4{font-size:14px;font-weight:600;margin-bottom:2px;}
+.opt-text p{font-size:12px;color:var(--muted);line-height:1.4;}
+.opt-price{font-size:12px;font-weight:700;color:var(--p);margin-left:auto;white-space:nowrap;padding-left:12px;}
+
+/* Multi-select note */
+.multi-note{font-size:12px;color:var(--muted);margin-bottom:16px;font-style:italic;}
+
+.nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:28px;}
+.back-btn{background:transparent;border:1.5px solid var(--pxl);color:var(--p);border-radius:100px;padding:10px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
+.back-btn:hover{background:var(--pxxxl);}
+.next-btn{background:var(--p);color:#fff;border:none;border-radius:100px;padding:11px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s;margin-left:auto;}
+.next-btn:hover{opacity:0.88;}
+.next-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* Results */
+.results{display:none;animation:fadeUp 0.4s ease;}
+.tier-result{border-radius:24px;padding:40px;margin-bottom:20px;position:relative;overflow:hidden;}
+.tier-result.starter{background:linear-gradient(135deg,#f7f4fd,#fff);border:2px solid var(--p);}
+.tier-result.growth{background:linear-gradient(135deg,#1e1338,#2d1f55);border:2px solid #7c5cc4;}
+.tier-result.studio{background:linear-gradient(135deg,#0f0820,#1e1338);border:2px solid #c4aee8;}
+.tier-glow{position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;pointer-events:none;}
+.starter .tier-glow{background:radial-gradient(circle,rgba(91,63,160,0.15) 0%,transparent 65%);}
+.growth .tier-glow{background:radial-gradient(circle,rgba(124,92,196,0.4) 0%,transparent 65%);}
+.studio .tier-glow{background:radial-gradient(circle,rgba(196,174,232,0.3) 0%,transparent 65%);}
+.tier-badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:16px;letter-spacing:0.5px;position:relative;}
+.starter .tier-badge{background:rgba(91,63,160,0.1);color:var(--p);}
+.growth .tier-badge{background:rgba(196,174,232,0.15);color:#c4aee8;}
+.studio .tier-badge{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);}
+.tier-name{font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;position:relative;}
+.starter .tier-name{color:var(--ink);}
+.growth .tier-name,.studio .tier-name{color:#fff;}
+.tier-range{font-family:var(--serif);font-size:40px;font-weight:400;letter-spacing:-1px;margin-bottom:6px;position:relative;}
+.starter .tier-range{color:var(--p);}
+.growth .tier-range,.studio .tier-range{color:#c4aee8;}
+.tier-cadence{font-size:13px;margin-bottom:20px;position:relative;}
+.starter .tier-cadence{color:var(--muted);}
+.growth .tier-cadence,.studio .tier-cadence{color:rgba(255,255,255,0.5);}
+.tier-includes{list-style:none;margin-bottom:24px;position:relative;}
+.tier-includes li{font-size:13px;padding:7px 0;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid rgba(91,63,160,0.06);}
+.growth .tier-includes li,.studio .tier-includes li{border-bottom-color:rgba(255,255,255,0.06);}
+.tier-includes li:last-child{border-bottom:none;}
+.tier-includes li::before{content:'→';flex-shrink:0;font-weight:600;}
+.starter .tier-includes li{color:var(--muted);}
+.starter .tier-includes li::before{color:var(--p);}
+.growth .tier-includes li,.studio .tier-includes li{color:rgba(255,255,255,0.65);}
+.growth .tier-includes li::before,.studio .tier-includes li::before{color:#c4aee8;}
+.tier-cta{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;padding:13px 26px;border-radius:100px;text-decoration:none;transition:transform 0.15s,opacity 0.15s;position:relative;}
+.tier-cta:hover{transform:translateY(-2px);}
+.starter .tier-cta{background:var(--p);color:#fff;}
+.growth .tier-cta,.studio .tier-cta{background:#fff;color:var(--ink);}
+
+.addons-note{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
+.addons-note h3{font-size:14px;font-weight:600;margin-bottom:12px;}
+.addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.addon-pill{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--pxxxl);border-radius:8px;font-size:12px;}
+.addon-pill span:first-child{color:var(--ink);font-weight:500;}
+.addon-pill span:last-child{color:var(--p);font-weight:700;}
+
+.disclaimer{font-size:12px;color:var(--muted);text-align:center;line-height:1.7;padding:16px;background:var(--pxxxl);border-radius:12px;margin-bottom:20px;}
+.restart-btn{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;text-decoration:underline;margin:0 auto;}
+
+.site-footer{padding:24px 48px;background:var(--pdark);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.site-footer p{font-size:12px;color:rgba(255,255,255,0.3);}
+.site-footer a{font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;margin-left:16px;}
+.site-footer a:hover{color:rgba(255,255,255,0.7);}
+
+@media(max-width:700px){
+  .nav{padding:0 20px;}.nav-links{display:none;}
+  .addons-grid{grid-template-columns:1fr;}
+  .site-footer{padding:20px 24px;flex-direction:column;text-align:center;}
+}
 </style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Website Pricing Estimator","url":"https://www.davisdigitalstudio.com/pricing-estimator","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Get an instant ballpark estimate for your web design project. Answer 5 questions, see a real price range.","provider":{"@type":"Person","name":"Eric Davis","url":"https://www.davisdigitalstudio.com"}}
-</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Site navigation">
+<nav class="nav" role="navigation" aria-label="Main navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
     <a href="/" class="navlink">Home</a>
+    <a href="/about" class="navlink">About</a>
     <a href="/services" class="navlink">Services</a>
-    <a href="/tools" class="navlink">Free Tools</a>
-    <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
-    <a href="/audit" class="nav-cta" style="margin-left:6px;">Audits from $99</a>
+    <a href="/work" class="navlink">Work</a>
+    <a href="/tools" class="navlink active">Free Tools</a>
+    <a href="/portal" class="navlink">Client Login</a>
+    <a href="/contact" class="nav-cta">Let's talk</a>
   </div>
 </nav>
 
-<div class="hero" role="banner">
+<div class="hero">
   <div class="hero-tag">Free Tool</div>
-  <h1>What will your<br>website <em>actually cost?</em></h1>
-  <p class="hero-sub">Answer 5 questions and get a real ballpark range in under a minute. No signup, no sales call unless you want one.</p>
+  <h1>What will your<br>project <em>actually cost?</em></h1>
+  <p class="hero-sub">Answer 5 questions and get a real price range in under a minute. No signup, no sales call unless you want one.</p>
 </div>
 
 <main id="main-content">
 <div class="tool-wrap">
-  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
-  <!-- Step 1 -->
-  <div class="step active" id="step1">
-    <div class="step-num">Question 1 of 5</div>
-    <div class="step-q">What type of business do you have?</div>
-    <div class="options-grid">
-      <button class="opt-btn" onclick="select(1,'restaurant')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></span>
-        <span class="opt-title">Restaurant or Bar</span>
-        <span class="opt-sub">Food, drink, hospitality</span>
-      </button>
-      <button class="opt-btn" onclick="select(1,'retail')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
-        <span class="opt-title">Retail or Boutique</span>
-        <span class="opt-sub">Physical or online store</span>
-      </button>
-      <button class="opt-btn" onclick="select(1,'service')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-        <span class="opt-title">Home Services</span>
-        <span class="opt-sub">Plumbing, cleaning, landscaping</span>
-      </button>
-      <button class="opt-btn" onclick="select(1,'health')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
-        <span class="opt-title">Health and Wellness</span>
-        <span class="opt-sub">Fitness, spa, medical</span>
-      </button>
-      <button class="opt-btn" onclick="select(1,'professional')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-        <span class="opt-title">Professional Services</span>
-        <span class="opt-sub">Legal, finance, consulting</span>
-      </button>
-      <button class="opt-btn" onclick="select(1,'creative')">
-        <span class="opt-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg></span>
-        <span class="opt-title">Creative or Freelance</span>
-        <span class="opt-sub">Design, photography, art</span>
-      </button>
-    </div>
-    <div class="nav-btns"><button class="btn-next" id="next1" onclick="next(2)" disabled>Continue</button></div>
+  <div id="progressWrap">
+    <div class="progress-label" id="progressLabel">Question 1 of 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
   </div>
 
-  <!-- Step 2 -->
-  <div class="step" id="step2">
-    <div class="step-num">Question 2 of 5</div>
-    <div class="step-q">Do you have an existing website?</div>
-    <div class="options-grid">
-      <button class="opt-btn" onclick="select(2,'no')">
-        <span class="opt-title">No website yet</span>
-        <span class="opt-sub">Starting from scratch</span>
-      </button>
-      <button class="opt-btn" onclick="select(2,'bad')">
-        <span class="opt-title">Yes, but it needs work</span>
-        <span class="opt-sub">Outdated or not performing</span>
-      </button>
-      <button class="opt-btn" onclick="select(2,'ok')">
-        <span class="opt-title">Yes, it is decent</span>
-        <span class="opt-sub">Just needs some improvements</span>
-      </button>
-      <button class="opt-btn" onclick="select(2,'diy')">
-        <span class="opt-title">DIY Wix or Squarespace</span>
-        <span class="opt-sub">Built it myself</span>
-      </button>
-    </div>
-    <div class="nav-btns"><button class="btn-back" onclick="back(1)">Back</button><button class="btn-next" id="next2" onclick="next(3)" disabled>Continue</button></div>
-  </div>
-
-  <!-- Step 3 -->
-  <div class="step" id="step3">
-    <div class="step-num">Question 3 of 5</div>
-    <div class="step-q">How many pages does your site need?</div>
-    <div class="options-grid">
-      <button class="opt-btn" onclick="select(3,'small')">
-        <span class="opt-title">1 to 5 pages</span>
-        <span class="opt-sub">Home, About, Services, Contact</span>
-      </button>
-      <button class="opt-btn" onclick="select(3,'medium')">
-        <span class="opt-title">6 to 10 pages</span>
-        <span class="opt-sub">Multiple service pages, blog</span>
-      </button>
-      <button class="opt-btn" onclick="select(3,'large')">
-        <span class="opt-title">11 or more pages</span>
-        <span class="opt-sub">Large site, multiple sections</span>
-      </button>
-      <button class="opt-btn" onclick="select(3,'unknown')">
-        <span class="opt-title">Not sure yet</span>
-        <span class="opt-sub">Need help figuring it out</span>
-      </button>
-    </div>
-    <div class="nav-btns"><button class="btn-back" onclick="back(2)">Back</button><button class="btn-next" id="next3" onclick="next(4)" disabled>Continue</button></div>
-  </div>
-
-  <!-- Step 4 -->
-  <div class="step" id="step4">
-    <div class="step-num">Question 4 of 5</div>
-    <div class="step-q">What features do you need?</div>
-    <div class="options-grid">
-      <button class="opt-btn" onclick="select(4,'basic')">
-        <span class="opt-title">Basic</span>
-        <span class="opt-sub">Contact form, Google Maps, social links</span>
-      </button>
-      <button class="opt-btn" onclick="select(4,'booking')">
-        <span class="opt-title">Booking or reservations</span>
-        <span class="opt-sub">Online appointments or table booking</span>
-      </button>
-      <button class="opt-btn" onclick="select(4,'ecommerce')">
-        <span class="opt-title">Online store</span>
-        <span class="opt-sub">Products, cart, payments</span>
-      </button>
-      <button class="opt-btn" onclick="select(4,'custom')">
-        <span class="opt-title">Custom features</span>
-        <span class="opt-sub">Calculators, portals, integrations</span>
-      </button>
-    </div>
-    <div class="nav-btns"><button class="btn-back" onclick="back(3)">Back</button><button class="btn-next" id="next4" onclick="next(5)" disabled>Continue</button></div>
-  </div>
-
-  <!-- Step 5 -->
-  <div class="step" id="step5">
-    <div class="step-num">Question 5 of 5</div>
-    <div class="step-q">What is most important to you?</div>
-    <div class="options-grid">
-      <button class="opt-btn" onclick="select(5,'speed')">
-        <span class="opt-title">Launch fast</span>
-        <span class="opt-sub">Need it live within 30 days</span>
-      </button>
-      <button class="opt-btn" onclick="select(5,'seo')">
-        <span class="opt-title">Rank on Google</span>
-        <span class="opt-sub">Organic traffic is the priority</span>
-      </button>
-      <button class="opt-btn" onclick="select(5,'design')">
-        <span class="opt-title">Stand out visually</span>
-        <span class="opt-sub">Custom design that reflects the brand</span>
-      </button>
-      <button class="opt-btn" onclick="select(5,'revenue')">
-        <span class="opt-title">Drive more revenue</span>
-        <span class="opt-sub">Convert visitors to customers</span>
-      </button>
-    </div>
-    <div class="nav-btns"><button class="btn-back" onclick="back(4)">Back</button><button class="btn-next" id="next5" onclick="showResult()" disabled>See my estimate</button></div>
-  </div>
-
-  <!-- Result -->
-  <div class="step" id="stepResult">
-    <div class="result-card" id="resultCard"></div>
-    
-    <div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;">
-      <div style="font-size:14px;font-weight:600;color:#1a1523;margin-bottom:6px;">Want this estimate emailed to you?</div>
-      <div style="font-size:13px;color:#5e5270;margin-bottom:14px;">I will also send you a breakdown of what is typically included at this price range.</div>
-      <div style="display:flex;gap:8px;max-width:400px;margin:0 auto;" id="peEmailForm">
-        <input type="email" id="peEmail" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;">
-        <button onclick="capturePeEmail()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Email me this</button>
+  <!-- Q1: What do you need? -->
+  <div class="q-card active" id="q1">
+    <div class="q-num">Question 1 of 5</div>
+    <h2>What do you need built?</h2>
+    <p>This gives us a starting point. Most projects fall into one of these buckets.</p>
+    <div class="opts">
+      <div class="opt" onclick="pick(1,'new')" id="q1_new">
+        <div class="opt-icon">✨</div>
+        <div class="opt-text"><h4>Brand new website</h4><p>Starting from scratch — no existing site</p></div>
       </div>
-      <div id="peEmailThanks" style="display:none;font-size:13px;color:#16a34a;font-weight:600;margin-top:8px;">On its way. Talk soon.</div>
+      <div class="opt" onclick="pick(1,'redesign')" id="q1_redesign">
+        <div class="opt-icon">🔄</div>
+        <div class="opt-text"><h4>Redesign an existing site</h4><p>I have a site but it needs a full overhaul</p></div>
+      </div>
+      <div class="opt" onclick="pick(1,'additions')" id="q1_additions">
+        <div class="opt-icon">➕</div>
+        <div class="opt-text"><h4>Add pages or features to my site</h4><p>My site is decent but needs specific improvements</p></div>
+      </div>
+      <div class="opt" onclick="pick(1,'ecommerce')" id="q1_ecommerce">
+        <div class="opt-icon">🛒</div>
+        <div class="opt-text"><h4>E-commerce or online store</h4><p>I need to sell products or services online</p></div>
+      </div>
     </div>
-    <p class="disclaimer">This is a ballpark estimate based on your answers. Final pricing is confirmed after a free discovery call where I can understand your full scope. Every estimate is honest I will tell you if something costs more or less than this range.</p>
-    <button class="restart-btn" onclick="restart()">← Start over</button>
+    <div class="nav-btns"><button class="next-btn" id="q1next" onclick="go(1,2)" disabled>Next</button></div>
+  </div>
+
+  <!-- Q2: How many pages? -->
+  <div class="q-card" id="q2">
+    <div class="q-num">Question 2 of 5</div>
+    <h2>How many pages do you need?</h2>
+    <p>Count the main sections — Home, About, Services, Contact, etc. Don't overthink it.</p>
+    <div class="opts">
+      <div class="opt" onclick="pick(2,'1-3')" id="q2_1-3">
+        <div class="opt-icon">📄</div>
+        <div class="opt-text"><h4>1 to 3 pages</h4><p>One-pager or very simple site</p></div>
+        <span class="opt-price">Starter</span>
+      </div>
+      <div class="opt" onclick="pick(2,'4-7')" id="q2_4-7">
+        <div class="opt-icon">📑</div>
+        <div class="opt-text"><h4>4 to 7 pages</h4><p>Most small business sites</p></div>
+        <span class="opt-price">Growth</span>
+      </div>
+      <div class="opt" onclick="pick(2,'8-15')" id="q2_8-15">
+        <div class="opt-icon">📚</div>
+        <div class="opt-text"><h4>8 to 15 pages</h4><p>Larger site with multiple services or locations</p></div>
+        <span class="opt-price">Studio</span>
+      </div>
+      <div class="opt" onclick="pick(2,'15+')" id="q2_15+">
+        <div class="opt-icon">🗂️</div>
+        <div class="opt-text"><h4>15+ pages</h4><p>Complex site, blog, or large catalog</p></div>
+        <span class="opt-price">Studio+</span>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="go(2,1)">Back</button>
+      <button class="next-btn" id="q2next" onclick="go(2,3)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q3: Platform -->
+  <div class="q-card" id="q3">
+    <div class="q-num">Question 3 of 5</div>
+    <h2>Do you have a platform preference?</h2>
+    <p>This affects cost and timeline. Not sure? I can recommend what fits your project best.</p>
+    <div class="opts">
+      <div class="opt" onclick="pick(3,'custom')" id="q3_custom">
+        <div class="opt-icon">⚡</div>
+        <div class="opt-text"><h4>Custom HTML/CSS (fastest, no monthly fees)</h4><p>Built from scratch — no platform dependency, fastest load times</p></div>
+      </div>
+      <div class="opt" onclick="pick(3,'squarespace')" id="q3_squarespace">
+        <div class="opt-icon">🟦</div>
+        <div class="opt-text"><h4>Squarespace or Wix</h4><p>Easy to update yourself, monthly platform fee</p></div>
+      </div>
+      <div class="opt" onclick="pick(3,'wordpress')" id="q3_wordpress">
+        <div class="opt-icon">🔵</div>
+        <div class="opt-text"><h4>WordPress</h4><p>Most flexible, good for blogs and larger sites</p></div>
+      </div>
+      <div class="opt" onclick="pick(3,'unsure')" id="q3_unsure">
+        <div class="opt-icon">🤔</div>
+        <div class="opt-text"><h4>Not sure — help me decide</h4><p>I'll recommend the right fit after we chat</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="go(3,2)">Back</button>
+      <button class="next-btn" id="q3next" onclick="go(3,4)" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Q4: Add-ons -->
+  <div class="q-card" id="q4">
+    <div class="q-num">Question 4 of 5</div>
+    <h2>What extras do you need?</h2>
+    <p class="multi-note">Select all that apply.</p>
+    <div class="opts" id="q4opts">
+      <div class="opt" onclick="toggleMulti(4,'seo')" id="q4_seo">
+        <div class="opt-icon">🔍</div>
+        <div class="opt-text"><h4>SEO setup</h4><p>Keyword research, on-page optimization, Google Search Console</p></div>
+        <span class="opt-price">+$800</span>
+      </div>
+      <div class="opt" onclick="toggleMulti(4,'copy')" id="q4_copy">
+        <div class="opt-icon">✍️</div>
+        <div class="opt-text"><h4>Copywriting</h4><p>I need help writing the actual words on the site</p></div>
+        <span class="opt-price">+$400/pg</span>
+      </div>
+      <div class="opt" onclick="toggleMulti(4,'brand')" id="q4_brand">
+        <div class="opt-icon">🎨</div>
+        <div class="opt-text"><h4>Brand identity</h4><p>Logo, colors, fonts — visual identity package</p></div>
+        <span class="opt-price">+$500</span>
+      </div>
+      <div class="opt" onclick="toggleMulti(4,'booking')" id="q4_booking">
+        <div class="opt-icon">📅</div>
+        <div class="opt-text"><h4>Booking or reservations</h4><p>Online scheduling, reservations, or appointment booking</p></div>
+        <span class="opt-price">+$300</span>
+      </div>
+      <div class="opt" onclick="toggleMulti(4,'none')" id="q4_none">
+        <div class="opt-icon">👍</div>
+        <div class="opt-text"><h4>None of the above</h4><p>Just the website is fine for now</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="go(4,3)">Back</button>
+      <button class="next-btn" id="q4next" onclick="go(4,5)">Next</button>
+    </div>
+  </div>
+
+  <!-- Q5: Timeline -->
+  <div class="q-card" id="q5">
+    <div class="q-num">Question 5 of 5</div>
+    <h2>When do you need it done?</h2>
+    <p>Timeline affects scope and sometimes cost. Rush projects may include a surcharge.</p>
+    <div class="opts">
+      <div class="opt" onclick="pick(5,'flexible')" id="q5_flexible">
+        <div class="opt-icon">😌</div>
+        <div class="opt-text"><h4>Flexible — no hard deadline</h4><p>Standard timeline of 4-8 weeks is fine</p></div>
+      </div>
+      <div class="opt" onclick="pick(5,'2months')" id="q5_2months">
+        <div class="opt-icon">📅</div>
+        <div class="opt-text"><h4>Within 2 months</h4><p>Moderate urgency</p></div>
+      </div>
+      <div class="opt" onclick="pick(5,'1month')" id="q5_1month">
+        <div class="opt-icon">⚡</div>
+        <div class="opt-text"><h4>Within 1 month</h4><p>May include a 25% rush surcharge</p></div>
+      </div>
+      <div class="opt" onclick="pick(5,'asap')" id="q5_asap">
+        <div class="opt-icon">🚨</div>
+        <div class="opt-text"><h4>ASAP — under 2 weeks</h4><p>Rush surcharge applies, limited availability</p></div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="back-btn" onclick="go(5,4)">Back</button>
+      <button class="next-btn" id="q5next" onclick="showResults()" disabled>Get my estimate</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="peResults">
+    <div id="tierCard"></div>
+
+    <div class="addons-note" id="addonsNote" style="display:none;">
+      <h3>Add-ons in your estimate</h3>
+      <div class="addons-grid" id="addonsGrid"></div>
+    </div>
+
+    <div class="disclaimer">
+      This is a ballpark range based on your answers — not a quote. Final price depends on design complexity, content, and scope confirmed in a free discovery call. Every paid audit fee ($99+) is credited toward your project.
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-flex;align-items:center;gap:8px;background:var(--p);color:#fff;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.88" onmouseout="this.style.opacity=1">Book a free 30-min call to confirm scope →</a>
+    </div>
+
+    <button class="restart-btn" onclick="restart()">Start over</button>
   </div>
 
 </div>
 </main>
 
-<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
-  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
-    <div>
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div style="display:flex;gap:12px;">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
-        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
-        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
-        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-      </div>
-    </div>
-  </div>
-  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-    </div>
+<footer class="site-footer" role="contentinfo">
+  <p>© <span id="footer-year"></span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+  <div>
+    <a href="/tools">All Free Tools</a>
+    <a href="/services">Services</a>
+    <a href="/contact">Contact</a>
   </div>
 </footer>
-<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
-
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
-  <div style="display:flex;gap:10px;">
-    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
-    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
-  </div>
-</div>
 
 <script>
-var answers = {};
-var currentStep = 1;
-var totalSteps = 5;
+var ans = {};
+var multiSel = {};
 
-function select(step, val) {
-  answers[step] = val;
-  document.querySelectorAll('#step'+step+' .opt-btn').forEach(function(b){ b.classList.remove('selected'); });
-  event.currentTarget.classList.add('selected');
-  document.getElementById('next'+step).disabled = false;
+function pick(q, val) {
+  document.querySelectorAll('#q' + q + ' .opt').forEach(function(el) { el.classList.remove('selected'); });
+  document.getElementById('q' + q + '_' + val).classList.add('selected');
+  ans['q' + q] = val;
+  document.getElementById('q' + q + 'next').disabled = false;
 }
 
-function next(step) {
-  document.getElementById('step'+(step-1)).classList.remove('active');
-  document.getElementById('step'+step).classList.add('active');
-  currentStep = step;
-  updateProgress();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function back(step) {
-  document.getElementById('step'+(step+1)).classList.remove('active');
-  document.getElementById('step'+step).classList.add('active');
-  currentStep = step;
-  updateProgress();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function updateProgress() {
-  document.getElementById('progressFill').style.width = ((currentStep-1)/totalSteps*100)+'%';
-}
-
-function showResult() {
-  var tier, range, includes, note;
-
-  var biz = answers[1]; var existing = answers[2];
-  var pages = answers[3]; var features = answers[4]; var priority = answers[5];
-
-  var complexity = 0;
-  if(pages==='medium') complexity += 1;
-  if(pages==='large') complexity += 2;
-  if(features==='booking') complexity += 1;
-  if(features==='ecommerce') complexity += 2;
-  if(features==='custom') complexity += 2;
-  if(priority==='seo') complexity += 1;
-  if(priority==='design') complexity += 1;
-
-  if(complexity <= 1) {
-    tier = 'Starter';
-    range = '$1,200 to $1,800';
-    note = 'Template build on Squarespace or Webflow. Clean, professional, and fast to launch. Best for businesses that need a solid online presence without a heavy custom build.';
-    includes = ['Template build (Squarespace, Wix, or Webflow)','Your branding applied colors, fonts, logo','Up to 5 pages, mobile-optimized','Contact form and basic SEO setup','Google Analytics installation','Launch walkthrough video'];
-  } else if(complexity <= 3) {
-    tier = 'Growth';
-    range = '$2,800 to $4,000';
-    note = 'Custom HTML/CSS design built to rank and convert. For businesses ready to compete online with a site that performs and looks different from the template crowd.';
-    includes = ['Custom HTML/CSS design no templates','Mobile-first, performance-optimized build','On-page SEO implementation','Google Analytics 4 and Search Console setup','Google Business Profile setup','2 revision rounds','30-day post-launch support'];
+function toggleMulti(q, val) {
+  if (val === 'none') {
+    multiSel = {};
+    document.querySelectorAll('#q' + q + ' .opt').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('q' + q + '_' + val).classList.add('selected');
+    multiSel[val] = true;
   } else {
-    tier = 'Studio';
-    range = '$5,500+';
-    note = 'The full package. Strategy, design, copy, brand kit, and anything custom your business needs. Pricing is confirmed after a discovery call because every Studio project is scoped individually.';
-    includes = ['Everything in Growth','Brand identity (logo, colors, typography)','Professional copywriting for all pages','Client portal with file sharing and approvals','Custom interactive features or widgets','Full launch support','Unlimited revisions during build'];
+    delete multiSel['none'];
+    document.getElementById('q' + q + '_none').classList.remove('selected');
+    if (multiSel[val]) {
+      delete multiSel[val];
+      document.getElementById('q' + q + '_' + val).classList.remove('selected');
+    } else {
+      multiSel[val] = true;
+      document.getElementById('q' + q + '_' + val).classList.add('selected');
+    }
   }
+}
 
-  var html = '<div class="result-tag">Your estimate</div>' +
-    '<div class="result-tier">'+tier+' Package</div>' +
-    '<div class="result-range">'+range+'</div>' +
-    '<div class="result-note">'+note+'</div>' +
-    '<ul class="result-includes">' + includes.map(function(i){ return '<li>'+i+'</li>'; }).join('') + '</ul>' +
-    '<div class="result-ctas">' +
-    '<a href="/contact" class="btn-p">Book a free discovery call</a>' +
-    '<a href="/services" class="btn-g">See full service details</a>' +
+function go(from, to) {
+  document.getElementById('q' + from).classList.remove('active');
+  document.getElementById('q' + to).classList.add('active');
+  var pct = (to / 5) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = to <= 5 ? 'Question ' + to + ' of 5' : 'Your estimate';
+}
+
+function calcTier() {
+  var score = 0;
+  // Page count
+  if (ans.q2 === '1-3') score += 1;
+  else if (ans.q2 === '4-7') score += 2;
+  else if (ans.q2 === '8-15') score += 3;
+  else if (ans.q2 === '15+') score += 4;
+  // Type
+  if (ans.q1 === 'ecommerce') score += 2;
+  else if (ans.q1 === 'redesign' || ans.q1 === 'new') score += 1;
+  // Platform
+  if (ans.q3 === 'custom') score += 1;
+  if (ans.q3 === 'wordpress') score += 1;
+  // Rush
+  if (ans.q5 === 'asap' || ans.q5 === '1month') score += 1;
+
+  if (score <= 2) return 'starter';
+  if (score <= 4) return 'growth';
+  return 'studio';
+}
+
+function showResults() {
+  var tier = calcTier();
+  var rush = ans.q5 === 'asap' || ans.q5 === '1month';
+  var addons = Object.keys(multiSel).filter(function(k) { return k !== 'none'; });
+
+  var tiers = {
+    starter: {
+      name: 'Starter',
+      range: rush ? '$1,500 – $2,500' : '$1,200 – $1,800',
+      cadence: '50% upfront · 50% at launch · Standard 4-6 week timeline',
+      cls: 'starter',
+      items: [
+        'Up to 5 pages, mobile-first design',
+        'Contact form and Google Maps integration',
+        'Basic on-page SEO (titles, descriptions, schema)',
+        'Google Analytics and Search Console setup',
+        '30-day post-launch support',
+        'Template-based build on Squarespace or similar'
+      ],
+      cta: 'Book a free call to confirm scope',
+      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min'
+    },
+    growth: {
+      name: 'Growth',
+      range: rush ? '$3,500 – $5,500' : '$2,800 – $4,000',
+      cadence: '50% upfront · 50% at launch · Standard 6-8 week timeline',
+      cls: 'growth',
+      items: [
+        'Up to 10 pages, custom HTML/CSS design',
+        'Full on-page SEO with keyword research',
+        'Speed-optimized, Core Web Vitals compliant',
+        'Lead capture forms with email notifications',
+        'Google Analytics, GA4 events, and Search Console',
+        '60-day post-launch support'
+      ],
+      cta: 'Book a free call to confirm scope',
+      ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min'
+    },
+    studio: {
+      name: 'Studio',
+      range: rush ? '$7,000+' : '$5,500+',
+      cadence: '50% upfront · 25% at midpoint · 25% at launch',
+      cls: 'studio',
+      items: [
+        'Unlimited pages, fully custom design system',
+        'E-commerce, booking, or membership features',
+        'Comprehensive SEO strategy and implementation',
+        'Custom animations, interactions, and widgets',
+        'Performance audit and Core Web Vitals optimization',
+        '90-day post-launch support + optional retainer'
+      ],
+      cta: 'Let\'s talk about your project',
+      ctaUrl: '/contact'
+    }
+  };
+
+  var t = tiers[tier];
+  var rushNote = rush ? '<div style="display:inline-block;background:rgba(240,180,41,0.15);color:#b8860b;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:12px;">⚡ Rush pricing applied</div><br>' : '';
+
+  document.getElementById('tierCard').innerHTML =
+    '<div class="tier-result ' + t.cls + '">' +
+    '<div class="tier-glow"></div>' +
+    rushNote +
+    '<div class="tier-badge">' + t.name + ' Package</div>' +
+    '<div class="tier-name">' + t.name + '</div>' +
+    '<div class="tier-range">' + t.range + '</div>' +
+    '<div class="tier-cadence">' + t.cadence + '</div>' +
+    '<ul class="tier-includes">' + t.items.map(function(i) { return '<li>' + i + '</li>'; }).join('') + '</ul>' +
+    '<a href="' + t.ctaUrl + '" class="tier-cta">' + t.cta + ' →</a>' +
     '</div>';
 
-  document.getElementById('resultCard').innerHTML = html;
-  document.getElementById('step5').classList.remove('active');
-  document.getElementById('stepResult').classList.add('active');
-  document.getElementById('progressFill').style.width = '100%';
-  window.scrollTo({top:0,behavior:'smooth'});
+  // Add-ons
+  var addonDetails = {
+    seo: { label: 'SEO Strategy', price: '$800' },
+    copy: { label: 'Copywriting', price: '$400/page' },
+    brand: { label: 'Brand Identity', price: '$500' },
+    booking: { label: 'Booking Integration', price: '$300' }
+  };
+  if (addons.length > 0) {
+    document.getElementById('addonsGrid').innerHTML = addons.map(function(k) {
+      var a = addonDetails[k];
+      return a ? '<div class="addon-pill"><span>' + a.label + '</span><span>' + a.price + '</span></div>' : '';
+    }).join('');
+    document.getElementById('addonsNote').style.display = 'block';
+  }
 
-  if(typeof gtag==='function'){gtag('event','pricing_estimator_complete',{event_category:'tools',event_label:tier,value:complexity});}
+  document.getElementById('progressWrap').style.display = 'none';
+  document.querySelectorAll('.q-card').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('peResults').style.display = 'block';
+
+  if (typeof gtag === 'function') gtag('event', 'pricing_estimate', { event_category: 'tools', event_label: tier });
 }
 
-function capturePeEmail(){
-  var email=document.getElementById('peEmail').value;
-  if(!email||!email.includes('@'))return;
-  document.getElementById('peEmailForm').style.display='none';
-  document.getElementById('peEmailThanks').style.display='block';
-  if(typeof gtag==='function'){gtag('event','email_capture',{event_category:'tools',event_label:'pricing_estimator'});}
-
-  var tierEl=document.querySelector('.result-tier');
-  var rangeEl=document.querySelector('.result-range');
-  var noteEl=document.querySelector('.result-note');
-  var tier=tierEl?tierEl.textContent.trim():'Custom';
-  var range=rangeEl?rangeEl.textContent.trim():'Contact for pricing';
-  var note=noteEl?noteEl.textContent.trim():'';
-
-  var includeEls=document.querySelectorAll('.result-includes li');
-  var includesHtml='<ul style="padding-left:20px;">';
-  var includesHtmlTeaser='';
-  var includesText='';
-  includeEls.forEach(function(li,i){
-    includesHtml+='<li style="margin-bottom:4px;font-size:13px;">'+li.textContent+'</li>';
-    if(i<3) includesHtmlTeaser+='<li style="color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:6px;">'+li.textContent+'</li>';
-    includesText+=li.textContent+' | ';
-  });
-  includesHtml+='</ul>';
-
-  var bizType=answers[1]||''; var existing=answers[2]||''; var pages=answers[3]||'';
-  var features=answers[4]||''; var priority=answers[5]||'';
-
-  // ERIC gets full details
-  var ericHtml='<div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9f9f9;">'+
-    '<h2 style="color:#1e1338;margin:0 0 4px;">Pricing Estimator Lead</h2>'+
-    '<p style="color:#666;margin:0 0 20px;font-size:13px;">Email: <a href="mailto:'+email+'">'+email+'</a></p>'+
-    '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">'+
-    '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">Tier</td><td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong style="color:#5b3fa0;">'+tier+' ('+range+')</strong></td></tr>'+
-    '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">Business type</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">'+bizType+'</td></tr>'+
-    '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">Existing site</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">'+existing+'</td></tr>'+
-    '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">Pages needed</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">'+pages+'</td></tr>'+
-    '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;">Features</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">'+features+'</td></tr>'+
-    '<tr><td style="padding:8px 12px;font-weight:600;">Priority</td><td style="padding:8px 12px;">'+priority+'</td></tr>'+
-    '</table>'+
-    '<h3 style="color:#1e1338;font-size:14px;margin:0 0 8px;">Includes</h3>'+includesHtml+
-    '<hr style="margin:20px 0;"><p style="color:#999;font-size:12px;">Reply to: <a href="mailto:'+email+'">'+email+'</a></p></div>';
-
-  // VISITOR gets teaser with just top 3 includes + CTA
-  var visitorHtml='<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
-    '<div style="max-width:520px;margin:0 auto;padding:40px 24px;">'+
-    '<p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:32px;">'+
-    '<div style="font-size:11px;font-weight:700;color:#c4aee8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Your estimate</div>'+
-    '<div style="font-size:24px;font-weight:600;color:#fff;margin-bottom:4px;">'+tier+' Package</div>'+
-    '<div style="font-size:32px;font-weight:700;color:#c4aee8;letter-spacing:-1px;margin-bottom:16px;">'+range+'</div>'+
-    '<p style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.6;margin:0 0 16px;">A few things typically included at this level:</p>'+
-    '<ul style="list-style:none;padding:0;margin:0 0 20px;">'+includesHtmlTeaser+'<li style="color:rgba(255,255,255,0.35);font-size:12px;margin-top:4px;">+ more depending on your scope</li></ul>'+
-    '<div style="background:rgba(91,63,160,0.2);border-left:3px solid #c4aee8;padding:12px 16px;border-radius:8px;margin-bottom:20px;">'+
-    '<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0;line-height:1.5;">This is a ballpark. A 30-minute call gives you an exact quote and a clear plan — no pressure, no pitch.</p></div>'+
-    '<a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;">Book a free discovery call</a>'+
-    '</div>'+
-    '<p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
-    '</div></body></html>';
-
-  fetch('https://api.resend.com/emails',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'DDS Notifications <eric@davisdigitalstudio.com>',to:['eric@davisdigitalstudio.com'],subject:'Pricing Lead: '+tier+' ('+range+') — '+email,html:ericHtml})}).catch(function(){});
-
-  fetch('https://formspree.io/f/mvznevlo',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({_subject:'Pricing Lead: '+tier,email:email,tier:tier,range:range,type:bizType,features:features,priority:priority})}).catch(function(){});
-
-  fetch('https://api.resend.com/emails',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3'},
-    body:JSON.stringify({from:'Eric Davis <eric@davisdigitalstudio.com>',to:[email],subject:'Your web design estimate — '+tier+' ('+range+')',html:visitorHtml})}).catch(function(){});
-}
 function restart() {
-  answers = {};
-  currentStep = 1;
-  document.querySelectorAll('.step').forEach(function(s){ s.classList.remove('active'); });
-  document.querySelectorAll('.opt-btn').forEach(function(b){ b.classList.remove('selected'); });
-  document.querySelectorAll('.btn-next').forEach(function(b){ b.disabled = true; });
-  document.getElementById('step1').classList.add('active');
-  document.getElementById('progressFill').style.width = '0%';
-  window.scrollTo({top:0,behavior:'smooth'});
+  ans = {};
+  multiSel = {};
+  document.getElementById('peResults').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('addonsNote').style.display = 'none';
+  for (var i = 1; i <= 5; i++) {
+    document.getElementById('q' + i).classList.remove('active');
+    document.querySelectorAll('#q' + i + ' .opt').forEach(function(el) { el.classList.remove('selected'); });
+    var nb = document.getElementById('q' + i + 'next');
+    if (nb && i !== 4) nb.disabled = true;
+  }
+  document.getElementById('q1').classList.add('active');
+  document.getElementById('progressFill').style.width = '20%';
+  document.getElementById('progressLabel').textContent = 'Question 1 of 5';
 }
 
 document.getElementById('footer-year').textContent = new Date().getFullYear();
-(function(){var c=localStorage.getItem('cookie_consent');if(!c){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(c==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();
-function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
-function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
 </script>
 </body>
 </html>
