@@ -247,6 +247,26 @@ a{color:inherit;}
   .footer-grid{grid-template-columns:1fr;}
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Service",
+  "name":"Website Audit",
+  "provider":{
+    "@type":"ProfessionalService",
+    "name":"Davis Digital Studio",
+    "url":"https://www.davisdigitalstudio.com"
+  },
+  "description":"Comprehensive website audit covering Lighthouse performance scores, mobile usability, search visibility, and local presence. Includes a prioritized fix list delivered as a 6-page branded report within 5 business days.",
+  "areaServed":{"@type":"Country","name":"United States"},
+  "offers":[
+    {"@type":"Offer","name":"Essential Audit","price":"99","priceCurrency":"USD","description":"Core site audit with prioritized fix list, 5 business day turnaround."},
+    {"@type":"Offer","name":"Growth Audit","price":"499","priceCurrency":"USD","description":"Full audit plus keyword analysis, competitor benchmark, and content recommendations."},
+    {"@type":"Offer","name":"Studio Audit","price":"899","priceCurrency":"USD","description":"Complete audit with implementation roadmap and 30 minutes of strategy consultation."}
+  ],
+  "serviceType":["Website Audit","SEO Audit","Performance Audit","Site Score Analysis"]
+}
+</script>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -276,17 +296,70 @@ a{color:inherit;}
 
 <main id="main-content">
 
-<section class="page-hero">
-  <div class="page-hero-inner">
-    <span class="hero-label">Audits & Tools</span>
-    <h1>Find out exactly what your<br>website is <em>missing.</em></h1>
-    <p>Free instant site score below. Paid audits from $99 give you the full picture. Lighthouse scores, keyword analysis, and a prioritized fix list in 5 business days.</p>
-    <div class="hero-badges">
-      <span class="hero-badge">Starting at $99</span>
-      <span class="hero-badge">Delivered in 5 business days</span>
-      <span class="hero-badge">6-page branded report</span>
-      <span class="hero-badge">No fluff, just fixes</span>
+<section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
+  <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;bottom:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
+
+  <div style="max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;position:relative;z-index:1;">
+
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:9px;background:rgba(106,191,105,0.08);border:1px solid rgba(106,191,105,0.18);border-radius:100px;padding:7px 15px;margin-bottom:24px;font-size:13px;font-weight:500;color:#1a7e49;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#6abf69;display:inline-block;box-shadow:0 0 0 3px rgba(106,191,105,0.18);"></span>
+        Available for new projects · Nationwide / Remote
+      </div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:14px;">Audits & Tools</div>
+      <h1 style="font-family:var(--serif);font-size:clamp(42px,6vw,68px);font-weight:400;line-height:1;letter-spacing:-2px;color:var(--ink);margin-bottom:22px;">Find out exactly what your website is <em style="color:var(--p);font-style:italic;">missing.</em></h1>
+      <p style="font-size:17px;line-height:1.6;color:var(--muted);margin-bottom:24px;max-width:520px;">Free instant site score below. Paid audits from $99 give you the full picture. Lighthouse scores, keyword analysis, and a prioritized fix list in 5 business days.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">Starting at $99</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">5 business days</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">6-page branded report</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">No fluff, just fixes</span>
+      </div>
     </div>
+
+    <!-- Sample audit result card -->
+    <div style="display:flex;justify-content:center;align-items:center;">
+      <div style="background:#fff;border-radius:24px;padding:28px;box-shadow:0 32px 80px rgba(91,63,160,0.18),0 4px 16px rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.08);position:relative;width:100%;max-width:380px;transform:rotate(0.5deg);">
+        <div style="position:absolute;top:-14px;right:24px;background:var(--pdark);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:6px 14px;border-radius:100px;text-transform:uppercase;">Sample Audit</div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--pxl));display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Overall Score</div>
+            <div style="font-size:15px;font-weight:600;color:var(--ink);font-family:var(--serif);">yourbusiness.com</div>
+          </div>
+          <div style="margin-left:auto;font-family:var(--serif);font-size:32px;font-weight:600;color:#f0b429;line-height:1;">53</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div style="text-align:center;padding:12px 6px;background:#fff3f3;border-radius:10px;">
+            <div style="font-family:var(--serif);font-size:22px;color:#e05555;font-weight:700;line-height:1;">57</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Performance</div>
+          </div>
+          <div style="text-align:center;padding:12px 6px;background:#f3fff5;border-radius:10px;">
+            <div style="font-family:var(--serif);font-size:22px;color:#6abf69;font-weight:700;line-height:1;">97</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Mobile</div>
+          </div>
+          <div style="text-align:center;padding:12px 6px;background:#fff3f3;border-radius:10px;">
+            <div style="font-family:var(--serif);font-size:22px;color:#e05555;font-weight:700;line-height:1;">39</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Search Visibility</div>
+          </div>
+          <div style="text-align:center;padding:12px 6px;background:#fff3f3;border-radius:10px;">
+            <div style="font-family:var(--serif);font-size:22px;color:#e05555;font-weight:700;line-height:1;">40</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Local Presence</div>
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid var(--p);">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--p);text-transform:uppercase;margin-bottom:5px;">#1 Opportunity</div>
+          <div style="font-size:13px;color:var(--ink);line-height:1.5;">Add LocalBusiness schema and verify your Google Business Profile.</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 

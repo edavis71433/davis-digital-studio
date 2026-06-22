@@ -523,16 +523,70 @@ if (!sessionStorage.getItem('exit_shown')) {
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
 <main id="main-content">
 
-<section class="page-hero">
-  <div class="page-hero-inner">
-    <span class="label">Free Tool</span>
-    <h1>Your digital<br><em>report card.</em></h1>
-    <p>Enter your business name, city, and email. I'll send you a 1-page snapshot of how your business looks online. completely free.</p>
-    <div class="hero-badges">
-      <span class="hero-badge"><span class="dot"></span>100% free</span>
-      <span class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Delivered to your inbox</span>
-      <span class="hero-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Sent within minutes</span>
+<section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
+  <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;bottom:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
+
+  <div style="max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;position:relative;z-index:1;">
+
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:9px;background:rgba(106,191,105,0.08);border:1px solid rgba(106,191,105,0.18);border-radius:100px;padding:7px 15px;margin-bottom:24px;font-size:13px;font-weight:500;color:#1a7e49;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#6abf69;display:inline-block;box-shadow:0 0 0 3px rgba(106,191,105,0.18);"></span>
+        Available for new projects · Nationwide / Remote
+      </div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:14px;">Free Tool</div>
+      <h1 style="font-family:var(--serif);font-size:clamp(42px,6vw,68px);font-weight:400;line-height:1;letter-spacing:-2px;color:var(--ink);margin-bottom:22px;">Your digital <em style="color:var(--p);font-style:italic;">report card.</em></h1>
+      <p style="font-size:17px;line-height:1.6;color:var(--muted);margin-bottom:24px;max-width:520px;">Enter your business name, city, and email. I'll send you a 1-page snapshot of how your business looks online, completely free.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(106,191,105,0.08);border:1px solid rgba(106,191,105,0.20);color:#1a7e49;font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;"><span style="width:6px;height:6px;border-radius:50%;background:#6abf69;"></span>100% free</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">Delivered to your inbox</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.12);color:var(--p);font-size:12px;font-weight:600;padding:7px 13px;border-radius:100px;">Sent within minutes</span>
+      </div>
     </div>
+
+    <!-- Sample report card preview -->
+    <div style="display:flex;justify-content:center;align-items:center;">
+      <div style="background:#fff;border-radius:24px;padding:28px;box-shadow:0 32px 80px rgba(91,63,160,0.18),0 4px 16px rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.08);position:relative;width:100%;max-width:380px;transform:rotate(0.5deg);">
+        <div style="position:absolute;top:-14px;right:24px;background:var(--pdark);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:6px 14px;border-radius:100px;text-transform:uppercase;">Sample Report</div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--pxl));display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Digital Report Card</div>
+            <div style="font-size:15px;font-weight:600;color:var(--ink);font-family:var(--serif);">Your Business Co.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;">
+              <span>Google Presence</span><span style="color:#1a7e49;font-weight:700;font-size:13px;">8.2</span>
+            </div>
+            <div style="height:6px;background:#ede8f7;border-radius:100px;overflow:hidden;"><div style="width:82%;height:100%;background:linear-gradient(90deg,#6abf69,#a8d8a7);border-radius:100px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;">
+              <span>Website Health</span><span style="color:#a47816;font-weight:700;font-size:13px;">5.4</span>
+            </div>
+            <div style="height:6px;background:#ede8f7;border-radius:100px;overflow:hidden;"><div style="width:54%;height:100%;background:linear-gradient(90deg,#f0b429,#f7d077);border-radius:100px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;">
+              <span>Local Visibility</span><span style="color:#b03a3a;font-weight:700;font-size:13px;">3.1</span>
+            </div>
+            <div style="height:6px;background:#ede8f7;border-radius:100px;overflow:hidden;"><div style="width:31%;height:100%;background:linear-gradient(90deg,#e05555,#ee8888);border-radius:100px;"></div></div>
+          </div>
+        </div>
+
+        <div style="padding:14px;background:#f7f4fd;border-radius:12px;border-left:3px solid var(--p);">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--p);text-transform:uppercase;margin-bottom:5px;">#1 Opportunity</div>
+          <div style="font-size:13px;color:var(--ink);line-height:1.5;">Add a Google Business Profile to capture local search traffic.</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -708,6 +762,21 @@ if (!sessionStorage.getItem('exit_shown')) {
     <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
   </div>
 </div>
+
+
+<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#1e1338 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
+  <div aria-hidden="true" style="position:absolute;top:-100px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;">
+    <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c4aee8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <div style="flex:1;min-width:260px;color:#fff;text-align:left;">
+      <h3 style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;line-height:1.2;letter-spacing:-0.5px;color:#fff;">Ready to grow your business online?</h3>
+      <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;line-height:1.6;">Let's build a website that works as hard as you do.</p>
+    </div>
+    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Let's Talk &rarr;</a>
+  </div>
+</section>
 
 <footer class="site-footer" role="contentinfo">
   <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
