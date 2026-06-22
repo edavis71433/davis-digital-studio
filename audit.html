@@ -295,7 +295,7 @@ a{color:inherit;}
     <div class="audit-header">
       <span class="hero-label">Try it free</span>
       <h2>Get your free <em>site score.</em></h2>
-      <p>Enter your details and get real Google Lighthouse scores in about 20 seconds. Personalized findings for your specific site — not generic advice.</p>
+      <p>Enter your details and get real Google Lighthouse scores in 20–60 seconds. Personalized findings for your specific site — not generic advice.</p>
     </div>
 
     <!-- STEP 1: FORM -->
@@ -337,7 +337,7 @@ a{color:inherit;}
         <button class="audit-btn" id="submitBtn" onclick="runAudit()">
           Check my site free →
         </button>
-        <p class="submit-note">No spam. No sales call unless you want one. Takes about 20 seconds.</p>
+        <p class="submit-note">No spam. No sales call unless you want one. Takes 20–60 seconds.</p>
       </div>
       <div class="error-box" id="errorBox"></div>
     </div>
@@ -647,7 +647,7 @@ function runAudit() {
   var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var fetchTimeout = setTimeout(function() {
     if (abortCtrl) abortCtrl.abort();
-  }, 55000);
+  }, 70000);
 
   fetch(EDGE_FN, {
     method: 'POST',

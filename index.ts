@@ -38,7 +38,7 @@ serve(async (req) => {
       const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile&category=performance&category=seo&category=accessibility&key=${PSI_KEY}`;
 
       try {
-        const psiRes = await fetch(psiUrl, { signal: AbortSignal.timeout(45000) });
+        const psiRes = await fetch(psiUrl, { signal: AbortSignal.timeout(60000) });
         const psiData = await psiRes.json();
 
         if (psiData.error) {
