@@ -170,7 +170,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <div class="opts">
       <div class="opt" onclick="pick(1,'new')" id="q1_new">
         <div class="opt-icon">✨</div>
-        <div class="opt-text"><h4>Brand new website</h4><p>Starting from scratch — no existing site</p></div>
+        <div class="opt-text"><h4>Brand new website</h4><p>Starting from scratch, no existing site</p></div>
       </div>
       <div class="opt" onclick="pick(1,'redesign')" id="q1_redesign">
         <div class="opt-icon">🔄</div>
@@ -192,7 +192,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
   <div class="q-card" id="q2">
     <div class="q-num">Question 2 of 5</div>
     <h2>How many pages do you need?</h2>
-    <p>Count the main sections — Home, About, Services, Contact, etc. Don't overthink it.</p>
+    <p>Count the main sections. Home, About, Services, Contact, etc. Don't overthink it.</p>
     <div class="opts">
       <div class="opt" onclick="pick(2,'1-3')" id="q2_1-3">
         <div class="opt-icon">📄</div>
@@ -229,7 +229,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <div class="opts">
       <div class="opt" onclick="pick(3,'custom')" id="q3_custom">
         <div class="opt-icon">⚡</div>
-        <div class="opt-text"><h4>Custom HTML/CSS (fastest, no monthly fees)</h4><p>Built from scratch — no platform dependency, fastest load times</p></div>
+        <div class="opt-text"><h4>Custom HTML/CSS (fastest, no monthly fees)</h4><p>Built from scratch, no platform dependency, fastest load times</p></div>
       </div>
       <div class="opt" onclick="pick(3,'squarespace')" id="q3_squarespace">
         <div class="opt-icon">🟦</div>
@@ -241,7 +241,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
       </div>
       <div class="opt" onclick="pick(3,'unsure')" id="q3_unsure">
         <div class="opt-icon">🤔</div>
-        <div class="opt-text"><h4>Not sure — help me decide</h4><p>I'll recommend the right fit after we chat</p></div>
+        <div class="opt-text"><h4>Not sure, help me decide</h4><p>I'll recommend the right fit after we chat</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -268,7 +268,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
       </div>
       <div class="opt" onclick="toggleMulti(4,'brand')" id="q4_brand">
         <div class="opt-icon">🎨</div>
-        <div class="opt-text"><h4>Brand identity</h4><p>Logo, colors, fonts — visual identity package</p></div>
+        <div class="opt-text"><h4>Brand identity</h4><p>Logo, colors, fonts, visual identity package</p></div>
         <span class="opt-price">+$500</span>
       </div>
       <div class="opt" onclick="toggleMulti(4,'booking')" id="q4_booking">
@@ -295,7 +295,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <div class="opts">
       <div class="opt" onclick="pick(5,'flexible')" id="q5_flexible">
         <div class="opt-icon">😌</div>
-        <div class="opt-text"><h4>Flexible — no hard deadline</h4><p>Standard timeline of 4-8 weeks is fine</p></div>
+        <div class="opt-text"><h4>Flexible, no hard deadline</h4><p>Standard timeline of 4-8 weeks is fine</p></div>
       </div>
       <div class="opt" onclick="pick(5,'2months')" id="q5_2months">
         <div class="opt-icon">📅</div>
@@ -307,7 +307,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
       </div>
       <div class="opt" onclick="pick(5,'asap')" id="q5_asap">
         <div class="opt-icon">🚨</div>
-        <div class="opt-text"><h4>ASAP — under 2 weeks</h4><p>Rush surcharge applies, limited availability</p></div>
+        <div class="opt-text"><h4>ASAP, under 2 weeks</h4><p>Rush surcharge applies, limited availability</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -326,18 +326,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     </div>
 
     <div class="disclaimer">
-      This is a ballpark range based on your answers — not a quote. Final price depends on design complexity, content, and scope confirmed in a free discovery call. Every paid audit fee ($99+) is credited toward your project.
-    </div>
-
-    <div id="peLeadBox" style="display:none;background:linear-gradient(135deg,rgba(91,63,160,0.08),rgba(196,174,232,0.05));border:1px solid rgba(91,63,160,0.15);border-radius:16px;padding:24px;margin-bottom:20px;text-align:center;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Save this estimate</h3>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">I'll save your estimate and email you a copy. No spam, unsubscribe anytime.</p>
-      <div style="display:flex;flex-direction:column;gap:8px;max-width:340px;margin:0 auto;">
-        <input type="text" id="peLeadName" placeholder="Business name (optional)" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
-        <input type="email" id="peLeadEmail" placeholder="Your email address" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
-        <button onclick="sendPricingLead()" style="background:var(--p);color:#fff;border:none;border-radius:100px;padding:12px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Email me this estimate →</button>
-        <div id="peLeadMsg" style="font-size:12px;color:var(--muted);min-height:16px;"></div>
-      </div>
+      This is a ballpark range based on your answers, not a quote. Final price depends on design complexity, content, and scope confirmed in a free discovery call. Every paid audit fee ($99+) is credited toward your project.
     </div>
 
     <div style="text-align:center;margin-bottom:20px;">
@@ -361,7 +350,6 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
 <script>
 var ans = {};
-var EDGE_FN = 'https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api';
 var multiSel = {};
 
 function pick(q, val) {
@@ -431,12 +419,12 @@ function showResults() {
   var timelineLabel = { flexible: 'no hard deadline', '2months': 'within 2 months', '1month': 'within 1 month', asap: 'as soon as possible' }[ans.q5] || '';
 
   var reasoning = {
-    starter: 'Based on your answers — ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ' — this is a Starter-level project. These builds move fast, typically 2-4 weeks, and give you a clean professional presence without overbuilding for where your business is right now.',
-    growth: 'Based on ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ', this falls into the Growth tier. This is the most common engagement for established small businesses — custom design, built to rank on Google, with enough pages to tell your full story and convert visitors into customers.',
-    studio: 'What you described — ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ' — is a Studio-level project. This scope needs a full custom design system, and depending on the complexity of your e-commerce or feature requirements, it will take 6-10 weeks to do right.'
+    starter: 'Based on your answers, ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ', this is a Starter-level project. These builds move fast, typically 2-4 weeks, and give you a clean professional presence without overbuilding for where your business is right now.',
+    growth: 'Based on ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ', this falls into the Growth tier. This is the most common engagement for established small businesses, custom design, built to rank on Google, with enough pages to tell your full story and convert visitors into customers.',
+    studio: 'What you described, ' + typeLabel + ' with ' + pageLabel + ' on ' + platformLabel + ', is a Studio-level project. This scope needs a full custom design system, and depending on the complexity of your e-commerce or feature requirements, it will take 6-10 weeks to do right.'
   }[tier];
 
-  var rushNote = rush ? ' Because your timeline is tight (' + timelineLabel + '), a 25% rush surcharge applies — this prioritizes your project and compresses the timeline.' : '';
+  var rushNote = rush ? ' Because your timeline is tight (' + timelineLabel + '), a 25% rush surcharge applies, this prioritizes your project and compresses the timeline.' : '';
 
   var tiers = {
     starter: {
@@ -446,7 +434,7 @@ function showResults() {
       cls: 'starter',
       items: [
         'Template build on Squarespace, Wix, or similar',
-        'Your branding applied — colors, fonts, logo',
+        'Your branding applied, colors, fonts, logo',
         'Up to 5 pages, mobile-optimized',
         'Contact form and basic on-page SEO',
         'Google Analytics and Search Console setup',
@@ -463,7 +451,7 @@ function showResults() {
       cadence: '50% upfront · 50% at launch · Standard 6-8 week timeline',
       cls: 'growth',
       items: [
-        'Custom HTML/CSS design — no templates',
+        'Custom HTML/CSS design, no templates',
         'Mobile-first, performance-optimized build',
         'Full on-page SEO with keyword research',
         'Google Analytics 4 with conversion events',
@@ -473,7 +461,7 @@ function showResults() {
       ],
       cta: 'Book a free call to confirm scope',
       ctaUrl: 'https://calendly.com/eric-davisdigitalstudio/30min',
-      who: 'Best for: Established businesses ready to compete online and rank on Google — not just have a website, but have one that works.'
+      who: 'Best for: Established businesses ready to compete online and rank on Google, not just have a website, but have one that works.'
     },
     studio: {
       name: 'Studio',
@@ -491,12 +479,12 @@ function showResults() {
       ],
       cta: "Let's talk about your project",
       ctaUrl: '/contact',
-      who: 'Best for: Businesses with complex needs — multiple revenue streams, custom features, or a brand that needs to stand apart from every competitor in the market.'
+      who: 'Best for: Businesses with complex needs, multiple revenue streams, custom features, or a brand that needs to stand apart from every competitor in the market.'
     }
   };
 
   var t = tiers[tier];
-  var rushHtml = rush ? '<div style="display:inline-block;background:rgba(240,180,41,0.15);color:#b8860b;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:14px;">⚡ Rush pricing applied — ' + timelineLabel + '</div><br>' : '';
+  var rushHtml = rush ? '<div style="display:inline-block;background:rgba(240,180,41,0.15);color:#b8860b;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:14px;">⚡ Rush pricing applied, ' + timelineLabel + '</div><br>' : '';
 
   // Conversational reasoning block
   var reasoningHtml = '<div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.75;border-left:3px solid var(--pxl);">' + reasoning + rushNote + '</div>';
@@ -547,81 +535,6 @@ function showResults() {
   document.getElementById('peResults').style.display = 'block';
 
   if (typeof gtag === 'function') gtag('event', 'pricing_estimate', { event_category: 'tools', event_label: tier });
-
-  // Cache for sendPricingLead
-  window._peResult = { tier: tier, tierName: t.name, range: t.range, ans: ans, addons: addons, addonDetails: addonDetails };
-
-  // Show lead-capture box
-  var leadBox = document.getElementById('peLeadBox');
-  if (leadBox) {
-    leadBox.style.display = 'block';
-    var msg = document.getElementById('peLeadMsg');
-    if (msg) { msg.textContent = ''; msg.style.color = ''; }
-  }
-}
-
-function sendPricingLead() {
-  var d = window._peResult;
-  if (!d) return;
-  var emailEl = document.getElementById('peLeadEmail');
-  var nameEl = document.getElementById('peLeadName');
-  var msg = document.getElementById('peLeadMsg');
-  var email = (emailEl ? emailEl.value : '').trim();
-  var bizName = (nameEl ? nameEl.value : '').trim() || '(no name)';
-  if (!email || !email.includes('@')) {
-    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Please enter a valid email.'; }
-    return;
-  }
-  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = 'Sending...'; }
-
-  // Build human-readable summary of their answers
-  var typeLabels = {restaurant:'Restaurant',retail:'Retail',service:'Home Services',health:'Health & Wellness',salon:'Salon/Spa',creative:'Creative',realestate:'Real Estate',legal:'Legal',other:'Other'};
-  var pageLabels = {small:'5 pages or fewer',medium:'6-10 pages',large:'10-15 pages',huge:'15+ pages'};
-  var platformLabels = {fast:'Template build',custom:'Custom build',unsure:'Unsure'};
-  var timelineLabels = {flex:'Flexible',normal:'4-8 weeks',rush:'Under 4 weeks'};
-  var addonHtml = d.addons.length ? d.addons.map(function(k){
-    var a = d.addonDetails[k];
-    return a ? '<tr><td style="padding:3px 0;font-size:11px;color:rgba(255,255,255,0.5);">'+a.label+'</td><td style="padding:3px 0;font-size:11px;color:#fff;text-align:right;">'+a.price+'</td></tr>' : '';
-  }).join('') : '<tr><td style="padding:3px 0;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;" colspan="2">None selected</td></tr>';
-
-  // Eric's notification — lead details + their answers + the estimate
-  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
-    '<div style="max-width:580px;margin:0 auto;padding:32px 24px;">'+
-    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:28px;">'+
-      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Pricing Estimate Lead</div>'+
-      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+bizName+'</h1>'+
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:18px;"><a href="mailto:'+email+'" style="color:#c4aee8;text-decoration:none;">'+email+'</a></div>'+
-      '<div style="background:rgba(91,63,160,0.2);border:1px solid rgba(196,174,232,0.3);border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;">'+
-        '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">Estimated Tier</div>'+
-        '<div style="font-family:Georgia,serif;font-size:26px;color:#fff;margin-bottom:4px;">'+d.tierName+'</div>'+
-        '<div style="font-size:18px;font-weight:700;color:#c4aee8;">'+d.range+'</div>'+
-      '</div>'+
-      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:14px 0 6px;">Their Answers</div>'+
-      '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;">'+
-        '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);width:55%;">Business type</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(typeLabels[d.ans.type]||d.ans.type||'—')+'</td></tr>'+
-        '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Size of site</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(pageLabels[d.ans.pages]||d.ans.pages||'—')+'</td></tr>'+
-        '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Platform preference</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(platformLabels[d.ans.platform]||d.ans.platform||'—')+'</td></tr>'+
-        '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Timeline</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(timelineLabels[d.ans.timeline]||d.ans.timeline||'—')+'</td></tr>'+
-      '</table>'+
-      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:14px 0 6px;">Add-ons They Selected</div>'+
-      '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;">'+addonHtml+'</table>'+
-      '<div style="text-align:center;margin-top:18px;">'+
-        '<a href="mailto:'+email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Reply to lead →</a>'+
-      '</div>'+
-    '</div></div></body></html>';
-
-  var userHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">Your estimate is saved.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Based on your answers, your project falls into the <strong style="color:#c4aee8;">'+d.tierName+'</strong> tier at <strong style="color:#c4aee8;">'+d.range+'</strong>. The exact number depends on details we can nail down on a quick discovery call — no pressure, no pitch.</p><a href="https://calendly.com/edavis7143" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">Book a free discovery call →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio</p></div></body></html>';
-
-  fetch(EDGE_FN, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{tool:'pricing_estimator', url:'(pricing estimator)', bizType:'Pricing Estimate', city:'', score:0, fallback:false, topIssues:[{title:d.tierName+' tier · '+d.range,sev:'medium'}], userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
-  }).then(function(){
-    if (msg) { msg.style.color = '#6abf69'; msg.textContent = 'Sent! Check your inbox.'; }
-    if (typeof gtag==='function') gtag('event','pricing_estimate_lead',{event_category:'lead'});
-  }).catch(function(){
-    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Something went wrong. Please try again.'; }
-  });
 }
 
 function restart() {

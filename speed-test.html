@@ -175,7 +175,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
   <div class="input-card">
     <h2>Test your site speed</h2>
-    <p>Enter your URL below. Results take about 20-30 seconds — Google is actually running Lighthouse on your site.</p>
+    <p>Enter your URL below. Results take about 20-30 seconds. Google is actually running Lighthouse on your site.</p>
     <div class="strategy-tabs" role="group" aria-label="Device strategy">
       <button class="stab active" id="tabMobile" onclick="setStrategy('mobile')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>Mobile
@@ -212,6 +212,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
         <button class="rerun-btn" onclick="resetTest()">Test another site</button>
       </div>
     </div>
+
     <div class="scores-row" id="scoresRow"></div>
 
     <div class="vitals-card" id="vitalsCard" style="display:none;">
@@ -224,20 +225,9 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
       <div id="issuesList"></div>
     </div>
 
-    <div id="stLeadBox" style="display:none;background:linear-gradient(135deg,rgba(91,63,160,0.08),rgba(196,174,232,0.05));border:1px solid rgba(91,63,160,0.15);border-radius:16px;padding:24px;margin-top:20px;text-align:center;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Email me a copy of this report</h3>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">I'll send you a clean version of these scores plus a written analysis. No spam, unsubscribe anytime.</p>
-      <div style="display:flex;flex-direction:column;gap:8px;max-width:340px;margin:0 auto;">
-        <input type="text" id="stLeadName" placeholder="Business name (optional)" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
-        <input type="email" id="stLeadEmail" placeholder="Your email address" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
-        <button onclick="sendSpeedReport()" style="background:var(--p);color:#fff;border:none;border-radius:100px;padding:12px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Email me the report →</button>
-        <div id="stLeadMsg" style="font-size:12px;color:var(--muted);min-height:16px;"></div>
-      </div>
-    </div>
-
     <div class="upgrade-card">
       <h3>Want to know what these scores mean for your business?</h3>
-      <p>The full Digital Health Check goes deeper — keyword analysis, conversion paths, competitor comparison, and a prioritized fix list. Delivered in 5 business days.</p>
+      <p>The full Digital Health Check goes deeper, keyword analysis, conversion paths, competitor comparison, and a prioritized fix list. Delivered in 5 business days.</p>
       <div class="btns">
         <a href="/audit" class="btn-p">See audit options from $99</a>
         <a href="/contact" class="btn-ghost">Book a free call first</a>
@@ -260,7 +250,6 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
 <script>
 var PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
-var EDGE_FN = 'https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api';
 var strategy = 'mobile';
 
 function setStrategy(s) {
@@ -314,44 +303,25 @@ function runTest() {
   document.getElementById('runBtn').disabled = true;
   animateSteps();
 
-  // Route through Edge Function — no CORS, no exposed key, 90s server-side timeout
-  var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  var browserTimeout = setTimeout(function(){ if(abortCtrl) abortCtrl.abort(); }, 100000);
+  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
+    encodeURIComponent(url) + '&strategy=' + strategy +
+    '&category=performance&category=seo&category=accessibility&category=best-practices' +
+    '&key=' + PSI_KEY;
 
-  fetch(EDGE_FN, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'psi_fetch', url: url, strategy: strategy }),
-    signal: abortCtrl ? abortCtrl.signal : undefined
-  })
+  fetch(psiUrl)
     .then(function(r) { return r.json(); })
-    .then(function(res) {
-      clearTimeout(browserTimeout);
+    .then(function(data) {
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      if (res && res.error) {
-        if (res.error === 'timeout') {
-          showError('Google took too long to analyze that page. Try again — slow platforms sometimes need a second attempt.');
-        } else {
-          showError('Could not analyze that URL: ' + res.error + '. Make sure the site is publicly accessible.');
-        }
-        return;
-      }
-      var data = res && res.data;
-      if (!data) { showError('No data returned. Please try again.'); return; }
+      if (data.error) { showError(data.error.message || 'Could not analyze that URL. Check it and try again.'); return; }
       renderResults(url, data);
     })
-    .catch(function(err) {
-      clearTimeout(browserTimeout);
+    .catch(function() {
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      if (err && err.name === 'AbortError') {
-        showError('Request timed out. Please try again.');
-      } else {
-        showError('Could not connect to the analysis service. Check your URL and try again.');
-      }
+      showError('Could not connect to Google. Check your URL and try again.');
     });
 }
 
@@ -365,24 +335,24 @@ function getScoreAnalysis(key, val, displayVal) {
   var t = val >= 90 ? 'good' : val >= 50 ? 'ok' : 'poor';
   var a = {
     performance: {
-      good: 'Your site scored ' + val + '/100 on performance — Google considers this fast and it puts you ahead of the majority of small business sites online. Visitors on mobile connections will see your content quickly, which directly reduces bounce rates.',
+      good: 'Your site scored ' + val + '/100 on performance. Google considers this fast and it puts you ahead of the majority of small business sites online. Visitors on mobile connections will see your content quickly, which directly reduces bounce rates.',
       ok: 'A performance score of ' + val + '/100 means your site loads acceptably but has room to improve. Some visitors on slower connections may wait 3-5 seconds before content appears, and Google uses page speed as a direct ranking factor.',
-      poor: 'Your performance score of ' + val + '/100 is in the range Google classifies as poor. Most mobile visitors will wait more than 4 seconds to see your content, and a significant percentage will leave before the page finishes loading — this is hurting both your traffic and your rankings.'
+      poor: 'Your performance score of ' + val + '/100 is in the range Google classifies as poor. Most mobile visitors will wait more than 4 seconds to see your content, and a significant percentage will leave before the page finishes loading, this is hurting both your traffic and your rankings.'
     },
     seo: {
       good: 'Your SEO fundamentals score of ' + val + '/100 means the basic signals Google looks for are in place. Title tags, meta descriptions, and mobile configuration are working correctly, giving you a solid technical foundation.',
-      ok: 'An SEO score of ' + val + '/100 indicates Google found some issues with your basic signals. This typically means weak or missing meta descriptions, title tag problems, or mobile viewport issues — all of which affect how your pages appear in search results.',
+      ok: 'An SEO score of ' + val + '/100 indicates Google found some issues with your basic signals. This typically means weak or missing meta descriptions, title tag problems, or mobile viewport issues, all of which affect how your pages appear in search results.',
       poor: 'Your SEO score of ' + val + '/100 means Google is flagging significant technical issues. Missing meta descriptions, improper structure, or mobile problems are likely preventing pages from ranking even when you have relevant content.'
     },
     accessibility: {
-      good: 'Accessibility looks strong at ' + val + '/100 — your site is usable for people with disabilities and passes most WCAG standards. Google treats accessibility as a quality signal, so this contributes positively to your rankings.',
-      ok: 'Your accessibility score of ' + val + '/100 means some users with disabilities may have difficulty using parts of your site. Common issues are low text contrast, missing image descriptions, or unlabeled buttons — relatively quick fixes with meaningful impact.',
-      poor: 'Google flagged serious accessibility issues with a score of ' + val + '/100. Images likely lack alt text, text contrast is insufficient, or interactive elements are missing labels — these affect real users and signal low quality to Google.'
+      good: 'Accessibility looks strong at ' + val + '/100, your site is usable for people with disabilities and passes most WCAG standards. Google treats accessibility as a quality signal, so this contributes positively to your rankings.',
+      ok: 'Your accessibility score of ' + val + '/100 means some users with disabilities may have difficulty using parts of your site. Common issues are low text contrast, missing image descriptions, or unlabeled buttons, relatively quick fixes with meaningful impact.',
+      poor: 'Google flagged serious accessibility issues with a score of ' + val + '/100. Images likely lack alt text, text contrast is insufficient, or interactive elements are missing labels, these affect real users and signal low quality to Google.'
     },
     'best-practices': {
-      good: 'Your site follows web best practices well, scoring ' + val + '/100. Modern security standards, no deprecated APIs, and clean console output — this is the kind of technical hygiene that builds browser and user trust.',
+      good: 'Your site follows web best practices well, scoring ' + val + '/100. Modern security standards, no deprecated APIs, and clean console output, this is the kind of technical hygiene that builds browser and user trust.',
       ok: 'A best practices score of ' + val + '/100 suggests some technical debt. This might include mixed content warnings, outdated APIs, or JavaScript errors that users never see but browsers and Google do.',
-      poor: 'Your best practices score of ' + val + '/100 indicates real technical problems. JavaScript errors, security issues, or deprecated browser APIs are present — these can break functionality for some users and reduce trust signals.'
+      poor: 'Your best practices score of ' + val + '/100 indicates real technical problems. JavaScript errors, security issues, or deprecated browser APIs are present, these can break functionality for some users and reduce trust signals.'
     }
   };
   return (a[key] && a[key][t]) || '';
@@ -391,9 +361,9 @@ function getScoreAnalysis(key, val, displayVal) {
 function getLCPAnalysis(lcp) {
   var raw = parseFloat(lcp);
   if (isNaN(raw)) return '';
-  if (raw <= 2500) return 'Your Largest Contentful Paint is ' + lcp + ' — Google classifies this as Good, meaning your main content appears quickly. This is one of the three Core Web Vitals Google uses directly in its ranking algorithm, and you are in a strong position here.';
-  if (raw <= 4000) return 'Your Largest Contentful Paint is ' + lcp + ', which Google classifies as "Needs Improvement." The main visible content takes slightly too long to appear — anything between 2.5s and 4s is in this middle range. Optimizing your hero image or reducing server response time would push this into the green.';
-  return 'Your Largest Contentful Paint is ' + lcp + ', which Google classifies as Poor. Content is taking more than 4 seconds to appear on screen — this is the single most impactful performance issue on your site and is directly suppressing your rankings. The likely culprits are an unoptimized hero image, slow server response, or render-blocking resources.';
+  if (raw <= 2500) return 'Your Largest Contentful Paint is ' + lcp + '. Google classifies this as Good, meaning your main content appears quickly. This is one of the three Core Web Vitals Google uses directly in its ranking algorithm, and you are in a strong position here.';
+  if (raw <= 4000) return 'Your Largest Contentful Paint is ' + lcp + ', which Google classifies as "Needs Improvement." The main visible content takes slightly too long to appear, anything between 2.5s and 4s is in this middle range. Optimizing your hero image or reducing server response time would push this into the green.';
+  return 'Your Largest Contentful Paint is ' + lcp + ', which Google classifies as Poor. Content is taking more than 4 seconds to appear on screen, this is the single most impactful performance issue on your site and is directly suppressing your rankings. The likely culprits are an unoptimized hero image, slow server response, or render-blocking resources.';
 }
 
 function renderResults(url, data) {
@@ -489,12 +459,12 @@ function renderResults(url, data) {
     { key: 'uses-optimized-images', label: 'Images not optimized', tip: 'Your images are larger than they need to be and likely in older formats. Converting to WebP and running them through a compressor can cut image file sizes by 50-80% without visible quality loss.' },
     { key: 'uses-responsive-images', label: 'Images served too large for the screen', tip: 'The same large image is being sent to both desktop and mobile visitors. Serving correctly-sized images based on screen size saves significant bandwidth and speeds up mobile load times.' },
     { key: 'uses-text-compression', label: 'Text files not compressed by server', tip: 'Your web server is sending HTML, CSS, and JavaScript in full uncompressed form. Enabling GZIP or Brotli compression typically reduces transfer size by 60-80% at no cost.' },
-    { key: 'server-response-time', label: 'Server responding slowly', tip: 'Your server is taking longer than 600ms to respond before sending any content. This is often a hosting issue — shared or cheap hosting can significantly slow down every page load.' },
+    { key: 'server-response-time', label: 'Server responding slowly', tip: 'Your server is taking longer than 600ms to respond before sending any content. This is often a hosting issue, shared or cheap hosting can significantly slow down every page load.' },
     { key: 'meta-description', label: 'Missing or weak meta description', tip: 'Your page has no meta description or the existing one is poor. This is the text that appears under your title in Google search results and directly affects whether people click through to your site.' },
-    { key: 'document-title', label: 'Page title not optimized', tip: 'Your title tag is missing or not descriptive. The title tag is one of the strongest on-page SEO signals Google uses — it should include your primary keyword and location.' },
-    { key: 'image-alt', label: 'Images missing alt text', tip: 'Images on your site have no alt text describing what they show. Google cannot understand images without it, and screen reader users cannot use your site properly — both affect your rankings.' },
+    { key: 'document-title', label: 'Page title not optimized', tip: 'Your title tag is missing or not descriptive. The title tag is one of the strongest on-page SEO signals Google uses, it should include your primary keyword and location.' },
+    { key: 'image-alt', label: 'Images missing alt text', tip: 'Images on your site have no alt text describing what they show. Google cannot understand images without it, and screen reader users cannot use your site properly, both affect your rankings.' },
     { key: 'is-on-https', label: 'Not fully on HTTPS', tip: 'Some resources are loading over HTTP instead of HTTPS. Modern browsers show security warnings for HTTP sites and Google uses HTTPS as a ranking signal.' },
-    { key: 'dom-size', label: 'Page has too many HTML elements', tip: 'Your page has an unusually large number of HTML elements, which slows down rendering and makes the page feel sluggish — especially on lower-end mobile devices.' }
+    { key: 'dom-size', label: 'Page has too many HTML elements', tip: 'Your page has an unusually large number of HTML elements, which slows down rendering and makes the page feel sluggish, especially on lower-end mobile devices.' }
   ];
 
   var issues = [];
@@ -509,7 +479,7 @@ function renderResults(url, data) {
 
   if (issues.length > 0) {
     var issuesCard = document.getElementById('issuesCard');
-    issuesCard.innerHTML = '<h3 style="font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Issues found — ' + issues.length + ' total</h3>';
+    issuesCard.innerHTML = '<h3 style="font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Issues found, ' + issues.length + ' total</h3>';
     issues.slice(0, 8).forEach(function(i) {
       var sevCol = i.sev === 'high' ? '#e05555' : i.sev === 'medium' ? '#f0b429' : '#6abf69';
       var item = document.createElement('div');
@@ -526,77 +496,6 @@ function renderResults(url, data) {
 
   document.getElementById('stResults').style.display = 'block';
   if (typeof gtag === 'function') gtag('event', 'speed_test_complete', { event_category: 'tools', event_label: displayUrl });
-
-  // Build lead-capture box + cache result for sendSpeedReport()
-  window._stResult = { url: url, displayUrl: displayUrl, data: data, scores: scoreItems, issues: issues, strategy: strategy };
-  var leadBox = document.getElementById('stLeadBox');
-  if (leadBox) {
-    leadBox.style.display = 'block';
-    var leadMsg = document.getElementById('stLeadMsg');
-    if (leadMsg) { leadMsg.textContent = ''; leadMsg.style.color = ''; }
-    var leadEmail = document.getElementById('stLeadEmail');
-    if (leadEmail) leadEmail.value = '';
-  }
-}
-
-function sendSpeedReport() {
-  var d = window._stResult;
-  if (!d) return;
-  var emailEl = document.getElementById('stLeadEmail');
-  var nameEl = document.getElementById('stLeadName');
-  var msg = document.getElementById('stLeadMsg');
-  var email = (emailEl ? emailEl.value : '').trim();
-  var bizName = (nameEl ? nameEl.value : '').trim() || d.displayUrl;
-  if (!email || !email.includes('@')) {
-    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Please enter a valid email.'; }
-    return;
-  }
-  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = 'Sending...'; }
-
-  var scoreColor = function(v){ return v < 50 ? '#e05555' : v < 90 ? '#f0b429' : '#6abf69'; };
-  var scoreCards = d.scores.map(function(s){
-    return '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 6px;text-align:center;width:25%;"><div style="font-size:20px;font-weight:700;color:'+scoreColor(s.val)+';">'+s.val+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">'+s.label+'</div></td>';
-  }).join('');
-  var pillarRow = '<table style="width:100%;border-collapse:separate;border-spacing:5px 0;margin-bottom:14px;"><tr>'+scoreCards+'</tr></table>';
-
-  var issueHtml = d.issues.length ? d.issues.map(function(i,n){
-    var sc = i.sev==='high'?'#e05555':i.sev==='medium'?'#f0b429':'#6abf69';
-    return '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:'+sc+';font-size:9px;font-weight:700;color:#0f0820;text-align:center;line-height:18px;">'+(n+1)+'</span><strong style="color:#fff;font-size:12px;">'+i.label+'</strong></div><p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 3px 26px;line-height:1.6;">'+i.tip+'</p><span style="font-size:9px;font-weight:700;color:'+sc+';letter-spacing:1px;margin-left:26px;">'+i.sev.toUpperCase()+'</span></div>';
-  }).join('') : '<div style="padding:12px 0;font-size:12px;color:rgba(255,255,255,0.4);">No major issues found.</div>';
-
-  // Eric's detailed notification — business name + URL at top, all scores, every issue
-  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
-    '<div style="max-width:580px;margin:0 auto;padding:32px 24px;">'+
-    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:28px;">'+
-      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Speed Test Lead</div>'+
-      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+bizName+'</h1>'+
-      '<a href="'+d.url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:18px;">'+d.url+'</a>'+
-      '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">'+
-        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);width:90px;">Email</td><td><a href="mailto:'+email+'" style="color:#c4aee8;text-decoration:none;">'+email+'</a></td></tr>'+
-        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);">Strategy</td><td style="color:#fff;">'+d.strategy+'</td></tr>'+
-      '</table>'+
-      pillarRow+
-      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:16px 0 8px;">All findings · '+d.issues.length+'</div>'+
-      issueHtml+
-      '<div style="text-align:center;margin-top:18px;">'+
-        '<a href="mailto:'+email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;margin-right:6px;">Reply to lead →</a>'+
-        '<a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Visit site →</a>'+
-      '</div>'+
-    '</div></div></body></html>';
-
-  // User confirmation — generic, drives toward paid audit
-  var userHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">Your speed test for '+bizName+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">I found '+d.issues.length+' issues affecting your site speed. The free test gives you the scores — the paid audit gives you a 6-page report with the exact fixes ranked by impact.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio</p></div></body></html>';
-
-  fetch(EDGE_FN, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{tool:'speed_test', url:d.url, bizType:'Speed test', city:'', score:d.scores[0]?d.scores[0].val:0, fallback:false, topIssues:d.issues.slice(0,3).map(function(i){return{title:i.label,sev:i.sev};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
-  }).then(function(){
-    if (msg) { msg.style.color = '#6abf69'; msg.textContent = 'Sent! Check your inbox.'; }
-    if (typeof gtag==='function') gtag('event','speed_test_lead',{event_category:'lead'});
-  }).catch(function(){
-    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Something went wrong. Please try again.'; }
-  });
 }
 
 function resetTest() {

@@ -482,7 +482,7 @@ a:focus-visible, button:focus-visible {
 .skip-link:focus {
   left: 6px;
 }
-/* Fix small text contrast — boost muted color slightly */
+/* Fix small text contrast, boost muted color slightly */
 :root { --muted: #6b5f7e; }
 
 /* ── 480px breakpoints for pages missing them ── */
@@ -660,8 +660,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 <section class="story" aria-labelledby="story-heading">
   <div class="story-inner">
     <div class="story-aside reveal">
-      <div class="story-portrait">
-        <img src="/og-image.jpg" loading="lazy" alt="Eric Davis, founder of Davis Digital Studio">
+      <div class="story-portrait" aria-label="Eric Davis monogram" role="img">
+        <div style="position:absolute;inset:0;background:linear-gradient(145deg,#1e1338 0%,#5b3fa0 55%,#c4aee8 100%);display:flex;align-items:center;justify-content:center;">
+          <div style="font-family:var(--serif);font-size:120px;color:rgba(255,255,255,0.92);letter-spacing:-4px;line-height:1;">ED</div>
+        </div>
       </div>
       <div class="story-cred">
         <div class="story-cred-item">
@@ -694,13 +696,19 @@ if (!sessionStorage.getItem('exit_shown')) {
 </section>
 
 <div class="photo-break reveal">
-  <div class="photo-break-img">
-    <img src="/og-image.jpg" loading="lazy" alt="Eric Davis on the California coast">
+  <div class="photo-break-img" aria-hidden="true">
+    <div style="width:100%;height:100%;min-height:340px;background:linear-gradient(145deg,#1e1338 0%,#5b3fa0 50%,#2d1f4e 100%);border-radius:24px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-100px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.35) 0%,transparent 65%);"></div>
+      <div style="text-align:center;color:rgba(255,255,255,0.92);padding:40px;">
+        <div style="font-family:var(--serif);font-size:64px;line-height:0.95;letter-spacing:-2px;">Los Angeles</div>
+        <div style="font-size:13px;letter-spacing:3px;color:rgba(196,174,232,0.8);margin-top:14px;text-transform:uppercase;">Working remotely worldwide</div>
+      </div>
+    </div>
   </div>
   <div class="photo-break-text">
     <span class="label">Based in LA</span>
     <h3>Work hard.<br><em>Live well.</em><br>Do both.</h3>
-    <p>I grew up working. First-gen, started from the bottom of an org chart and worked up through nine roles to get where I am. That's not a sob story. it's a competitive advantage. I know what it actually takes to build something from nothing, and I bring that same energy to every client I work with.</p>
+    <p>I grew up working. First-gen, started from the bottom of an org chart and worked up through nine roles to get where I am. That's not a sob story, it's a competitive advantage. I know what it actually takes to build something from nothing, and I bring that same energy to every client I work with.</p>
   </div>
 </div>
 
@@ -734,13 +742,6 @@ if (!sessionStorage.getItem('exit_shown')) {
 </section>
 
 
-<section style="padding: 0 52px 80px; background: var(--pxxxl);">
-  <div style="max-width: 1100px; margin: 0 auto;">
-    <div style="border-radius: 24px; overflow: hidden; max-height: 420px; box-shadow: 0 16px 48px rgba(0,0,0,0.12);">
-      <img src="/og-image.jpg" loading="lazy" alt="Eric Davis at the beach" loading="lazy" style="width:100%;height:420px;object-fit:cover;object-position:center 30%;display:block;">
-    </div>
-  </div>
-</section>
 <section class="values" aria-labelledby="values-heading">
   <div class="values-inner">
     <div class="section-header reveal" style="margin-bottom:48px;">
@@ -897,7 +898,7 @@ document.querySelectorAll('.reveal').forEach(function(el) {
         <span class="sw-pulse-text">Free check available</span>
       </div>
       <div class="sw-title">Is your site hurting your business?</div>
-      <div class="sw-sub">Get 5 personalized findings for your website — free, instant, no signup required.</div>
+      <div class="sw-sub">Get 5 personalized findings for your website, free, instant, no signup required.</div>
       <a href="/audit#free-audit" class="sw-cta">
         <span class="sw-cta-text">Get your free score →</span>
       </a>

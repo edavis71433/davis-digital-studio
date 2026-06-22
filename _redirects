@@ -16,5 +16,7 @@
 /local-visibility       /local-visibility.html          200
 /pricing-estimator      /pricing-estimator.html         200
 
+/roi                    /roi-calculator                 301
+
 /*                      /404.html                       404
 /tools                  /tools.html                     200
