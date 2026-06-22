@@ -660,10 +660,14 @@ if (!sessionStorage.getItem('exit_shown')) {
 <section class="story" aria-labelledby="story-heading">
   <div class="story-inner">
     <div class="story-aside reveal">
-      <div class="story-portrait" aria-label="Eric Davis monogram" role="img">
-        <div style="position:absolute;inset:0;background:linear-gradient(145deg,#1e1338 0%,#5b3fa0 55%,#c4aee8 100%);display:flex;align-items:center;justify-content:center;">
-          <div style="font-family:var(--serif);font-size:120px;color:rgba(255,255,255,0.92);letter-spacing:-4px;line-height:1;">ED</div>
-        </div>
+      <div class="story-portrait">
+        <img src="/eric-davis.jpg"
+             srcset="/eric-davis-small.jpg 600w, /eric-davis.jpg 1200w"
+             sizes="(max-width: 768px) 100vw, 400px"
+             loading="eager"
+             fetchpriority="high"
+             alt="Eric Davis, founder of Davis Digital Studio, in Los Angeles"
+             width="1200" height="1600">
       </div>
       <div class="story-cred">
         <div class="story-cred-item">
