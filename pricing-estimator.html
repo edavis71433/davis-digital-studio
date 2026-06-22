@@ -137,6 +137,16 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
   .addons-grid{grid-template-columns:1fr;}
   .site-footer{padding:20px 24px;flex-direction:column;text-align:center;}
 }
+
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
+.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
+.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);}
+.nav-mob.open{display:flex;}
+.nav-mob a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:13px 12px;border-radius:8px;min-height:48px;display:flex;align-items:center;}
+.nav-mob a:hover,.nav-mob a.active{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff !important;text-align:center;border-radius:100px;margin-top:6px;justify-content:center;}
+.nav-mob .mob-cta:hover{background:#4a3280 !important;}
+@media(max-width:900px){.nav-ham{display:flex;}}
 </style>
 </head>
 <body>
@@ -152,7 +162,21 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <a href="/portal" class="navlink">Client Login</a>
     <a href="/contact" class="nav-cta">Let's talk</a>
   </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
 </nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+  <a href="/services">Services</a>
+  <a href="/work">Work</a>
+  <a href="/tools">Free Tools</a>
+  <a href="/report-card">Free Report Card</a>
+  <a href="/audit" style="background:var(--pxxxl);color:var(--p);">Get an Audit</a>
+  <a href="/portal">Client Login</a>
+  <a href="/contact" class="mob-cta">Let's talk</a>
+</div>
 
 
 <!-- BREADCRUMBS -->
@@ -387,6 +411,34 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
   </div>
 </section>
 
+<!-- TRUST STRIP -->
+<section style="background:var(--pdark);padding:32px 24px;border-top:1px solid rgba(255,255,255,0.06);">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Eric L. Davis</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design &amp; SEO Strategist</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Day Job</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Kaiser Permanente</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">IT Consultant III &middot; 9+ years</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Education</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">M.S. Business Analytics</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">CSUN &middot; Dean's Scholar</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Scale</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">11,000+ assets</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Enterprise governance experience</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="site-footer" role="contentinfo">
   <p>© <span id="footer-year"></span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
   <div>
@@ -604,6 +656,26 @@ function restart() {
 
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
+</script>
+
+<script>
+(function(){
+  var ham=document.getElementById('navHam');
+  var mob=document.getElementById('navMob');
+  if(!ham||!mob)return;
+  ham.addEventListener('click',function(){
+    var open=mob.classList.toggle('open');
+    ham.setAttribute('aria-expanded',open?'true':'false');
+    ham.setAttribute('aria-label',open?'Close menu':'Open menu');
+  });
+  mob.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      mob.classList.remove('open');
+      ham.setAttribute('aria-expanded','false');
+      ham.setAttribute('aria-label','Open menu');
+    });
+  });
+})();
 </script>
 </body>
 </html>
