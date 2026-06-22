@@ -173,6 +173,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
     <div class="sidebar">
       <div class="sl">Dashboard</div>
       <button class="sn active" onclick="go('overview')" id="sn-overview">📊 Overview</button>
+      <button class="sn" onclick="go('hub')" id="sn-hub">🗂️ Client Hub</button>
       <button class="sn" onclick="go('leads')" id="sn-leads">📋 Leads</button>
       <div class="sdiv"></div>
       <div class="sl">Client Work</div>
@@ -203,6 +204,23 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="card"><div class="ch"><div class="ct">👥 Active Clients</div></div><div class="cb" id="ovClients"></div></div>
           <div class="card"><div class="ch"><div class="ct">📬 Recent Activity</div></div><div class="cb" id="ovActivity"></div></div>
         </div>
+      </div>
+
+      <!-- CLIENT HUB -->
+      <div class="page" id="page-hub">
+        <div class="pt">Client Hub</div>
+        <div class="ps">Everyone you work with, in one place. Click a client to see their full record: messages, files, invoices, approvals, timeline, and any tools they have run on the site.</div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center;">
+          <input id="hubSearch" oninput="renderHub()" placeholder="Search clients by name, project, or email..." style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
+          <button class="sbtn" onclick="hubFilter='all';renderHub()" id="hf-all" style="background:var(--p);color:#fff;font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">All</button>
+          <button class="sbtn" onclick="hubFilter='active';renderHub()" id="hf-active" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Active</button>
+          <button class="sbtn" onclick="hubFilter='inactive';renderHub()" id="hf-inactive" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Inactive</button>
+          <button class="sbtn" onclick="loadHub()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">↻ Refresh</button>
+        </div>
+
+        <div id="hubList"></div>
+        <div id="hubDetail" style="display:none;margin-top:24px;"></div>
       </div>
 
       <!-- LEADS -->
@@ -655,6 +673,7 @@ function go(page) {
   if (btn) btn.classList.add("active");
   if (page !== "overview" && page !== "leads") populateSelects(page);
   if (page === "leads") loadLeads();
+  if (page === "hub") loadHub();
 }
 
 // ── LEADS ──
@@ -897,6 +916,253 @@ function updateBanner(context, client) {
   if (pr) pr.textContent = client.project_name || "";
 }
 
+
+// ══════════════════════════════════════════════
+//  CLIENT HUB
+// ══════════════════════════════════════════════
+var hubFilter = "all";
+var hubClients = [];
+var hubLeads = [];
+
+// A client is INACTIVE if their project is done/archived/paused,
+// OR they have not logged into the portal in 60+ days.
+function hubIsActive(c) {
+  var status = (c.project_status || "").toLowerCase();
+  if (status.indexOf("complete") > -1 || status.indexOf("done") > -1 ||
+      status.indexOf("archiv") > -1 || status.indexOf("paused") > -1 ||
+      status.indexOf("inactive") > -1 || status.indexOf("closed") > -1) {
+    return false;
+  }
+  if (c.last_seen_at) {
+    var days = (Date.now() - new Date(c.last_seen_at)) / (1000*60*60*24);
+    if (days > 60) return false;
+  }
+  return true;
+}
+
+async function loadHub() {
+  var listEl = document.getElementById("hubList");
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading clients...</p>';
+  document.getElementById("hubDetail").style.display = "none";
+  var res = await Promise.all([
+    api("clients?select=*&order=created_at.desc"),
+    api("audit_leads?select=*&order=created_at.desc&limit=300")
+  ]);
+  hubClients = res[0] || [];
+  hubLeads = res[1] || [];
+  clients = hubClients; // keep the rest of the panel in sync
+  renderHub();
+}
+
+function renderHub() {
+  var listEl = document.getElementById("hubList");
+  if (!listEl) return;
+  // highlight active filter button
+  ["all","active","inactive"].forEach(function(f){
+    var b = document.getElementById("hf-"+f);
+    if (b) {
+      b.style.background = (f===hubFilter) ? "var(--p)" : "rgba(91,63,160,0.08)";
+      b.style.color = (f===hubFilter) ? "#fff" : "var(--p)";
+    }
+  });
+
+  var q = (document.getElementById("hubSearch").value || "").toLowerCase().trim();
+  var rows = hubClients.filter(function(c){
+    var active = hubIsActive(c);
+    if (hubFilter === "active" && !active) return false;
+    if (hubFilter === "inactive" && active) return false;
+    if (q) {
+      var hay = ((c.name||"")+" "+(c.project_name||"")+" "+(c.email||"")).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  var activeCount = hubClients.filter(hubIsActive).length;
+  var inactiveCount = hubClients.length - activeCount;
+
+  if (rows.length === 0) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:20px;text-align:center;">No clients match.</p>';
+    return;
+  }
+
+  listEl.innerHTML =
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;">'+activeCount+' active · '+inactiveCount+' inactive · '+hubClients.length+' total</div>' +
+    rows.map(function(c){
+      var active = hubIsActive(c);
+      var leadCount = hubLeads.filter(function(l){
+        return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
+      }).length;
+      var lastSeen = c.last_seen_at ? ("Last seen "+fmtDate(c.last_seen_at)) : "Never logged in";
+      var dot = active
+        ? '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;"></span>'
+        : '<span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;"></span>';
+      return '' +
+      '<div onclick="openHubClient(\''+c.id+'\')" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;margin-bottom:8px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;cursor:pointer;transition:box-shadow .15s;" onmouseover="this.style.boxShadow=\'0 2px 10px rgba(91,63,160,0.10)\'" onmouseout="this.style.boxShadow=\'none\'">' +
+        '<div style="display:flex;align-items:center;gap:12px;min-width:0;">' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:var(--pxxxl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">'+((c.name||"?")[0])+'</div>' +
+          '<div style="min-width:0;">' +
+            '<div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;">'+dot+(c.name||"Unnamed")+'</div>' +
+            '<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(c.project_name||"No project")+' · '+lastSeen+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+          (leadCount>0?'<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(91,63,160,0.08);color:var(--p);">'+leadCount+' tool run'+(leadCount>1?'s':'')+'</span>':'') +
+          '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--pxxxl);color:var(--p);">'+(c.progress||0)+'%</span>' +
+          '<span style="color:var(--muted);font-size:18px;">›</span>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+}
+
+async function openHubClient(id) {
+  var c = hubClients.find(function(x){ return x.id === id; });
+  if (!c) return;
+  var detail = document.getElementById("hubDetail");
+  detail.style.display = "block";
+  detail.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading record...</p>';
+  detail.scrollIntoView({behavior:"smooth", block:"start"});
+
+  // Pull everything for this client in parallel
+  var res = await Promise.all([
+    api("messages?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("files?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("invoices?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("approvals?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("timeline?select=*&client_id=eq."+c.id+"&order=sort_order")
+  ]);
+  var msgs = res[0]||[], files = res[1]||[], invs = res[2]||[], apprs = res[3]||[], tl = res[4]||[];
+  var leads = hubLeads.filter(function(l){
+    return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
+  });
+  var active = hubIsActive(c);
+
+  function statBox(v,l){ return '<div style="text-align:center;padding:12px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:10px;"><div style="font-size:20px;font-weight:700;color:var(--p);">'+v+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">'+l+'</div></div>'; }
+  function sectionTitle(t){ return '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:22px 0 10px;">'+t+'</div>'; }
+  function empty(t){ return '<p style="font-size:12px;color:var(--muted);padding:6px 0;">'+t+'</p>'; }
+
+  var pendingInv = invs.filter(function(i){ return (i.status||"")!=="paid"; }).length;
+  var pendingAppr = apprs.filter(function(a){ return (a.status||"")==="pending"; }).length;
+
+  var html = '';
+  // Header
+  html += '<div style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;padding:22px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">';
+  html += '<div style="display:flex;align-items:center;gap:14px;">';
+  html += '<div style="width:54px;height:54px;border-radius:14px;background:var(--pxxxl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;">'+((c.name||"?")[0])+'</div>';
+  html += '<div>';
+  html += '<div style="font-size:19px;font-weight:700;">'+(c.name||"Unnamed")+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);">'+(c.project_name||"No project")+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(c.email||"")+'</div>';
+  html += '</div></div>';
+  html += '<div style="display:flex;gap:8px;align-items:center;">';
+  html += '<span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;background:'+(active?"rgba(34,197,94,0.12)":"rgba(148,163,184,0.15)")+';color:'+(active?"#16a34a":"#64748b")+';">'+(active?"Active":"Inactive")+'</span>';
+  html += '<button onclick="toggleHubStatus(\''+c.id+'\','+active+')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--p);cursor:pointer;">Mark '+(active?"inactive":"active")+'</button>';
+  html += '<button onclick="document.getElementById(\'hubDetail\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;">Close</button>';
+  html += '</div></div>';
+
+  // Stat row
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:18px;">';
+  html += statBox((c.progress||0)+"%","Progress");
+  html += statBox(msgs.length,"Messages");
+  html += statBox(files.length,"Files");
+  html += statBox(pendingInv,"Open invoices");
+  html += statBox(pendingAppr,"Pending approvals");
+  html += statBox(leads.length,"Tool runs");
+  html += '</div>';
+
+  // Quick jump links to the working tabs (pre-selected to this client)
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">';
+  ["messages","files","approvals","timeline","invoices"].forEach(function(ctx){
+    var label = {messages:"💬 Messages",files:"📁 Files",approvals:"✅ Approvals",timeline:"📋 Timeline",invoices:"💳 Invoices"}[ctx];
+    html += '<button onclick="hubJumpTo(\''+ctx+'\',\''+c.id+'\')" style="font-size:11px;padding:6px 12px;border-radius:8px;border:1px solid rgba(91,63,160,0.15);background:rgba(91,63,160,0.04);color:var(--p);cursor:pointer;">'+label+'</button>';
+  });
+  html += '</div>';
+
+  // Tool runs / inquiries
+  html += sectionTitle("🔍 Tool Runs & Inquiries");
+  if (leads.length === 0) {
+    html += empty("This client has not run any tools on the site (matched by email).");
+  } else {
+    html += leads.map(function(l){
+      var toolName = (l.tool||"tool").replace(/_/g," ");
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border:1px solid rgba(91,63,160,0.08);border-radius:10px;margin-bottom:6px;">'+
+        '<div><div style="font-size:13px;font-weight:600;text-transform:capitalize;">'+toolName+(l.url?' · '+l.url:'')+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);">'+(l.business_name||"")+(l.city?" · "+l.city:"")+' · '+fmtDate(l.created_at)+'</div></div>'+
+        (l.score!=null?'<span style="font-size:12px;font-weight:700;color:var(--p);">'+l.score+'/100</span>':'')+
+      '</div>';
+    }).join("");
+  }
+
+  // Recent messages
+  html += sectionTitle("💬 Recent Messages");
+  if (msgs.length === 0) { html += empty("No messages yet."); }
+  else {
+    html += msgs.slice(0,5).map(function(m){
+      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;">'+(m.text||"")+'</div></div>';
+    }).join("");
+  }
+
+  // Files
+  html += sectionTitle("📁 Files");
+  if (files.length === 0) { html += empty("No files yet."); }
+  else {
+    html += files.slice(0,8).map(function(f){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+ficon(f.name)+' '+(f.name||"")+' <span style="color:var(--muted);font-size:11px;">'+(f.size||"")+'</span></div>'+(f.url?'<a href="'+f.url+'" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;">Open ↗</a>':'')+'</div>';
+    }).join("");
+  }
+
+  // Invoices
+  html += sectionTitle("💳 Invoices");
+  if (invs.length === 0) { html += empty("No invoices yet."); }
+  else {
+    html += invs.map(function(i){
+      var paid = (i.status||"")==="paid";
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+(i.name||"Invoice")+' <span style="color:var(--muted);font-size:11px;">'+(i.amount||"")+'</span></div><span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:100px;background:'+(paid?"rgba(34,197,94,0.12)":"rgba(245,158,11,0.12)")+';color:'+(paid?"#16a34a":"#d97706")+';">'+cap(i.status||"draft")+'</span></div>';
+    }).join("");
+  }
+
+  // Approvals
+  html += sectionTitle("✅ Approvals");
+  if (apprs.length === 0) { html += empty("No approvals yet."); }
+  else {
+    html += apprs.map(function(a){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+(a.title||"")+'</div><span style="font-size:11px;color:var(--muted);">'+cap(a.status||"pending")+'</span></div>';
+    }).join("");
+  }
+
+  // Timeline
+  html += sectionTitle("📋 Timeline");
+  if (tl.length === 0) { html += empty("No timeline milestones yet."); }
+  else {
+    html += tl.map(function(t){
+      return '<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><span style="font-size:15px;">'+(t.icon||"📋")+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+(t.title||"")+'</div><div style="font-size:11px;color:var(--muted);">'+(t.date_label||"")+' · '+cap(t.status||"pending")+'</div></div></div>';
+    }).join("");
+  }
+
+  html += '</div>';
+  detail.innerHTML = html;
+}
+
+// Jump to a working tab with this client pre-selected
+function hubJumpTo(ctx, clientId) {
+  go(ctx);
+  setTimeout(function(){
+    var sel = document.getElementById("sel-"+ctx);
+    if (sel) { sel.value = clientId; onClientChange(clientId, ctx); }
+  }, 120);
+}
+
+// Manually flip active/inactive (writes project_status)
+async function toggleHubStatus(id, currentlyActive) {
+  var newStatus = currentlyActive ? "Inactive" : "In Progress";
+  await api("clients?id=eq."+id, "PATCH", {project_status:newStatus});
+  toast("✓ Marked "+(currentlyActive?"inactive":"active"));
+  await loadHub();
+  openHubClient(id);
+}
+
 // ── API HELPER ──
 async function api(path, method, body) {
   var opts = {
@@ -905,7 +1171,7 @@ async function api(path, method, body) {
       "apikey": SB_KEY,
       "Authorization": "Bearer " + SB_KEY,
       "Content-Type": "application/json",
-      "Prefer": method === "POST" ? "return=representation" : ""
+      "Prefer": (method === "POST" || method === "PATCH") ? "return=representation" : ""
     }
   };
   if (body) opts.body = JSON.stringify(body);
