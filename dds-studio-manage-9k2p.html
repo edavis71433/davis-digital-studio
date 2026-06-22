@@ -585,6 +585,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 <script>
 const SB_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
+const ADMIN_TOKEN = "dplaHi_BIZ17Qf4LJUfRli9lkVQJM_EbxOx_tLOBq3s";  // must match ADMIN_TOKEN secret in the Edge Function
 const PASS_HASH = "50897cb74718d639a5b89f3efd0b144f127eee374e8e6a52c7cf3c252b8302c6";
 const DEFAULT_CONTRACT = `PROJECT AGREEMENT
 Davis Digital Studio
@@ -1165,20 +1166,21 @@ async function toggleHubStatus(id, currentlyActive) {
 
 // ── API HELPER ──
 async function api(path, method, body) {
-  var opts = {
-    method: method || "GET",
-    headers: {
-      "apikey": SB_KEY,
-      "Authorization": "Bearer " + SB_KEY,
-      "Content-Type": "application/json",
-      "Prefer": (method === "POST" || method === "PATCH") ? "return=representation" : ""
-    }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  var r = await fetch(SB_URL + "/rest/v1/" + path, opts);
-  if (!r.ok) { var e = await r.text(); console.error(e); return null; }
-  if (r.status === 204) return null;
-  return r.json();
+  // Routes through the Edge Function so the browser never holds a key that can
+  // bypass RLS. The Edge Function uses the service role server-side, gated by ADMIN_TOKEN.
+  try {
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY },
+      body: JSON.stringify({ type: "admin_db", token: ADMIN_TOKEN, path: path, method: method || "GET", payload: body || null })
+    });
+    var j = await r.json();
+    if (j.error) { console.error("api error:", j.error, j.detail || ""); return null; }
+    return j.data;
+  } catch (e) {
+    console.error("api fetch failed:", e);
+    return null;
+  }
 }
 
 // ── OVERVIEW ──
