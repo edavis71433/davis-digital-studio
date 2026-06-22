@@ -6,3 +6,6 @@ Disallow: /checklist.html
 Disallow: /dds-studio-manage-9k2p.html
 
 Sitemap: https://www.davisdigitalstudio.com/sitemap.xml
+Disallow: /dds-studio-audit-2026.html
+Disallow: /email-nurture-sequence.html
+Disallow: /email-signature.html

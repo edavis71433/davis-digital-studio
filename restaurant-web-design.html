@@ -42,7 +42,10 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 .nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);}
 .nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
 .nav-logo span{color:#5b3fa0;}
-.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;}
+.nav-links{display:flex;align-items:center;gap:20px;}
+.nav-links a{font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;white-space:nowrap;}
+.nav-links a:hover{color:#5b3fa0;}
+.nav-cta{background:var(--p);color:#fff !important;font-size:13px;font-weight:700;padding:8px 20px;border-radius:100px;text-decoration:none;}
 .hero{background:var(--pdark);padding:80px 24px 72px;text-align:center;}
 .hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:12px;font-weight:600;padding:4px 14px;border-radius:100px;margin-bottom:20px;letter-spacing:0.5px;}
 .hero h1{font-family:var(--serif);font-size:clamp(34px,5vw,60px);font-weight:400;color:#fff;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1;}
@@ -134,6 +137,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     grid-template-columns: 1fr !important;
   }
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
@@ -148,20 +152,19 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
 <nav class="nav" role="navigation" aria-label="Site navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-    <div class="nav-links">
-    <a href="/" class="navlink">Home</a>
-    <a href="/about" class="navlink">About</a>
-    <a href="/services" class="navlink">Services</a>
-    <a href="/work" class="navlink">Work</a>
-    <a href="/tools" class="navlink">Free Tools</a>
-    <a href="/portal" class="navlink">Client Login</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/services">Services</a>
+    <a href="/work">Work</a>
+    <a href="/tools">Free Tools</a>
     <a href="/report-card" style="font-size:13px;font-weight:700;color:#5b3fa0;background:#ede8f7;padding:7px 16px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;margin-left:4px;">Free Report Card</a>
-    <a href="/audit" style="background:#5b3fa0;color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:100px;text-decoration:none;margin-left:6px;">Audits from $99</a>
+    <a href="/audit" class="nav-cta" style="margin-left:6px;">Audits from $99</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
   </button>
-</nav
+</nav>
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
   <a href="/">Home</a>
   <a href="/about">About</a>
@@ -178,7 +181,7 @@ document.getElementById('navHam').addEventListener('click',function(){
   var open=mob.classList.toggle('open');
   this.setAttribute('aria-expanded',open);
 });
-</script>>
+</script>
 
 
 <!-- BREADCRUMBS -->
@@ -452,10 +455,10 @@ document.getElementById('navHam').addEventListener('click',function(){
       <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/contact?industry=salon" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/contact?industry=retail" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/contact?industry=health" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/contact?industry=homeservices" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
+        <a href="/salon-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
+        <a href="/retail-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
+        <a href="/health-wellness-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
+        <a href="/home-services-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
       </div>
     </div>
   </div>
