@@ -82,6 +82,61 @@ p { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.8; margin-bott
   }
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
+
+}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+.nav-links{display:none;}.nav-ham{display:flex;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+
+/* NAV-FINAL-V4 */
+
+.skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
+.skip-link:focus{left:8px;}
+*:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
+.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
+.nav-logo span{color:#5b3fa0;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
+.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
+.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
+.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
+.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
+.nav-drop{position:relative;}
+.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
+.nav-drop:hover>button svg{transform:rotate(180deg);}
+.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
+.nav-drop:hover .nav-drop-menu{display:block;}
+.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
+.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
+.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
+.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
+.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
+.nav-mob.open{display:flex;}
+.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
+.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob-group{margin:2px 0;}
+.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
+.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
+.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
+.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
+.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
+.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
+.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
+.nav-mob .mob-cta:hover{background:#4a3280!important;}
+body{padding-top:68px;}
+@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","name":"Page Not Found | Davis Digital Studio","url":"https://www.davisdigitalstudio.com/404","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://www.davisdigitalstudio.com"}}
@@ -101,9 +156,90 @@ p { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.8; margin-bott
   <meta name="twitter:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
 </head>
 <body>
-
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<div class="orb" aria-hidden="true"></div>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Services</a>
+        <div class="nav-drop-divider"></div>
+        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
+        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
+        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Monthly Retainer</a>
+      </div>
+    </div>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
+        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
+        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
+        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
+        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
+      </div>
+    </div>
+    <a href="/work">Work</a>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
+        <div class="nav-drop-divider"></div>
+        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
+        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
+        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
+        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
+        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
+        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
+      </div>
+    </div>
+    <a href="/report-card" class="nav-report">Free Report Card</a>
+    <a href="/audit" class="nav-cta">Audits from $99</a>
+  </div>
+  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </button>
+</nav>
+<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+  <div class="nav-mob-group" id="mobServices">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/services">All Services</a>
+      <a href="/web-design">Web Design</a>
+      <a href="/seo-strategy">SEO Strategy</a>
+      <a href="/monthly-retainer">Monthly Retainer</a>
+    </div>
+  </div>
+  <div class="nav-mob-group" id="mobIndustries">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
+      <a href="/salon-web-design">Salons &amp; Spas</a>
+      <a href="/retail-web-design">Retail &amp; Boutiques</a>
+      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
+      <a href="/home-services-web-design">Home Services</a>
+    </div>
+  </div>
+  <a href="/work">Work</a>
+  <div class="nav-mob-group" id="mobTools">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/audit#free-audit">Free Site Score</a>
+      <a href="/report-card">Digital Report Card</a>
+      <a href="/roi-calculator">ROI Calculator</a>
+      <a href="/speed-test">Speed Test</a>
+      <a href="/local-visibility">Local Visibility</a>
+      <a href="/pricing-estimator">Pricing Estimator</a>
+    </div>
+  </div>
+  <a href="/report-card">Free Report Card</a>
+  <a href="/contact" class="mob-cta">Let's talk</a>
+</div>
 
 <main id="main-content">
 <div class="container">

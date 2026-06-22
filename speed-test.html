@@ -34,136 +34,61 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);}
-.nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:6px;}
-.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;}
-.navlink:hover,.navlink.active{color:var(--p);background:var(--pxxxl);}
-.nav-cta{background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
-.nav-cta:hover{opacity:0.88;}
-
-.hero{background:var(--pdark);padding:72px 24px 64px;text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.4) 0%,transparent 65%);pointer-events:none;}
-.hero-tag{display:inline-block;background:rgba(196,174,232,0.15);color:var(--pxl);font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:18px;letter-spacing:1px;text-transform:uppercase;}
-.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;color:#fff;letter-spacing:-1.5px;margin-bottom:14px;line-height:1.1;}
-.hero h1 em{font-style:italic;color:var(--pxl);}
-.hero-sub{font-size:16px;color:rgba(255,255,255,0.55);max-width:480px;margin:0 auto;line-height:1.7;}
-
-.tool-wrap{max-width:760px;margin:0 auto;padding:56px 24px 80px;}
-
-/* Input card */
-.input-card{background:#fff;border-radius:24px;padding:40px;box-shadow:0 4px 40px rgba(91,63,160,0.08);border:1px solid rgba(91,63,160,0.1);margin-bottom:32px;}
-.input-card h2{font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:8px;letter-spacing:-0.5px;}
-.input-card p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
-.url-row{display:flex;gap:12px;}
-.url-input{flex:1;border:1.5px solid rgba(91,63,160,0.2);border-radius:12px;padding:14px 18px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;transition:border-color 0.15s;outline:none;}
-.url-input:focus{border-color:var(--p);}
-.url-input::placeholder{color:#b0a8c0;}
-.run-btn{background:var(--p);color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s,transform 0.15s;white-space:nowrap;}
-.run-btn:hover{opacity:0.88;transform:translateY(-1px);}
-.run-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-.strategy-tabs{display:flex;gap:8px;margin-bottom:20px;}
-.stab{background:var(--pxxxl);border:1.5px solid transparent;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-.stab.active{background:#fff;border-color:var(--p);color:var(--p);}
-.error-msg{color:#c0392b;font-size:13px;margin-top:10px;display:none;}
-
-/* Loading */
-.loading{display:none;text-align:center;padding:48px 24px;}
-.spinner{width:48px;height:48px;border:3px solid var(--pxxl);border-top-color:var(--p);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading p{font-size:15px;color:var(--muted);margin-bottom:6px;}
-.loading small{font-size:12px;color:#b0a8c0;}
-.loading-steps{list-style:none;text-align:left;max-width:280px;margin:20px auto 0;}
-.loading-steps li{font-size:13px;color:var(--muted);padding:6px 0;display:flex;align-items:center;gap:10px;opacity:0.4;transition:opacity 0.4s;}
-.loading-steps li.active{opacity:1;color:var(--p);font-weight:500;}
-.loading-steps li.done{opacity:0.7;}
-.loading-steps li::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pxl);flex-shrink:0;}
-.loading-steps li.active::before{background:var(--p);}
-.loading-steps li.done::before{content:'✓';background:none;color:#6abf69;font-size:12px;font-weight:700;}
-
-/* Results */
-.results{display:none;}
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
-.results-url{font-size:13px;color:var(--muted);background:var(--pxxxl);padding:6px 14px;border-radius:100px;}
-.rerun-btn{background:transparent;border:1.5px solid var(--pxl);color:var(--p);border-radius:100px;padding:7px 18px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;}
-.rerun-btn:hover{background:var(--pxxxl);}
-
-/* Score cards */
-.scores-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.score-card{background:#fff;border-radius:16px;padding:20px 16px;text-align:center;border:1px solid rgba(91,63,160,0.1);}
-.score-num{font-family:var(--serif);font-size:40px;font-weight:400;line-height:1;margin-bottom:4px;}
-.score-num.good{color:#6abf69;}
-.score-num.ok{color:#f0b429;}
-.score-num.poor{color:#e05555;}
-.score-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
-.score-bar{height:4px;border-radius:2px;background:#ede8f7;margin-top:10px;overflow:hidden;}
-.score-bar-fill{height:100%;border-radius:2px;transition:width 1s ease;}
-.score-bar-fill.good{background:#6abf69;}
-.score-bar-fill.ok{background:#f0b429;}
-.score-bar-fill.poor{background:#e05555;}
-
-/* Vitals */
-.vitals-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
-.vitals-card h3{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
-.vitals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;}
-.vital{background:var(--pxxxl);border-radius:10px;padding:14px 12px;text-align:center;}
-.vital-val{font-size:20px;font-weight:700;margin-bottom:2px;}
-.vital-val.good{color:#6abf69;}
-.vital-val.ok{color:#f0b429;}
-.vital-val.poor{color:#e05555;}
-.vital-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
-.vital-thresh{font-size:10px;color:#b0a8c0;margin-top:2px;}
-
-/* Issues */
-.issues-card{background:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(91,63,160,0.1);}
-.issues-card h3{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
-.issue-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
-.issue-item:last-child{border-bottom:none;padding-bottom:0;}
-.issue-sev{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
-.issue-sev.high{background:#e05555;}
-.issue-sev.medium{background:#f0b429;}
-.issue-sev.low{background:#6abf69;}
-.issue-body h4{font-size:14px;font-weight:600;margin-bottom:4px;}
-.issue-body p{font-size:13px;color:var(--muted);line-height:1.6;}
-.issue-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-top:6px;letter-spacing:0.5px;}
-.issue-tag.high{background:rgba(224,85,85,0.1);color:#c0392b;}
-.issue-tag.medium{background:rgba(240,180,41,0.1);color:#b8860b;}
-.issue-tag.low{background:rgba(106,191,105,0.1);color:#2e7d32;}
-
-/* CTA */
-.upgrade-card{background:var(--pdark);border-radius:20px;padding:32px;text-align:center;position:relative;overflow:hidden;}
-.upgrade-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.5) 0%,transparent 65%);pointer-events:none;}
-.upgrade-card h3{font-family:var(--serif);font-size:24px;font-weight:400;color:#fff;margin-bottom:10px;position:relative;}
-.upgrade-card p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:24px;line-height:1.7;position:relative;}
-.upgrade-card .btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;}
-.btn-p{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;transition:transform 0.15s;}
-.btn-p:hover{transform:translateY(-2px);}
-.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.25);text-decoration:none;transition:background 0.15s;}
-.btn-ghost:hover{background:rgba(255,255,255,0.1);}
-
-.site-footer{padding:24px 48px;background:var(--pdark);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:0;}
-.site-footer p{font-size:12px;color:rgba(255,255,255,0.3);}
-.site-footer a{font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;margin-left:16px;}
-.site-footer a:hover{color:rgba(255,255,255,0.7);}
-
-@media(max-width:700px){
-  .nav{padding:0 20px;}.nav-links{display:none;}
-  .url-row{flex-direction:column;}
-  .scores-row{grid-template-columns:repeat(2,1fr);}
-  .site-footer{padding:20px 24px;flex-direction:column;text-align:center;}
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
 
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+.nav-links{display:none;}.nav-ham{display:flex;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+
+/* NAV-FINAL-V4 */
+
+.skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
+.skip-link:focus{left:8px;}
+*:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
+.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
+.nav-logo span{color:#5b3fa0;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
+.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
+.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
+.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
+.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
+.nav-drop{position:relative;}
+.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
+.nav-drop:hover>button svg{transform:rotate(180deg);}
+.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
+.nav-drop:hover .nav-drop-menu{display:block;}
+.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
+.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
+.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
 .nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
 .nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);}
+.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
 .nav-mob.open{display:flex;}
-.nav-mob a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:13px 12px;border-radius:8px;min-height:48px;display:flex;align-items:center;}
-.nav-mob a:hover,.nav-mob a.active{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff !important;text-align:center;border-radius:100px;margin-top:6px;justify-content:center;}
-.nav-mob .mob-cta:hover{background:#4a3280 !important;}
-@media(max-width:900px){.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
+.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
+.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob-group{margin:2px 0;}
+.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
+.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
+.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
+.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
+.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
+.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
+.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
+.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
+.nav-mob .mob-cta:hover{background:#4a3280!important;}
+body{padding-top:68px;}
+@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
 </style>
 </head>
 <body>
@@ -171,13 +96,44 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 <nav class="nav" role="navigation" aria-label="Main navigation">
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
-    <a href="/" class="navlink">Home</a>
-    <a href="/about" class="navlink">About</a>
-    <a href="/services" class="navlink">Services</a>
-    <a href="/work" class="navlink">Work</a>
-    <a href="/tools" class="navlink active">Free Tools</a>
-    <a href="/portal" class="navlink">Client Login</a>
-    <a href="/contact" class="nav-cta">Let's talk</a>
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Services</a>
+        <div class="nav-drop-divider"></div>
+        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
+        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
+        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Monthly Retainer</a>
+      </div>
+    </div>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
+        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
+        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
+        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
+        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
+      </div>
+    </div>
+    <a href="/work">Work</a>
+    <div class="nav-drop">
+      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="nav-drop-menu">
+        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
+        <div class="nav-drop-divider"></div>
+        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
+        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
+        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
+        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
+        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
+        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
+      </div>
+    </div>
+    <a href="/report-card" class="nav-report">Free Report Card</a>
+    <a href="/audit" class="nav-cta">Audits from $99</a>
   </div>
   <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -186,15 +142,40 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
   <a href="/">Home</a>
   <a href="/about">About</a>
-  <a href="/services">Services</a>
+  <div class="nav-mob-group" id="mobServices">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/services">All Services</a>
+      <a href="/web-design">Web Design</a>
+      <a href="/seo-strategy">SEO Strategy</a>
+      <a href="/monthly-retainer">Monthly Retainer</a>
+    </div>
+  </div>
+  <div class="nav-mob-group" id="mobIndustries">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
+      <a href="/salon-web-design">Salons &amp; Spas</a>
+      <a href="/retail-web-design">Retail &amp; Boutiques</a>
+      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
+      <a href="/home-services-web-design">Home Services</a>
+    </div>
+  </div>
   <a href="/work">Work</a>
-  <a href="/tools">Free Tools</a>
+  <div class="nav-mob-group" id="mobTools">
+    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="nav-mob-sub">
+      <a href="/audit#free-audit">Free Site Score</a>
+      <a href="/report-card">Digital Report Card</a>
+      <a href="/roi-calculator">ROI Calculator</a>
+      <a href="/speed-test">Speed Test</a>
+      <a href="/local-visibility">Local Visibility</a>
+      <a href="/pricing-estimator">Pricing Estimator</a>
+    </div>
+  </div>
   <a href="/report-card">Free Report Card</a>
-  <a href="/audit" style="background:var(--pxxxl);color:var(--p);">Get an Audit</a>
-  <a href="/portal">Client Login</a>
   <a href="/contact" class="mob-cta">Let's talk</a>
 </div>
-
 
 <!-- BREADCRUMBS -->
 <nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
