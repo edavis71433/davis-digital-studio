@@ -551,7 +551,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
     "name": "Eric Davis",
     "jobTitle": "Web Designer & SEO Strategist",
     "worksFor": { "@type": "Organization", "name": "Davis Digital Studio" },
-    "url": "https://www.davisdigitalstudio.com/about.html",
+    "url": "https://www.davisdigitalstudio.com/about",
     "sameAs": ["https://www.linkedin.com/in/eric-davis-4b1034b8/"],
     "address": { "@type": "PostalAddress", "addressLocality": "Los Angeles", "addressRegion": "CA" }
   }
@@ -583,14 +583,12 @@ if (!sessionStorage.getItem('exit_shown')) {
 </script>
   <!-- Google Analytics 4 -->
   <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
-  <!-- STEP: Replace G-EQYY0DL8JL with your real GA4 Measurement ID -->
-  <!-- Get it at: analytics.google.com → Admin → Data Streams → your stream -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-EQYY0DL8JL');
+    gtag('config', 'G-EQYY0DL8JL', {anonymize_ip: true});
   
 
 
@@ -622,6 +620,9 @@ if (!sessionStorage.getItem('exit_shown')) {
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DavisDigital">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"AboutPage","name":"About Eric Davis | Davis Digital Studio","description":"Eric Davis: 9 years at Kaiser Permanente, now bringing enterprise-level web strategy to independent businesses across the US.","url":"https://www.davisdigitalstudio.com/about","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://www.davisdigitalstudio.com"}}
+</script>
 </head>
 <body>
 <nav class="nav" role="navigation" aria-label="Main navigation">

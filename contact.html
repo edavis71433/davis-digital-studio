@@ -756,16 +756,16 @@ if (!sessionStorage.getItem('exit_shown')) {
         });
       } catch(e) {}
 
-      // Send auto-reply via Resend - minimal confirmation
+      // Send auto-reply via Edge Function (server-side - no key exposure, no CSP issue)
       try {
-        await fetch('https://api.resend.com/emails', {
+        await fetch('https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer re_a1wmqA2w_2FmdQGcD9ouYNmwnkHWrzXr3' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: 'Eric Davis <eric@davisdigitalstudio.com>',
-            to: [email],
-            subject: 'Got your message. I will be in touch within 24 hours',
-            html: '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:520px;margin:0 auto;padding:40px 24px;"><p style="font-family:Georgia,serif;font-size:20px;color:#fff;margin:0 0 28px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</p><div style="background:#1e1338;border-radius:16px;padding:32px;"><h2 style="color:#fff;font-weight:400;font-size:22px;margin:0 0 12px;">Got your message.</h2><p style="color:rgba(255,255,255,0.6);line-height:1.7;margin:0 0 20px;">Thanks for reaching out. I will get back to you within 24 hours at this email address.</p><p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0 0 20px;">If you would rather talk sooner, grab a free 30-minute slot on my calendar.</p><a href="https://calendly.com/eric-davisdigitalstudio/30min" style="display:inline-block;background:#5b3fa0;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;">Book a free discovery call</a></div><p style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles, CA</p></div></body></html>'
+            type: 'contact_reply',
+            to: email,
+            name: name,
+            service: service || 'Not specified'
           })
         });
       } catch(e) {}

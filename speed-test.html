@@ -11,6 +11,12 @@
 <meta name="theme-color" content="#5b3fa0">
 <meta property="og:title" content="Free Page Speed Test | Davis Digital Studio">
 <meta property="og:description" content="Real Google Lighthouse scores for mobile and desktop. Core Web Vitals and plain-English fixes. Free, no signup.">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@davisdigitalstudio">
 <meta property="og:url" content="https://www.davisdigitalstudio.com/speed-test">
 <meta property="og:image" content="https://www.davisdigitalstudio.com/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -444,9 +450,9 @@ function getScoreAnalysis(key, val, displayVal) {
       poor: 'Google flagged serious accessibility issues with a score of ' + val + '/100. Images likely lack alt text, text contrast is insufficient, or interactive elements are missing labels, these affect real users and signal low quality to Google.'
     },
     'best-practices': {
-      good: 'Your site follows web best practices well, scoring ' + val + '/100. Modern security standards, no deprecated APIs, and clean console output, this is the kind of technical hygiene that builds browser and user trust.',
-      ok: 'A best practices score of ' + val + '/100 suggests some technical debt. This might include mixed content warnings, outdated APIs, or JavaScript errors that users never see but browsers and Google do.',
-      poor: 'Your best practices score of ' + val + '/100 indicates real technical problems. JavaScript errors, security issues, or deprecated browser APIs are present, these can break functionality for some users and reduce trust signals.'
+      good: 'Your site follows web the right techniques well, scoring ' + val + '/100. Modern security standards, no deprecated APIs, and clean console output, this is the kind of technical hygiene that builds browser and user trust.',
+      ok: 'A the right techniques score of ' + val + '/100 suggests some technical debt. This might include mixed content warnings, outdated APIs, or JavaScript errors that users never see but browsers and Google do.',
+      poor: 'Your the right techniques score of ' + val + '/100 indicates real technical problems. JavaScript errors, security issues, or deprecated browser APIs are present, these can break functionality for some users and reduce trust signals.'
     }
   };
   return (a[key] && a[key][t]) || '';
@@ -473,7 +479,7 @@ function renderResults(url, data) {
     { key: 'performance', label: 'Performance', val: cats.performance ? Math.round(cats.performance.score * 100) : null },
     { key: 'seo', label: 'SEO', val: cats.seo ? Math.round(cats.seo.score * 100) : null },
     { key: 'accessibility', label: 'Accessibility', val: cats.accessibility ? Math.round(cats.accessibility.score * 100) : null },
-    { key: 'best-practices', label: 'Best Practices', val: cats['best-practices'] ? Math.round(cats['best-practices'].score * 100) : null }
+    { key: 'best-practices', label: 'the right techniques', val: cats['best-practices'] ? Math.round(cats['best-practices'].score * 100) : null }
   ];
   var scoresHtml = scoreItems.map(function(s) {
     if (s.val === null) return '';
