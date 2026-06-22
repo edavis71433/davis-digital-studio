@@ -1463,15 +1463,17 @@ async function createClient() {
   var proj = document.getElementById("nc-proj").value.trim();
   if (!name || !cemail || !pass) { toast("Name, email, and password required."); return; }
 
-  // Create Supabase Auth user
-  var authRes = await fetch(SB_URL + "/auth/v1/admin/users", {
+  // Create Supabase Auth user via the Edge Function (server-side, uses service role).
+  // The browser anon key is not allowed to call /auth/v1/admin/users directly.
+  var authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
     method: "POST",
-    headers: {"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY},
-    body: JSON.stringify({email: cemail, password: pass, email_confirm: true})
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
   });
-  if (!authRes.ok) {
-    var err = await authRes.json();
-    toast("Auth error: " + (err.msg || err.message || "Could not create login"));
+  var authJson = {};
+  try { authJson = await authRes.json(); } catch(e) {}
+  if (!authRes.ok || authJson.error) {
+    toast("Auth error: " + (authJson.error || "Could not create login"));
     return;
   }
 
