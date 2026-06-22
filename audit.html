@@ -637,69 +637,232 @@ function runAudit() {
   var timerEl = document.getElementById('loadingTimer');
   var timerInterval = setInterval(function() {
     elapsed++;
-    if (elapsed < 10) timerEl.textContent = 'This usually takes 20–50 seconds for some sites...';
-    else if (elapsed < 25) timerEl.textContent = 'Still running — Google is loading and analyzing your full page...';
-    else if (elapsed < 40) timerEl.textContent = 'Your site has a lot going on — almost there...';
-    else timerEl.textContent = 'Nearly done — complex or slow sites can take up to 50 seconds...';
+    if (elapsed < 10) timerEl.textContent = 'This usually takes 20–50 seconds...';
+    else if (elapsed < 30) timerEl.textContent = 'Still running — Google is loading and analyzing your full page...';
+    else if (elapsed < 60) timerEl.textContent = 'Your site has a lot going on — almost there...';
+    else timerEl.textContent = 'Nearly done — slow platforms can take up to 90 seconds...';
   }, 1000);
 
   // Call PSI via Edge Function (server-side proxy — no CORS issues)
   var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var fetchTimeout = setTimeout(function() {
     if (abortCtrl) abortCtrl.abort();
-  }, 70000);
+  }, 100000);
 
-  fetch(EDGE_FN, {
+  // Run PSI and Deep Audit in parallel. PSI dominates the timing (~30-50s on slow sites).
+  var psiCall = fetch(EDGE_FN, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'psi_fetch', url: url }),
     signal: abortCtrl ? abortCtrl.signal : undefined,
-  })
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(res) {
+  }).then(function(r){ return r.json(); });
+
+  var deepCall = fetch(EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'deep_audit', url: url }),
+  }).then(function(r){ return r.json(); }).catch(function(){ return { error: 'deep_failed' }; });
+
+  Promise.allSettled([psiCall, deepCall])
+    .then(function(results) {
       clearTimeout(fetchTimeout);
       clearInterval(timerInterval);
 
-      if (res.error) {
-        if (res.error === 'timeout') {
-          showLoadingError('Google took too long to analyze that page. This happens with very large or complex sites. Try a local business URL — those work reliably.');
+      var psiRes = results[0].status === 'fulfilled' ? results[0].value : null;
+      var deepRes = results[1].status === 'fulfilled' ? results[1].value : null;
+
+      // Treat both Edge Function errors AND network failures as "no data"
+      var psiOk = psiRes && !psiRes.error && psiRes.data;
+      var deepOk = deepRes && !deepRes.error && deepRes.data;
+
+      // Only fail if BOTH sources failed
+      if (!psiOk && !deepOk) {
+        var reason = psiRes && psiRes.error ? psiRes.error : 'analysis_failed';
+        if (reason === 'timeout') {
+          showLoadingError('Both PSI and the deep audit timed out. Try again, or try a different URL.');
         } else {
-          showLoadingError('Google could not analyze that URL: ' + res.error + '. Make sure the site is publicly accessible and try again.');
+          showLoadingError('Could not analyze that URL. Make sure the site is publicly accessible and try again.');
         }
         return;
       }
 
-      var data = res.data;
-      if (!data) { showLoadingError('No data returned. Please try again.'); return; }
-      var cats = (data.lighthouseResult && data.lighthouseResult.categories) || {};
-      var audits = (data.lighthouseResult && data.lighthouseResult.audits) || {};
+      var data = psiOk ? psiRes.data : null;
+      var cats = (data && data.lighthouseResult && data.lighthouseResult.categories) || {};
+      var audits = (data && data.lighthouseResult && data.lighthouseResult.audits) || {};
+      var deep = deepOk ? deepRes.data : null;
+      var psiSkipped = !psiOk;
 
       var perf = cats.performance ? Math.round(cats.performance.score * 100) : null;
-      var seo = cats.seo ? Math.round(cats.seo.score * 100) : null;
+      var seoRaw = cats.seo ? Math.round(cats.seo.score * 100) : null;
       var a11y = cats.accessibility ? Math.round(cats.accessibility.score * 100) : null;
       var lcp = audits['largest-contentful-paint'] ? audits['largest-contentful-paint'].displayValue : null;
       var lcpMs = audits['largest-contentful-paint'] ? audits['largest-contentful-paint'].numericValue : null;
       var fcp = audits['first-contentful-paint'] ? audits['first-contentful-paint'].displayValue : null;
       var cls = audits['cumulative-layout-shift'] ? audits['cumulative-layout-shift'].displayValue : null;
       var tbt = audits['total-blocking-time'] ? audits['total-blocking-time'].displayValue : null;
-      var overall = Math.round(((perf||50)*0.4) + ((seo||50)*0.4) + ((a11y||50)*0.2));
-      showResults({name:name||displayUrl, type:type, city:city, email:email, url:url, overall:overall, perf:perf, seo:seo, a11y:a11y, lcp:lcp, lcpMs:lcpMs, fcp:fcp, cls:cls, tbt:tbt, audits:audits});
-    })
-    .catch(function(err) {
-      clearTimeout(fetchTimeout);
-      clearInterval(timerInterval);
-      console.error('Audit error:', err);
-      var msg;
-      if (err && err.name === 'AbortError') {
-        msg = 'The request timed out. Google can take up to 40 seconds for some sites. Please try again, or try a different URL.';
-      } else {
-        msg = 'Something went wrong connecting to our analysis service. Please try again in a moment.';
-      }
-      showLoadingError(msg);
+
+      var composite = computeComposite(perf, seoRaw, a11y, deep, psiSkipped);
+
+      showResults({
+        name: name || displayUrl, type: type, city: city, email: email, url: url,
+        overall: composite.overall,
+        perf: perf, seo: seoRaw, a11y: a11y,
+        pillars: composite.pillars,
+        deepFindings: composite.findings,
+        deep: deep,
+        psiSkipped: psiSkipped,
+        lcp: lcp, lcpMs: lcpMs, fcp: fcp, cls: cls, tbt: tbt, audits: audits
+      });
     });
+}
+
+// ── COMPOSITE SCORING ──
+// Performance (25) + Mobile/A11y (15) + Visibility (35) + Local (25) = 100 when PSI succeeds.
+// When PSI times out, Performance and Mobile pillars are unmeasurable. Visibility (35) and
+// Local (25) still score normally and are rescaled to 100 for the overall.
+function computeComposite(perf, seoRaw, a11y, deep, psiSkipped) {
+  var findings = [];
+
+  // Pillar 1: Performance (25 pts) — from PSI mobile
+  var perfPts = 0, perfPillar = null;
+  if (!psiSkipped && perf !== null) {
+    perfPts = perf / 100 * 25;
+    perfPillar = Math.round(perfPts / 25 * 100);
+  }
+
+  // Pillar 2: Mobile/Accessibility (15 pts) — from PSI a11y
+  var mobilePts = 0, mobilePillar = null;
+  if (!psiSkipped && a11y !== null) {
+    mobilePts = a11y / 100 * 15;
+    mobilePillar = Math.round(mobilePts / 15 * 100);
+  }
+
+  // Pillar 3: Search Visibility (35 pts)
+  // Half from PSI seo (15 pts) when available, half from on-page/discoverability (20 pts).
+  // When PSI is skipped, all 35 pts come from on-page analysis — Wix/Squarespace template SEO
+  // is usually fine anyway, so we credit those 15 pts as "presumed adequate" and let on-page work.
+  var visPts = psiSkipped ? 12 : ((seoRaw || 50) / 100 * 15);
+  var onPagePts = 20;
+  if (!deep || !deep.fetchedHtml) {
+    onPagePts = 10;
+    findings.push({sev:'medium', pillar:'visibility', title:'Could not fetch homepage for deep analysis', body:'Some sites block automated requests. Scoring is based on PSI only.'});
+  } else {
+    var op = deep.onPage;
+    if (!op.title || op.titleLength < 25 || op.titleLength > 65) {
+      onPagePts -= 4;
+      findings.push({sev:'high', pillar:'visibility', title:'Title tag is missing or wrong length', body:'Your title tag is ' + op.titleLength + ' characters. Google displays roughly 60 characters in search results — aim for 30 to 60.'});
+    }
+    if (!op.metaDescription || op.metaDescriptionLength < 80 || op.metaDescriptionLength > 170) {
+      onPagePts -= 3;
+      findings.push({sev:'high', pillar:'visibility', title:'Meta description weak or missing', body:'Meta descriptions should be 120 to 160 characters. Yours is ' + op.metaDescriptionLength + '. This text appears under your title in Google search and directly affects click-through rate.'});
+    }
+    if (op.h1Count === 0) {
+      onPagePts -= 4;
+      findings.push({sev:'high', pillar:'visibility', title:'No H1 heading on homepage', body:'Every page needs exactly one H1 that tells Google what the page is about. Yours has none.'});
+    } else if (op.h1Count > 1) {
+      onPagePts -= 2;
+      findings.push({sev:'medium', pillar:'visibility', title:'Multiple H1 tags on homepage', body:'You have ' + op.h1Count + ' H1 headings on the page. Google expects exactly one per page.'});
+    }
+    if (!op.canonical) {
+      onPagePts -= 2;
+      findings.push({sev:'medium', pillar:'visibility', title:'No canonical tag', body:'Without a canonical link, Google can index duplicate versions of your page across www/non-www, http/https, and tracking parameters.'});
+    }
+    if (op.wordCount < 200) {
+      onPagePts -= 4;
+      findings.push({sev:'high', pillar:'visibility', title:'Very little text on homepage', body:'Your homepage has only ' + op.wordCount + ' words of visible text. Google needs real content to understand what to rank you for.'});
+    }
+    if (!deep.discoverability.robotsTxt) {
+      onPagePts -= 1;
+      findings.push({sev:'low', pillar:'visibility', title:'No robots.txt file', body:'robots.txt is the file that tells search engines what they can crawl. Most professional sites have one.'});
+    }
+    if (!deep.discoverability.sitemapXml) {
+      onPagePts -= 3;
+      findings.push({sev:'high', pillar:'visibility', title:'No sitemap.xml found', body:'A sitemap helps Google discover all your pages. Without one, your deeper pages may never get indexed.'});
+    }
+    if (deep.discoverability.robotsTxtBlocksAll) {
+      onPagePts -= 8;
+      findings.push({sev:'high', pillar:'visibility', title:'robots.txt is blocking the entire site', body:'Your robots.txt is telling search engines not to crawl any page. This will keep your site out of Google entirely.'});
+    }
+    if (op.imageCount > 0 && op.imagesWithAlt / op.imageCount < 0.5) {
+      onPagePts -= 1;
+      findings.push({sev:'medium', pillar:'visibility', title:'Most images missing alt text', body:'Only ' + op.imagesWithAlt + ' of ' + op.imageCount + ' images have alt text. Alt text helps Google Image search find you and is an accessibility requirement.'});
+    }
+  }
+  visPts += Math.max(0, onPagePts);
+  var visPillar = Math.round(visPts / 35 * 100);
+
+  // Pillar 4: Local Presence (25 pts) — entirely deep-audit driven, unaffected by PSI
+  var localPts = 25;
+  if (!deep || !deep.fetchedHtml) {
+    localPts = 12;
+    findings.push({sev:'medium', pillar:'local', title:'Local signals could not be measured', body:'Homepage HTML could not be fetched — full local presence audit unavailable.'});
+  } else {
+    if (!deep.schema.hasLocalBusiness) {
+      localPts -= 12;
+      findings.push({sev:'high', pillar:'local', title:'No LocalBusiness schema markup', body:'Your homepage is missing the structured data that tells Google you are a local business. Without LocalBusiness, Restaurant, or similar schema, you are dramatically harder to surface in local searches and the Google Map Pack. This is the single biggest signal a local business can add.'});
+    } else if (deep.schema.localBusinessNAP) {
+      var nap = deep.schema.localBusinessNAP;
+      var missing = [];
+      if (!nap.name) missing.push('name');
+      if (!nap.address) missing.push('address');
+      if (!nap.phone) missing.push('phone');
+      if (!nap.hours) missing.push('opening hours');
+      if (!nap.geo) missing.push('geo coordinates');
+      if (!nap.sameAs) missing.push('sameAs social links');
+      if (missing.length) {
+        localPts -= Math.min(6, missing.length);
+        findings.push({sev:'medium', pillar:'local', title:'LocalBusiness schema is incomplete', body:'Your schema is missing: ' + missing.join(', ') + '. Complete NAP plus geo and sameAs links are what feed your Google Business Profile and Knowledge Graph.'});
+      }
+    }
+    if (!deep.local.phoneOnPage) {
+      localPts -= 3;
+      findings.push({sev:'medium', pillar:'local', title:'No phone number visible on homepage', body:'A phone number on every page is a strong local SEO signal and a basic conversion path. It should also be a tel: link on mobile.'});
+    }
+    if (!deep.local.zipOnPage) {
+      localPts -= 3;
+      findings.push({sev:'medium', pillar:'local', title:'No address visible on homepage', body:'A street address with city, state, and zip code helps Google associate your site with your location and rank you for nearby searches.'});
+    }
+    if (!deep.local.googleMapsEmbed) {
+      localPts -= 2;
+      findings.push({sev:'low', pillar:'local', title:'No Google Maps embed found', body:'A map embed on your contact or homepage reinforces your location and is correlated with stronger local pack rankings.'});
+    }
+    if (!deep.local.hoursMentioned) {
+      localPts -= 2;
+      findings.push({sev:'low', pillar:'local', title:'Hours not visible on homepage', body:'Hours of operation should be visible on the page without clicking and present in your schema markup.'});
+    }
+    if (deep.local.socialLinks.length < 2) {
+      localPts -= 1;
+      findings.push({sev:'low', pillar:'local', title:'Few or no social profile links', body:'Linking to your Instagram, Facebook, Yelp, and other profiles via sameAs helps Google build out your Knowledge Graph entry.'});
+    }
+    if (!deep.onPage.ogTitle || !deep.onPage.ogDescription || !deep.onPage.ogImage) {
+      localPts -= 1;
+      findings.push({sev:'low', pillar:'local', title:'Open Graph tags incomplete', body:'When someone shares your site on Facebook, LinkedIn, or in a text message, it will not show a clean preview without complete OG tags.'});
+    }
+  }
+  localPts = Math.max(0, localPts);
+  var localPillar = Math.round(localPts / 25 * 100);
+
+  // Compose overall — rescale to /100 over whichever pillars we measured
+  var measuredTotal = visPts + localPts + perfPts + mobilePts;
+  var measuredMax = 35 + 25 + (psiSkipped ? 0 : 25) + (psiSkipped ? 0 : 15);
+  var overall = Math.round(measuredTotal / measuredMax * 100);
+
+  if (psiSkipped) {
+    findings.unshift({sev:'low', pillar:'visibility', title:'Performance and Mobile scores unavailable', body:'Google PageSpeed Insights did not respond in time — your Visibility and Local Presence are still fully measured below. You can re-run the audit later to capture Performance metrics.'});
+  }
+
+  findings.sort(function(a,b){ return ({high:0,medium:1,low:2})[a.sev] - ({high:0,medium:1,low:2})[b.sev]; });
+
+  return {
+    overall: overall,
+    pillars: {
+      performance: perfPillar,
+      mobile: mobilePillar,
+      visibility: visPillar,
+      local: localPillar
+    },
+    findings: findings
+  };
 }
 
 function showErr(msg) {
@@ -748,12 +911,26 @@ function showResults(d) {
   sumDiv.textContent = summaryText;
   body.appendChild(sumDiv);
 
-  // Score cards
-  if (d.perf !== null || d.seo !== null) {
+  // Score cards — 4 pillars from composite scoring, skip pillars we couldn't measure
+  if (d.pillars) {
+    var availablePillars = [
+      {label:'Performance', val:d.pillars.performance, key:'performance'},
+      {label:'Mobile', val:d.pillars.mobile, key:'mobile'},
+      {label:'Search Visibility', val:d.pillars.visibility, key:'visibility'},
+      {label:'Local Presence', val:d.pillars.local, key:'local'}
+    ].filter(function(p){ return p.val !== null && p.val !== undefined; });
+
+    if (d.psiSkipped) {
+      var note = document.createElement('div');
+      note.className = 'analysis-block';
+      note.style.borderLeftColor = '#f0b429';
+      note.innerHTML = '<div class="analysis-label" style="color:#f0b429">Note · Performance metrics unavailable</div><div class="analysis-text">Google PageSpeed Insights did not respond in time for this site. Your Search Visibility and Local Presence are still fully measured below — they are the signals that matter most for getting found.</div>';
+      body.appendChild(note);
+    }
+
     var scoresRow = document.createElement('div');
     scoresRow.className = 'scores-row';
-    [{label:'Performance',val:d.perf},{label:'SEO',val:d.seo},{label:'Accessibility',val:d.a11y}].forEach(function(s) {
-      if (s.val === null || s.val === undefined) return;
+    availablePillars.forEach(function(s) {
       var card = document.createElement('div');
       card.className = 'score-card';
       card.innerHTML = '<div class="score-card-num '+scoreClass(s.val)+'">' + s.val + '</div><div class="score-card-label">' + s.label + '</div>';
@@ -761,16 +938,22 @@ function showResults(d) {
     });
     body.appendChild(scoresRow);
 
-    // Analysis for each score
-    [{key:'performance',val:d.perf,label:'Performance'},{key:'seo',val:d.seo,label:'SEO'},{key:'accessibility',val:d.a11y,label:'Accessibility'}].forEach(function(s) {
-      if (s.val === null || s.val === undefined) return;
-      var analysis = getAnalysis(s.key, s.val);
-      if (!analysis) return;
-      var col = s.val < 50 ? '#e05555' : s.val < 90 ? '#f0b429' : '#6abf69';
+    // Generic narrative per pillar — kept vague to drive the paid audit
+    var copy = {
+      performance: {good:'Mobile speed is in good shape. Pages load quickly enough that Google does not penalize you on Core Web Vitals.', ok:'Mobile speed is workable but there is room to tighten. Slower sites lose visitors before they ever read a word.', poor:'Mobile speed is dragging the site down. Most mobile visitors abandon pages that take longer than 3 seconds to appear.'},
+      mobile: {good:'Your site is mobile-friendly and accessible to assistive tech. Google uses both as quality signals.', ok:'Mobile experience has gaps. Some users on phones or with assistive tech may hit friction.', poor:'Mobile experience has real problems. Tap targets, contrast, or labels are likely failing checks.'},
+      visibility: {good:'On-page SEO fundamentals are in place. Google can crawl, understand, and rank your content properly.', ok:'On-page SEO has gaps. Missing meta data, thin content, or weak heading structure are limiting how Google ranks you.', poor:'Search visibility is severely limited. Google cannot easily understand what to rank you for, and your pages may not even be getting indexed.'},
+      local: {good:'Strong local signals — schema, NAP, hours, and social links are giving Google what it needs to surface you for nearby searches.', ok:'Local signals are partial. Without complete schema and on-page NAP, you are leaving local search traffic on the table.', poor:'Almost no local presence signals on your site. This is the gap between having a website and being findable when nearby customers search for what you offer.'}
+    };
+    availablePillars.forEach(function(s) {
+      var c = copy[s.key];
+      if (!c) return;
+      var t = s.val >= 80 ? c.good : s.val >= 55 ? c.ok : c.poor;
+      var col = s.val < 50 ? '#e05555' : s.val < 80 ? '#f0b429' : '#6abf69';
       var block = document.createElement('div');
       block.className = 'analysis-block';
       block.style.borderLeftColor = col;
-      block.innerHTML = '<div class="analysis-label" style="color:'+col+'">'+s.label+' · '+s.val+'/100</div><div class="analysis-text">'+analysis+'</div>';
+      block.innerHTML = '<div class="analysis-label" style="color:'+col+'">'+s.label+' · '+s.val+'/100</div><div class="analysis-text">'+t+'</div>';
       body.appendChild(block);
     });
   }
@@ -806,15 +989,21 @@ function showResults(d) {
     }
   }
 
-  // Issues from real PSI data
+  // Issues — merge PSI audit findings with deep audit findings
   var issues = [];
   AUDIT_MAP.forEach(function(def) {
     var a = d.audits[def.key];
     if (!a || a.score === 1 || a.score === null || a.score === undefined) return;
     var sev = a.score === 0 ? 'high' : a.score < 0.5 ? 'medium' : 'low';
-    var body = def.body + (a.displayValue ? ' (' + a.displayValue + ')' : '');
-    issues.push({sev:sev, title:def.title, body:body, score:a.score});
+    var bodyText = def.body + (a.displayValue ? ' (' + a.displayValue + ')' : '');
+    issues.push({sev:sev, title:def.title, body:bodyText, score:a.score, source:'psi'});
   });
+  // Add deep audit findings
+  if (d.deepFindings && d.deepFindings.length) {
+    d.deepFindings.forEach(function(f) {
+      issues.push({sev:f.sev, title:f.title, body:f.body, source:'deep', pillar:f.pillar});
+    });
+  }
   issues.sort(function(a,b) { return ({high:0,medium:1,low:2})[a.sev] - ({high:0,medium:1,low:2})[b.sev]; });
 
   if (issues.length > 0) {
@@ -870,7 +1059,7 @@ function showResults(d) {
 
   // Notify Eric
   var typeLabels = {restaurant:'Restaurant/Bar',retail:'Retail',service:'Home Services',health:'Health & Wellness',salon:'Salon/Spa',realestate:'Real Estate',legal:'Legal',creative:'Creative/Freelance',other:'Other'};
-  sendNotification(d, typeLabels[d.type]||d.type, issues);
+  sendNotification(d, typeLabels[d.type]||d.type, issues, d.deep);
 }
 
 function unlockReport() {
@@ -898,6 +1087,23 @@ function unlockReport() {
     '</div>';
   }).join('');
 
+  var pillarRow = '';
+  if (d.pillars) {
+    var pl = [
+      {n:'Performance', v:d.pillars.performance},
+      {n:'Mobile', v:d.pillars.mobile},
+      {n:'Visibility', v:d.pillars.visibility},
+      {n:'Local', v:d.pillars.local}
+    ].filter(function(p){ return p.v !== null && p.v !== undefined; });
+    if (pl.length) {
+      var pctW = Math.floor(100 / pl.length);
+      pillarRow = '<table style="width:100%;border-collapse:separate;border-spacing:5px 0;margin-bottom:16px;"><tr>' + pl.map(function(p){
+        var c = p.v < 50 ? '#e05555' : p.v < 80 ? '#f0b429' : '#6abf69';
+        return '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 6px;text-align:center;width:'+pctW+'%;"><div style="font-size:20px;font-weight:700;color:'+c+';">'+p.v+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">'+p.n+'</div></td>';
+      }).join('') + '</tr></table>';
+    }
+  }
+
   var reportHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
     '<div style="max-width:560px;margin:0 auto;padding:32px 24px;">'+
     '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
@@ -905,11 +1111,8 @@ function unlockReport() {
     '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Your Free Site Report</div>'+
     '<h1 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 6px;">'+(d.name||'')+'</h1>'+
     '<p style="font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 18px;">'+(d.url||'')+' · '+(d.city||'')+'</p>'+
-    '<div style="display:flex;gap:10px;margin-bottom:18px;">'+
-    '<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:36px;font-weight:700;color:'+scoreColor+';">'+(d.overall||0)+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Overall</div></div>'+
-    (d.perf!=null?'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:22px;font-weight:600;color:'+(d.perf<50?'#e05555':d.perf<90?'#f0b429':'#6abf69')+';">'+(d.perf||0)+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Perf</div></div>':'')+
-    (d.seo!=null?'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:22px;font-weight:600;color:'+(d.seo<50?'#e05555':d.seo<90?'#f0b429':'#6abf69')+';">'+(d.seo||0)+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">SEO</div></div>':'')+
-    '</div>'+
+    '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;"><div style="font-size:40px;font-weight:700;color:'+scoreColor+';line-height:1;">'+(d.overall||0)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Overall Score</div></div>'+
+    pillarRow+
     (d.lcp?'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.4);">LCP: '+d.lcp+' &nbsp;·&nbsp; FCP: '+(d.fcp||'—')+' &nbsp;·&nbsp; CLS: '+(d.cls||'—')+' &nbsp;·&nbsp; TBT: '+(d.tbt||'—')+'</div>':'')+
     '<div style="font-size:10px;color:rgba(255,255,255,0.25);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">All '+issues.length+' issues found</div>'+
     issuesHtml+
@@ -932,14 +1135,123 @@ function unlockReport() {
   });
 }
 
-function sendNotification(d, bizLabel, issues) {
+function sendNotification(d, bizLabel, issues, deep) {
   var scoreColor = d.overall < 45 ? '#e05555' : d.overall < 65 ? '#f0b429' : '#6abf69';
-  var topHtml = issues.slice(0,5).map(function(i,n) {
-    var sc = i.sev==='high'?'#e05555':i.sev==='medium'?'#f0b429':'#6abf69';
-    return '<tr><td style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:'+sc+';font-size:9px;font-weight:700;color:#0f0820;text-align:center;line-height:18px;margin-right:8px;">'+(n+1)+'</span><strong style="color:#fff;font-size:13px;">'+i.title+'</strong><br><span style="font-size:11px;color:rgba(255,255,255,0.4);padding-left:26px;display:block;">'+i.body.substring(0,100)+'...</span></td></tr>';
-  }).join('');
-  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:560px;margin:0 auto;padding:32px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Audit Lead</div><h1 style="font-family:Georgia,serif;font-size:20px;font-weight:400;color:#fff;margin:0 0 16px;">'+d.name+'</h1><table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px;"><tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);width:80px;">Email</td><td style="color:#c4aee8;"><a href="mailto:'+d.email+'" style="color:#c4aee8;">'+d.email+'</a></td></tr><tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);">URL</td><td><a href="'+d.url+'" style="color:#c4aee8;" target="_blank">'+d.url+'</a></td></tr><tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);">Type</td><td style="color:#fff;">'+bizLabel+'</td></tr><tr><td style="padding:5px 0;color:rgba(255,255,255,0.4);">City</td><td style="color:#fff;">'+d.city+'</td></tr></table><div style="display:flex;gap:10px;margin-bottom:18px;"><div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:32px;font-weight:700;color:'+scoreColor+';">'+d.overall+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Overall</div></div>'+(d.perf!=null?'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:600;color:'+(d.perf<50?'#e05555':d.perf<90?'#f0b429':'#6abf69')+';">'+d.perf+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Perf</div></div>':'')+(d.seo!=null?'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:600;color:'+(d.seo<50?'#e05555':d.seo<90?'#f0b429':'#6abf69')+';">'+d.seo+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">SEO</div></div>':'')+'</div>'+( d.lcp?'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.4);">LCP: '+d.lcp+' · FCP: '+(d.fcp||'—')+' · CLS: '+(d.cls||'—')+' · TBT: '+(d.tbt||'—')+'</div>':'' )+'<div style="font-size:10px;color:rgba(255,255,255,0.25);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">'+issues.length+' issues found</div><table style="width:100%;border-collapse:collapse;">'+topHtml+'</table></div><div style="text-align:center;margin-top:16px;"><a href="mailto:'+d.email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:10px 22px;border-radius:100px;text-decoration:none;margin-right:8px;">Reply to lead →</a><a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:10px 22px;border-radius:100px;text-decoration:none;">Visit site →</a></div></div></body></html>';
 
+  // Build pillar score row — skip nulls (e.g. when PSI timed out)
+  var pillarHtml = '';
+  if (d.pillars) {
+    var pl = [
+      {n:'Performance', v:d.pillars.performance},
+      {n:'Mobile', v:d.pillars.mobile},
+      {n:'Visibility', v:d.pillars.visibility},
+      {n:'Local', v:d.pillars.local}
+    ].filter(function(p){ return p.v !== null && p.v !== undefined; });
+    if (pl.length) {
+      var pctW = Math.floor(100 / pl.length);
+      pillarHtml = '<table style="width:100%;border-collapse:separate;border-spacing:6px 0;margin-bottom:14px;"><tr>' + pl.map(function(p){
+        var c = p.v < 50 ? '#e05555' : p.v < 80 ? '#f0b429' : '#6abf69';
+        return '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 6px;text-align:center;width:'+pctW+'%;"><div style="font-size:18px;font-weight:700;color:'+c+';">'+p.v+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">'+p.n+'</div></td>';
+      }).join('') + '</tr></table>';
+    }
+  }
+
+  var psiBanner = d.psiSkipped ? '<div style="background:rgba(240,180,41,0.08);border-left:3px solid #f0b429;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#f0b429;">PSI timed out for this site. Visibility and Local scores are still fully measured.</div>' : '';
+
+  // Build the deep-audit signal table — the part Eric actually needs to see
+  var signalRows = '';
+  function row(label, value, ok) {
+    var color = ok === true ? '#6abf69' : ok === false ? '#e05555' : 'rgba(255,255,255,0.5)';
+    var mark = ok === true ? '✓' : ok === false ? '✗' : '·';
+    return '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);width:55%;">'+label+'</td><td style="padding:4px 0;font-size:11px;color:'+color+';text-align:right;"><strong>'+mark+'</strong> '+value+'</td></tr>';
+  }
+  if (deep && deep.fetchedHtml) {
+    var op = deep.onPage, sc = deep.schema, lc = deep.local, dc = deep.discoverability;
+    signalRows += '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">On-Page</td></tr>';
+    signalRows += row('Title tag', op.titleLength + ' chars', op.titleLength >= 25 && op.titleLength <= 65);
+    signalRows += row('Meta description', op.metaDescriptionLength + ' chars', op.metaDescriptionLength >= 80 && op.metaDescriptionLength <= 170);
+    signalRows += row('H1 count', String(op.h1Count), op.h1Count === 1);
+    signalRows += row('Canonical tag', op.canonical ? 'present' : 'missing', !!op.canonical);
+    signalRows += row('Word count', String(op.wordCount), op.wordCount >= 200);
+    signalRows += row('Images with alt', op.imagesWithAlt + ' / ' + op.imageCount, op.imageCount === 0 || op.imagesWithAlt / op.imageCount >= 0.8);
+    signalRows += row('Open Graph complete', (op.ogTitle && op.ogDescription && op.ogImage) ? 'yes' : 'no', op.ogTitle && op.ogDescription && op.ogImage);
+    signalRows += row('Twitter Card', op.twitterCard ? 'yes' : 'no', op.twitterCard);
+
+    signalRows += '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">Schema</td></tr>';
+    signalRows += row('LocalBusiness schema', sc.hasLocalBusiness ? (sc.types.join(', ')) : 'none', sc.hasLocalBusiness);
+    signalRows += row('Organization schema', sc.hasOrganization ? 'yes' : 'no', sc.hasOrganization);
+    signalRows += row('Breadcrumb schema', sc.hasBreadcrumb ? 'yes' : 'no', sc.hasBreadcrumb);
+    if (sc.localBusinessNAP) {
+      var n = sc.localBusinessNAP;
+      signalRows += row('Schema NAP — name', n.name ? 'yes' : 'no', n.name);
+      signalRows += row('Schema NAP — address', n.address ? 'yes' : 'no', n.address);
+      signalRows += row('Schema NAP — phone', n.phone ? 'yes' : 'no', n.phone);
+      signalRows += row('Schema NAP — hours', n.hours ? 'yes' : 'no', n.hours);
+      signalRows += row('Schema NAP — geo coords', n.geo ? 'yes' : 'no', n.geo);
+      signalRows += row('Schema NAP — sameAs', n.sameAs ? 'yes' : 'no', n.sameAs);
+    }
+
+    signalRows += '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">Local Signals</td></tr>';
+    signalRows += row('Phone on page', lc.phoneOnPage ? (lc.phone || 'yes') : 'no', lc.phoneOnPage);
+    signalRows += row('Address/ZIP on page', lc.zipOnPage ? 'yes' : 'no', lc.zipOnPage);
+    signalRows += row('Google Maps embed', lc.googleMapsEmbed ? 'yes' : 'no', lc.googleMapsEmbed);
+    signalRows += row('Hours mentioned', lc.hoursMentioned ? 'yes' : 'no', lc.hoursMentioned);
+    signalRows += row('Social profile links', lc.socialLinks.length ? lc.socialLinks.join(', ') : 'none', lc.socialLinks.length >= 2);
+
+    signalRows += '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">Discoverability</td></tr>';
+    signalRows += row('robots.txt', dc.robotsTxt ? 'present' : 'missing', dc.robotsTxt && !dc.robotsTxtBlocksAll);
+    signalRows += row('Sitemap declared in robots', dc.sitemapDeclared ? 'yes' : 'no', dc.sitemapDeclared);
+    signalRows += row('sitemap.xml', dc.sitemapXml ? (dc.sitemapUrlCount + ' URLs') : 'missing', dc.sitemapXml);
+    signalRows += row('HTTPS', deep.https ? 'yes' : 'no', deep.https);
+  } else {
+    signalRows = '<tr><td colspan="2" style="padding:14px 0;font-size:12px;color:rgba(255,255,255,0.4);font-style:italic;">Deep audit unavailable — homepage HTML could not be fetched (site may block bots).</td></tr>';
+  }
+
+  // Findings list — all of them, severity-coded
+  var findingsHtml = issues.length ? issues.map(function(i,n) {
+    var sc = i.sev==='high'?'#e05555':i.sev==='medium'?'#f0b429':'#6abf69';
+    return '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'+
+        '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:'+sc+';font-size:9px;font-weight:700;color:#0f0820;text-align:center;line-height:18px;">'+(n+1)+'</span>'+
+        '<strong style="color:#fff;font-size:12px;">'+i.title+'</strong>'+
+      '</div>'+
+      '<p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 3px 26px;line-height:1.6;">'+i.body+'</p>'+
+      '<span style="font-size:9px;font-weight:700;color:'+sc+';letter-spacing:1px;margin-left:26px;">'+i.sev.toUpperCase()+'</span>'+
+    '</div>';
+  }).join('') : '<div style="padding:12px 0;font-size:12px;color:rgba(255,255,255,0.4);">No issues found.</div>';
+
+  // Eric's notification — business name + URL bold at top, then full deep dive
+  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
+    '<div style="max-width:580px;margin:0 auto;padding:32px 24px;">'+
+    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
+    '<div style="background:#1e1338;border-radius:16px;padding:28px;margin-bottom:20px;">'+
+      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Audit Lead</div>'+
+      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+(d.name||'(unnamed)')+'</h1>'+
+      '<a href="'+d.url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:18px;">'+d.url+'</a>'+
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);width:90px;">Email</td><td><a href="mailto:'+d.email+'" style="color:#c4aee8;text-decoration:none;">'+d.email+'</a></td></tr>'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);">Business type</td><td style="color:#fff;">'+bizLabel+'</td></tr>'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);">City</td><td style="color:#fff;">'+d.city+'</td></tr>'+
+      '</table>'+
+      '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;">'+
+        '<div style="font-size:42px;font-weight:700;color:'+scoreColor+';line-height:1;">'+d.overall+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Overall Visibility Score</div>'+
+      '</div>'+
+      pillarHtml+
+      psiBanner+
+      (d.lcp?'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:rgba(255,255,255,0.4);">Core Web Vitals · LCP '+d.lcp+' · FCP '+(d.fcp||'—')+' · CLS '+(d.cls||'—')+' · TBT '+(d.tbt||'—')+'</div>':'')+
+      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:18px 0 4px;">Signal Audit</div>'+
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:18px;">'+signalRows+'</table>'+
+      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:18px 0 8px;">All findings · '+issues.length+'</div>'+
+      findingsHtml+
+    '</div>'+
+    '<div style="text-align:center;">'+
+      '<a href="mailto:'+d.email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;margin-right:6px;">Reply to lead →</a>'+
+      '<a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Visit site →</a>'+
+    '</div>'+
+    '</div></body></html>';
+
+  // User-facing confirm — generic, no detailed findings, drives toward paid audit
   var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">I took a look at '+d.name+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific issues on your site — some quick fixes, a couple that need more attention.</p><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 22px;">Want the full picture? The Digital Health Check goes deeper with keyword analysis, competitor comparison, and a 6-page prioritized action plan.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles</p></div></body></html>';
 
   fetch(EDGE_FN, {
