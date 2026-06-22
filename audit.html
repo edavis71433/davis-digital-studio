@@ -1126,7 +1126,7 @@ function unlockReport() {
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:d.name||'', clientEmail:email, meta:{url:d.url||'', bizType:bizLabel, city:d.city||'', score:d.overall||0, perf:d.perf||null, seo:d.seo||null, a11y:d.a11y||null, lcp:d.lcp||null, fcp:d.fcp||null, cls:d.cls||null, tbt:d.tbt||null, fallback:false, topIssues:issues.slice(0,3).map(function(i){return{title:i.title,sev:i.sev};}), userConfirmHtml:reportHtml}})
+    body: JSON.stringify({type:'audit_lead', clientName:d.name||'', clientEmail:email, meta:{tool:'audit', url:d.url||'', bizType:bizLabel, city:d.city||'', score:d.overall||0, perf:d.perf||null, seo:d.seo||null, a11y:d.a11y||null, lcp:d.lcp||null, fcp:d.fcp||null, cls:d.cls||null, tbt:d.tbt||null, fallback:false, pillars:d.pillars||null, deep:d.deep||null, psiSkipped:!!d.psiSkipped, topIssues:issues.slice(0,3).map(function(i){return{title:i.title,sev:i.sev};}), userConfirmHtml:reportHtml}})
   }).then(function() {
     if (msg) { msg.style.color='#6abf69'; msg.textContent='Full report sent! Check your inbox.'; }
     if (typeof gtag==='function') gtag('event','unlock_audit_report',{event_category:'lead'});
@@ -1256,7 +1256,7 @@ function sendNotification(d, bizLabel, issues, deep) {
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:d.name, clientEmail:d.email, meta:{url:d.url, bizType:bizLabel, city:d.city, score:d.overall, perf:d.perf||null, seo:d.seo||null, a11y:d.a11y||null, lcp:d.lcp||null, fcp:d.fcp||null, cls:d.cls||null, tbt:d.tbt||null, fallback:false, topIssues:issues.slice(0,3).map(function(i){return{title:i.title,sev:i.sev};}), userConfirmHtml:quickConfirm, notifyHtml:notifyHtml}})
+    body: JSON.stringify({type:'audit_lead', clientName:d.name, clientEmail:d.email, meta:{tool:'audit', url:d.url, bizType:bizLabel, city:d.city, score:d.overall, perf:d.perf||null, seo:d.seo||null, a11y:d.a11y||null, lcp:d.lcp||null, fcp:d.fcp||null, cls:d.cls||null, tbt:d.tbt||null, fallback:false, pillars:d.pillars||null, deep:deep||null, psiSkipped:!!d.psiSkipped, topIssues:issues.slice(0,3).map(function(i){return{title:i.title,sev:i.sev};}), userConfirmHtml:quickConfirm, notifyHtml:notifyHtml}})
   }).catch(function(){});
 }
 

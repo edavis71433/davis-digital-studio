@@ -173,6 +173,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
     <div class="sidebar">
       <div class="sl">Dashboard</div>
       <button class="sn active" onclick="go('overview')" id="sn-overview">📊 Overview</button>
+      <button class="sn" onclick="go('leads')" id="sn-leads">📋 Leads</button>
       <div class="sdiv"></div>
       <div class="sl">Client Work</div>
       <button class="sn" onclick="go('messages')" id="sn-messages">💬 Send Message</button>
@@ -202,6 +203,22 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="card"><div class="ch"><div class="ct">👥 Active Clients</div></div><div class="cb" id="ovClients"></div></div>
           <div class="card"><div class="ch"><div class="ct">📬 Recent Activity</div></div><div class="cb" id="ovActivity"></div></div>
         </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="page-leads">
+        <div class="pt">Audit Leads</div>
+        <div class="ps">Everyone who has run a free tool on the site. Click a lead to see the full deep audit, signal table, and findings.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
+          <button class="sbtn" onclick="filterLeads('all')" id="lf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
+          <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
+          <button class="sbtn" onclick="filterLeads('speed_test')" id="lf-speed_test" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Speed Test</button>
+          <button class="sbtn" onclick="filterLeads('local_visibility')" id="lf-local_visibility" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Local Visibility</button>
+          <button class="sbtn" onclick="filterLeads('pricing_estimator')" id="lf-pricing_estimator" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Pricing Estimate</button>
+          <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
+        </div>
+        <div id="leadsList"></div>
+        <div id="leadDetail" style="display:none;margin-top:24px;"></div>
       </div>
 
       <!-- MESSAGES -->
@@ -636,7 +653,191 @@ function go(page) {
   document.getElementById("page-"+page).classList.add("active");
   var btn = document.getElementById("sn-"+page);
   if (btn) btn.classList.add("active");
-  if (page !== "overview") populateSelects(page);
+  if (page !== "overview" && page !== "leads") populateSelects(page);
+  if (page === "leads") loadLeads();
+}
+
+// ── LEADS ──
+var allLeads = [];
+var currentLeadFilter = 'all';
+
+async function loadLeads() {
+  var listEl = document.getElementById('leadsList');
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading leads...</p>';
+  document.getElementById('leadDetail').style.display = 'none';
+  var r = await api('audit_leads?select=*&order=created_at.desc&limit=200');
+  allLeads = r || [];
+  renderLeadsList();
+}
+
+function filterLeads(tool) {
+  currentLeadFilter = tool;
+  ['all','audit','speed_test','local_visibility','pricing_estimator'].forEach(t => {
+    var btn = document.getElementById('lf-'+t);
+    if (!btn) return;
+    if (t === tool) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
+    else { btn.style.background = 'rgba(91,63,160,0.08)'; btn.style.color = 'var(--p)'; }
+  });
+  renderLeadsList();
+}
+
+function renderLeadsList() {
+  var listEl = document.getElementById('leadsList');
+  if (!listEl) return;
+  var leads = currentLeadFilter === 'all' ? allLeads : allLeads.filter(l => l.tool === currentLeadFilter);
+  if (!leads.length) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:24px;text-align:center;background:rgba(91,63,160,0.04);border-radius:12px;">No leads in this category yet. Run a tool on your site to test.</p>';
+    return;
+  }
+  var toolLabels = { audit:'Site Audit', speed_test:'Speed Test', local_visibility:'Local Visibility', pricing_estimator:'Pricing Estimate' };
+  var toolColors = { audit:'#5b3fa0', speed_test:'#1a7e49', local_visibility:'#c4731a', pricing_estimator:'#8a4fb3' };
+  listEl.innerHTML = leads.map(l => {
+    var sc = l.score == null ? '—' : l.score;
+    var scoreCol = (l.score == null) ? '#999' : (l.score < 45 ? '#e05555' : l.score < 65 ? '#f0b429' : '#6abf69');
+    var statusCol = l.status === 'contacted' ? '#1a7e49' : l.status === 'closed' ? '#999' : '#5b3fa0';
+    var d = new Date(l.created_at);
+    var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    var tLabel = toolLabels[l.tool] || l.tool;
+    var tCol = toolColors[l.tool] || '#666';
+    return '<div onclick="showLeadDetail(\''+l.id+'\')" style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s, transform 0.1s;" onmouseover="this.style.borderColor=\'var(--p)\'" onmouseout="this.style.borderColor=\'rgba(91,63,160,0.1)\'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px;">'+(l.business_name||'(no name)')+'</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(l.url||'—')+' · '+(l.client_email||'—')+'</div>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:'+tCol+'15;color:'+tCol+';letter-spacing:0.5px;text-transform:uppercase;">'+tLabel+'</span>' +
+            '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:'+statusCol+'15;color:'+statusCol+';letter-spacing:0.5px;text-transform:uppercase;">'+(l.status||'new')+'</span>' +
+            (l.city ? '<span style="font-size:11px;color:var(--muted);">'+l.city+'</span>' : '') +
+            '<span style="font-size:11px;color:var(--muted);margin-left:auto;">'+dateStr+'</span>' +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:center;flex-shrink:0;">' +
+          '<div style="font-size:26px;font-weight:700;color:'+scoreCol+';line-height:1;">'+sc+'</div>' +
+          '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Score</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function showLeadDetail(id) {
+  var lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  var detail = document.getElementById('leadDetail');
+  detail.style.display = 'block';
+
+  var scoreCol = (lead.score == null) ? '#999' : (lead.score < 45 ? '#e05555' : lead.score < 65 ? '#f0b429' : '#6abf69');
+  var pillarsHtml = '';
+  if (lead.pillars) {
+    var pl = [
+      {n:'Performance', v:lead.pillars.performance},
+      {n:'Mobile', v:lead.pillars.mobile},
+      {n:'Visibility', v:lead.pillars.visibility},
+      {n:'Local', v:lead.pillars.local}
+    ].filter(p => p.v != null);
+    if (pl.length) {
+      var w = Math.floor(100/pl.length);
+      pillarsHtml = '<div style="display:grid;grid-template-columns:repeat('+pl.length+',1fr);gap:8px;margin-bottom:16px;">' + pl.map(p => {
+        var c = p.v < 50 ? '#e05555' : p.v < 80 ? '#f0b429' : '#6abf69';
+        return '<div style="background:rgba(91,63,160,0.04);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;color:'+c+';">'+p.v+'</div><div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">'+p.n+'</div></div>';
+      }).join('') + '</div>';
+    }
+  }
+
+  // Signal table from deep_audit
+  function row(label, value, ok) {
+    var c = ok === true ? '#1a7e49' : ok === false ? '#e05555' : '#666';
+    var mark = ok === true ? '✓' : ok === false ? '✗' : '·';
+    return '<tr><td style="padding:5px 0;font-size:12px;color:var(--muted);width:55%;border-bottom:1px solid rgba(91,63,160,0.04);">'+label+'</td><td style="padding:5px 0;font-size:12px;color:'+c+';text-align:right;border-bottom:1px solid rgba(91,63,160,0.04);"><strong>'+mark+'</strong> '+value+'</td></tr>';
+  }
+  var signalHtml = '';
+  var d = lead.deep_audit;
+  if (d && d.fetchedHtml) {
+    var op = d.onPage||{}, sc = d.schema||{}, lc = d.local||{}, dc = d.discoverability||{};
+    signalHtml = '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;margin-bottom:16px;">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Signal Audit</div>' +
+      '<table style="width:100%;border-collapse:collapse;">' +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">On-Page</td></tr>' +
+        row('Title length', (op.titleLength||0)+' chars', op.titleLength>=25 && op.titleLength<=65) +
+        row('Meta description', (op.metaDescriptionLength||0)+' chars', op.metaDescriptionLength>=80 && op.metaDescriptionLength<=170) +
+        row('H1 count', String(op.h1Count||0), op.h1Count === 1) +
+        row('Canonical tag', op.canonical ? 'present' : 'missing', !!op.canonical) +
+        row('Word count', String(op.wordCount||0), (op.wordCount||0) >= 200) +
+        row('Images with alt', (op.imagesWithAlt||0)+' / '+(op.imageCount||0), (op.imageCount||0)===0 || (op.imagesWithAlt||0)/op.imageCount >= 0.8) +
+        row('Open Graph complete', (op.ogTitle && op.ogDescription && op.ogImage) ? 'yes' : 'no', op.ogTitle && op.ogDescription && op.ogImage) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Schema</td></tr>' +
+        row('LocalBusiness schema', sc.hasLocalBusiness ? ((sc.types||[]).join(', ') || 'present') : 'none', sc.hasLocalBusiness) +
+        row('Organization schema', sc.hasOrganization ? 'yes' : 'no', sc.hasOrganization) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Local Signals</td></tr>' +
+        row('Phone on page', lc.phoneOnPage ? (lc.phone || 'yes') : 'no', lc.phoneOnPage) +
+        row('Address on page', lc.zipOnPage ? 'yes' : 'no', lc.zipOnPage) +
+        row('Hours mentioned', lc.hoursMentioned ? 'yes' : 'no', lc.hoursMentioned) +
+        row('Google Maps embed', lc.googleMapsEmbed ? 'yes' : 'no', lc.googleMapsEmbed) +
+        row('Social profiles', (lc.socialLinks||[]).length ? (lc.socialLinks||[]).join(', ') : 'none', (lc.socialLinks||[]).length >= 2) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Discoverability</td></tr>' +
+        row('robots.txt', dc.robotsTxt ? 'present' : 'missing', dc.robotsTxt && !dc.robotsTxtBlocksAll) +
+        row('sitemap.xml', dc.sitemapXml ? ((dc.sitemapUrlCount||0)+' URLs') : 'missing', dc.sitemapXml) +
+        row('HTTPS', d.https ? 'yes' : 'no', d.https) +
+      '</table>' +
+    '</div>';
+  }
+
+  // Findings list
+  var findingsHtml = '';
+  if (lead.findings && lead.findings.length) {
+    findingsHtml = '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;margin-bottom:16px;">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Top Findings</div>' +
+      lead.findings.map((f, i) => {
+        var fcol = f.sev === 'high' ? '#e05555' : f.sev === 'medium' ? '#f0b429' : '#6abf69';
+        return '<div style="padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.04);"><div style="display:flex;gap:8px;align-items:flex-start;"><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:'+fcol+';color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:20px;flex-shrink:0;">'+(i+1)+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+(f.title||'')+'</div><span style="font-size:9px;font-weight:700;color:'+fcol+';letter-spacing:1px;">'+(f.sev||'').toUpperCase()+'</span></div></div></div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var cwv = lead.core_web_vitals;
+  var cwvHtml = (cwv && (cwv.lcp || cwv.fcp || cwv.cls || cwv.tbt)) ?
+    '<div style="background:rgba(91,63,160,0.04);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);">LCP: '+(cwv.lcp||'—')+' · FCP: '+(cwv.fcp||'—')+' · CLS: '+(cwv.cls||'—')+' · TBT: '+(cwv.tbt||'—')+'</div>' : '';
+
+  var psiBanner = lead.psi_skipped ? '<div style="background:rgba(240,180,41,0.1);border-left:3px solid #f0b429;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#a47816;">PSI timed out for this site — Visibility and Local scores still fully measured.</div>' : '';
+
+  var statusOpts = ['new','contacted','qualified','closed'].map(s => '<option value="'+s+'" '+(lead.status===s?'selected':'')+'>'+s+'</option>').join('');
+
+  detail.innerHTML = '<div style="background:rgba(91,63,160,0.03);border-radius:16px;padding:24px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap;">' +
+      '<div style="flex:1;min-width:200px;">' +
+        '<h2 style="font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 6px;color:var(--ink);">'+(lead.business_name||'(no name)')+'</h2>' +
+        (lead.url ? '<a href="'+lead.url+'" target="_blank" style="display:inline-block;font-size:13px;color:var(--p);text-decoration:none;margin-bottom:4px;">'+lead.url+' →</a><br>' : '') +
+        '<a href="mailto:'+(lead.client_email||'')+'" style="font-size:13px;color:var(--muted);text-decoration:none;">'+(lead.client_email||'—')+'</a>' +
+        (lead.city ? ' · <span style="font-size:13px;color:var(--muted);">'+lead.city+'</span>' : '') +
+      '</div>' +
+      '<div style="text-align:center;">' +
+        '<div style="font-size:42px;font-weight:700;color:'+scoreCol+';line-height:1;">'+(lead.score == null ? '—' : lead.score)+'</div>' +
+        '<div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;">Overall Score</div>' +
+      '</div>' +
+    '</div>' +
+    psiBanner +
+    pillarsHtml +
+    cwvHtml +
+    signalHtml +
+    findingsHtml +
+    '<div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">' +
+      '<label style="font-size:12px;color:var(--muted);">Status:</label>' +
+      '<select onchange="updateLeadStatus(\''+lead.id+'\', this.value)" style="font-size:13px;padding:6px 10px;border:1px solid rgba(91,63,160,0.2);border-radius:8px;background:#fff;">'+statusOpts+'</select>' +
+      '<a href="mailto:'+(lead.client_email||'')+'" style="display:inline-block;background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 18px;border-radius:100px;text-decoration:none;">Reply →</a>' +
+      '<button onclick="document.getElementById(\'leadDetail\').style.display=\'none\'" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">Close detail</button>' +
+    '</div>' +
+  '</div>';
+
+  // Smooth scroll into view
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function updateLeadStatus(id, status) {
+  await api('audit_leads?id=eq.'+id, 'PATCH', { status: status });
+  var lead = allLeads.find(l => l.id === id);
+  if (lead) lead.status = status;
+  renderLeadsList();
 }
 
 // ── CLIENTS ──

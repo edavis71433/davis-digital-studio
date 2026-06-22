@@ -615,7 +615,7 @@ function sendPricingLead() {
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{url:'(pricing estimator)', bizType:'Pricing Estimate', city:'', score:0, fallback:false, topIssues:[{title:d.tierName+' tier · '+d.range,sev:'medium'}], userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
+    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{tool:'pricing_estimator', url:'(pricing estimator)', bizType:'Pricing Estimate', city:'', score:0, fallback:false, topIssues:[{title:d.tierName+' tier · '+d.range,sev:'medium'}], userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
   }).then(function(){
     if (msg) { msg.style.color = '#6abf69'; msg.textContent = 'Sent! Check your inbox.'; }
     if (typeof gtag==='function') gtag('event','pricing_estimate_lead',{event_category:'lead'});

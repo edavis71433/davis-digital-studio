@@ -717,7 +717,7 @@ function sendLocalNotification(bizName, city, url, email, score, quizScore, onSi
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{url:url, bizType:'Local Visibility', city:city, score:score, fallback:false, topIssues:actions.slice(0,3).map(function(a){return{title:a.h,sev:'medium'};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
+    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{tool:'local_visibility', url:url, bizType:'Local Visibility', city:city, score:score, fallback:false, deep:deep||null, topIssues:actions.slice(0,3).map(function(a){return{title:a.h,sev:'medium'};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
   }).catch(function(){});
 }
 

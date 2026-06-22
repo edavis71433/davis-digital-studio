@@ -590,7 +590,7 @@ function sendSpeedReport() {
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{url:d.url, bizType:'Speed test', city:'', score:d.scores[0]?d.scores[0].val:0, fallback:false, topIssues:d.issues.slice(0,3).map(function(i){return{title:i.label,sev:i.sev};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
+    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{tool:'speed_test', url:d.url, bizType:'Speed test', city:'', score:d.scores[0]?d.scores[0].val:0, fallback:false, topIssues:d.issues.slice(0,3).map(function(i){return{title:i.label,sev:i.sev};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
   }).then(function(){
     if (msg) { msg.style.color = '#6abf69'; msg.textContent = 'Sent! Check your inbox.'; }
     if (typeof gtag==='function') gtag('event','speed_test_lead',{event_category:'lead'});
