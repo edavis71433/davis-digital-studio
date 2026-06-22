@@ -353,7 +353,7 @@ a{color:inherit;}
         <div class="loading-step"><div class="loading-dot"></div>Analyzing SEO signals...</div>
         <div class="loading-step"><div class="loading-dot"></div>Identifying top issues...</div>
       </div>
-      <div class="loading-timer" id="loadingTimer">This usually takes 15–25 seconds</div>
+      <div class="loading-timer" id="loadingTimer">This usually takes 20–50 seconds...</div>
     </div>
 
     <!-- STEP 3: RESULTS -->
@@ -637,16 +637,17 @@ function runAudit() {
   var timerEl = document.getElementById('loadingTimer');
   var timerInterval = setInterval(function() {
     elapsed++;
-    if (elapsed < 10) timerEl.textContent = 'This usually takes 15-25 seconds...';
-    else if (elapsed < 20) timerEl.textContent = 'Almost there — Google is analyzing your page...';
-    else timerEl.textContent = 'Taking a bit longer than usual — hang tight...';
+    if (elapsed < 10) timerEl.textContent = 'This usually takes 20–50 seconds for some sites...';
+    else if (elapsed < 25) timerEl.textContent = 'Still running — Google is loading and analyzing your full page...';
+    else if (elapsed < 40) timerEl.textContent = 'Your site has a lot going on — almost there...';
+    else timerEl.textContent = 'Nearly done — complex or slow sites can take up to 50 seconds...';
   }, 1000);
 
   // Call PSI via Edge Function (server-side proxy — no CORS issues)
   var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var fetchTimeout = setTimeout(function() {
     if (abortCtrl) abortCtrl.abort();
-  }, 40000);
+  }, 55000);
 
   fetch(EDGE_FN, {
     method: 'POST',
@@ -959,7 +960,7 @@ function resetAudit() {
   // Reset loading steps
   var steps = document.getElementById('loadingSteps').children;
   for (var i = 0; i < steps.length; i++) steps[i].classList.remove('show');
-  document.getElementById('loadingTimer').textContent = 'This usually takes 15-25 seconds';
+  document.getElementById('loadingTimer').textContent = 'This usually takes 20-50 seconds...';
 }
 
 // Nav hamburger
