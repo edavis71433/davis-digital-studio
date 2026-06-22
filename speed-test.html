@@ -212,7 +212,6 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
         <button class="rerun-btn" onclick="resetTest()">Test another site</button>
       </div>
     </div>
-
     <div class="scores-row" id="scoresRow"></div>
 
     <div class="vitals-card" id="vitalsCard" style="display:none;">
@@ -223,6 +222,17 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     <div class="issues-card" id="issuesCard" style="display:none;">
       <h3>Top issues to fix</h3>
       <div id="issuesList"></div>
+    </div>
+
+    <div id="stLeadBox" style="display:none;background:linear-gradient(135deg,rgba(91,63,160,0.08),rgba(196,174,232,0.05));border:1px solid rgba(91,63,160,0.15);border-radius:16px;padding:24px;margin-top:20px;text-align:center;">
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;">Email me a copy of this report</h3>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">I'll send you a clean version of these scores plus a written analysis. No spam, unsubscribe anytime.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;max-width:340px;margin:0 auto;">
+        <input type="text" id="stLeadName" placeholder="Business name (optional)" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
+        <input type="email" id="stLeadEmail" placeholder="Your email address" style="background:#fff;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;">
+        <button onclick="sendSpeedReport()" style="background:var(--p);color:#fff;border:none;border-radius:100px;padding:12px 22px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Email me the report →</button>
+        <div id="stLeadMsg" style="font-size:12px;color:var(--muted);min-height:16px;"></div>
+      </div>
     </div>
 
     <div class="upgrade-card">
@@ -250,6 +260,7 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
 
 <script>
 var PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
+var EDGE_FN = 'https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api';
 var strategy = 'mobile';
 
 function setStrategy(s) {
@@ -303,25 +314,44 @@ function runTest() {
   document.getElementById('runBtn').disabled = true;
   animateSteps();
 
-  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
-    encodeURIComponent(url) + '&strategy=' + strategy +
-    '&category=performance&category=seo&category=accessibility&category=best-practices' +
-    '&key=' + PSI_KEY;
+  // Route through Edge Function — no CORS, no exposed key, 90s server-side timeout
+  var abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var browserTimeout = setTimeout(function(){ if(abortCtrl) abortCtrl.abort(); }, 100000);
 
-  fetch(psiUrl)
+  fetch(EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'psi_fetch', url: url, strategy: strategy }),
+    signal: abortCtrl ? abortCtrl.signal : undefined
+  })
     .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function(res) {
+      clearTimeout(browserTimeout);
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      if (data.error) { showError(data.error.message || 'Could not analyze that URL. Check it and try again.'); return; }
+      if (res && res.error) {
+        if (res.error === 'timeout') {
+          showError('Google took too long to analyze that page. Try again — slow platforms sometimes need a second attempt.');
+        } else {
+          showError('Could not analyze that URL: ' + res.error + '. Make sure the site is publicly accessible.');
+        }
+        return;
+      }
+      var data = res && res.data;
+      if (!data) { showError('No data returned. Please try again.'); return; }
       renderResults(url, data);
     })
-    .catch(function() {
+    .catch(function(err) {
+      clearTimeout(browserTimeout);
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      showError('Could not connect to Google. Check your URL and try again.');
+      if (err && err.name === 'AbortError') {
+        showError('Request timed out. Please try again.');
+      } else {
+        showError('Could not connect to the analysis service. Check your URL and try again.');
+      }
     });
 }
 
@@ -496,6 +526,77 @@ function renderResults(url, data) {
 
   document.getElementById('stResults').style.display = 'block';
   if (typeof gtag === 'function') gtag('event', 'speed_test_complete', { event_category: 'tools', event_label: displayUrl });
+
+  // Build lead-capture box + cache result for sendSpeedReport()
+  window._stResult = { url: url, displayUrl: displayUrl, data: data, scores: scoreItems, issues: issues, strategy: strategy };
+  var leadBox = document.getElementById('stLeadBox');
+  if (leadBox) {
+    leadBox.style.display = 'block';
+    var leadMsg = document.getElementById('stLeadMsg');
+    if (leadMsg) { leadMsg.textContent = ''; leadMsg.style.color = ''; }
+    var leadEmail = document.getElementById('stLeadEmail');
+    if (leadEmail) leadEmail.value = '';
+  }
+}
+
+function sendSpeedReport() {
+  var d = window._stResult;
+  if (!d) return;
+  var emailEl = document.getElementById('stLeadEmail');
+  var nameEl = document.getElementById('stLeadName');
+  var msg = document.getElementById('stLeadMsg');
+  var email = (emailEl ? emailEl.value : '').trim();
+  var bizName = (nameEl ? nameEl.value : '').trim() || d.displayUrl;
+  if (!email || !email.includes('@')) {
+    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Please enter a valid email.'; }
+    return;
+  }
+  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = 'Sending...'; }
+
+  var scoreColor = function(v){ return v < 50 ? '#e05555' : v < 90 ? '#f0b429' : '#6abf69'; };
+  var scoreCards = d.scores.map(function(s){
+    return '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 6px;text-align:center;width:25%;"><div style="font-size:20px;font-weight:700;color:'+scoreColor(s.val)+';">'+s.val+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">'+s.label+'</div></td>';
+  }).join('');
+  var pillarRow = '<table style="width:100%;border-collapse:separate;border-spacing:5px 0;margin-bottom:14px;"><tr>'+scoreCards+'</tr></table>';
+
+  var issueHtml = d.issues.length ? d.issues.map(function(i,n){
+    var sc = i.sev==='high'?'#e05555':i.sev==='medium'?'#f0b429':'#6abf69';
+    return '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:'+sc+';font-size:9px;font-weight:700;color:#0f0820;text-align:center;line-height:18px;">'+(n+1)+'</span><strong style="color:#fff;font-size:12px;">'+i.label+'</strong></div><p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 3px 26px;line-height:1.6;">'+i.tip+'</p><span style="font-size:9px;font-weight:700;color:'+sc+';letter-spacing:1px;margin-left:26px;">'+i.sev.toUpperCase()+'</span></div>';
+  }).join('') : '<div style="padding:12px 0;font-size:12px;color:rgba(255,255,255,0.4);">No major issues found.</div>';
+
+  // Eric's detailed notification — business name + URL at top, all scores, every issue
+  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
+    '<div style="max-width:580px;margin:0 auto;padding:32px 24px;">'+
+    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
+    '<div style="background:#1e1338;border-radius:16px;padding:28px;">'+
+      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Speed Test Lead</div>'+
+      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+bizName+'</h1>'+
+      '<a href="'+d.url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:18px;">'+d.url+'</a>'+
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);width:90px;">Email</td><td><a href="mailto:'+email+'" style="color:#c4aee8;text-decoration:none;">'+email+'</a></td></tr>'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);">Strategy</td><td style="color:#fff;">'+d.strategy+'</td></tr>'+
+      '</table>'+
+      pillarRow+
+      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:16px 0 8px;">All findings · '+d.issues.length+'</div>'+
+      issueHtml+
+      '<div style="text-align:center;margin-top:18px;">'+
+        '<a href="mailto:'+email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;margin-right:6px;">Reply to lead →</a>'+
+        '<a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Visit site →</a>'+
+      '</div>'+
+    '</div></div></body></html>';
+
+  // User confirmation — generic, drives toward paid audit
+  var userHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">Your speed test for '+bizName+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">I found '+d.issues.length+' issues affecting your site speed. The free test gives you the scores — the paid audit gives you a 6-page report with the exact fixes ranked by impact.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio</p></div></body></html>';
+
+  fetch(EDGE_FN, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{url:d.url, bizType:'Speed test', city:'', score:d.scores[0]?d.scores[0].val:0, fallback:false, topIssues:d.issues.slice(0,3).map(function(i){return{title:i.label,sev:i.sev};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
+  }).then(function(){
+    if (msg) { msg.style.color = '#6abf69'; msg.textContent = 'Sent! Check your inbox.'; }
+    if (typeof gtag==='function') gtag('event','speed_test_lead',{event_category:'lead'});
+  }).catch(function(){
+    if (msg) { msg.style.color = '#e05555'; msg.textContent = 'Something went wrong. Please try again.'; }
+  });
 }
 
 function resetTest() {

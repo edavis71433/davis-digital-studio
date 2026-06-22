@@ -311,13 +311,15 @@ body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-f
     </div>
   </div>
 
-  <!-- Q6: Business name -->
+  <!-- Q6: Business name, URL, email -->
   <div class="q-card" id="q6">
     <div class="q-num">Question 6 of 6</div>
-    <h2>Last one — what's your business name and city?</h2>
-    <p>So I can personalize your results. No spam, ever.</p>
+    <h2>Last one — your business details.</h2>
+    <p>I'll run a real audit on your site and combine it with your answers above. Detailed report sent to your inbox.</p>
     <input type="text" class="text-input" id="q6_name" placeholder="Business name (e.g. Bacchus Kitchen)" oninput="checkQ6()">
     <input type="text" class="text-input" id="q6_city" placeholder="City (e.g. Los Angeles, CA)" oninput="checkQ6()" style="margin-top:10px;">
+    <input type="url" class="text-input" id="q6_url" placeholder="Your website URL (https://...)" oninput="checkQ6()" style="margin-top:10px;">
+    <input type="email" class="text-input" id="q6_email" placeholder="Your email" oninput="checkQ6()" style="margin-top:10px;">
     <div class="nav-btns">
       <button class="back-btn" onclick="prevStep(6)">Back</button>
       <button class="next-btn" id="q6next" onclick="showResults()" disabled>See my score</button>
@@ -385,7 +387,10 @@ function selectOpt(q, val) {
 function checkQ6() {
   var name = document.getElementById('q6_name').value.trim();
   var city = document.getElementById('q6_city').value.trim();
-  document.getElementById('q6next').disabled = !(name && city);
+  var url = document.getElementById('q6_url').value.trim();
+  var email = document.getElementById('q6_email').value.trim();
+  var valid = name && city && url && email.includes('@');
+  document.getElementById('q6next').disabled = !valid;
 }
 
 function nextStep(from) {
@@ -439,19 +444,72 @@ function calcScore() {
   return score;
 }
 
+var EDGE_FN = 'https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api';
+
 function showResults() {
   var bizName = document.getElementById('q6_name').value.trim();
   var city = document.getElementById('q6_city').value.trim();
+  var url = document.getElementById('q6_url').value.trim();
+  var email = document.getElementById('q6_email').value.trim();
+  if (!url.match(/^https?:\/\//)) url = 'https://' + url;
 
   document.getElementById('q6').classList.remove('active');
   document.getElementById('sd6').className = 'step-dot done';
   document.getElementById('sd6').textContent = '✓';
   if (document.getElementById('sl6')) document.getElementById('sl6').classList.add('done');
 
-  var score = calcScore();
+  // Show results card immediately with a loading state while deep audit runs
+  document.getElementById('lvResults').style.display = 'block';
+  document.getElementById('lvBizName').textContent = bizName + ' · ' + city;
+  document.getElementById('lvGrade').textContent = 'Running real-time audit on your site...';
+  document.getElementById('lvGrade').className = 'score-grade ok';
+
+  // Quiz-based score from answers (max 100 — original logic)
+  var quizScore = calcScore();
+
+  // Run deep audit in parallel — if it succeeds, blend with quiz score
+  fetch(EDGE_FN, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({type:'deep_audit', url:url})
+  }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+  .then(function(res) {
+    var deep = (res && res.data) ? res.data : null;
+    renderLocalResults(bizName, city, url, email, quizScore, deep);
+  });
+}
+
+function renderLocalResults(bizName, city, url, email, quizScore, deep) {
+  // Blend: 60% from self-reported quiz (GBP, reviews, citations — things only the user knows),
+  // 40% from real on-site audit (schema, NAP, hours, maps embed — things only the site can tell us)
+  var onSiteScore = 0;
+  var onSiteSignals = [];
+  if (deep && deep.fetchedHtml) {
+    var p = 0, max = 0;
+    // LocalBusiness schema — 30 pts
+    max += 30; if (deep.schema.hasLocalBusiness) p += 30;
+    onSiteSignals.push({label:'LocalBusiness schema', ok:deep.schema.hasLocalBusiness});
+    // NAP on page — 15 pts each (45 total)
+    max += 15; if (deep.local.phoneOnPage) p += 15;
+    onSiteSignals.push({label:'Phone visible on page', ok:deep.local.phoneOnPage});
+    max += 15; if (deep.local.zipOnPage) p += 15;
+    onSiteSignals.push({label:'Address visible on page', ok:deep.local.zipOnPage});
+    max += 15; if (deep.local.hoursMentioned) p += 15;
+    onSiteSignals.push({label:'Hours visible on page', ok:deep.local.hoursMentioned});
+    // Maps embed — 10 pts
+    max += 10; if (deep.local.googleMapsEmbed) p += 10;
+    onSiteSignals.push({label:'Google Maps embed', ok:deep.local.googleMapsEmbed});
+    // Social profile links — 10 pts (2+ profiles)
+    max += 10; if (deep.local.socialLinks.length >= 2) p += 10;
+    onSiteSignals.push({label:'Social profile links', ok:deep.local.socialLinks.length >= 2});
+    onSiteScore = max > 0 ? Math.round(p / max * 100) : 0;
+  }
+
+  var score = deep && deep.fetchedHtml
+    ? Math.round(quizScore * 0.6 + onSiteScore * 0.4)
+    : quizScore;
   var scoreClass = score >= 70 ? 'good' : score >= 40 ? 'ok' : 'poor';
 
-  // Conversational overall summary
+  // Conversational summary
   var summaryText;
   if (score >= 70) {
     summaryText = bizName + ' has a solid local search presence in ' + city + ' — your Google Business Profile, reviews, and web signals are working together. The opportunities below will help you pull further ahead of competitors who are still getting the basics right.';
@@ -581,6 +639,86 @@ function showResults() {
   document.getElementById('stepIndicator').style.display = 'none';
 
   if (typeof gtag === 'function') gtag('event', 'local_visibility_complete', { event_category: 'tools', event_label: bizName, value: score });
+
+  // Send notification to Eric + confirmation to user
+  sendLocalNotification(bizName, city, url, email, score, quizScore, onSiteScore, onSiteSignals, actions, deep);
+}
+
+function sendLocalNotification(bizName, city, url, email, score, quizScore, onSiteScore, onSiteSignals, actions, deep) {
+  var scoreColor = score < 45 ? '#e05555' : score < 65 ? '#f0b429' : '#6abf69';
+
+  // Signal table — show every real on-site check
+  var signalRows = '';
+  function row(label, value, ok) {
+    var c = ok === true ? '#6abf69' : ok === false ? '#e05555' : 'rgba(255,255,255,0.5)';
+    var mark = ok === true ? '✓' : ok === false ? '✗' : '·';
+    return '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);width:55%;">'+label+'</td><td style="padding:4px 0;font-size:11px;color:'+c+';text-align:right;"><strong>'+mark+'</strong> '+value+'</td></tr>';
+  }
+  if (deep && deep.fetchedHtml) {
+    var sc = deep.schema, lc = deep.local;
+    signalRows += '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">Real On-Site Signals</td></tr>';
+    signalRows += row('LocalBusiness schema', sc.hasLocalBusiness ? sc.types.join(', ') : 'none', sc.hasLocalBusiness);
+    signalRows += row('Phone on page', lc.phoneOnPage ? (lc.phone || 'yes') : 'no', lc.phoneOnPage);
+    signalRows += row('Address/ZIP on page', lc.zipOnPage ? 'yes' : 'no', lc.zipOnPage);
+    signalRows += row('Hours mentioned', lc.hoursMentioned ? 'yes' : 'no', lc.hoursMentioned);
+    signalRows += row('Google Maps embed', lc.googleMapsEmbed ? 'yes' : 'no', lc.googleMapsEmbed);
+    signalRows += row('Social profile links', lc.socialLinks.length ? lc.socialLinks.join(', ') : 'none', lc.socialLinks.length >= 2);
+  } else {
+    signalRows = '<tr><td colspan="2" style="padding:14px 0;font-size:12px;color:rgba(255,255,255,0.4);font-style:italic;">Site HTML could not be fetched — score is based on quiz answers only.</td></tr>';
+  }
+
+  var quizLabels = {
+    q1: {restaurant:'Restaurant/Bar',service:'Home Services',salon:'Salon/Spa',retail:'Retail',health:'Health/Wellness',other:'Other'},
+    q2: {yes_claimed:'Claimed & verified',yes_unclaimed:'Exists but unclaimed',no:'No GBP'},
+    q3: {great:'4.5+ stars, 50+ reviews',decent:'4+ stars, some reviews',few:'A handful of reviews',bad:'Mixed or poor reviews'},
+    q4: {optimized:'Optimized for local',partial:'Has some local mentions',none:'No local optimization'},
+    q5: {many:'Listed on many directories',some:'Listed on a few',none:'Not on any'}
+  };
+  var quizRows = '<tr><td colspan="2" style="padding:14px 0 6px;font-size:9px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">Quiz Responses</td></tr>';
+  quizRows += '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Business type</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(quizLabels.q1[answers.q1]||'—')+'</td></tr>';
+  quizRows += '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Google Business Profile</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(quizLabels.q2[answers.q2]||'—')+'</td></tr>';
+  quizRows += '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Reviews</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(quizLabels.q3[answers.q3]||'—')+'</td></tr>';
+  quizRows += '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Website</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(quizLabels.q4[answers.q4]||'—')+'</td></tr>';
+  quizRows += '<tr><td style="padding:4px 0;font-size:11px;color:rgba(255,255,255,0.5);">Citations/directories</td><td style="padding:4px 0;font-size:11px;color:#fff;text-align:right;">'+(quizLabels.q5[answers.q5]||'—')+'</td></tr>';
+
+  var actionsHtml = actions.slice(0,6).map(function(a,i){
+    return '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><strong style="color:#fff;font-size:12px;">'+(i+1)+'. '+a.h+'</strong><p style="font-size:11px;color:rgba(255,255,255,0.5);margin:4px 0 0;line-height:1.6;">'+a.p+'</p></div>';
+  }).join('');
+
+  var notifyHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
+    '<div style="max-width:580px;margin:0 auto;padding:32px 24px;">'+
+    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
+    '<div style="background:#1e1338;border-radius:16px;padding:28px;">'+
+      '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Local Visibility Lead</div>'+
+      '<h1 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+bizName+'</h1>'+
+      '<a href="'+url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:4px;">'+url+'</a>'+
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:18px;">'+city+'</div>'+
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">'+
+        '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);width:90px;">Email</td><td><a href="mailto:'+email+'" style="color:#c4aee8;text-decoration:none;">'+email+'</a></td></tr>'+
+      '</table>'+
+      '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;">'+
+        '<div style="font-size:42px;font-weight:700;color:'+scoreColor+';line-height:1;">'+score+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Local Visibility Score</div>'+
+      '</div>'+
+      '<table style="width:100%;border-collapse:separate;border-spacing:6px 0;margin-bottom:14px;"><tr>'+
+        '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 6px;text-align:center;width:50%;"><div style="font-size:18px;font-weight:700;color:#c4aee8;">'+quizScore+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Self-Reported</div></td>'+
+        '<td style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 6px;text-align:center;width:50%;"><div style="font-size:18px;font-weight:700;color:#c4aee8;">'+onSiteScore+'</div><div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Real On-Site</div></td>'+
+      '</tr></table>'+
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:18px;">'+signalRows+quizRows+'</table>'+
+      '<div style="font-size:10px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin:18px 0 8px;">Recommended Actions</div>'+
+      actionsHtml+
+      '<div style="text-align:center;margin-top:18px;">'+
+        '<a href="mailto:'+email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;margin-right:6px;">Reply to lead →</a>'+
+        '<a href="'+url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Visit site →</a>'+
+      '</div>'+
+    '</div></div></body></html>';
+
+  var userHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:block;margin-bottom:20px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">Your local visibility check for '+bizName+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Your score: <strong style="color:'+scoreColor+';">'+score+'/100</strong>. The free quiz gives you a snapshot — the paid Local SEO audit gives you a full GBP review, citation audit, and competitor ranking analysis.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio</p></div></body></html>';
+
+  fetch(EDGE_FN, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({type:'audit_lead', clientName:bizName, clientEmail:email, meta:{url:url, bizType:'Local Visibility', city:city, score:score, fallback:false, topIssues:actions.slice(0,3).map(function(a){return{title:a.h,sev:'medium'};}), userConfirmHtml:userHtml, notifyHtml:notifyHtml}})
+  }).catch(function(){});
 }
 
 function restart() {
