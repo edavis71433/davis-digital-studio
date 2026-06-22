@@ -157,6 +157,16 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 body{padding-top:68px;}
 @media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+
+/* Dropdown gap fix - bridge pseudo-element */
+.nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
+.nav-drop:hover .nav-drop-menu{display:block;}
+
+
+/* Dropdown bridge - prevents menu closing when moving mouse down */
+.nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
+.nav-drop{padding-bottom:0;}
+
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TermsOfService","name":"Terms of Service | Davis Digital Studio","url":"https://www.davisdigitalstudio.com/terms","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://www.davisdigitalstudio.com"}}
