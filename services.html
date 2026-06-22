@@ -164,57 +164,63 @@ body { padding-top: 68px; }
 /* SERVICES */
 .services-main { padding: 100px 52px; background: #fff; }
 .services-inner { max-width: 1100px; margin: 0 auto; }
-.svc-grid { display: flex; flex-direction: column; gap: 24px; }
+.svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
 .svc-card {
   border-radius: 20px;
   border: 1px solid rgba(91,63,160,0.1);
-  padding: 40px 36px;
+  padding: 32px 28px;
+  background: #fff;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 48px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
 }
 .svc-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(91,63,160,0.12); border-color: var(--pxl); }
 .svc-card.featured {
-  background: var(--pdark);
+  background: linear-gradient(180deg,#1e1338 0%,#2d1f4e 100%);
   border-color: var(--p);
   color: #fff;
-  grid-column: span 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: center;
+  transform: scale(1.02);
+  box-shadow: 0 20px 50px rgba(91,63,160,0.20);
 }
+.svc-card.featured:hover { transform: scale(1.02) translateY(-4px); }
 .svc-card.featured::before {
-  content: 'Most Popular';
+  content: 'RECOMMENDED';
   position: absolute;
-  top: 20px; right: 20px;
-  background: var(--p);
-  color: #fff;
+  top: 18px; right: 20px;
+  background: #c4894a;
+  color: #1a0f0a;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
   padding: 5px 12px;
   border-radius: 100px;
 }
-.svc-icon { font-size: 32px; margin-bottom: 20px; }
-.svc-card h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; margin-bottom: 12px; }
+.svc-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--pxxl); color: var(--p); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.svc-card.featured .svc-icon { background: rgba(196,174,232,0.15); color: var(--pxl); }
+.svc-card h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; margin-bottom: 10px; letter-spacing: -0.5px; }
 .svc-card.featured h3 { color: #fff; }
-.svc-card.featured p { color: rgba(255,255,255,0.6); }
-.svc-card p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 20px; }
-.svc-includes { list-style: none; }
-.svc-includes li { font-size: 13px; color: var(--muted); padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; }
-.svc-includes li::before { content: '→'; color: var(--p); flex-shrink: 0; margin-top: 1px; }
-.svc-card.featured .svc-includes li { color: rgba(255,255,255,0.55); }
+.svc-card p { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 20px; }
+.svc-card.featured p { color: rgba(255,255,255,0.7); }
+.svc-card .svc-price-block { margin-bottom: 20px; }
+.svc-price { font-family: var(--serif); font-size: 36px; font-weight: 600; color: var(--ink); line-height: 1; letter-spacing: -1px; }
+.svc-card.featured .svc-price { color: #fff; }
+.svc-price-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.svc-card.featured .svc-price-note { color: rgba(255,255,255,0.5); }
+.svc-includes { list-style: none; flex: 1; margin-bottom: 20px; padding-top: 18px; border-top: 1px solid rgba(91,63,160,0.10); }
+.svc-card.featured .svc-includes { border-top-color: rgba(255,255,255,0.10); }
+.svc-includes li { font-size: 13px; color: var(--ink); padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.svc-includes li::before { content: '→'; color: var(--p); flex-shrink: 0; margin-top: 1px; font-weight: 600; }
+.svc-card.featured .svc-includes li { color: rgba(255,255,255,0.78); }
 .svc-card.featured .svc-includes li::before { color: var(--pxl); }
-.svc-price { font-family: var(--serif); font-size: 32px; color: var(--p); margin-top: 20px; }
-.svc-card.featured .svc-price { color: var(--pxl); }
-.svc-price-note { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.svc-card.featured .svc-price-note { color: rgba(255,255,255,0.4); }
+.svc-updates { font-size: 12px; color: var(--muted); padding-top: 14px; border-top: 1px solid rgba(91,63,160,0.10); margin-bottom: 16px; }
+.svc-updates strong { color: var(--ink); font-weight: 600; }
+.svc-card.featured .svc-updates { color: rgba(255,255,255,0.5); border-top-color: rgba(255,255,255,0.10); }
+.svc-card.featured .svc-updates strong { color: #fff; }
+.svc-card .btn-ghost, .svc-card .btn-white { width: 100%; justify-content: center; text-align: center; }
+.svc-card.featured .btn-white { background: #fff; color: var(--ink); }
+.svc-card.featured .btn-white:hover { background: var(--pxl); color: var(--ink); }
 
 /* ADD-ONS */
 .addons { padding: 80px 52px; background: var(--pxxxl); }
@@ -254,8 +260,9 @@ body { padding-top: 68px; }
   .page-hero { padding:60px 24px 72px; }
   .services-main { padding:60px 24px; }
   .svc-grid { grid-template-columns: 1fr; }
-  .svc-card { grid-template-columns: 1fr; gap: 24px; display: block; }
-  .svc-card.featured { grid-column: span 1; grid-template-columns: 1fr; padding: 28px 20px; }
+  .svc-card { display: flex; flex-direction: column; }
+  .svc-card.featured { grid-column: span 1; transform: none; padding: 28px 20px; }
+  .svc-card.featured:hover { transform: translateY(-4px); }
   .addons { padding:60px 24px; }
   .addons-grid { grid-template-columns: 1fr; }
   .compare { padding:60px 24px; }
@@ -502,9 +509,9 @@ html, body { overflow-x: hidden; max-width: 100vw; }
     "areaServed": "Los Angeles, CA",
     "description": "Website redesign, local SEO strategy, and monthly retainers for small businesses in Los Angeles.",
     "offers": [
-      { "@type": "Offer", "name": "Website Redesign (Starter)", "price": "1200", "priceCurrency": "USD" },
-      { "@type": "Offer", "name": "SEO Strategy", "price": "650", "priceCurrency": "USD" },
-      { "@type": "Offer", "name": "Digital Health Check Audit", "price": "299", "priceCurrency": "USD" }
+      { "@type": "Offer", "name": "Template Build", "price": "1500", "priceCurrency": "USD", "description": "Polished template build on the platform that fits your business." },
+      { "@type": "Offer", "name": "Custom + Photography", "price": "3800", "priceCurrency": "USD", "description": "Bespoke custom design with art-directed photography." },
+      { "@type": "Offer", "name": "Custom HTML", "price": "6500", "priceCurrency": "USD", "description": "Hand-coded site, no template limits, fastest and most unique." }
     ]
   }
   
@@ -580,10 +587,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-  {"@type":"Question","name":"How much does a website cost?","acceptedAnswer":{"@type":"Answer","text":"Websites start at $1,200 for a template-based Starter build, $2,800-$4,000 for a custom Growth build, and $5,500+ for the full Studio package. Every project includes a free discovery call to confirm scope and pricing."}},
-  {"@type":"Question","name":"How long does a website take to build?","acceptedAnswer":{"@type":"Answer","text":"Starter builds take 2-4 weeks. Growth projects take 4-6 weeks. Studio packages take 6-10 weeks depending on scope. Rush delivery is available at a 25% surcharge."}},
+  {"@type":"Question","name":"How much does a website cost?","acceptedAnswer":{"@type":"Answer","text":"Websites are $1,500 for a Template build on the platform that fits your business, $3,800 for Custom + Photography with art-directed shots, and $6,500 for a fully hand-coded Custom HTML build. Every project includes a free discovery call to confirm scope and pricing."}},
+  {"@type":"Question","name":"How long does a website take to build?","acceptedAnswer":{"@type":"Answer","text":"Template builds take 2-4 weeks. Custom + Photography projects take 4-6 weeks. Custom HTML builds take 6-10 weeks depending on scope. Rush delivery is available at a 25% surcharge."}},
   {"@type":"Question","name":"Do you work with businesses outside Los Angeles?","acceptedAnswer":{"@type":"Answer","text":"Yes. Davis Digital Studio is fully remote and works with small businesses across the United States. All projects are managed online."}},
-  {"@type":"Question","name":"What happens after the site launches?","acceptedAnswer":{"@type":"Answer","text":"Every project includes post-launch support. Starter builds come with a walkthrough video. Growth and Studio packages include 30-90 days of support. Monthly retainers are available starting at $250/month."}}
+  {"@type":"Question","name":"What happens after the site launches?","acceptedAnswer":{"@type":"Answer","text":"Every project includes a 30-day post-launch support window. Ongoing support is available as DIY at $0/mo, Managed at $400/mo, or HTML Managed at $850/mo (required for Custom HTML builds). 3-month minimum either way."}}
 ]}
 </script>
 </head>
@@ -615,6 +622,22 @@ if (!sessionStorage.getItem('exit_shown')) {
 <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
 <main id="main-content">
 
+
+<!-- BREADCRUMBS -->
+<nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
+  <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);opacity:0.5;flex-shrink:0;" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    <a href="/" style="color:var(--muted);text-decoration:none;">Home</a>
+        <span style="color:var(--muted);opacity:0.4;">/</span>
+        <span style="color:var(--p);font-weight:600;">Services</span>
+  </div>
+</nav>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+          {"@type":"ListItem","position":1,"name":"Home","item":"https://www.davisdigitalstudio.com/"},
+          {"@type":"ListItem","position":2,"name":"Services"}
+        ]}
+</script>
 <section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
   <div aria-hidden="true" style="position:absolute;bottom:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
@@ -645,24 +668,24 @@ if (!sessionStorage.getItem('exit_shown')) {
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid #c4aee8;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Starter</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Template build, 2-4 weeks</div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink);">Template</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Polished template, self-managed</div>
             </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$1,200+</div>
+            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$1,500</div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid var(--p);">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Growth</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Custom, SEO-ready</div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink);">Custom + Photography</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Bespoke design, shot list incl.</div>
             </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$2,800+</div>
+            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$3,800</div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid #1e1338;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Studio</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Full custom build</div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink);">Custom HTML</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Hand-coded, no template limits</div>
             </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$5,500+</div>
+            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$6,500</div>
           </div>
         </div>
 
@@ -684,102 +707,127 @@ if (!sessionStorage.getItem('exit_shown')) {
       <p>Transparent pricing, no surprises. Every engagement includes strategy, not just execution. Payment plans available. 50% upfront, 50% at launch.</p>
     </div>
 
+    <!-- THE ENGINE - IN EVERY BUILD -->
+    <div class="reveal" style="background:linear-gradient(145deg,#1e1338 0%,#2d1f4e 100%);border-radius:18px;padding:24px 28px;margin-bottom:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;align-items:center;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#c4894a;text-transform:uppercase;margin-bottom:6px;">The engine · in every build</div>
+        <div style="font-family:var(--serif);font-size:18px;color:#fff;line-height:1.2;">The part that makes the <em style="color:var(--pxl);font-style:italic;">phone ring.</em></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Found</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Google Business Profile</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Ranks</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Meta tags, titles & sitemap</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Local</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">On-page + local SEO</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Mobile</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Fast & indexable on phones</div>
+      </div>
+    </div>
+
     <div class="svc-grid">
 
+      <!-- TEMPLATE -->
       <div class="svc-card reveal" style="transition-delay:0s">
-        <div>
-          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-5-5-10-5-10z"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M7 17l-2 3M17 17l2 3"/></svg></div>
-          <h3>Starter</h3>
-          <p>Get online fast with a polished template build. Best for new businesses that need a clean, professional presence right away.</p>
-          <ul class="svc-includes">
-            <li>Template build on the platform that fits your business</li>
-            <li>Your branding applied. colors, fonts, logo</li>
-            <li>Up to 5 pages, mobile-optimized</li>
-            <li>Contact form and basic SEO setup</li>
-            <li>Google Analytics installation</li>
-            <li>1 revision round</li>
-            <li>Launch walkthrough video</li>
-          </ul>
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-5-5-10-5-10z"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M7 17l-2 3M17 17l2 3"/></svg></div>
+        <h3>Template</h3>
+        <p>Get online fast with a polished template build. Best for new businesses that need a clean, professional presence right away.</p>
+        <div class="svc-price-block">
+          <div class="svc-price">$1,500</div>
+          <div class="svc-price-note">one-time · design + setup</div>
         </div>
-        <div>
-          <div class="svc-price" style="color:var(--p);">$1,200–$1,800</div>
-          <div class="svc-price-note">Built on the right platform for you · client manages after launch</div>
-          <a href="/contact" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'starter_package'});}">Get started &rarr;</a>
-        </div>
+        <ul class="svc-includes">
+          <li>Template build on the platform that fits your business</li>
+          <li>Your branding applied: colors, fonts, logo</li>
+          <li>Up to 5 pages, mobile-optimized</li>
+          <li>Contact form and basic SEO setup</li>
+          <li>Google Analytics installation</li>
+          <li>1 revision round</li>
+          <li>Launch walkthrough video</li>
+        </ul>
+        <div class="svc-updates">Who updates it: <strong>You, anytime. No code.</strong></div>
+        <a href="/contact" class="btn-ghost" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'template_package'});}">Get started &rarr;</a>
       </div>
 
+      <!-- CUSTOM + PHOTOGRAPHY (RECOMMENDED) -->
       <div class="svc-card featured reveal" style="transition-delay:0.1s">
-        <div>
-          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l4-4 4 4 4-5 4-3"/><path d="M3 7h18"/></svg></div>
-          <h3>Growth</h3>
-          <p>A custom-designed, hand-coded site built to rank and convert. For businesses ready to compete online.</p>
-          <ul class="svc-includes">
-            <li>Custom HTML/CSS design. no templates</li>
-            <li>Mobile-first, performance-optimized build</li>
-            <li>On-page SEO implementation</li>
-            <li>Google Analytics 4 and Search Console setup</li>
-            <li>Google Business Profile setup</li>
-            <li>Sitemap, robots.txt, and schema markup</li>
-            <li>2 revision rounds</li>
-            <li>30-day post-launch support</li>
-          </ul>
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l4-4 4 4 4-5 4-3"/><path d="M3 7h18"/></svg></div>
+        <h3>Custom + Photography</h3>
+        <p>A bespoke design with art-directed photography, built to rank and convert. For businesses ready to compete online.</p>
+        <div class="svc-price-block">
+          <div class="svc-price">$3,800</div>
+          <div class="svc-price-note">one-time · design + setup</div>
         </div>
-        <div>
-          <div class="svc-price">$2,800–$4,000</div>
-          <div class="svc-price-note">Custom code · ongoing updates need a developer</div>
-          <a href="/contact" class="btn-white" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'growth_package'});}">Get started &rarr;</a>
-        </div>
+        <ul class="svc-includes">
+          <li>Bespoke design + custom typography</li>
+          <li>Art-directed photography (shot list included)</li>
+          <li>Mobile-first, performance-optimized</li>
+          <li>On-page SEO implementation</li>
+          <li>Google Analytics 4 and Search Console setup</li>
+          <li>Google Business Profile setup</li>
+          <li>2 revision rounds</li>
+          <li>30-day post-launch support</li>
+        </ul>
+        <div class="svc-updates">Who updates it: <strong>You, anytime. No code.</strong></div>
+        <a href="/contact" class="btn-white" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'custom_package'});}">Get started &rarr;</a>
       </div>
 
+      <!-- CUSTOM HTML -->
       <div class="svc-card reveal" style="transition-delay:0.2s">
-        <div>
-          <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M3 10h18M5 10V21M19 10V21M12 3L3 10h18L12 3z"/></svg></div>
-          <h3>Studio</h3>
-          <p>The full package. Strategy, design, copy, brand kit, and a client portal. everything your business needs to launch and grow.</p>
-          <ul class="svc-includes">
-            <li>Everything in Growth</li>
-            <li>Brand identity (logo, colors, typography)</li>
-            <li>Professional copywriting for all pages</li>
-            <li>Client portal with file sharing and approvals</li>
-            <li>Custom interactive features or widgets</li>
-            <li>Full launch support</li>
-            <li>Unlimited revisions during build</li>
-          </ul>
+        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <h3>Custom HTML</h3>
+        <p>The hand-coded version. No template limits, fastest performance, completely unique. For businesses that want the best.</p>
+        <div class="svc-price-block">
+          <div class="svc-price">$6,500</div>
+          <div class="svc-price-note">one-time · design + build</div>
         </div>
-        <div>
-          <div class="svc-price" style="color:var(--p);">$5,500+</div>
-          <div class="svc-price-note">Custom scope · pricing confirmed after discovery call</div>
-          <a href="/contact" class="btn-ghost" style="margin-top:24px;display:inline-flex;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'studio_package'});}">Get started &rarr;</a>
-        </div>
+        <ul class="svc-includes">
+          <li>Custom HTML, CSS, and JavaScript</li>
+          <li>No template limits, fastest and most unique</li>
+          <li>Mobile-first, performance-optimized</li>
+          <li>On-page SEO implementation</li>
+          <li>Google Analytics 4 and Search Console setup</li>
+          <li>Google Business Profile setup</li>
+          <li>2 revision rounds</li>
+          <li>30-day post-launch support</li>
+        </ul>
+        <div class="svc-updates">Who updates it: <strong>I do. It's hand-coded.</strong></div>
+        <a href="/contact" class="btn-ghost" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'html_package'});}">Get started &rarr;</a>
       </div>
 
     </div>
 
     <!-- MAINTENANCE PLANS -->
     <div class="section-header reveal" style="margin-top:72px;">
-      <span class="label">After Launch</span>
+      <span class="label">Ongoing Support</span>
       <h2>Keep it <em>running.</em></h2>
-      <p>Every site needs maintenance. I offer three options depending on how hands-on you want to be.</p>
+      <p>Every site needs upkeep. 3-month minimum either way. Pick how hands-on you want to be.</p>
     </div>
 
     <div class="addons-grid" style="margin-top:0;">
       <div class="addon-card reveal">
-        <h4>Self-Managed</h4>
-        <p>Included with every Starter build. I hand off your site with a full walkthrough video so your team can manage updates independently.</p>
-        <div class="addon-price">Included</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Available on any platform</div>
+        <h4>DIY</h4>
+        <p>You manage updates yourself on the platform. Includes a launch walkthrough so your team can take it from here.</p>
+        <div class="addon-price">$0/mo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Template & Custom + Photography tiers</div>
       </div>
       <div class="addon-card reveal" style="transition-delay:0.1s">
-        <h4>Monthly Retainer</h4>
-        <p>I handle updates, seasonal content, SEO monitoring, and a monthly performance report. You focus on running your business.</p>
-        <div class="addon-price">$250–$500/mo</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">3-month minimum · $250 templates · $500 custom</div>
+        <h4>Managed</h4>
+        <p>I handle updates, seasonal content, SEO monitoring, and a monthly performance report. You focus on running the business.</p>
+        <div class="addon-price">$400/mo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Template & Custom + Photography tiers</div>
       </div>
       <div class="addon-card reveal" style="transition-delay:0.2s">
-        <h4>Annual Plan</h4>
-        <p>Same as the monthly retainer but billed once a year. Saves you roughly two months compared to paying monthly.</p>
-        <div class="addon-price">$2,400–$4,800/yr</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">$2,400 templates · $4,800 custom HTML</div>
+        <h4>HTML Managed</h4>
+        <p>Required for Custom HTML builds since the site is hand-coded. I handle every update, content change, and SEO improvement.</p>
+        <div class="addon-price">$850/mo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Required for Custom HTML tier</div>
       </div>
     </div>
   </div>
@@ -812,7 +860,7 @@ if (!sessionStorage.getItem('exit_shown')) {
         <h4>SEO Strategy</h4>
         <p>A data-driven roadmap built with SEMrush. Keyword research, competitive analysis, and a 6-month content plan.</p>
         <div class="addon-price">From $800</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Included in Growth and Studio packages</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Included in Custom + Photography and Custom HTML packages</div>
       </div>
       <div class="addon-card reveal" style="transition-delay:0.4s">
         <h4>Custom Widget or Feature</h4>

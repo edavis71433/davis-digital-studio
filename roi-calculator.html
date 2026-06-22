@@ -94,6 +94,25 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
   </div>
 </nav>
 
+
+<!-- BREADCRUMBS -->
+<nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
+  <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);opacity:0.5;flex-shrink:0;" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    <a href="/" style="color:var(--muted);text-decoration:none;">Home</a>
+        <span style="color:var(--muted);opacity:0.4;">/</span>
+        <a href="/tools" style="color:var(--muted);text-decoration:none;">Free Tools</a>
+        <span style="color:var(--muted);opacity:0.4;">/</span>
+        <span style="color:var(--p);font-weight:600;">ROI Calculator</span>
+  </div>
+</nav>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+          {"@type":"ListItem","position":1,"name":"Home","item":"https://www.davisdigitalstudio.com/"},
+          {"@type":"ListItem","position":2,"name":"Free Tools","item":"https://www.davisdigitalstudio.com/tools"},
+          {"@type":"ListItem","position":3,"name":"ROI Calculator"}
+        ]}
+</script>
 <section class="page-hero-v2" role="banner" style="padding:48px 24px 56px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
   <div aria-hidden="true" style="position:absolute;bottom:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
@@ -136,19 +155,19 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
     <div class="slider-row">
       <label class="label" for="package">Investment level</label>
       <span class="sublabel">Which package are you considering?</span>
-      <input type="range" id="package" min="1200" max="5500" step="100" value="2800" oninput="calc()">
-      <div class="slider-val" id="package-val">$2,800 (Growth)</div>
+      <input type="range" id="package" min="1500" max="6500" step="100" value="3800" oninput="calc()">
+      <div class="slider-val" id="package-val">$3,800 (Custom + Photography)</div>
     </div>
   </div>
 
   <div class="results" role="region" aria-label="ROI calculation results">
     <div class="results-grid">
       <div class="result-box">
-        <div class="result-num" id="res-monthly">$1,125</div>
+        <div class="result-num" id="res-monthly">$1,520</div>
         <div class="result-label">Additional revenue per month</div>
       </div>
       <div class="result-box">
-        <div class="result-num" id="res-annual">$13,500</div>
+        <div class="result-num" id="res-annual">$18,240</div>
         <div class="result-label">Additional revenue per year</div>
       </div>
       <div class="result-box">
@@ -162,7 +181,7 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
       <div class="roi-fill" id="roi-fill" style="width:79%;"></div>
     </div>
     <div class="roi-labels">
-      <span id="roi-left-label">Investment: $2,800</span>
+      <span id="roi-left-label">Investment: $3,800</span>
       <span id="res-payback">Pays for itself in 2.5 months</span>
     </div>
 
@@ -276,7 +295,7 @@ function calc(){
   document.getElementById('improvement-val').textContent = Math.round(imp*100)+'% increase';
 
   var pkg = inv;
-  var label = pkg <= 1800 ? 'Starter' : pkg <= 4000 ? 'Growth' : 'Studio';
+  var label = pkg <= 1800 ? 'Template' : pkg <= 4500 ? 'Custom + Photography' : 'Custom HTML';
   document.getElementById('package-val').textContent = fmt(pkg)+' ('+label+')';
 
   var onlineRev = rev * webPct;
