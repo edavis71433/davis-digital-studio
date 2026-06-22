@@ -65,6 +65,43 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .mob-cta{background:#5b3fa0;color:#fff !important;border-radius:100px;text-align:center;padding:12px !important;margin-top:8px;font-weight:600 !important;}
 @media(max-width:900px){.nav-links{display:none;}.nav-ham{display:flex;}}
 
+
+/* ── Footer mobile responsive fix ── */
+@media (max-width: 768px) {
+  .footer-main-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 28px !important;
+    padding: 32px 20px 20px !important;
+  }
+  .footer-brand-col {
+    grid-column: span 2;
+  }
+  .footer-trust-strip {
+    padding: 28px 20px 0 !important;
+  }
+  .footer-trust-inner {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px !important;
+    padding: 16px 18px !important;
+  }
+  .footer-bottom {
+    padding: 14px 20px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 10px !important;
+  }
+}
+@media (max-width: 480px) {
+  .footer-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .footer-brand-col {
+    grid-column: span 1;
+  }
+  .footer-trust-inner {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"PrivacyPolicy","name":"Privacy Policy | Davis Digital Studio","url":"https://www.davisdigitalstudio.com/privacy","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://www.davisdigitalstudio.com"}}
@@ -188,8 +225,8 @@ document.getElementById('navHam').addEventListener('click',function(){
 </main>
 
 <footer class="site-footer" role="contentinfo" style="background:#1e1338;">
-  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
-    <div>
+  <div class="footer-main-grid" style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
+    <div class="footer-brand-col">
       <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
       <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
       <div style="display:flex;gap:12px;">
@@ -228,7 +265,7 @@ document.getElementById('navHam').addEventListener('click',function(){
       </div>
     </div>
   </div>
-  <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+  <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
     <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric L. Davis &middot; Los Angeles, CA</p>
     <div style="display:flex;gap:16px;flex-wrap:wrap;">
       <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
