@@ -1,3 +1,6 @@
+# Force non-www canonical (www -> non-www, 301)
+https://www.davisdigitalstudio.com/*  https://davisdigitalstudio.com/:splat  301!
+
 /about                  /about.html                     200
 /services               /services.html                  200
 /work                   /work.html                      200
