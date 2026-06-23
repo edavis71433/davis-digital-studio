@@ -1084,11 +1084,7 @@ function submitReportCard() {
           '<p style="color:rgba(255,255,255,0.3);font-size:12px;margin:0;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br>' +
           '<a href="https://davisdigitalstudio.com" style="color:rgba(196,174,232,0.5);">davisdigitalstudio.com</a></p>' +
         '</div>' +
-        '</div><script>
-/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
-function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
-</script>
-</body></html>';
+        '</div></body></html>';
 
       // Send both emails (to Eric + visitor) server-side via the Edge Function — no exposed key
       fetch('https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api', {
@@ -1181,5 +1177,9 @@ if (!sessionStorage.getItem('exit_shown')) {
 </script>
 
 <script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
+<script>
+/* Mobile nav dropdown toggle */
+function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
+</script>
 </body>
 </html>
