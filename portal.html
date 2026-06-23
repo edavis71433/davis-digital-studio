@@ -413,6 +413,24 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 
 <!-- PORTAL -->
 <div class="portal" id="portal">
+
+  <!-- WELCOME OVERLAY (first login) -->
+  <div id="welcomeOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,21,35,0.55);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#fff;border-radius:20px;max-width:480px;width:100%;padding:34px 30px;box-shadow:0 24px 70px rgba(26,21,35,0.3);text-align:center;">
+      <div style="font-size:42px;margin-bottom:10px;">👋</div>
+      <h2 style="font-family:var(--serif,'DM Serif Display',Georgia,serif);font-size:26px;font-weight:400;color:var(--ink);margin-bottom:10px;">Welcome, <span id="welcomeName">there</span>!</h2>
+      <p style="font-size:14.5px;line-height:1.6;color:var(--muted);margin-bottom:22px;">This is your private project hub. Everything for your project lives here, so nothing gets lost in email. Here's what you can do:</p>
+      <div style="text-align:left;margin-bottom:24px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:13px;"><div style="font-size:20px;">📝</div><div><div style="font-size:13.5px;font-weight:600;color:var(--ink);">Share your project brief</div><div style="font-size:12.5px;color:var(--muted);">Tell me about your business so I can get started.</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:13px;"><div style="font-size:20px;">✅</div><div><div style="font-size:13.5px;font-weight:600;color:var(--ink);">Review &amp; approve work</div><div style="font-size:12.5px;color:var(--muted);">Approve deliverables or request changes in one click.</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:13px;"><div style="font-size:20px;">📁</div><div><div style="font-size:13.5px;font-weight:600;color:var(--ink);">Files, messages &amp; invoices</div><div style="font-size:12.5px;color:var(--muted);">Everything in one place, with comments on any file.</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;"><div style="font-size:20px;">🔔</div><div><div style="font-size:13.5px;font-weight:600;color:var(--ink);">Stay in the loop</div><div style="font-size:12.5px;color:var(--muted);">The bell up top shows you everything new.</div></div></div>
+      </div>
+      <button onclick="welcomeGoTo('onboarding')" style="background:var(--p);color:#fff;border:none;padding:13px 22px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:9px;">Start with my project brief →</button>
+      <button onclick="closeWelcome()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;">I'll look around first</button>
+    </div>
+  </div>
+
   <div class="topbar">
     <div class="topbar-left">
       <a href="/" style="text-decoration:none;"><div class="topbar-logo">Davis<span>Digital</span></div></a>
@@ -421,6 +439,18 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
     </div>
     <div class="topbar-right">
       <div class="status-pill"><div class="status-dot"></div><span id="topbarStatus">In Progress</span></div>
+      <div style="position:relative;">
+        <button class="topbar-btn" onclick="toggleNotifs()" id="notifBellBtn" style="position:relative;padding:7px 11px;" aria-label="Notifications">
+          🔔<span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;line-height:17px;text-align:center;padding:0 4px;"></span>
+        </button>
+        <div id="notifPanel" style="display:none;position:absolute;right:0;top:42px;width:320px;max-height:420px;overflow-y:auto;background:#fff;border:1px solid rgba(91,63,160,0.14);border-radius:14px;box-shadow:0 12px 40px rgba(26,21,35,0.16);z-index:200;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid rgba(91,63,160,0.08);">
+            <div style="font-size:13px;font-weight:700;color:var(--ink);">Notifications</div>
+            <button onclick="markAllNotifsRead()" style="font-size:11px;color:var(--p);background:none;border:none;cursor:pointer;font-weight:600;">Mark all read</button>
+          </div>
+          <div id="notifList"><p style="font-size:12px;color:var(--muted);padding:18px;text-align:center;">Loading...</p></div>
+        </div>
+      </div>
       <button class="topbar-btn" onclick="logout()">Sign out</button>
     </div>
   </div>
@@ -956,8 +986,43 @@ async function initPortal() {
   await loadAll();
   renderAddons();
   await loadFeedback();
+  checkWelcome();
+  try { await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "logged_in", detail: "Opened the portal" }); } catch(e){}
   setTimeout(initContract, 300);
   setTimeout(checkUnreadOnLoad, 1000);
+}
+
+// ── WELCOME FLOW ──
+async function checkWelcome() {
+  if (!CLIENT) return;
+  try {
+    var { data } = await sb.from("client_onboarding").select("*").eq("client_id", CLIENT.id).maybeSingle();
+    if (data && data.has_seen_welcome) return; // already seen
+    showWelcome();
+    // mark as seen (upsert)
+    if (data) {
+      await sb.from("client_onboarding").update({has_seen_welcome:true, updated_at:new Date().toISOString()}).eq("client_id", CLIENT.id);
+    } else {
+      await sb.from("client_onboarding").insert({client_id:CLIENT.id, has_seen_welcome:true});
+    }
+  } catch(e){}
+}
+
+function showWelcome() {
+  var ov = document.getElementById("welcomeOverlay");
+  if (!ov) return;
+  document.getElementById("welcomeName").textContent = (CLIENT.name ? CLIENT.name.split(" ")[0] : "there");
+  ov.style.display = "flex";
+}
+
+function closeWelcome() {
+  var ov = document.getElementById("welcomeOverlay");
+  if (ov) ov.style.display = "none";
+}
+
+function welcomeGoTo(tab) {
+  closeWelcome();
+  nav(tab);
 }
 
 async function loadAll() {
@@ -967,8 +1032,96 @@ async function loadAll() {
     loadMessages(),
     loadInvoices(),
     loadApprovals(),
+    loadNotifs(),
   ]);
 }
+
+// ── NOTIFICATIONS ──
+var _notifs = [];
+
+function notifTimeAgo(ts) {
+  if (!ts) return "";
+  var d = new Date(ts), now = new Date(), s = Math.floor((now - d)/1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s/60) + "m ago";
+  if (s < 86400) return Math.floor(s/3600) + "h ago";
+  if (s < 604800) return Math.floor(s/86400) + "d ago";
+  return d.toLocaleDateString();
+}
+
+async function loadNotifs() {
+  if (!CLIENT) return;
+  var { data } = await sb.from("notifications")
+    .select("*").eq("client_id", CLIENT.id)
+    .order("created_at", {ascending:false}).limit(30);
+  _notifs = data || [];
+  renderNotifs();
+}
+
+function renderNotifs() {
+  var unread = _notifs.filter(function(n){ return !n.is_read; }).length;
+  var badge = document.getElementById("notifBadge");
+  if (badge) {
+    if (unread > 0) { badge.style.display = "block"; badge.textContent = unread > 9 ? "9+" : String(unread); }
+    else { badge.style.display = "none"; }
+  }
+  var list = document.getElementById("notifList");
+  if (!list) return;
+  if (_notifs.length === 0) {
+    list.innerHTML = '<p style="font-size:12px;color:var(--muted);padding:24px 18px;text-align:center;">You\'re all caught up. New updates will show here.</p>';
+    return;
+  }
+  var icon = {file:"📁",approval:"✅",invoice:"💳",message:"💬",timeline:"📋",welcome:"👋"};
+  list.innerHTML = _notifs.map(function(n){
+    var bg = n.is_read ? "#fff" : "rgba(91,63,160,0.05)";
+    var jump = n.link_tab ? 'onclick="openNotif(\''+n.id+'\',\''+n.link_tab+'\')"' : 'onclick="markNotifRead(\''+n.id+'\')"';
+    return '<div '+jump+' style="display:flex;gap:10px;padding:11px 15px;border-bottom:1px solid rgba(91,63,160,0.06);cursor:pointer;background:'+bg+';">'+
+      '<div style="font-size:16px;line-height:1.2;">'+(icon[n.type]||"🔔")+'</div>'+
+      '<div style="min-width:0;flex:1;">'+
+        '<div style="font-size:12.5px;font-weight:600;color:var(--ink);">'+(n.title||"").replace(/</g,"&lt;")+'</div>'+
+        (n.body ? '<div style="font-size:11.5px;color:var(--muted);margin-top:2px;white-space:pre-wrap;">'+String(n.body).replace(/</g,"&lt;")+'</div>' : '')+
+        '<div style="font-size:10.5px;color:var(--muted);margin-top:4px;">'+notifTimeAgo(n.created_at)+'</div>'+
+      '</div>'+
+      (n.is_read ? '' : '<div style="width:8px;height:8px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0;"></div>')+
+    '</div>';
+  }).join("");
+}
+
+function toggleNotifs() {
+  var p = document.getElementById("notifPanel");
+  if (!p) return;
+  p.style.display = (p.style.display === "none" || !p.style.display) ? "block" : "none";
+}
+
+async function markNotifRead(id) {
+  await sb.from("notifications").update({is_read:true}).eq("id", id);
+  var n = _notifs.find(function(x){ return x.id === id; });
+  if (n) n.is_read = true;
+  renderNotifs();
+}
+
+async function openNotif(id, tab) {
+  await markNotifRead(id);
+  document.getElementById("notifPanel").style.display = "none";
+  if (tab) nav(tab);
+}
+
+async function markAllNotifsRead() {
+  if (!CLIENT) return;
+  await sb.from("notifications").update({is_read:true}).eq("client_id", CLIENT.id).eq("is_read", false);
+  _notifs.forEach(function(n){ n.is_read = true; });
+  renderNotifs();
+}
+
+// Close the notif panel when clicking outside it
+document.addEventListener("click", function(e){
+  var panel = document.getElementById("notifPanel");
+  var btn = document.getElementById("notifBellBtn");
+  if (!panel || !btn) return;
+  if (panel.style.display === "block" && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.style.display = "none";
+  }
+});
 
 // ── TIMELINE ──
 async function loadTimeline() {
@@ -1035,10 +1188,68 @@ function renderFiles() {
         <span class="file-status ${f.status}">${cap(f.status)}</span>
         <div class="file-actions">
           ${f.url ? `<a href="${f.url}" target="_blank" class="file-btn" download rel="noopener">Download</a>` : ""}
+          <button class="file-btn" onclick="toggleFileComments('${f.id}')">💬 Comments</button>
           ${f.from_who === "eric" && f.status === "pending" ? `<button class="file-btn" onclick="approveFile('${f.id}')">Approve ✓</button>` : ""}
           ${f.from_who === "client" ? `<button class="file-btn danger" onclick="deleteFile('${f.id}','${f.storage_path}')">Delete</button>` : ""}
         </div>
+        <div class="file-comments" id="fc-${f.id}" style="display:none;flex-basis:100%;width:100%;margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,63,160,0.08);">
+          <div id="fc-list-${f.id}" style="margin-bottom:10px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input id="fc-input-${f.id}" type="text" placeholder="Add a comment about this file..." style="flex:1;padding:9px 12px;border:1px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter')postFileComment('${f.id}')">
+            <button class="file-btn" onclick="postFileComment('${f.id}')">Send</button>
+          </div>
+        </div>
       </div>`).join("");
+}
+
+// ── FILE COMMENTS ──
+async function toggleFileComments(fileId) {
+  var box = document.getElementById("fc-" + fileId);
+  if (!box) return;
+  if (box.style.display === "none" || !box.style.display) {
+    box.style.display = "block";
+    await loadFileComments(fileId);
+  } else {
+    box.style.display = "none";
+  }
+}
+
+async function loadFileComments(fileId) {
+  var listEl = document.getElementById("fc-list-" + fileId);
+  if (!listEl) return;
+  var { data } = await sb.from("file_comments")
+    .select("*").eq("file_id", fileId).order("created_at", {ascending:true});
+  var rows = data || [];
+  if (rows.length === 0) {
+    listEl.innerHTML = '<p style="font-size:12px;color:var(--muted);">No comments yet. Start the conversation about this file.</p>';
+    return;
+  }
+  listEl.innerHTML = rows.map(function(c){
+    var mine = c.author === "client";
+    var who = mine ? (CLIENT.name || "You") : "Eric";
+    var bg = mine ? "rgba(91,63,160,0.06)" : "#f4f2f8";
+    return '<div style="background:'+bg+';border-radius:9px;padding:9px 12px;margin-bottom:7px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">'+
+        '<span style="font-size:12px;font-weight:700;color:var(--ink);">'+who+'</span>'+
+        '<span style="font-size:10.5px;color:var(--muted);">'+notifTimeAgo(c.created_at)+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;color:#33333a;white-space:pre-wrap;">'+String(c.comment).replace(/</g,"&lt;")+'</div>'+
+    '</div>';
+  }).join("");
+}
+
+async function postFileComment(fileId) {
+  var input = document.getElementById("fc-input-" + fileId);
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  await sb.from("file_comments").insert({
+    file_id: fileId, client_id: CLIENT.id, author: "client", comment: text
+  });
+  try { await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "file_comment", detail: "Commented on a file" }); } catch(e){}
+  await sendNotification("client_message", "New comment on a file: " + text.slice(0,80));
+  await loadFileComments(fileId);
 }
 
 function filterFiles(filter, btn) {
@@ -1430,6 +1641,18 @@ async function submitFeedback() {
     client_id: CLIENT.id, from_who: "client",
     sender_name: CLIENT.name, text: fullText
   });
+
+  // Save to client_requests so it's trackable (open/in-progress/closed) on the admin side
+  try {
+    await sb.from("client_requests").insert({
+      client_id: CLIENT.id,
+      request_type: "change",
+      subject: subject + " (" + fbPriority + " priority)",
+      details: text,
+      status: "open"
+    });
+    await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "requested", detail: "Submitted feedback: " + subject });
+  } catch(e){}
   
   document.getElementById("fb-subject").value = "";
   document.getElementById("fb-text").value = "";

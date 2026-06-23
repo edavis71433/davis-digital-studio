@@ -256,6 +256,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="ch"><div class="ct">💬 Message Thread</div></div>
           <div class="cb">
             <div class="thread" id="msgThread"><p style="font-size:13px;color:var(--muted);text-align:center;padding:20px;">Select a client to load messages.</p></div>
+            <div id="tmplRow" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;"></div>
             <div class="fg"><textarea aria-label="Type your message..." class="fi" id="msgText" rows="3" placeholder="Type your message..."></textarea></div>
             <button class="sbtn" onclick="sendMsg()">Send + notify client →</button>
           </div>
@@ -674,6 +675,7 @@ function go(page) {
   if (page !== "overview" && page !== "leads") populateSelects(page);
   if (page === "leads") loadLeads();
   if (page === "hub") loadHub();
+  if (page === "messages") loadTemplates();
 }
 
 // ── LEADS ──
@@ -1047,10 +1049,14 @@ async function openHubClient(id) {
     api("invoices?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
     api("approvals?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
     api("timeline?select=*&client_id=eq."+c.id+"&order=sort_order"),
-    api("intake_forms?select=*&client_id=eq."+c.id+"&order=submitted_at.desc")
+    api("intake_forms?select=*&client_id=eq."+c.id+"&order=submitted_at.desc"),
+    api("client_requests?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("activity_log?select=*&client_id=eq."+c.id+"&order=created_at.desc&limit=20")
   ]);
   var msgs = res[0]||[], files = res[1]||[], invs = res[2]||[], apprs = res[3]||[], tl = res[4]||[];
   var intake = (res[5]||[])[0] || null;
+  var requests = res[6]||[];
+  var activity = res[7]||[];
   var leads = hubLeads.filter(function(l){
     return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
   });
@@ -1183,6 +1189,53 @@ async function openHubClient(id) {
   }
   html += '</div>';
 
+  // ── CLIENT REQUESTS ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🙋 Client Requests</div>';
+  if (requests.length === 0) {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No requests yet.</p>';
+  } else {
+    html += requests.map(function(r){
+      var st = r.status||"open";
+      var col = st==="closed" ? "#16a34a" : (st==="in_progress" ? "#d97706" : "#5b3fa0");
+      var next = st==="open" ? "in_progress" : (st==="in_progress" ? "closed" : "open");
+      var nextLabel = st==="open" ? "Start" : (st==="in_progress" ? "Mark done" : "Reopen");
+      return '<div style="padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">'+
+          '<div style="font-size:13px;font-weight:600;min-width:0;">'+(r.subject||"").replace(/</g,"&lt;")+'</div>'+
+          '<span style="font-size:10.5px;font-weight:700;color:'+col+';white-space:nowrap;">'+cap(st.replace("_"," "))+'</span>'+
+        '</div>'+
+        (r.details ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;white-space:pre-wrap;">'+String(r.details).replace(/</g,"&lt;")+'</div>' : '')+
+        '<button onclick="cycleRequest(\''+r.id+'\',\''+next+'\',\''+c.id+'\')" style="margin-top:7px;font-size:11px;padding:4px 11px;border-radius:8px;border:1px solid rgba(91,63,160,0.18);background:transparent;color:var(--p);cursor:pointer;">'+nextLabel+'</button>'+
+      '</div>';
+    }).join("");
+  }
+  html += '</div>';
+
+  // ── ACTIVITY LOG ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📊 Recent Activity</div>';
+  if (activity.length === 0) {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No recorded activity yet.</p>';
+  } else {
+    var actIcon = {logged_in:"🔓",viewed_file:"👁️",approved:"✅",requested_changes:"✏️",paid:"💳",submitted_intake:"📝",requested:"🙋",file_comment:"💬"};
+    var actLabel = {logged_in:"Logged in",viewed_file:"Viewed a file",approved:"Approved a deliverable",requested_changes:"Requested changes",paid:"Paid an invoice",submitted_intake:"Submitted project brief",requested:"Submitted a request",file_comment:"Commented on a file"};
+    html += '<div style="display:flex;flex-direction:column;gap:9px;">';
+    html += activity.map(function(a){
+      var ic = actIcon[a.action] || "•";
+      var lbl = actLabel[a.action] || cap((a.action||"").replace(/_/g," "));
+      return '<div style="display:flex;gap:10px;align-items:flex-start;">'+
+        '<div style="font-size:14px;line-height:1.3;">'+ic+'</div>'+
+        '<div style="min-width:0;flex:1;">'+
+          '<div style="font-size:12.5px;color:#33333a;">'+lbl+(a.detail && a.detail !== lbl ? ' <span style="color:var(--muted);">— '+String(a.detail).replace(/</g,"&lt;").slice(0,80)+'</span>' : '')+'</div>'+
+          '<div style="font-size:10.5px;color:var(--muted);">'+fmtDate(a.created_at)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    html += '</div>';
+  }
+  html += '</div>';
+
   detail.innerHTML = html;
 }
 
@@ -1269,12 +1322,57 @@ async function loadMessages(client) {
   thread.scrollTop = thread.scrollHeight;
 }
 
+async // ── MESSAGE TEMPLATES ──
+var _templates = [];
+
+async function loadTemplates() {
+  var data = await api("message_templates?select=*&order=created_at.asc");
+  _templates = data || [];
+  renderTemplates();
+}
+
+function renderTemplates() {
+  var row = document.getElementById("tmplRow");
+  if (!row) return;
+  var chips = _templates.map(function(t){
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(91,63,160,0.08);border-radius:100px;padding:4px 6px 4px 11px;font-size:11.5px;">'+
+      '<button onclick="insertTemplate(\''+t.id+'\')" style="background:none;border:none;color:var(--p);font-weight:600;cursor:pointer;font-size:11.5px;">'+(t.label||"").replace(/</g,"&lt;")+'</button>'+
+      '<button onclick="deleteTemplate(\''+t.id+'\')" title="Delete template" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;">×</button>'+
+    '</span>';
+  }).join("");
+  row.innerHTML = chips + '<button onclick="saveTemplate()" style="background:none;border:1px dashed rgba(91,63,160,0.3);border-radius:100px;padding:4px 12px;font-size:11.5px;color:var(--p);cursor:pointer;">+ Save current as template</button>';
+}
+
+function insertTemplate(id) {
+  var t = _templates.find(function(x){ return x.id === id; });
+  if (!t) return;
+  var box = document.getElementById("msgText");
+  box.value = (box.value ? box.value + "\n" : "") + t.body;
+  box.focus();
+}
+
+async function saveTemplate() {
+  var body = document.getElementById("msgText").value.trim();
+  if (!body) { toast("Type a message first, then save it as a template."); return; }
+  var label = prompt("Name this template (e.g. 'Weekly update', 'Invoice reminder'):");
+  if (!label) return;
+  await api("message_templates","POST",{label:label.trim(), body:body});
+  toast("✓ Template saved");
+  await loadTemplates();
+}
+
+async function deleteTemplate(id) {
+  await api("message_templates?id=eq."+id, "DELETE");
+  await loadTemplates();
+}
+
 async function sendMsg() {
   var ctx = selectedClients["messages"];
   if (!ctx) { toast("Select a client first."); return; }
   var text = document.getElementById("msgText").value.trim();
   if (!text) { toast("Enter a message."); return; }
   await api("messages", "POST", {client_id:ctx.id, from_who:"eric", sender_name:"Eric", text:text});
+  try { await api("notifications","POST",{client_id:ctx.id,type:"message",title:"New message from Eric",body:text.slice(0,90),link_tab:"messages"}); } catch(e){}
   await notify("eric_message", text, "", ctx);
   document.getElementById("msgText").value = "";
   toast("✓ Message sent + client notified");
@@ -1309,6 +1407,7 @@ async function uploadFiles(files) {
     var pubUrl = SB_URL+"/storage/v1/object/public/client-files/"+path;
     var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
     await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:file.name.split(".").pop().toUpperCase(),from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
+    try { await api("notifications","POST",{client_id:ctx.id,type:"file",title:"New file: "+file.name,body:"Eric uploaded a new file for you to review.",link_tab:"files"}); } catch(e){}
     await notify("eric_file",file.name+" ("+size+")","",ctx);
     toast("✓ "+file.name+" uploaded");
   }
@@ -1316,6 +1415,12 @@ async function uploadFiles(files) {
 }
 
 // ── APPROVALS ──
+async function cycleRequest(id, next, clientId) {
+  await api("client_requests?id=eq."+id, "PATCH", {status: next});
+  toast("✓ Request updated");
+  openHubClient(clientId);
+}
+
 async function addApproval() {
   var ctx = selectedClients["approvals"];
   if (!ctx) { toast("Select a client first."); return; }
@@ -1444,6 +1549,7 @@ async function saveInvoice() {
     toast("✓ Invoice updated");
   } else {
     await api("invoices","POST",payload);
+    try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
     await notify("invoice",payload.amount,payload.name,ctx);
     toast("✓ Invoice added + client notified");
   }
