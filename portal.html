@@ -600,7 +600,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="card-body">
             <div class="msg-thread" id="msgThread"></div>
             <div class="msg-compose">
-              <textarea class="msg-input" id="msgInput" placeholder="Message Eric..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+              <textarea aria-label="Message Eric..." class="msg-input" id="msgInput" placeholder="Message Eric..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
               <button class="msg-send" onclick="sendMsg()">Send</button>
             </div>
           </div>
@@ -675,7 +675,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card" id="contractAckSection">
           <div class="card-body">
             <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;">
-              <input type="checkbox" id="contractCheck" style="margin-top:3px;accent-color:var(--p);">
+              <input aria-label="Contractcheck" type="checkbox" id="contractCheck" style="margin-top:3px;accent-color:var(--p);">
               <span style="font-size:14px;color:var(--ink);line-height:1.6;">I, <strong id="contract-client-name"></strong>, have read, understand, and agree to all 15 sections of this Project Agreement. I understand this constitutes a binding electronic signature and that work will begin after the deposit is received.</span>
             </label>
             <button onclick="acknowledgeContract()" style="margin-top:16px;background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Sign & Acknowledge →</button>
@@ -702,43 +702,43 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">One-line tagline for your business</label>
-              <input id="b-tagline" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. A wine bar where jazz and food meet in Pasadena">
+              <input aria-label="A wine bar where jazz and food meet in Pasadena" id="b-tagline" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. A wine bar where jazz and food meet in Pasadena">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Primary goal for this project *</label>
-              <textarea id="b-goal" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. Get more reservations and private event bookings from Google"></textarea>
+              <textarea aria-label="Get more reservations and private event bookings from Google" id="b-goal" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. Get more reservations and private event bookings from Google"></textarea>
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Who is your ideal customer?</label>
-              <input id="b-customer" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Adults 30–55, date nights, corporate events">
+              <input aria-label="Adults 30–55, date nights, corporate events" id="b-customer" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Adults 30–55, date nights, corporate events">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Competitors or sites you admire</label>
-              <input id="b-competitors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="URLs or names">
+              <input aria-label="URLs or names" id="b-competitors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="URLs or names">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Design inspiration or vibe</label>
-              <input id="b-inspiration" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Warm, sophisticated, modern wine bar feel">
+              <input aria-label="Warm, sophisticated, modern wine bar feel" id="b-inspiration" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Warm, sophisticated, modern wine bar feel">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Colors or brand guidelines (if any)</label>
-              <input id="b-colors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Deep burgundy, gold, cream">
+              <input aria-label="Deep burgundy, gold, cream" id="b-colors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Deep burgundy, gold, cream">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Main call to action for visitors</label>
-              <input id="b-cta" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Make a reservation, Book a private event">
+              <input aria-label="Make a reservation, Book a private event" id="b-cta" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Make a reservation, Book a private event">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Things you don't want on the site</label>
-              <input id="b-donts" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. No stock photos, no overly corporate feel">
+              <input aria-label="No stock photos, no overly corporate feel" id="b-donts" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. No stock photos, no overly corporate feel">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Existing platform logins to share (optional)</label>
-              <textarea id="b-logins" rows="2" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. WordPress login, Google Business, Yelp — these stay private in the portal"></textarea>
+              <textarea aria-label="WordPress login, Google Business, Yelp — these stay priva…" id="b-logins" rows="2" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. WordPress login, Google Business, Yelp — these stay private in the portal"></textarea>
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Anything else I should know?</label>
-              <textarea id="b-other" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Open field — deadlines, special requests, context about your business"></textarea>
+              <textarea aria-label="Open field — deadlines, special requests, context about y…" id="b-other" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Open field — deadlines, special requests, context about your business"></textarea>
             </div>
             <button onclick="submitBrief()" style="background:var(--p);color:#fff;border:none;padding:14px 28px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;align-self:flex-start;">Submit brief →</button>
           </div>
@@ -760,7 +760,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="card-body">
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">What's this about?</label>
-              <input id="fb-subject" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Homepage design, color choice, navigation">
+              <input aria-label="Homepage design, color choice, navigation" id="fb-subject" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Homepage design, color choice, navigation">
             </div>
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Priority</label>
@@ -772,7 +772,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
             </div>
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Your feedback</label>
-              <textarea id="fb-text" rows="5" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Be as specific as possible — what did you like, what would you change?"></textarea>
+              <textarea aria-label="Be as specific as possible — what did you like, what woul…" id="fb-text" rows="5" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Be as specific as possible — what did you like, what would you change?"></textarea>
             </div>
             <button onclick="submitFeedback()" style="background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Send feedback →</button>
           </div>
@@ -829,7 +829,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   <div style="background:#fff;border-radius:20px;padding:32px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
     <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:8px;">Request a revision</h3>
     <p style="font-size:13px;color:#7a6d8e;margin-bottom:16px;" id="revisionTitle"></p>
-    <textarea id="revisionNote" rows="4" style="width:100%;padding:12px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;margin-bottom:16px;" placeholder="What would you like changed? Be as specific as possible."></textarea>
+    <textarea aria-label="What would you like changed? Be as specific as possible." id="revisionNote" rows="4" style="width:100%;padding:12px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;margin-bottom:16px;" placeholder="What would you like changed? Be as specific as possible."></textarea>
     <div style="display:flex;gap:10px;">
       <button onclick="submitRevision()" style="flex:1;background:#5b3fa0;color:#fff;border:none;padding:12px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Send revision request</button>
       <button onclick="closeRevisionModal()" style="background:transparent;color:#7a6d8e;border:1.5px solid rgba(91,63,160,0.2);padding:12px 20px;border-radius:100px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
@@ -1589,7 +1589,7 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
     <p id="svcModalDesc"></p>
     <div class="fg">
       <label class="form-label">Any additional details or questions? (optional)</label>
-      <textarea class="form-input" id="svcModalNote" rows="3" placeholder="e.g. We need it done by August, our budget is around $3k..."></textarea>
+      <textarea aria-label="We need it done by August, our budget is around $3k..." class="form-input" id="svcModalNote" rows="3" placeholder="e.g. We need it done by August, our budget is around $3k..."></textarea>
     </div>
     <div class="svc-modal-btns">
       <button class="svc-cancel-btn" onclick="closeSvcModal()">Cancel</button>

@@ -155,7 +155,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   <div class="login-card">
     <div class="login-logo">Davis<span>Digital</span> Studio</div>
     <div class="login-sub">ADMIN PANEL · ERIC ONLY</div>
-    <input class="login-input" id="ap" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <input aria-label="Admin password" class="login-input" id="ap" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Sign in →</button>
     <div class="login-err" id="le">Incorrect password.</div>
   </div>
@@ -212,7 +212,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">Everyone you work with, in one place. Click a client to see their full record: messages, files, invoices, approvals, timeline, and any tools they have run on the site.</div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center;">
-          <input id="hubSearch" oninput="renderHub()" placeholder="Search clients by name, project, or email..." style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
+          <input aria-label="Search clients by name, project, or email..." id="hubSearch" oninput="renderHub()" placeholder="Search clients by name, project, or email..." style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
           <button class="sbtn" onclick="hubFilter='all';renderHub()" id="hf-all" style="background:var(--p);color:#fff;font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">All</button>
           <button class="sbtn" onclick="hubFilter='active';renderHub()" id="hf-active" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Active</button>
           <button class="sbtn" onclick="hubFilter='inactive';renderHub()" id="hf-inactive" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Inactive</button>
@@ -230,9 +230,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
           <button class="sbtn" onclick="filterLeads('all')" id="lf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
           <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
-          <button class="sbtn" onclick="filterLeads('speed_test')" id="lf-speed_test" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Speed Test</button>
-          <button class="sbtn" onclick="filterLeads('local_visibility')" id="lf-local_visibility" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Local Visibility</button>
-          <button class="sbtn" onclick="filterLeads('pricing_estimator')" id="lf-pricing_estimator" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Pricing Estimate</button>
+          <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
+          <button class="sbtn" onclick="filterLeads('contact')" id="lf-contact" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Contact</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
         </div>
         <div id="leadsList"></div>
@@ -245,7 +244,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">Message a client — they get an email notification instantly.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
-          <select class="client-select" id="sel-messages" onchange="onClientChange(this.value,'messages')">
+          <select aria-label="Sel messages" class="client-select" id="sel-messages" onchange="onClientChange(this.value,'messages')">
             <option value="">— Choose a client —</option>
           </select>
         </div>
@@ -257,7 +256,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="ch"><div class="ct">💬 Message Thread</div></div>
           <div class="cb">
             <div class="thread" id="msgThread"><p style="font-size:13px;color:var(--muted);text-align:center;padding:20px;">Select a client to load messages.</p></div>
-            <div class="fg"><textarea class="fi" id="msgText" rows="3" placeholder="Type your message..."></textarea></div>
+            <div class="fg"><textarea aria-label="Type your message..." class="fi" id="msgText" rows="3" placeholder="Type your message..."></textarea></div>
             <button class="sbtn" onclick="sendMsg()">Send + notify client →</button>
           </div>
         </div>
@@ -269,7 +268,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">Upload files to a client's portal — they get an email notification.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
-          <select class="client-select" id="sel-files" onchange="onClientChange(this.value,'files')">
+          <select aria-label="Sel files" class="client-select" id="sel-files" onchange="onClientChange(this.value,'files')">
             <option value="">— Choose a client —</option>
           </select>
         </div>
@@ -292,7 +291,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">Add a deliverable for the client to review — they get an email notification.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
-          <select class="client-select" id="sel-approvals" onchange="onClientChange(this.value,'approvals')">
+          <select aria-label="Sel approvals" class="client-select" id="sel-approvals" onchange="onClientChange(this.value,'approvals')">
             <option value="">— Choose a client —</option>
           </select>
         </div>
@@ -303,8 +302,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card">
           <div class="ch"><div class="ct">✅ New Approval Item</div></div>
           <div class="cb">
-            <div class="fg"><label class="fl">Deliverable title</label><input class="fi" id="apprTitle" placeholder="e.g. Homepage Design — Round 1"></div>
-            <div class="fg"><label class="fl">Description / instructions</label><textarea class="fi" id="apprDesc" rows="3" placeholder="e.g. Please review the homepage design and approve or leave revision notes."></textarea></div>
+            <div class="fg"><label class="fl">Deliverable title</label><input aria-label="Homepage Design — Round 1" class="fi" id="apprTitle" placeholder="e.g. Homepage Design — Round 1"></div>
+            <div class="fg"><label class="fl">Description / instructions</label><textarea aria-label="Please review the homepage design and approve or leave re…" class="fi" id="apprDesc" rows="3" placeholder="e.g. Please review the homepage design and approve or leave revision notes."></textarea></div>
             <button class="sbtn" onclick="addApproval()">Add approval + notify client →</button>
           </div>
         </div>
@@ -316,7 +315,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">Update project phase statuses and progress percentage.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
-          <select class="client-select" id="sel-timeline" onchange="onClientChange(this.value,'timeline')">
+          <select aria-label="Sel timeline" class="client-select" id="sel-timeline" onchange="onClientChange(this.value,'timeline')">
             <option value="">— Choose a client —</option>
           </select>
         </div>
@@ -327,7 +326,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card"><div class="ch"><div class="ct">📋 Phase Status</div></div><div class="cb" id="tlBody"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
         <div class="card" style="margin-top:0;"><div class="ch"><div class="ct">📈 Progress %</div></div>
           <div class="cb" style="display:flex;gap:12px;align-items:center;">
-            <input class="fi" type="number" id="progressVal" min="0" max="100" placeholder="e.g. 50" style="max-width:120px;">
+            <input aria-label="50" class="fi" type="number" id="progressVal" min="0" max="100" placeholder="e.g. 50" style="max-width:120px;">
             <button class="sbtn" onclick="saveProgress()">Save</button>
           </div>
         </div>
@@ -339,7 +338,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="ps">View, edit, and add invoices. Clients get an email notification when you add one.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
-          <select class="client-select" id="sel-invoices" onchange="onClientChange(this.value,'invoices')">
+          <select aria-label="Sel invoices" class="client-select" id="sel-invoices" onchange="onClientChange(this.value,'invoices')">
             <option value="">— Choose a client —</option>
           </select>
         </div>
@@ -353,13 +352,13 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="cb">
             <input type="hidden" id="editingInvId" value="">
             <div class="two-col">
-              <div class="fg"><label class="fl">Invoice name</label><input class="fi" id="invName" placeholder="e.g. Deposit — 50%"></div>
-              <div class="fg"><label class="fl">Amount</label><input class="fi" id="invAmount" placeholder="e.g. $1,250"></div>
-              <div class="fg"><label class="fl">Description</label><input class="fi" id="invDesc" placeholder="e.g. Website Redesign + SEO · Phase 1"></div>
-              <div class="fg"><label class="fl">Due date</label><input class="fi" id="invDue" placeholder="e.g. Due Jun 30, 2026"></div>
-              <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link (optional)</label><input class="fi" id="invStripe" placeholder="https://buy.stripe.com/..."></div>
+              <div class="fg"><label class="fl">Invoice name</label><input aria-label="Deposit — 50%" class="fi" id="invName" placeholder="e.g. Deposit — 50%"></div>
+              <div class="fg"><label class="fl">Amount</label><input aria-label="$1,250" class="fi" id="invAmount" placeholder="e.g. $1,250"></div>
+              <div class="fg"><label class="fl">Description</label><input aria-label="Website Redesign + SEO · Phase 1" class="fi" id="invDesc" placeholder="e.g. Website Redesign + SEO · Phase 1"></div>
+              <div class="fg"><label class="fl">Due date</label><input aria-label="Due Jun 30, 2026" class="fi" id="invDue" placeholder="e.g. Due Jun 30, 2026"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link (optional)</label><input aria-label="https://buy.stripe.com/..." class="fi" id="invStripe" placeholder="https://buy.stripe.com/..."></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Status</label>
-                <select class="fi" id="invStatus">
+                <select aria-label="Invstatus" class="fi" id="invStatus">
                   <option value="pending">Pending — show Pay Now button</option>
                   <option value="draft">Draft — not yet due</option>
                   <option value="paid">Paid</option>
@@ -381,8 +380,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card">
           <div class="ch"><div class="ct">📃 Contract Template</div></div>
           <div class="cb">
-            <div class="fg"><label class="fl">Contract title</label><input class="fi" id="ctTitle" value="Davis Digital Studio — Project Agreement"></div>
-            <div class="fg"><label class="fl">Contract body</label><textarea class="fi" id="ctBody" rows="14" style="font-size:12px;line-height:1.7;"></textarea></div>
+            <div class="fg"><label class="fl">Contract title</label><input aria-label="Cttitle" class="fi" id="ctTitle" value="Davis Digital Studio — Project Agreement"></div>
+            <div class="fg"><label class="fl">Contract body</label><textarea aria-label="Ctbody" class="fi" id="ctBody" rows="14" style="font-size:12px;line-height:1.7;"></textarea></div>
             <div style="display:flex;gap:10px;margin-top:6px;">
               <button class="sbtn" onclick="saveContract()">Save template</button>
               <button class="sbtn sec" onclick="resetContract()">Reset to default</button>
@@ -395,7 +394,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
             <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Send the contract to a client's Agreement tab — they get an email notification.</p>
             <div class="client-select-wrap" style="margin-bottom:14px;">
               <label>Select client</label>
-              <select class="client-select" id="sel-contracts" onchange="onClientChange(this.value,'contracts')">
+              <select aria-label="Sel contracts" class="client-select" id="sel-contracts" onchange="onClientChange(this.value,'contracts')">
                 <option value="">— Choose a client —</option>
               </select>
             </div>
@@ -412,7 +411,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
             <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Upload any PDF or doc directly to a client's Files section.</p>
             <div class="client-select-wrap" style="margin-bottom:14px;">
               <label>Select client</label>
-              <select class="client-select" id="sel-docs" onchange="onClientChange(this.value,'docs')">
+              <select aria-label="Sel docs" class="client-select" id="sel-docs" onchange="onClientChange(this.value,'docs')">
                 <option value="">— Choose a client —</option>
               </select>
             </div>
@@ -433,11 +432,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="ch"><div class="ct">👤 New Client</div></div>
           <div class="cb">
             <div class="two-col">
-              <div class="fg"><label class="fl">Business name</label><input class="fi" id="nc-name" placeholder="e.g. Joe's Coffee Shop"></div>
-              <div class="fg"><label class="fl">Client login email</label><input class="fi" id="nc-cemail" type="email" placeholder="owner@business.com"></div>
+              <div class="fg"><label class="fl">Business name</label><input aria-label="Joe's Coffee Shop" class="fi" id="nc-name" placeholder="e.g. Joe's Coffee Shop"></div>
+              <div class="fg"><label class="fl">Client login email</label><input aria-label="owner@business.com" class="fi" id="nc-cemail" type="email" placeholder="owner@business.com"></div>
               
-              <div class="fg"><label class="fl">Portal password</label><input class="fi" id="nc-pass" placeholder="e.g. Coffee2026!"></div>
-              <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
+              <div class="fg"><label class="fl">Portal password</label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="e.g. Coffee2026!"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
               <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;">Client logs in with their email + password. Welcome email sent automatically.</div>
             </div>
             <button class="sbtn" onclick="createClient()" style="margin-top:6px;">Create client portal →</button>
@@ -458,12 +457,12 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <div class="ch"><div class="ct">📝 Quote Details</div></div>
           <div class="cb">
             <div class="two-col">
-              <div class="fg"><label class="fl">Client / Business Name</label><input class="fi" id="q-client" placeholder="e.g. Bacchus Kitchen"></div>
-              <div class="fg"><label class="fl">Client Email</label><input class="fi" id="q-email" type="email" placeholder="owner@business.com"></div>
-              <div class="fg"><label class="fl">Project Name</label><input class="fi" id="q-project" placeholder="e.g. Website Redesign + SEO Strategy"></div>
-              <div class="fg"><label class="fl">Quote Date</label><input class="fi" id="q-date" type="date"></div>
-              <div class="fg"><label class="fl">Quote Valid Until</label><input class="fi" id="q-expires" type="date"></div>
-              <div class="fg"><label class="fl">Estimated Delivery</label><input class="fi" id="q-delivery" placeholder="e.g. 45 business days from deposit"></div>
+              <div class="fg"><label class="fl">Client / Business Name</label><input aria-label="Bacchus Kitchen" class="fi" id="q-client" placeholder="e.g. Bacchus Kitchen"></div>
+              <div class="fg"><label class="fl">Client Email</label><input aria-label="owner@business.com" class="fi" id="q-email" type="email" placeholder="owner@business.com"></div>
+              <div class="fg"><label class="fl">Project Name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="q-project" placeholder="e.g. Website Redesign + SEO Strategy"></div>
+              <div class="fg"><label class="fl">Quote Date</label><input aria-label="Q date" class="fi" id="q-date" type="date"></div>
+              <div class="fg"><label class="fl">Quote Valid Until</label><input aria-label="Q expires" class="fi" id="q-expires" type="date"></div>
+              <div class="fg"><label class="fl">Estimated Delivery</label><input aria-label="45 business days from deposit" class="fi" id="q-delivery" placeholder="e.g. 45 business days from deposit"></div>
             </div>
           </div>
         </div>
@@ -477,7 +476,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card" style="margin-top:0;">
           <div class="ch"><div class="ct">📝 Notes</div></div>
           <div class="cb">
-            <textarea class="fi" id="q-notes" rows="4" placeholder="e.g. 50% deposit required to begin. Remaining balance due at launch. Includes 2 rounds of revisions per deliverable."></textarea>
+            <textarea aria-label="50% deposit required to begin. Remaining balance due at l…" class="fi" id="q-notes" rows="4" placeholder="e.g. 50% deposit required to begin. Remaining balance due at launch. Includes 2 rounds of revisions per deliverable."></textarea>
           </div>
         </div>
         <div class="card" style="margin-top:0;">
@@ -1569,9 +1568,9 @@ function renderQuoteLines() {
     ? "<p style='font-size:13px;color:var(--muted);'>No line items yet. Click + Add line item below.</p>"
     : quoteLines.map(l => `
       <div style="display:grid;grid-template-columns:1fr 80px 100px 36px;gap:8px;align-items:center;">
-        <input class="fi" placeholder="Description (e.g. Website Redesign)" value="${l.desc}" onchange="updateLine(${l.id},'desc',this.value)" style="margin:0;">
-        <input class="fi" placeholder="Qty" type="number" value="${l.qty}" onchange="updateLine(${l.id},'qty',this.value)" style="margin:0;text-align:center;">
-        <input class="fi" placeholder="$ Rate" value="${l.rate}" onchange="updateLine(${l.id},'rate',this.value)" style="margin:0;text-align:right;">
+        <input aria-label="Description (e.g. Website Redesign)" class="fi" placeholder="Description (e.g. Website Redesign)" value="${l.desc}" onchange="updateLine(${l.id},'desc',this.value)" style="margin:0;">
+        <input aria-label="Qty" class="fi" placeholder="Qty" type="number" value="${l.qty}" onchange="updateLine(${l.id},'qty',this.value)" style="margin:0;text-align:center;">
+        <input aria-label="$ Rate" class="fi" placeholder="$ Rate" value="${l.rate}" onchange="updateLine(${l.id},'rate',this.value)" style="margin:0;text-align:right;">
         <button onclick="removeQuoteLine(${l.id})" style="background:none;border:1.5px solid rgba(91,63,160,0.2);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:14px;color:var(--muted);">✕</button>
       </div>`).join("");
 }
