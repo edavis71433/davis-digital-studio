@@ -1234,10 +1234,11 @@ async function loadApprovals() {
 }
 
 async function approve(id) {
-  await sb.from("approvals").update({status:"approved"}).eq("id", id);
+  await sb.from("approvals").update({status:"approved", responded_at: new Date().toISOString()}).eq("id", id);
+  try { await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "approved", detail: "Approved a deliverable" }); } catch(e){}
   showToast("✓ Approved! Eric has been notified.");
   await loadApprovals();
-  await sendNotification("client_message", "Deliverable approved");
+  await sendNotification("approval_action", "Deliverable approved", "", {action: "approved", clientId: CLIENT.id});
 }
 
 var _revisionId = null;
@@ -1255,10 +1256,11 @@ async function submitRevision() {
   var note = document.getElementById("revisionNote").value.trim();
   if (!note) { showToast("Please describe what you'd like changed."); return; }
   closeRevisionModal();
-  await sb.from("approvals").update({description: "Revision requested: " + note}).eq("id", _revisionId);
+  await sb.from("approvals").update({status: "changes_requested", client_feedback: note, responded_at: new Date().toISOString()}).eq("id", _revisionId);
+  try { await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "requested_changes", detail: "Requested changes: " + note.slice(0,120) }); } catch(e){}
   showToast("Revision request sent to Eric.");
   await loadApprovals();
-  await sendNotification("approval_action", _revisionTitleText, "", {action: "revision", note: note});
+  await sendNotification("approval_action", _revisionTitleText, "", {action: "revision", note: note, clientId: CLIENT.id});
 }
 
 function closeRevisionModal() {

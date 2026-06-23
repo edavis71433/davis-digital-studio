@@ -1146,7 +1146,11 @@ async function openHubClient(id) {
   if (apprs.length === 0) { html += empty("No approvals yet."); }
   else {
     html += apprs.map(function(a){
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+(a.title||"")+'</div><span style="font-size:11px;color:var(--muted);">'+cap(a.status||"pending")+'</span></div>';
+      var st = a.status||"pending";
+      var col = st==="approved" ? "#16a34a" : (st==="changes_requested" ? "#d97706" : "var(--muted)");
+      var label = st==="changes_requested" ? "Changes requested" : cap(st);
+      var fb = (st==="changes_requested" && a.client_feedback) ? '<div style="font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;white-space:pre-wrap;">"'+String(a.client_feedback).replace(/</g,"&lt;")+'"</div>' : "";
+      return '<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:13px;font-weight:600;">'+(a.title||"")+'</div><span style="font-size:11px;font-weight:600;color:'+col+';">'+label+'</span></div>'+fb+'</div>';
     }).join("");
   }
 
@@ -1319,6 +1323,8 @@ async function addApproval() {
   var desc = document.getElementById("apprDesc").value.trim();
   if (!title) { toast("Enter a title."); return; }
   await api("approvals","POST",{client_id:ctx.id,title:title,description:desc,status:"pending"});
+  // In-portal notification for the client's notification bell
+  try { await api("notifications","POST",{client_id:ctx.id,type:"approval",title:"New item to review: "+title,body:desc||"",link_tab:"approvals"}); } catch(e){}
   await notify("approval_needed",desc,title,ctx);
   document.getElementById("apprTitle").value="";
   document.getElementById("apprDesc").value="";
