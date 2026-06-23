@@ -1499,24 +1499,21 @@ function unlockReport() {
     }
   }
 
-  var reportHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;">'+
+  var reportHtml = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f7f4fd;font-family:Helvetica Neue,Arial,sans-serif;">'+
     '<div style="max-width:560px;margin:0 auto;padding:32px 24px;">'+
-    '<a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:inline-block;margin-bottom:20px;background:#1e1338;padding:10px 18px;border-radius:10px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a>'+
-    '<div style="background:#1e1338;border-radius:16px;padding:28px;margin-bottom:20px;">'+
-    '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Your Free Site Report</div>'+
-    '<h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 6px;">'+(d.name||'')+'</h2>'+
-    '<p style="font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 18px;">'+(d.url||'')+' · '+(d.city||'')+'</p>'+
-    '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;"><div style="font-size:40px;font-weight:700;color:'+scoreColor+';line-height:1;">'+(d.overall||0)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Overall Score</div></div>'+
-    pillarRow+
-    (d.lcp?'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.4);">LCP: '+d.lcp+' &nbsp;·&nbsp; FCP: '+(d.fcp||'—')+' &nbsp;·&nbsp; CLS: '+(d.cls||'—')+' &nbsp;·&nbsp; TBT: '+(d.tbt||'—')+'</div>':'')+
-    '<div style="font-size:10px;color:rgba(255,255,255,0.25);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">All '+issues.length+' issues found</div>'+
+    '<p style="font-family:Georgia,serif;font-size:17px;color:#1a1523;margin:0 0 20px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</p>'+
+    '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">Hi'+(d.name?' '+d.name:'')+',</p>'+
+    '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">Thanks for running a review of your site. Here is what I found.</p>'+
+    '<div style="background:#fff;border:1px solid #ede8f7;border-radius:12px;padding:24px;margin-bottom:20px;">'+
+    '<p style="font-size:13px;color:#7a6d8e;margin:0 0 4px;">'+(d.url||'')+(d.city?' · '+d.city:'')+'</p>'+
+    '<div style="text-align:center;padding:14px 0;"><div style="font-size:40px;font-weight:700;color:'+scoreColor+';line-height:1;">'+(d.overall||0)+'<span style="font-size:18px;color:#b8aec9;">/100</span></div><div style="font-size:11px;color:#7a6d8e;letter-spacing:1px;text-transform:uppercase;margin-top:6px;">Overall score</div></div>'+
+    (d.lcp?'<p style="background:#f7f4fd;border-radius:8px;padding:10px 14px;margin:0 0 16px;font-size:12px;color:#7a6d8e;text-align:center;">LCP: '+d.lcp+' &nbsp;·&nbsp; FCP: '+(d.fcp||'—')+' &nbsp;·&nbsp; CLS: '+(d.cls||'—')+' &nbsp;·&nbsp; TBT: '+(d.tbt||'—')+'</p>':'')+
+    '<p style="font-size:13px;color:#7a6d8e;margin:0 0 8px;">The '+issues.length+' things I would look at:</p>'+
     issuesHtml+
     '</div>'+
-    '<div style="text-align:center;margin-bottom:20px;">'+
-    '<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:14px;line-height:1.7;">The full Digital Health Check goes deeper, keyword analysis, competitor comparison, and a 6-page branded report.</p>'+
-    '<a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a>'+
-    '</div>'+
-    '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
+    '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">If you want, I am happy to walk through any of these with you, just reply to this email and we can talk it through. No pressure either way.</p>'+
+    '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 24px;">Eric</p>'+
+    '<p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p>'+
     '</div>'+
 '</body></html>';
 
@@ -1648,7 +1645,7 @@ function sendNotification(d, bizLabel, issues, deep) {
     '</div></body></html>';
 
   // User-facing confirm, generic, no detailed findings, drives toward paid audit
-  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:inline-block;margin-bottom:20px;background:#1e1338;padding:10px 18px;border-radius:10px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">I took a look at '+d.name+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific issues on your site, some quick fixes, a couple that need more attention.</p>'+(issues.length?'<p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">The first thing I would look at is <strong style="color:#c4aee8;">'+issues[0].title+'</strong>. That is usually where the quickest wins are.</p>':'')+'<p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 22px;">Want the full picture? The Digital Health Check goes deeper with keyword analysis, competitor comparison, and a 6-page prioritized action plan.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles</p></div></body></html>';
+  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f7f4fd;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:32px 24px;"><p style="font-family:Georgia,serif;font-size:17px;color:#1a1523;margin:0 0 20px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">Hi'+(d.name?' '+d.name:'')+',</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">I took a look at your site. Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific things worth looking at, some quick fixes, a couple that need more attention.</p>'+(issues.length?'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">The first thing I would start with is <strong>'+issues[0].title+'</strong>. That is usually where the quickest wins are.</p>':'')+'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">If you want to talk through any of it, just reply to this email, happy to help. No pressure either way.</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 24px;">Eric</p><p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p></div></body></html>';
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},

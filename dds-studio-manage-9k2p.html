@@ -190,6 +190,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <div class="sdiv"></div>
       <div class="sl">Clients</div>
       <button class="sn" onclick="go('newclient')" id="sn-newclient"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Client</button>
+      <div class="sdiv"></div>
+      <div class="sl">Outreach</div>
+      <button class="sn" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
+      <button class="sn" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Templates</button>
     </div>
 
     <!-- MAIN -->
@@ -580,6 +584,133 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         </div>
       </div>
 
+      <!-- PROSPECTS -->
+      <div class="page" id="page-prospects">
+        <div class="pt">Prospects</div>
+        <div class="ps">Your outreach research workspace. Log local businesses you find, qualify them with your AI Review tool, and track who you have reached out to. Send the actual emails from your outreach tool, then mark them here.</div>
+
+        <div class="stats" id="prStats" style="margin-bottom:18px;"></div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">＋ Add a prospect</div></div>
+          <div class="cb">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Business name</label><input class="fi" id="pr-name" placeholder="e.g. Joe's Taco Spot"></div>
+              <div class="fg"><label class="fl">Contact name</label><input class="fi" id="pr-contact" placeholder="e.g. Joe Martinez (optional)"></div>
+              <div class="fg"><label class="fl">Email</label><input class="fi" id="pr-email" type="email" placeholder="owner@business.com"></div>
+              <div class="fg"><label class="fl">Phone</label><input class="fi" id="pr-phone" placeholder="(optional)"></div>
+              <div class="fg"><label class="fl">Website</label><input class="fi" id="pr-website" placeholder="theirsite.com (or blank)"></div>
+              <div class="fg"><label class="fl">Site status</label>
+                <select class="fi" id="pr-sitestatus">
+                  <option>No website</option>
+                  <option>Facebook page only</option>
+                  <option>Outdated site</option>
+                  <option>Decent site</option>
+                  <option>Good site</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Source</label>
+                <select class="fi" id="pr-source">
+                  <option>Google Maps</option>
+                  <option>Yelp</option>
+                  <option>Referral</option>
+                  <option>Walk-by</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Follow-up date</label><input class="fi" id="pr-followup" type="date"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Notes</label><input class="fi" id="pr-notes" placeholder="e.g. ran AI review, scored 41, slow on mobile, no menu page"></div>
+            </div>
+            <button class="sbtn" onclick="addProspect()" style="margin-top:6px;">Add prospect →</button>
+            <div class="result-box" id="pr-result"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch">
+            <div class="ct">📋 Pipeline</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="prSearch" oninput="renderProspects()" placeholder="Search..." style="padding:7px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;outline:none;">
+              <button class="sbtn sec" onclick="loadProspects()" style="font-size:12px;padding:7px 14px;">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="cb" style="padding:0;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid rgba(91,63,160,0.06);">
+              <button class="prf" onclick="setProspectFilter('all')" id="prf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
+              <button class="prf" onclick="setProspectFilter('New')" id="prf-New" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">New</button>
+              <button class="prf" onclick="setProspectFilter('Emailed')" id="prf-Emailed" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Emailed</button>
+              <button class="prf" onclick="setProspectFilter('Replied')" id="prf-Replied" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Replied</button>
+              <button class="prf" onclick="setProspectFilter('Client')" id="prf-Client" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Client</button>
+              <button class="prf" onclick="setProspectFilter('Dead')" id="prf-Dead" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Dead</button>
+            </div>
+            <div id="prospectsList" style="padding:14px 18px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL TEMPLATES -->
+      <div class="page" id="page-templates">
+        <div class="pt">Email Templates</div>
+        <div class="ps">Your outreach copy, ready to paste into your sending tool. These lead with a free site review, not a hard pitch. Fill in the brackets per business. Your CAN-SPAM footer is already included.</div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">✉️ Warm and brief</div><button class="sbtn sec" onclick="copyTemplate('tpl1')" style="font-size:12px;padding:7px 16px;">Copy</button></div>
+          <div class="cb">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><strong>Subject:</strong> A quick free review of your website</div>
+            <div class="code" id="tpl1">Hi [First Name],
+
+I came across [Business Name] while looking around at local spots, and I run a small web studio here in LA called Davis Digital Studio.
+
+I built a free tool that gives you a quick, honest review of your website, things like how fast it loads on phones, how easy it is for new customers to find you on Google, and a few simple fixes that make a difference. No catch, no signup wall, you just run it and get the results.
+
+If you're curious how [Business Name]'s site is doing, you can try it here:
+
+https://davisdigitalstudio.com
+
+Hope it's useful either way.
+
+Eric Davis
+Davis Digital Studio
+eric@davisdigitalstudio.com
+https://davisdigitalstudio.com
+3727 W. Magnolia Blvd, PMB 1061, Burbank, CA 91505
+
+Not interested in hearing from me again? Just reply "unsubscribe" and I'll take you off my list.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">✉️ Personalized hook</div><button class="sbtn sec" onclick="copyTemplate('tpl2')" style="font-size:12px;padding:7px 16px;">Copy</button></div>
+          <div class="cb">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><strong>Subject:</strong> Noticed something about [Business Name]'s site</div>
+            <div class="code" id="tpl2">Hi [First Name],
+
+I'm Eric, I run a small web studio in LA called Davis Digital Studio, and I happened to land on [Business Name]'s website. I noticed [one specific, true observation, e.g. "it loads a little slow on mobile" / "there's no easy way to see your menu on a phone"], which is a really common thing for busy small businesses and usually a quick fix.
+
+I built a free review tool that breaks this kind of stuff down in plain language, what's working, what's costing you customers, and a few simple things to improve. It's genuinely free, no signup, you just run it:
+
+https://davisdigitalstudio.com
+
+Figured it might be worth two minutes for you.
+
+Eric Davis
+Davis Digital Studio
+eric@davisdigitalstudio.com
+https://davisdigitalstudio.com
+3727 W. Magnolia Blvd, PMB 1061, Burbank, CA 91505
+
+Don't want emails from me? Reply "unsubscribe" and you're off the list.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">💡 How to use these</div></div>
+          <div class="cb" style="font-size:13px;color:var(--ink);line-height:1.7;">
+            Find a business, log it in Prospects, run its site through your AI Review tool, then paste a template into your sending tool and fill in the brackets. The personalized hook converts better because it references something real about their actual site. Keep it to 15 to 20 a day from your domain so your sender reputation stays healthy, and let your warm-up run for about two weeks before the first real send.
+          </div>
+        </div>
+      </div>
+
     </div><!-- /main -->
   </div><!-- /shell -->
 </div><!-- /admin -->
@@ -678,6 +809,7 @@ function go(page) {
   if (page === "leads") loadLeads();
   if (page === "hub") loadHub();
   if (page === "messages") loadTemplates();
+  if (page === "prospects") loadProspects();
 }
 
 // ── LEADS ──
@@ -1890,6 +2022,149 @@ function copyDisc(btn) {
   navigator.clipboard.writeText(ta.value).then(() => {
     btn.textContent = "Copied ✓";
     setTimeout(() => btn.textContent = "Copy", 2000);
+  });
+}
+
+// ── PROSPECTS ──
+var allProspects = [];
+var prospectFilter = 'all';
+
+async function loadProspects() {
+  var listEl = document.getElementById('prospectsList');
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);">Loading prospects...</p>';
+  var r = await api('prospects?select=*&order=created_at.desc&limit=500');
+  if (r === null) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--red);padding:10px;line-height:1.6;">Could not load prospects. If this is the first time, your Edge Function may need the prospects table added to its allowlist. Tell Claude you saw this message and you will get a one-line fix.</div>';
+    return;
+  }
+  allProspects = r || [];
+  renderProspectStats();
+  renderProspects();
+}
+
+function renderProspectStats() {
+  var el = document.getElementById('prStats');
+  if (!el) return;
+  var total = allProspects.length;
+  var emailed = allProspects.filter(p => p.emailed).length;
+  var replied = allProspects.filter(p => p.replied).length;
+  var toContact = allProspects.filter(p => p.status === 'New').length;
+  function card(label, val) {
+    return '<div class="stat"><div class="sv">'+val+'</div><div style="font-size:11px;color:var(--muted);">'+label+'</div></div>';
+  }
+  el.innerHTML = card('Total prospects', total) + card('To contact', toContact) + card('Emailed', emailed) + card('Replied', replied);
+}
+
+function setProspectFilter(f) {
+  prospectFilter = f;
+  ['all','New','Emailed','Replied','Client','Dead'].forEach(t => {
+    var btn = document.getElementById('prf-'+t);
+    if (!btn) return;
+    if (t === f) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
+    else { btn.style.background = 'rgba(91,63,160,0.08)'; btn.style.color = 'var(--p)'; }
+  });
+  renderProspects();
+}
+
+function renderProspects() {
+  var listEl = document.getElementById('prospectsList');
+  if (!listEl) return;
+  var q = (document.getElementById('prSearch').value || '').toLowerCase();
+  var rows = allProspects.filter(p => {
+    if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
+    if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if (rows.length === 0) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:8px 0;">No prospects here yet. Add one above to get started.</p>';
+    return;
+  }
+  var statusColors = { New:'var(--muted)', Emailed:'var(--p)', Replied:'var(--green)', Client:'var(--green)', Dead:'var(--red)' };
+  listEl.innerHTML = rows.map(function(p) {
+    var sc = statusColors[p.status] || 'var(--muted)';
+    return '<div style="border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+        '<div style="flex:1;min-width:200px;">' +
+          '<div style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+
+            (p.email ? p.email : 'no email') +
+            (p.website ? ' · '+p.website : '') +
+            ' · '+(p.site_status||'') +
+          '</div>' +
+          (p.notes ? '<div style="font-size:12px;color:var(--ink);margin-top:6px;background:var(--cream);padding:6px 10px;border-radius:7px;">'+p.notes+'</div>' : '') +
+        '</div>' +
+        '<select onchange="updateProspect(\''+p.id+'\',\'status\',this.value)" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;border:1px solid '+sc+';color:'+sc+';background:#fff;cursor:pointer;outline:none;">' +
+          ['New','Emailed','Replied','Client','Dead'].map(s => '<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div style="display:flex;gap:16px;margin-top:10px;align-items:center;flex-wrap:wrap;">' +
+        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.emailed?'checked':'')+' onchange="toggleEmailed(\''+p.id+'\',this.checked)"> Emailed'+(p.emailed_date?' ('+p.emailed_date+')':'')+'</label>' +
+        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.replied?'checked':'')+' onchange="toggleReplied(\''+p.id+'\',this.checked)"> Replied</label>' +
+        (p.follow_up_date ? '<span style="font-size:12px;color:var(--muted);">Follow up: '+p.follow_up_date+'</span>' : '') +
+        '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function addProspect() {
+  var name = (document.getElementById('pr-name').value || '').trim();
+  var resultEl = document.getElementById('pr-result');
+  if (!name) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Business name is required.'; return; }
+  var body = {
+    business_name: name,
+    contact_name: document.getElementById('pr-contact').value.trim() || null,
+    email: document.getElementById('pr-email').value.trim() || null,
+    phone: document.getElementById('pr-phone').value.trim() || null,
+    website: document.getElementById('pr-website').value.trim() || null,
+    site_status: document.getElementById('pr-sitestatus').value,
+    source: document.getElementById('pr-source').value,
+    follow_up_date: document.getElementById('pr-followup').value || null,
+    notes: document.getElementById('pr-notes').value.trim() || null,
+    status: 'New'
+  };
+  var r = await api('prospects', 'POST', body);
+  if (r === null) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not save. Check the Edge Function allowlist note above.'; return; }
+  ['pr-name','pr-contact','pr-email','pr-phone','pr-website','pr-followup','pr-notes'].forEach(id => document.getElementById(id).value = '');
+  resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
+  loadProspects();
+}
+
+async function updateProspect(id, field, value) {
+  var patch = {}; patch[field] = value; patch.updated_at = new Date().toISOString();
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  var p = allProspects.find(x => x.id === id); if (p) p[field] = value;
+  renderProspectStats();
+}
+
+async function toggleEmailed(id, checked) {
+  var patch = { emailed: checked, emailed_date: checked ? new Date().toISOString().split('T')[0] : null, updated_at: new Date().toISOString() };
+  if (checked) { var p = allProspects.find(x => x.id === id); if (p && p.status === 'New') patch.status = 'Emailed'; }
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  loadProspects();
+}
+
+async function toggleReplied(id, checked) {
+  var patch = { replied: checked, replied_date: checked ? new Date().toISOString().split('T')[0] : null, updated_at: new Date().toISOString() };
+  if (checked) { var p = allProspects.find(x => x.id === id); if (p && p.status !== 'Client') patch.status = 'Replied'; }
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  loadProspects();
+}
+
+async function deleteProspect(id) {
+  if (!confirm('Delete this prospect?')) return;
+  await api('prospects?id=eq.'+id, 'DELETE');
+  loadProspects();
+}
+
+function copyTemplate(id) {
+  var text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = event.target;
+    var orig = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(function(){ btn.textContent = orig; }, 1500);
   });
 }
 
