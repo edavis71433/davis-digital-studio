@@ -840,6 +840,12 @@ function showLeadDetail(id) {
     cwvHtml +
     signalHtml +
     findingsHtml +
+    '<div style="margin-top:18px;">' +
+      '<label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">Notes (follow-ups, reminders, context)</label>' +
+      '<textarea id="leadNotes-'+lead.id+'" style="width:100%;min-height:80px;font-size:13px;font-family:inherit;padding:10px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;resize:vertical;box-sizing:border-box;" placeholder="e.g. Called 6/22, left voicemail. Wants to revisit next week.">'+(lead.notes ? String(lead.notes).replace(/</g,'&lt;') : '')+'</textarea>' +
+      '<button onclick="saveLeadNote(\''+lead.id+'\')" style="margin-top:8px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Save note</button>' +
+      '<span id="noteSaved-'+lead.id+'" style="font-size:12px;color:#1a7e49;margin-left:10px;display:none;">Saved ✓</span>' +
+    '</div>' +
     '<div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">' +
       '<label style="font-size:12px;color:var(--muted);">Status:</label>' +
       '<select onchange="updateLeadStatus(\''+lead.id+'\', this.value)" style="font-size:13px;padding:6px 10px;border:1px solid rgba(91,63,160,0.2);border-radius:8px;background:#fff;">'+statusOpts+'</select>' +
@@ -850,6 +856,16 @@ function showLeadDetail(id) {
 
   // Smooth scroll into view
   detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function saveLeadNote(id) {
+  var ta = document.getElementById('leadNotes-' + id);
+  if (!ta) return;
+  await api('audit_leads?id=eq.' + id, 'PATCH', { notes: ta.value });
+  var lead = allLeads.find(function(l){ return l.id === id; });
+  if (lead) lead.notes = ta.value;
+  var saved = document.getElementById('noteSaved-' + id);
+  if (saved) { saved.style.display = 'inline'; setTimeout(function(){ saved.style.display = 'none'; }, 2000); }
 }
 
 async function updateLeadStatus(id, status) {
