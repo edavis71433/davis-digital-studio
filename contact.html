@@ -761,7 +761,9 @@ body{padding-top:68px;}
             type: 'contact_reply',
             to: email,
             name: name,
-            service: service || 'Not specified'
+            service: service || 'Not specified',
+            message: (typeof message !== 'undefined' ? message : '') || '',
+            business: (typeof business !== 'undefined' ? business : '') || ''
           })
         });
       } catch(e) {}
