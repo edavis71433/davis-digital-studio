@@ -981,6 +981,32 @@ function runAudit() {
       var seoRaw = cats.seo ? Math.round(cats.seo.score * 100) : null;
       var a11y = cats.accessibility ? Math.round(cats.accessibility.score * 100) : null;
 
+      // ── REAL MOBILE USABILITY (deterministic, from Lighthouse audits we already fetched) ──
+      // These are the exact signals Google uses to decide if a page is "mobile-friendly."
+      // Each audit scores 0..1 (or null if not applicable). We weight the ones that
+      // actually break the phone experience hardest. No new network calls, repeatable.
+      function mobileUsabilityScore(au) {
+        if (!au) return null;
+        // weight, audit key. viewport + tap-targets + legible font are the make-or-break ones.
+        var checks = [
+          { key: 'viewport', w: 30 },                 // is the page even configured for mobile
+          { key: 'tap-targets', w: 25 },              // are buttons/links tappable without zooming
+          { key: 'font-size', w: 20 },                // is body text legible without pinch-zoom
+          { key: 'content-width', w: 15 },            // does content fit the screen (no h-scroll)
+          { key: 'uses-responsive-images', w: 10 }    // are right-sized images sent to phones
+        ];
+        var gotWeight = 0, earned = 0;
+        for (var i = 0; i < checks.length; i++) {
+          var a = au[checks[i].key];
+          if (!a || typeof a.score !== 'number') continue; // not applicable -> skip, don't penalize
+          gotWeight += checks[i].w;
+          earned += checks[i].w * a.score;
+        }
+        if (gotWeight === 0) return null; // nothing measurable, fall back to a11y below
+        return Math.round(earned / gotWeight * 100);
+      }
+      var mobileUsability = mobileUsabilityScore(audits);
+
       // ── STABILITY: prefer real-user field data (CrUX) over the noisy single lab run ──
       // CrUX is a 28-day rolling average of real visitors, so it barely moves between runs.
       // The lab performance score can swing +/-5-10 points run to run on Google's shared infra.
@@ -1026,7 +1052,7 @@ function runAudit() {
       var cls = audits['cumulative-layout-shift'] ? audits['cumulative-layout-shift'].displayValue : null;
       var tbt = audits['total-blocking-time'] ? audits['total-blocking-time'].displayValue : null;
 
-      var composite = computeComposite(perfStable, seoRaw, a11y, deep, psiSkipped);
+      var composite = computeComposite(perfStable, seoRaw, a11y, deep, psiSkipped, mobileUsability, audits);
 
       showResults({
         name: name || displayUrl, type: type, city: city, email: email, url: url,
@@ -1043,10 +1069,10 @@ function runAudit() {
 }
 
 // ── COMPOSITE SCORING ──
-// Performance (25) + Mobile/A11y (15) + Visibility (35) + Local (25) = 100 when PSI succeeds.
+// Performance (25) + Mobile usability (15) + Visibility (35) + Local (25) = 100 when PSI succeeds.
 // When PSI times out, Performance and Mobile pillars are unmeasurable. Visibility (35) and
 // Local (25) still score normally and are rescaled to 100 for the overall.
-function computeComposite(perf, seoRaw, a11y, deep, psiSkipped) {
+function computeComposite(perf, seoRaw, a11y, deep, psiSkipped, mobileUsability, audits) {
   var findings = [];
 
   // Pillar 1: Performance (25 pts), from PSI mobile
@@ -1056,11 +1082,37 @@ function computeComposite(perf, seoRaw, a11y, deep, psiSkipped) {
     perfPillar = Math.round(perfPts / 25 * 100);
   }
 
-  // Pillar 2: Mobile/Accessibility (15 pts), from PSI a11y
+  // Pillar 2: Mobile usability (15 pts) — REAL mobile-friendliness, not accessibility.
+  // Built from Lighthouse's viewport / tap-targets / font-size / content-width audits.
+  // Falls back to the accessibility score only if none of those audits were measurable,
+  // so the pillar is never blank when PSI succeeded.
   var mobilePts = 0, mobilePillar = null;
-  if (!psiSkipped && a11y !== null) {
-    mobilePts = a11y / 100 * 15;
+  var mobileVal = (mobileUsability !== null && mobileUsability !== undefined) ? mobileUsability : a11y;
+  if (!psiSkipped && mobileVal !== null && mobileVal !== undefined) {
+    mobilePts = mobileVal / 100 * 15;
     mobilePillar = Math.round(mobilePts / 15 * 100);
+  }
+
+  // Specific, plain-English mobile findings pulled straight from the failing audits.
+  if (!psiSkipped && audits) {
+    function failed(k) { var a = audits[k]; return a && typeof a.score === 'number' && a.score < 0.9; }
+    if (failed('viewport')) {
+      findings.push({sev:'high', pillar:'mobile', title:'Not configured for mobile screens', body:'The page is missing a proper mobile viewport setting, so phones render it like a shrunk-down desktop site. Google treats this as not mobile-friendly, which is a direct ranking penalty.'});
+    }
+    if (failed('tap-targets')) {
+      findings.push({sev:'high', pillar:'mobile', title:'Buttons and links are too small to tap', body:'Tap targets are too small or too close together for thumbs. Visitors mis-tap, get frustrated, and leave. Google flags this as a mobile usability failure.'});
+    }
+    if (failed('font-size')) {
+      findings.push({sev:'medium', pillar:'mobile', title:'Text is too small to read on a phone', body:'Body text is small enough that visitors have to pinch-zoom to read it. That friction costs you customers before they ever see your menu or hours.'});
+    }
+    if (failed('content-width')) {
+      findings.push({sev:'high', pillar:'mobile', title:'Content does not fit the screen', body:'The page is wider than the phone screen, forcing visitors to scroll sideways. This is one of the clearest signs a site was not built mobile-first.'});
+    }
+  }
+
+  // Accessibility is still worth surfacing — but as its own honest finding, not disguised as "Mobile."
+  if (!psiSkipped && a11y !== null && a11y < 90) {
+    findings.push({sev: a11y < 70 ? 'medium' : 'low', pillar:'mobile', title:'Accessibility could be stronger', body:'Lighthouse scored accessibility at ' + a11y + '/100. Common gaps are low color contrast, missing image alt text, or unlabeled buttons. Fixing these helps screen-reader users and is a quality signal Google rewards.'});
   }
 
   // Pillar 3: Search Visibility (35 pts)
@@ -1241,7 +1293,7 @@ function showResults(d) {
   if (d.pillars) {
     var availablePillars = [
       {label: d.perfIsField ? 'Performance (real-user data)' : 'Performance', val:d.pillars.performance, key:'performance'},
-      {label:'Mobile', val:d.pillars.mobile, key:'mobile'},
+      {label:'Mobile Usability', val:d.pillars.mobile, key:'mobile'},
       {label:'Search Visibility', val:d.pillars.visibility, key:'visibility'},
       {label:'Local Presence', val:d.pillars.local, key:'local'}
     ].filter(function(p){ return p.val !== null && p.val !== undefined; });
@@ -1268,14 +1320,14 @@ function showResults(d) {
     var transNote = document.createElement('div');
     transNote.style.cssText = 'font-size:12px;color:#8a8a99;line-height:1.5;margin:14px 0 4px;padding:10px 14px;background:#f7f6fa;border-radius:8px;';
     transNote.innerHTML = d.perfIsField
-      ? 'How this is measured: Search Visibility and Local Presence are checked directly against your live site, so they are exact and repeatable. Performance uses Google\u2019s real-user data (a 28-day average), which is stable and reflects what your actual visitors experience.'
-      : 'How this is measured: Search Visibility and Local Presence are checked directly against your live site, so they are exact and repeatable. Performance is a live speed test from Google and can shift a few points between runs depending on network and server load \u2014 that is normal for any speed tool.';
+      ? 'How this is measured: Search Visibility and Local Presence are checked directly against your live site, so they are exact and repeatable. Mobile Usability comes from Google\u2019s own mobile-friendliness checks (viewport, tap targets, text size, layout width). Performance uses Google\u2019s real-user data (a 28-day average), which is stable and reflects what your actual visitors experience.'
+      : 'How this is measured: Search Visibility, Local Presence, and Mobile Usability are checked against your live site using Google\u2019s own mobile-friendliness signals, so they are exact and repeatable. Performance is a live speed test from Google and can shift a few points between runs depending on network and server load \u2014 that is normal for any speed tool.';
     body.appendChild(transNote);
 
     // Generic narrative per pillar, kept vague to drive the paid audit
     var copy = {
       performance: {good:'Mobile speed is in good shape. Pages load quickly enough that Google does not penalize you on Core Web Vitals.', ok:'Mobile speed is workable but there is room to tighten. Slower sites lose visitors before they ever read a word.', poor:'Mobile speed is dragging the site down. Most mobile visitors abandon pages that take longer than 3 seconds to appear.'},
-      mobile: {good:'Your site is mobile-friendly and accessible to assistive tech. Google uses both as quality signals.', ok:'Mobile experience has gaps. Some users on phones or with assistive tech may hit friction.', poor:'Mobile experience has real problems. Tap targets, contrast, or labels are likely failing checks.'},
+      mobile: {good:'The site works well on phones. Buttons are tappable, text is legible, and the layout fits the screen the way Google wants.', ok:'The mobile experience has gaps. Some buttons, text, or layout widths give phone visitors friction, and most of your traffic is on phones.', poor:'The site struggles on phones. Tap targets, text size, or layout width are failing Google\u2019s mobile checks, and this is where most visitors actually land.'},
       visibility: {good:'On-page SEO fundamentals are in place. Google can crawl, understand, and rank your content properly.', ok:'On-page SEO has gaps. Missing meta data, thin content, or weak heading structure are limiting how Google ranks you.', poor:'Search visibility is severely limited. Google cannot easily understand what to rank you for, and your pages may not even be getting indexed.'},
       local: {good:'Strong local signals, schema, NAP, hours, and social links are giving Google what it needs to surface you for nearby searches.', ok:'Local signals are partial. Without complete schema and on-page NAP, you are leaving local search traffic on the table.', poor:'Almost no local presence signals on your site. This is the gap between having a website and being findable when nearby customers search for what you offer.'}
     };
@@ -1425,7 +1477,7 @@ function unlockReport() {
   if (d.pillars) {
     var pl = [
       {n:'Performance', v:d.pillars.performance},
-      {n:'Mobile', v:d.pillars.mobile},
+      {n:'Mobile Usability', v:d.pillars.mobile},
       {n:'Visibility', v:d.pillars.visibility},
       {n:'Local', v:d.pillars.local}
     ].filter(function(p){ return p.v !== null && p.v !== undefined; });
@@ -1477,7 +1529,7 @@ function sendNotification(d, bizLabel, issues, deep) {
   if (d.pillars) {
     var pl = [
       {n:'Performance', v:d.pillars.performance},
-      {n:'Mobile', v:d.pillars.mobile},
+      {n:'Mobile Usability', v:d.pillars.mobile},
       {n:'Visibility', v:d.pillars.visibility},
       {n:'Local', v:d.pillars.local}
     ].filter(function(p){ return p.v !== null && p.v !== undefined; });
