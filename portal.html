@@ -1479,14 +1479,43 @@ async function submitBrief() {
   
   var summary = Object.entries(fields).map(function([k,v]) { return k.toUpperCase() + ": " + (v||"—"); }).join("\n");
   
-  // Save as structured message in DB
+  // Save structured intake to its own table (upsert: one per client)
+  try {
+    var existing = await sb.from("intake_forms").select("id").eq("client_id", CLIENT.id).maybeSingle();
+    var payload = {
+      client_id: CLIENT.id,
+      business_name: CLIENT.name || null,
+      business_description: fields.tagline || null,
+      target_audience: fields.customer || null,
+      brand_colors: fields.colors || null,
+      competitors: fields.competitors || null,
+      goals: fields.goal || null,
+      existing_site: fields.inspiration || null,
+      special_requests: [fields.cta ? "CTA: " + fields.cta : "", fields.donts ? "Avoid: " + fields.donts : "", fields.logins ? "Logins: " + fields.logins : "", fields.other ? "Notes: " + fields.other : ""].filter(Boolean).join("\n") || null,
+      status: "submitted",
+      submitted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    if (existing && existing.data && existing.data.id) {
+      await sb.from("intake_forms").update(payload).eq("id", existing.data.id);
+    } else {
+      await sb.from("intake_forms").insert(payload);
+    }
+  } catch (e) { /* non-blocking; message + notification still fire */ }
+
+  // Also keep a readable copy in messages (so it shows in the thread)
   await sb.from("messages").insert({
     client_id: CLIENT.id, from_who: "client",
     sender_name: CLIENT.name,
     text: "[PROJECT BRIEF SUBMITTED]\n" + summary
   });
-  
-  // Send rich notification via Edge Function
+
+  // Log the activity for the admin engagement view
+  try {
+    await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "submitted_intake", detail: "Project brief submitted" });
+  } catch (e) {}
+
+  // Notify Eric via Edge Function
   await sendNotification("brief_submitted", summary, "", {clientId: CLIENT.id, brief: fields});
   
   document.getElementById("briefFormCard").style.display = "none";

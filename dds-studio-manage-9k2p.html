@@ -1046,9 +1046,11 @@ async function openHubClient(id) {
     api("files?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
     api("invoices?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
     api("approvals?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
-    api("timeline?select=*&client_id=eq."+c.id+"&order=sort_order")
+    api("timeline?select=*&client_id=eq."+c.id+"&order=sort_order"),
+    api("intake_forms?select=*&client_id=eq."+c.id+"&order=submitted_at.desc")
   ]);
   var msgs = res[0]||[], files = res[1]||[], invs = res[2]||[], apprs = res[3]||[], tl = res[4]||[];
+  var intake = (res[5]||[])[0] || null;
   var leads = hubLeads.filter(function(l){
     return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
   });
@@ -1158,6 +1160,25 @@ async function openHubClient(id) {
   }
 
   html += '</div>';
+
+  // ── INTAKE / PROJECT BRIEF ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📝 Project Brief / Intake</div>';
+  if (intake) {
+    function row(label, val){ return val ? '<div style="margin-bottom:9px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">'+label+'</div><div style="font-size:13px;color:#33333a;white-space:pre-wrap;">'+String(val).replace(/</g,"&lt;")+'</div></div>' : ''; }
+    html += row("Goals", intake.goals);
+    html += row("Business description", intake.business_description);
+    html += row("Target audience", intake.target_audience);
+    html += row("Brand colors", intake.brand_colors);
+    html += row("Competitors / admired sites", intake.competitors);
+    html += row("Inspiration / vibe", intake.existing_site);
+    html += row("Notes & requests", intake.special_requests);
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:8px;">Submitted '+(intake.submitted_at?fmtDate(intake.submitted_at):"—")+'</div>';
+  } else {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No project brief submitted yet. The client can fill it out under <strong>Project Brief</strong> in their portal.</p>';
+  }
+  html += '</div>';
+
   detail.innerHTML = html;
 }
 
