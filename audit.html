@@ -980,18 +980,59 @@ function runAudit() {
       var perf = cats.performance ? Math.round(cats.performance.score * 100) : null;
       var seoRaw = cats.seo ? Math.round(cats.seo.score * 100) : null;
       var a11y = cats.accessibility ? Math.round(cats.accessibility.score * 100) : null;
+
+      // ── STABILITY: prefer real-user field data (CrUX) over the noisy single lab run ──
+      // CrUX is a 28-day rolling average of real visitors, so it barely moves between runs.
+      // The lab performance score can swing +/-5-10 points run to run on Google's shared infra.
+      var field = (data && data.loadingExperience && data.loadingExperience.metrics) || null;
+      var fieldOrigin = (data && data.originLoadingExperience && data.originLoadingExperience.metrics) || null;
+      var fieldSource = field || fieldOrigin || null;
+      var hasField = !!fieldSource;
+      var fieldPerf = null;
+      if (hasField) {
+        // Build a stable 0-100 performance proxy from real-user Core Web Vitals percentiles.
+        // Google's own Good/NI/Poor buckets: LCP good <=2500ms, INP good <=200ms, CLS good <=0.1.
+        function cwvScore(metric, goodMax, poorMin) {
+          if (!metric) return null;
+          var p = metric.percentile;
+          if (p == null) return null;
+          if (p <= goodMax) return 100;
+          if (p >= poorMin) return 40;
+          // linear between good and poor thresholds -> 40..100
+          return Math.round(100 - ((p - goodMax) / (poorMin - goodMax)) * 60);
+        }
+        var lcpS = cwvScore(fieldSource.LARGEST_CONTENTFUL_PAINT_MS, 2500, 4000);
+        var inpMetric = fieldSource.INTERACTION_TO_NEXT_PAINT || fieldSource.EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT;
+        var inpS = cwvScore(inpMetric, 200, 500);
+        var clsMetric = fieldSource.CUMULATIVE_LAYOUT_SHIFT_SCORE;
+        var clsS = clsMetric ? (clsMetric.percentile <= 10 ? 100 : (clsMetric.percentile >= 25 ? 40 : Math.round(100 - ((clsMetric.percentile - 10) / 15) * 60))) : null;
+        var parts = [lcpS, inpS, clsS].filter(function(x){ return x !== null; });
+        if (parts.length) fieldPerf = Math.round(parts.reduce(function(a,b){return a+b;},0) / parts.length);
+      }
+
+      // Use field-data performance when available (stable); otherwise band the lab score to
+      // the nearest 5 so small run-to-run lab jitter doesn't change the displayed number.
+      var perfStable = perf;
+      if (fieldPerf !== null) {
+        perfStable = fieldPerf;
+      } else if (perf !== null) {
+        perfStable = Math.round(perf / 5) * 5;
+      }
+      var perfIsField = (fieldPerf !== null);
+
       var lcp = audits['largest-contentful-paint'] ? audits['largest-contentful-paint'].displayValue : null;
       var lcpMs = audits['largest-contentful-paint'] ? audits['largest-contentful-paint'].numericValue : null;
       var fcp = audits['first-contentful-paint'] ? audits['first-contentful-paint'].displayValue : null;
       var cls = audits['cumulative-layout-shift'] ? audits['cumulative-layout-shift'].displayValue : null;
       var tbt = audits['total-blocking-time'] ? audits['total-blocking-time'].displayValue : null;
 
-      var composite = computeComposite(perf, seoRaw, a11y, deep, psiSkipped);
+      var composite = computeComposite(perfStable, seoRaw, a11y, deep, psiSkipped);
 
       showResults({
         name: name || displayUrl, type: type, city: city, email: email, url: url,
         overall: composite.overall,
-        perf: perf, seo: seoRaw, a11y: a11y,
+        perf: perfStable, seo: seoRaw, a11y: a11y,
+        perfIsField: perfIsField,
         pillars: composite.pillars,
         deepFindings: composite.findings,
         deep: deep,
@@ -1199,7 +1240,7 @@ function showResults(d) {
   // Score cards. 4 pillars from composite scoring, skip pillars we couldn't measure
   if (d.pillars) {
     var availablePillars = [
-      {label:'Performance', val:d.pillars.performance, key:'performance'},
+      {label: d.perfIsField ? 'Performance (real-user data)' : 'Performance', val:d.pillars.performance, key:'performance'},
       {label:'Mobile', val:d.pillars.mobile, key:'mobile'},
       {label:'Search Visibility', val:d.pillars.visibility, key:'visibility'},
       {label:'Local Presence', val:d.pillars.local, key:'local'}
@@ -1222,6 +1263,14 @@ function showResults(d) {
       scoresRow.appendChild(card);
     });
     body.appendChild(scoresRow);
+
+    // Transparency note: explain what's stable vs. what reflects a live measurement.
+    var transNote = document.createElement('div');
+    transNote.style.cssText = 'font-size:12px;color:#8a8a99;line-height:1.5;margin:14px 0 4px;padding:10px 14px;background:#f7f6fa;border-radius:8px;';
+    transNote.innerHTML = d.perfIsField
+      ? 'How this is measured: Search Visibility and Local Presence are checked directly against your live site, so they are exact and repeatable. Performance uses Google\u2019s real-user data (a 28-day average), which is stable and reflects what your actual visitors experience.'
+      : 'How this is measured: Search Visibility and Local Presence are checked directly against your live site, so they are exact and repeatable. Performance is a live speed test from Google and can shift a few points between runs depending on network and server load \u2014 that is normal for any speed tool.';
+    body.appendChild(transNote);
 
     // Generic narrative per pillar, kept vague to drive the paid audit
     var copy = {

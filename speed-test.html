@@ -589,9 +589,36 @@ function renderResults(url, data) {
   document.getElementById('stResultUrl').textContent = displayUrl;
   document.getElementById('strategyBadge').textContent = strategy === 'mobile' ? '📱 Mobile' : '🖥 Desktop';
 
+  // ── STABILITY: prefer real-user field data (CrUX) for the performance number ──
+  // The single lab run can swing several points between runs on Google's shared infra.
+  // CrUX is a 28-day real-user average, so it's stable and reflects actual visitors.
+  var labPerf = cats.performance ? Math.round(cats.performance.score * 100) : null;
+  var fieldSrc = (data.loadingExperience && data.loadingExperience.metrics)
+    || (data.originLoadingExperience && data.originLoadingExperience.metrics) || null;
+  var perfIsField = false;
+  var perfVal = labPerf;
+  if (fieldSrc) {
+    function cwv(metric, goodMax, poorMin) {
+      if (!metric || metric.percentile == null) return null;
+      var p = metric.percentile;
+      if (p <= goodMax) return 100;
+      if (p >= poorMin) return 40;
+      return Math.round(100 - ((p - goodMax) / (poorMin - goodMax)) * 60);
+    }
+    var lcpS = cwv(fieldSrc.LARGEST_CONTENTFUL_PAINT_MS, 2500, 4000);
+    var inpS = cwv(fieldSrc.INTERACTION_TO_NEXT_PAINT || fieldSrc.EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT, 200, 500);
+    var clsM = fieldSrc.CUMULATIVE_LAYOUT_SHIFT_SCORE;
+    var clsS = clsM ? (clsM.percentile <= 10 ? 100 : (clsM.percentile >= 25 ? 40 : Math.round(100 - ((clsM.percentile - 10) / 15) * 60))) : null;
+    var parts = [lcpS, inpS, clsS].filter(function(x){ return x !== null; });
+    if (parts.length) { perfVal = Math.round(parts.reduce(function(a,b){return a+b;},0)/parts.length); perfIsField = true; }
+  }
+  if (!perfIsField && labPerf !== null) {
+    perfVal = Math.round(labPerf / 5) * 5; // band lab score to nearest 5 to reduce jitter
+  }
+
   // Score cards
   var scoreItems = [
-    { key: 'performance', label: 'Performance', val: cats.performance ? Math.round(cats.performance.score * 100) : null },
+    { key: 'performance', label: perfIsField ? 'Performance (real-user data)' : 'Performance', val: perfVal },
     { key: 'seo', label: 'SEO', val: cats.seo ? Math.round(cats.seo.score * 100) : null },
     { key: 'accessibility', label: 'Accessibility', val: cats.accessibility ? Math.round(cats.accessibility.score * 100) : null },
     { key: 'best-practices', label: 'the right techniques', val: cats['best-practices'] ? Math.round(cats['best-practices'].score * 100) : null }
@@ -605,7 +632,7 @@ function renderResults(url, data) {
       '<div class="score-bar"><div class="score-bar-fill ' + cls + '" style="width:0%" id="sb_' + s.key + '"></div></div>' +
     '</div>';
   }).join('');
-  document.getElementById('scoresRow').innerHTML = scoresHtml;
+  document.getElementById('scoresRow').innerHTML = scoresHtml + '<div style="flex-basis:100%;font-size:12px;color:#8a8a99;line-height:1.5;margin-top:12px;padding:10px 14px;background:#f7f6fa;border-radius:8px;">' + (perfIsField ? 'Performance here uses Google\u2019s real-user data (a 28-day average), so it\u2019s stable and reflects what your actual visitors experience. SEO and Accessibility are measured directly.' : 'Performance is a live lab test from Google and can move a few points between runs depending on network and server load. That\u2019s normal for every speed tool \u2014 run it 2 to 3 times and take the typical value. SEO and Accessibility are measured directly and stay consistent.') + '</div>';
 
   // Animate score numbers
   scoreItems.forEach(function(s) {
