@@ -232,6 +232,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
           <button class="sbtn" onclick="filterLeads('all')" id="lf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
           <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
           <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
+          <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
           <button class="sbtn" onclick="filterLeads('contact')" id="lf-contact" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Contact</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
         </div>
@@ -695,7 +696,7 @@ async function loadLeads() {
 
 function filterLeads(tool) {
   currentLeadFilter = tool;
-  ['all','audit','report_card','contact'].forEach(t => {
+  ['all','audit','report_card','ai_critique','contact'].forEach(t => {
     var btn = document.getElementById('lf-'+t);
     if (!btn) return;
     if (t === tool) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
@@ -712,8 +713,8 @@ function renderLeadsList() {
     listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:24px;text-align:center;background:rgba(91,63,160,0.04);border-radius:12px;">No leads in this category yet. Run a tool on your site to test.</p>';
     return;
   }
-  var toolLabels = { audit:'Site Audit', speed_test:'Speed Test', local_visibility:'Local Visibility', pricing_estimator:'Pricing Estimate' };
-  var toolColors = { audit:'#5b3fa0', speed_test:'#1a7e49', local_visibility:'#c4731a', pricing_estimator:'#8a4fb3' };
+  var toolLabels = { audit:'Site Audit', speed_test:'Speed Test', local_visibility:'Local Visibility', pricing_estimator:'Pricing Estimate', ai_critique:'AI Review', report_card:'Report Card', contact:'Contact' };
+  var toolColors = { audit:'#5b3fa0', speed_test:'#1a7e49', local_visibility:'#c4731a', pricing_estimator:'#8a4fb3', ai_critique:'#5b3fa0', report_card:'#c4731a', contact:'#1a7e49' };
   listEl.innerHTML = leads.map(l => {
     var sc = l.score == null ? '—' : l.score;
     var scoreCol = (l.score == null) ? '#999' : (l.score < 45 ? '#e05555' : l.score < 65 ? '#f0b429' : '#6abf69');
@@ -1285,7 +1286,7 @@ async function loadOverview() {
     api("messages?select=*&order=created_at.desc&limit=8"),
     api("files?select=*"),
     api("invoices?select=*&status=eq.pending"),
-    api("leads?select=*").catch(()=>[]),
+    api("audit_leads?select=*").catch(()=>[]),
     api("approvals?select=*&status=eq.pending").catch(()=>[]),
   ]);
   clients = cls || [];

@@ -455,7 +455,7 @@ body{padding-top:68px;}
   </div>
   <a href="/report-card">Free Report Card</a>
   <a href="/portal" style="font-size:16px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;">Client Login</a>
-  <a href="/contact" class="mob-cta">Let's talk</a>
+  <a href="/contact" class="mob-cta">Book a free call</a>
 </div>
 
 <style>
@@ -892,12 +892,13 @@ body{padding-top:68px;}
     var div = document.createElement('div');
     div.className = 'crit-error';
     div.id = 'critErr';
+    var book = '<a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" style="color:#5b3fa0;font-weight:600;text-decoration:underline;">book a quick call</a>';
     if(code === 'fetch_failed' || code === 'unreachable'){
-      div.textContent = "I couldn't reach that site. Double-check the address is right and the site is live, then try again.";
+      div.innerHTML = "I couldn't load that site to review it. A few sites block automated tools, or it may be temporarily down. Double-check the address and try again, or " + book + " and I'll look at it with you directly.";
     } else if(code === 'network'){
-      div.textContent = "Something went wrong on my end, not yours. Give it another try in a moment.";
+      div.innerHTML = "Something went wrong on my end, not yours. Give it another try in a moment, or " + book + " if it keeps happening.";
     } else {
-      div.textContent = "I couldn't finish the review this time. Try again, or just book a call and I'll look at it with you.";
+      div.innerHTML = "I couldn't finish the review this time. Try again, or " + book + " and I'll walk through your site with you.";
     }
     $('critCard').appendChild(div);
   }

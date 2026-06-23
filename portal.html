@@ -441,7 +441,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <div class="status-pill"><div class="status-dot"></div><span id="topbarStatus">In Progress</span></div>
       <div style="position:relative;">
         <button class="topbar-btn" onclick="toggleNotifs()" id="notifBellBtn" style="position:relative;padding:7px 11px;" aria-label="Notifications">
-          🔔<span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;line-height:17px;text-align:center;padding:0 4px;"></span>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="notifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:9px;line-height:17px;text-align:center;padding:0 4px;"></span>
         </button>
         <div id="notifPanel" style="display:none;position:absolute;right:0;top:42px;width:320px;max-height:420px;overflow-y:auto;background:#fff;border:1px solid rgba(91,63,160,0.14);border-radius:14px;box-shadow:0 12px 40px rgba(26,21,35,0.16);z-index:200;">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid rgba(91,63,160,0.08);">
@@ -459,24 +459,24 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
     <div class="sidebar">
       <div style="padding:8px 0;">
         <div class="sidebar-label">Overview</div>
-        <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span>Dashboard</button>
-        <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon">📋</span>Timeline</button>
+        <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>Dashboard</button>
+        <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Timeline</button>
         <div class="sidebar-divider"></div>
         <div class="sidebar-label">Work</div>
-        <button class="nav-item" onclick="nav('files')" id="nav-files"><span class="nav-icon">📁</span>Files<span class="nav-badge" id="badge-files" style="display:none"></span></button>
-        <button class="nav-item" onclick="nav('approvals')" id="nav-approvals"><span class="nav-icon">✅</span>Approvals<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
-        <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon">💬</span>Messages<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
-        <button class="nav-item" onclick="nav('services')" id="nav-services"><span class="nav-icon">🛍️</span>Services</button>
-        <button class="nav-item" onclick="nav('feedback')" id="nav-feedback"><span class="nav-icon">💡</span>Feedback<span class="nav-badge" id="badge-feedback" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('files')" id="nav-files"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Files<span class="nav-badge" id="badge-files" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('approvals')" id="nav-approvals"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Approvals<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Messages<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('services')" id="nav-services"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>Services</button>
+        <button class="nav-item" onclick="nav('feedback')" id="nav-feedback"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></span>Feedback<span class="nav-badge" id="badge-feedback" style="display:none"></span></button>
         <div class="sidebar-divider"></div>
         <div class="sidebar-label">Billing</div>
-        <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon">💳</span>Invoices</button>
+        <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Invoices</button>
         <div class="sidebar-divider"></div>
         <div class="sidebar-label">Resources</div>
-        <button class="nav-item" onclick="nav('onboarding')" id="nav-onboarding"><span class="nav-icon">📝</span>Project Brief</button>
-        <button class="nav-item" onclick="nav('guide')" id="nav-guide"><span class="nav-icon">📖</span>How It Works</button>
-        <button class="nav-item" onclick="nav('contract')" id="nav-contract"><span class="nav-icon">📃</span>Agreement</button>
-        <button class="nav-item" onclick="nav('links')" id="nav-links"><span class="nav-icon">🔗</span>Quick Links</button>
+        <button class="nav-item" onclick="nav('onboarding')" id="nav-onboarding"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></span>Project Brief</button>
+        <button class="nav-item" onclick="nav('guide')" id="nav-guide"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>How It Works</button>
+        <button class="nav-item" onclick="nav('contract')" id="nav-contract"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Agreement</button>
+        <button class="nav-item" onclick="nav('links')" id="nav-links"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>Quick Links</button>
       </div>
     </div>
 
@@ -486,10 +486,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <div class="page-view active" id="page-dashboard">
         <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:4px;" id="greeting"></h2>
         <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="dash-sub"></p>
+        <div id="clientAttention"></div>
         <div class="stats-row" id="statsRow"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div class="card">
-            <div class="card-header"><div class="card-title">📈 Progress</div><span id="dash-pct" style="font-size:13px;font-weight:700;color:var(--p);"></span></div>
+            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</div><span id="dash-pct" style="font-size:13px;font-weight:700;color:var(--p);"></span></div>
             <div style="padding:20px;">
               <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
               <div class="phase-row" id="phaseRow"></div>
@@ -497,17 +498,17 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
             </div>
           </div>
           <div class="card">
-            <div class="card-header"><div class="card-title">📋 Next Up</div></div>
+            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Next Up</div></div>
             <div class="card-body" id="nextUp"></div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:0;">
           <div class="card">
-            <div class="card-header"><div class="card-title">📁 Recent Files</div><button class="card-action" onclick="nav('files')">View all</button></div>
+            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Recent Files</div><button class="card-action" onclick="nav('files')">View all</button></div>
             <div class="card-body" id="dashFiles"></div>
           </div>
           <div class="card">
-            <div class="card-header"><div class="card-title">💬 Recent Messages</div><button class="card-action" onclick="nav('messages')">View all</button></div>
+            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Recent Messages</div><button class="card-action" onclick="nav('messages')">View all</button></div>
             <div class="card-body" id="dashMsgs"></div>
           </div>
         </div>
@@ -1415,6 +1416,25 @@ async function loadInvoices() {
     <div style="font-size:13px;color:var(--muted);">Balance: <strong style="color:var(--p);font-family:var(--serif);font-size:18px;">$${(total-paid).toLocaleString()}</strong></div></div>`;
   
   document.getElementById("invoiceBody").innerHTML = html;
+  window._unpaidInvoices = data.filter(i => i.status === "pending").length;
+  window._unpaidTotal = data.filter(i => i.status === "pending").reduce((s,i)=>s+(parseFloat(i.amount?.replace(/[^0-9.]/g,""))||0),0);
+  updateAttention();
+}
+
+function updateAttention() {
+  var el = document.getElementById("clientAttention");
+  if (!el) return;
+  var items = [];
+  if (window._pendingApprovals > 0) {
+    items.push((window._pendingApprovals) + " item" + (window._pendingApprovals>1?"s":"") + " waiting for your approval");
+  }
+  if (window._unpaidInvoices > 0) {
+    items.push((window._unpaidInvoices) + " invoice" + (window._unpaidInvoices>1?"s":"") + " ready to pay ($" + (window._unpaidTotal||0).toLocaleString() + ")");
+  }
+  if (!items.length) { el.innerHTML = ""; return; }
+  el.innerHTML = '<div style="background:#f7f4fd;border:1px solid rgba(91,63,160,0.18);border-radius:12px;padding:13px 16px;margin-bottom:20px;display:flex;align-items:center;gap:11px;">'
+    + '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    + '<div style="font-size:13px;color:var(--ink);"><span style="font-weight:600;">A couple of things for you:</span> ' + items.join(" · ") + '</div></div>';
 }
 
 // ── APPROVALS ──
@@ -1425,6 +1445,8 @@ async function loadApprovals() {
   
   var pending = data.filter(a => a.status === "pending").length;
   setBadge("badge-approvals", pending);
+  window._pendingApprovals = pending;
+  updateAttention();
   
   document.getElementById("approvalsBody").innerHTML = data.length === 0
     ? `<div class="empty-state"><div class="ei">✅</div><p>Nothing to approve yet.<br>Deliverables will appear here when Eric shares them.</p></div>`
