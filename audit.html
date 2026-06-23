@@ -1530,7 +1530,7 @@ function sendNotification(d, bizLabel, issues, deep) {
     '</div></body></html>';
 
   // User-facing confirm, generic, no detailed findings, drives toward paid audit
-  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:inline-block;margin-bottom:20px;background:#1e1338;padding:10px 18px;border-radius:10px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">I took a look at '+d.name+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific issues on your site, some quick fixes, a couple that need more attention.</p><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 22px;">Want the full picture? The Digital Health Check goes deeper with keyword analysis, competitor comparison, and a 6-page prioritized action plan.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles</p></div></body></html>';
+  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0f0820;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:40px 24px;"><a href="https://davisdigitalstudio.com" style="font-family:Georgia,serif;font-size:18px;color:#fff;text-decoration:none;display:inline-block;margin-bottom:20px;background:#1e1338;padding:10px 18px;border-radius:10px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</a><div style="background:#1e1338;border-radius:16px;padding:28px;"><h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;margin:0 0 12px;">I took a look at '+d.name+'.</h2><p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific issues on your site, some quick fixes, a couple that need more attention.</p>'+(issues.length?'<p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 14px;">The first thing I would look at is <strong style="color:#c4aee8;">'+issues[0].title+'</strong>. That is usually where the quickest wins are.</p>':'')+'<p style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin:0 0 22px;">Want the full picture? The Digital Health Check goes deeper with keyword analysis, competitor comparison, and a 6-page prioritized action plan.</p><a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a></div><p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);margin-top:20px;">Eric Davis · Davis Digital Studio · Los Angeles</p></div></body></html>';
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -1605,6 +1605,21 @@ window.addEventListener('scroll', function(){ var h=document.documentElement.scr
 <script>
 /* Mobile nav dropdown toggle */
 function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
+</script>
+<div id="ddsStickyCta" style="position:fixed;bottom:24px;right:24px;z-index:9990;opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease;pointer-events:none;">
+  <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Book a free call →</a>
+</div>
+<style>@media(max-width:640px){#ddsStickyCta{display:none;}}</style>
+<script>
+(function(){
+  var c=document.getElementById('ddsStickyCta');
+  if(!c)return;
+  function onScroll(){
+    if(window.scrollY>600){c.style.opacity='1';c.style.transform='translateY(0)';c.style.pointerEvents='auto';}
+    else{c.style.opacity='0';c.style.transform='translateY(12px)';c.style.pointerEvents='none';}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
 </script>
 </body>
 </html>
