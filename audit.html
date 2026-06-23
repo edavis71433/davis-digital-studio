@@ -1510,8 +1510,8 @@ function unlockReport() {
     '<a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a>'+
     '</div>'+
     '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
-    '</div>  <script src="/concierge.js" defer></script>
-</body></html>';
+    '</div>'+
+'</body></html>';
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -1732,5 +1732,6 @@ function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.t
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+  <script src="/concierge.js" defer></script>
 </body>
 </html>
