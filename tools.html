@@ -242,6 +242,7 @@ body{padding-top:68px;}
         <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
         <div class="nav-drop-divider"></div>
         <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
+        <a href="/ai-critique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/></svg> AI Website Review</a>
         <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
         <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
         <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
@@ -284,6 +285,7 @@ body{padding-top:68px;}
     <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="nav-mob-sub">
       <a href="/audit#free-audit">Free Site Score</a>
+      <a href="/ai-critique">AI Website Review</a>
       <a href="/report-card">Digital Report Card</a>
       <a href="/roi-calculator">ROI Calculator</a>
       <a href="/speed-test">Speed Test</a>
@@ -373,6 +375,23 @@ body{padding-top:68px;}
   <div class="section-label" style="margin-bottom:20px;">Start here</div>
 
   <div class="tools-grid">
+
+    <div class="tool-card featured">
+      <span class="tool-badge badge-free">Free · New</span>
+      <div class="tool-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/><path d="M10 18h4"/></svg>
+      </div>
+      <div class="tool-name">AI Website Review</div>
+      <p class="tool-desc">Paste your URL and answer two quick questions. A plain-English read on what's working and what's quietly costing you business, written like a real person would explain it. No signup, no jargon.</p>
+      <ul class="tool-features">
+        <li>Reads your real, live page</li>
+        <li>Tailored to your business type and goal</li>
+        <li>Honest wins and fixes, sorted by impact</li>
+        <li>Tells you what to fix first</li>
+        <li>About 30 seconds, no email required</li>
+      </ul>
+      <a href="/ai-critique" class="tool-cta" onclick="if(typeof gtag==='function'){gtag('event','tool_click',{event_category:'tools',event_label:'ai_critique'});}">Review my site free</a>
+    </div>
 
     <div class="tool-card featured">
       <span class="tool-badge badge-free">Free</span>
@@ -646,5 +665,6 @@ function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.t
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 })();
 </script>
+  <script src="/concierge.js" defer></script>
 </body>
 </html>

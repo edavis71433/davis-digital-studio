@@ -18,5 +18,8 @@
 
 /roi                    /roi-calculator                 301
 /tools                  /tools.html                     200
+/ai-critique            /ai-critique.html               200
+/review                 /ai-critique                    301
+/ai-review              /ai-critique                    301
 
 /*                      /404.html                       404
