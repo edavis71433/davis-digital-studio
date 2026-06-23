@@ -692,7 +692,7 @@ async function loadLeads() {
 
 function filterLeads(tool) {
   currentLeadFilter = tool;
-  ['all','audit','speed_test','local_visibility','pricing_estimator'].forEach(t => {
+  ['all','audit','report_card','contact'].forEach(t => {
     var btn = document.getElementById('lf-'+t);
     if (!btn) return;
     if (t === tool) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
