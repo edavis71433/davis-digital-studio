@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const RESEND_KEY = Deno.env.get('RESEND_KEY') || '';
-const ANTHROPIC_KEY = Deno.env.get('ANTHORPIC_KEY') || ''; // secret name is misspelled in Supabase on purpose; this matches it
+const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_KEY') || ''; // matches the ANTHROPIC_KEY secret in Supabase
 const ERIC = 'eric@davisdigitalstudio.com';
 const FROM = 'Davis Digital Studio <noreply@davisdigitalstudio.com>';
 const PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
@@ -71,27 +71,19 @@ async function deepAudit(targetUrl: string) {
   out.domain = u.hostname;
   out.https = u.protocol === 'https:';
 
-  // Use a real browser User-Agent so sites don't 403 a "bot".
+  // Single fast fetch (like the original working version). Browser UA so sites don't 403 a "bot".
   const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
   let html = '';
-  // Try the URL as given, then fall back to http:// if https failed (some small sites still aren't on https).
-  const tryUrls = [normalized];
-  if (u.protocol === 'https:') tryUrls.push('http://' + u.hostname + u.pathname + u.search);
-  for (const tryUrl of tryUrls) {
-    try {
-      const res = await fetch(tryUrl, {
-        headers: { 'User-Agent': BROWSER_UA, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
-        signal: AbortSignal.timeout(15000), redirect: 'follow',
-      });
-      if (res.ok) {
-        html = await res.text();
-        out.fetchedHtml = true;
-        out.https = tryUrl.startsWith('https:');
-        break;
-      }
-    } catch (_) { /* try next */ }
-  }
+  try {
+    const res = await fetch(normalized, {
+      headers: { 'User-Agent': BROWSER_UA, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+      signal: AbortSignal.timeout(9000), redirect: 'follow',
+    });
+    if (res.ok) {
+      html = (await res.text()).slice(0, 600000);
+      out.fetchedHtml = true;
+    }
+  } catch (_) { /* ignore */ }
 
   if (html) {
     const lc = html.toLowerCase();
@@ -174,27 +166,9 @@ async function deepAudit(targetUrl: string) {
     for (const p of socials) if (lc.includes(p)) out.local.socialLinks.push(p);
   }
 
-  try {
-    const rRes = await fetch(`${u.protocol}//${u.hostname}/robots.txt`, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
-    if (rRes.ok) {
-      const rText = await rRes.text();
-      out.discoverability.robotsTxt = true;
-      out.discoverability.robotsTxtBlocksAll = /User-agent:\s*\*[\s\S]*?Disallow:\s*\/\s*$/im.test(rText);
-      const sd = rText.match(/^Sitemap:\s*(\S+)/im);
-      out.discoverability.sitemapDeclared = !!sd;
-      out.discoverability.sitemapUrl = sd ? sd[1] : null;
-    }
-  } catch (_) { /* */ }
-
-  try {
-    const smUrl = out.discoverability.sitemapUrl || `${u.protocol}//${u.hostname}/sitemap.xml`;
-    const sRes = await fetch(smUrl, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
-    if (sRes.ok) {
-      const sText = await sRes.text();
-      out.discoverability.sitemapXml = true;
-      out.discoverability.sitemapUrlCount = (sText.match(/<url>/gi) || []).length || (sText.match(/<loc>/gi) || []).length;
-    }
-  } catch (_) { /* */ }
+  // (robots.txt + sitemap probes removed: they added network round-trips that pushed
+  //  total runtime past Supabase's execution limit. The review reads the page itself,
+  //  which is what matters most for the visitor-facing critique.)
 
   return out;
 }

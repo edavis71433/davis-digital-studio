@@ -474,6 +474,12 @@ body{padding-top:68px;}
 .crit-input{width:100%;border:1.5px solid rgba(91,63,160,0.22);border-radius:12px;padding:15px 16px;font-size:16px;color:var(--ink);font-family:inherit;background:#fdfcff;transition:border-color .15s,box-shadow .15s;}
 .crit-input::placeholder{color:#a99fbb;}
 .crit-input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 4px rgba(91,63,160,0.1);}
+/* URL input with a built-in https:// prefix so visitors know they don't type it */
+.crit-url-wrap{display:flex;align-items:stretch;border:1.5px solid rgba(91,63,160,0.22);border-radius:12px;background:#fdfcff;overflow:hidden;transition:border-color .15s,box-shadow .15s;}
+.crit-url-wrap:focus-within{border-color:var(--p);box-shadow:0 0 0 4px rgba(91,63,160,0.1);}
+.crit-url-prefix{display:flex;align-items:center;padding:0 4px 0 16px;font-size:16px;color:#a99fbb;background:#f3eefb;border-right:1.5px solid rgba(91,63,160,0.14);white-space:nowrap;user-select:none;}
+.crit-url-wrap .crit-input{border:none;border-radius:0;box-shadow:none;background:transparent;flex:1;}
+.crit-url-wrap .crit-input:focus{box-shadow:none;}
 .crit-hint{font-size:13px;color:var(--muted);line-height:1.5;margin:11px 0 0;}
 .crit-next,.crit-go{margin-top:20px;width:100%;background:var(--p);color:#fff;border:none;border-radius:100px;padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s,transform .08s;}
 .crit-next:hover,.crit-go:hover{opacity:.9;}
@@ -602,9 +608,12 @@ body{padding-top:68px;}
       <div class="crit-step" id="step1">
         <label class="crit-q" for="critUrl">What's your website address?</label>
         <div class="crit-url-row">
-          <input type="url" id="critUrl" class="crit-input" placeholder="yourbusiness.com" autocomplete="url" inputmode="url" spellcheck="false">
+          <div class="crit-url-wrap">
+            <span class="crit-url-prefix">https://</span>
+            <input type="text" id="critUrl" class="crit-input" placeholder="yourbusiness.com" autocomplete="url" inputmode="url" spellcheck="false">
+          </div>
         </div>
-        <p class="crit-hint">Works with any live site. I only read what's already public, the same as Google does.</p>
+        <p class="crit-hint">Just your domain is fine, no need to type the https part. I only read what's already public, the same as Google does.</p>
         <button class="crit-next" id="toStep2">Next</button>
       </div>
 
