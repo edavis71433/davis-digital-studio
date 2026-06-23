@@ -518,51 +518,7 @@ body{padding-top:68px;}
   <!-- STEP: Replace G-EQYY0DL8JL with your real GA4 Measurement ID -->
   <!-- Get it at: analytics.google.com → Admin → Data Streams → your stream -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EQYY0DL8JL');
   
-// Prevent double form submission
-document.querySelectorAll('form').forEach(function(form) {
-  form.addEventListener('submit', function() {
-    var btn = form.querySelector('button[type="submit"]');
-    if (btn) {
-      setTimeout(function() {
-        btn.disabled = true;
-        btn.textContent = 'Sending...';
-      }, 100);
-    }
-  });
-});
-
-
-
-
-// ── Exit Intent ──
-var _exitShown = false;
-function closeExit() {
-  document.getElementById('exitOverlay').classList.remove('show');
-  sessionStorage.setItem('exit_shown','1');
-}
-if (!sessionStorage.getItem('exit_shown')) {
-  document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10 && !_exitShown) {
-      _exitShown = true;
-      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
-    }
-  });
-  // Mobile: show on back button / after 45s inactivity
-  var _idleTimer;
-  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
-  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
-  resetIdle();
-}
-
-
-
-</script>
 
   <link rel="manifest" href="/manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -1128,7 +1084,11 @@ function submitReportCard() {
           '<p style="color:rgba(255,255,255,0.3);font-size:12px;margin:0;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br>' +
           '<a href="https://davisdigitalstudio.com" style="color:rgba(196,174,232,0.5);">davisdigitalstudio.com</a></p>' +
         '</div>' +
-        '</div></body></html>';
+        '</div><script>
+/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
+function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
+</script>
+</body></html>';
 
       // Also notify Eric via Resend with full details
       fetch('https://api.resend.com/emails', {

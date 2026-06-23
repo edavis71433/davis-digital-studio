@@ -800,7 +800,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Everything you might need in one place.</p>
         <div class="card">
           <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
-            <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);">
+            <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);" rel="noopener">
               <span style="font-size:24px;">📅</span>
               <div><div style="font-size:14px;font-weight:600;">Book a call with Eric</div><div style="font-size:12px;color:var(--muted);">Schedule a 30-minute check-in</div></div>
             </a>
@@ -808,11 +808,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
               <span style="font-size:24px;">✉️</span>
               <div><div style="font-size:14px;font-weight:600;">Email Eric directly</div><div style="font-size:12px;color:var(--muted);">eric@davisdigitalstudio.com</div></div>
             </a>
-            <a href="https://davisdigitalstudio.com" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);">
+            <a href="https://davisdigitalstudio.com" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);" rel="noopener">
               <span style="font-size:24px;">🌐</span>
               <div><div style="font-size:14px;font-weight:600;">Davis Digital Studio</div><div style="font-size:12px;color:var(--muted);">davisdigitalstudio.com</div></div>
             </a>
-            <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);">
+            <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" target="_blank" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--cream);border-radius:12px;border:1px solid rgba(91,63,160,0.08);text-decoration:none;color:var(--ink);" rel="noopener">
               <span style="font-size:24px;">💼</span>
               <div><div style="font-size:14px;font-weight:600;">LinkedIn</div><div style="font-size:12px;color:var(--muted);">Eric's professional profile</div></div>
             </a>
@@ -1034,7 +1034,7 @@ function renderFiles() {
         <div class="file-info"><h4>${f.name}</h4><p>${f.type||""} · ${f.size||""} · ${formatDate(f.created_at)}</p></div>
         <span class="file-status ${f.status}">${cap(f.status)}</span>
         <div class="file-actions">
-          ${f.url ? `<a href="${f.url}" target="_blank" class="file-btn" download>Download</a>` : ""}
+          ${f.url ? `<a href="${f.url}" target="_blank" class="file-btn" download rel="noopener">Download</a>` : ""}
           ${f.from_who === "eric" && f.status === "pending" ? `<button class="file-btn" onclick="approveFile('${f.id}')">Approve ✓</button>` : ""}
           ${f.from_who === "client" ? `<button class="file-btn danger" onclick="deleteFile('${f.id}','${f.storage_path}')">Delete</button>` : ""}
         </div>
@@ -1192,7 +1192,7 @@ async function loadInvoices() {
     total += amt;
     if (inv.status === "paid") paid += amt;
     var payBtn = inv.status === "pending" && inv.stripe_url
-      ? `<a href="${inv.stripe_url}" target="_blank" class="pay-btn">💳 Pay now →</a>` : "";
+      ? `<a href="${inv.stripe_url}" target="_blank" class="pay-btn" rel="noopener">💳 Pay now →</a>` : "";
     return `<div class="inv-item">
       <div class="inv-left"><h4>${inv.name}</h4><p>${inv.description||""}<br>${inv.due_date||""}</p></div>
       <div class="inv-right"><div class="inv-amount">${inv.amount}</div>

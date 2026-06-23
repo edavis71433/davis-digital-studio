@@ -1400,7 +1400,11 @@ function unlockReport() {
     '<a href="https://davisdigitalstudio.com/audit#pricing" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:12px 24px;border-radius:100px;text-decoration:none;">See audit options from $99 →</a>'+
     '</div>'+
     '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);">Eric Davis · Davis Digital Studio · Los Angeles, CA</p>'+
-    '</div></body></html>';
+    '</div><script>
+/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
+function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
+</script>
+</body></html>';
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -1505,7 +1509,7 @@ function sendNotification(d, bizLabel, issues, deep) {
     '<div style="background:#1e1338;border-radius:16px;padding:28px;margin-bottom:20px;">'+
       '<div style="font-size:11px;color:#c4aee8;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">New Audit Lead</div>'+
       '<h2 style="font-family:Georgia,serif;font-size:24px;font-weight:400;color:#fff;margin:0 0 4px;">'+(d.name||'(unnamed)')+'</h2>'+
-      '<a href="'+d.url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:18px;">'+d.url+'</a>'+
+      '<a href="'+d.url+'" target="_blank" style="display:block;color:#c4aee8;text-decoration:none;font-size:13px;margin-bottom:18px;" rel="noopener">'+d.url+'</a>'+
       '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">'+
         '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);width:90px;">Email</td><td><a href="mailto:'+d.email+'" style="color:#c4aee8;text-decoration:none;">'+d.email+'</a></td></tr>'+
         '<tr><td style="padding:4px 0;color:rgba(255,255,255,0.4);">Business type</td><td style="color:#fff;">'+bizLabel+'</td></tr>'+
@@ -1525,7 +1529,7 @@ function sendNotification(d, bizLabel, issues, deep) {
     '</div>'+
     '<div style="text-align:center;">'+
       '<a href="mailto:'+d.email+'" style="display:inline-block;background:#5b3fa0;color:#fff;font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;margin-right:6px;">Reply to lead →</a>'+
-      '<a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;">Visit site →</a>'+
+      '<a href="'+d.url+'" target="_blank" style="display:inline-block;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:11px 22px;border-radius:100px;text-decoration:none;" rel="noopener">Visit site →</a>'+
     '</div>'+
     '</div></body></html>';
 

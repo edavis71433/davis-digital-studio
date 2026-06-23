@@ -495,66 +495,11 @@ body{padding-top:68px;}
       { "@type": "Offer", "name": "Custom HTML", "price": "6500", "priceCurrency": "USD", "description": "Hand-coded site, no template limits, fastest and most unique." }
     ]
   }
-  
-
-
-// ── Exit Intent ──
-var _exitShown = false;
-function closeExit() {
-  document.getElementById('exitOverlay').classList.remove('show');
-  sessionStorage.setItem('exit_shown','1');
-}
-if (!sessionStorage.getItem('exit_shown')) {
-  document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10 && !_exitShown) {
-      _exitShown = true;
-      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
-    }
-  });
-  // Mobile: show on back button / after 45s inactivity
-  var _idleTimer;
-  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
-  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
-  resetIdle();
-}
-
-
-
 </script>
   <!-- Google Analytics 4 -->
   <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();</script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EQYY0DL8JL');
   
-
-
-// ── Exit Intent ──
-var _exitShown = false;
-function closeExit() {
-  document.getElementById('exitOverlay').classList.remove('show');
-  sessionStorage.setItem('exit_shown','1');
-}
-if (!sessionStorage.getItem('exit_shown')) {
-  document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10 && !_exitShown) {
-      _exitShown = true;
-      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
-    }
-  });
-  // Mobile: show on back button / after 45s inactivity
-  var _idleTimer;
-  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
-  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
-  resetIdle();
-}
-
-
-
-</script>
 
   <link rel="manifest" href="/manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -1191,6 +1136,10 @@ if (!sessionStorage.getItem('exit_shown')) {
 (function(){var consent=localStorage.getItem('cookie_consent');if(!consent){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(consent==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})();
 function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
 function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-EQYY0DL8JL']=true;document.getElementById('cookieBanner').style.display='none';}
+</script>
+<script>
+/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
+function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
 </script>
 </body>
 </html>

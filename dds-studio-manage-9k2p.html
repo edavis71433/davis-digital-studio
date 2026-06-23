@@ -827,7 +827,7 @@ function showLeadDetail(id) {
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap;">' +
       '<div style="flex:1;min-width:200px;">' +
         '<h2 style="font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 6px;color:var(--ink);">'+(lead.business_name||'(no name)')+'</h2>' +
-        (lead.url ? '<a href="'+lead.url+'" target="_blank" style="display:inline-block;font-size:13px;color:var(--p);text-decoration:none;margin-bottom:4px;">'+lead.url+' →</a><br>' : '') +
+        (lead.url ? '<a href="'+lead.url+'" target="_blank" style="display:inline-block;font-size:13px;color:var(--p);text-decoration:none;margin-bottom:4px;" rel="noopener">'+lead.url+' →</a><br>' : '') +
         '<a href="mailto:'+(lead.client_email||'')+'" style="font-size:13px;color:var(--muted);text-decoration:none;">'+(lead.client_email||'—')+'</a>' +
         (lead.city ? ' · <span style="font-size:13px;color:var(--muted);">'+lead.city+'</span>' : '') +
       '</div>' +
@@ -1110,7 +1110,7 @@ async function openHubClient(id) {
   if (files.length === 0) { html += empty("No files yet."); }
   else {
     html += files.slice(0,8).map(function(f){
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+ficon(f.name)+' '+(f.name||"")+' <span style="color:var(--muted);font-size:11px;">'+(f.size||"")+'</span></div>'+(f.url?'<a href="'+f.url+'" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;">Open ↗</a>':'')+'</div>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+ficon(f.name)+' '+(f.name||"")+' <span style="color:var(--muted);font-size:11px;">'+(f.size||"")+'</span></div>'+(f.url?'<a href="'+f.url+'" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;" rel="noopener">Open ↗</a>':'')+'</div>';
     }).join("");
   }
 
@@ -1251,7 +1251,7 @@ async function loadFiles(client) {
       <div class="ficon">${ficon(f.name)}</div>
       <div class="finfo"><h4>${f.name}</h4><p>${f.from_who==="eric"?"From you":"From client"} · ${f.size||""} · ${fmtDate(f.created_at)}</p></div>
       <span class="fbadge ${f.status}">${cap(f.status)}</span>
-      ${f.url?`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;margin-left:8px;">Download</a>`:""}
+      ${f.url?`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;margin-left:8px;" rel="noopener">Download</a>`:""}
     </div>`).join("");
 }
 
