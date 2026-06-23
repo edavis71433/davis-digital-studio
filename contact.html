@@ -685,6 +685,7 @@ body{padding-top:68px;}
   <div class="contact-right">
     <h2>Tell me about<br>your <em>project.</em></h2>
     <div class="sent-banner" id="sentBanner"><strong>Message sent!</strong> I'll get back to you within 24 hours at eric@davisdigitalstudio.com.</div>
+    <div id="contactErr" style="display:none;background:#fdecec;border:1px solid #f0c4c4;color:#a23b3b;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;"></div>
 <form id="contactForm">
       <!-- Honeypot for spam prevention -->
       <input type="text" name="_gotcha" style="display:none">
@@ -730,15 +731,30 @@ body{padding-top:68px;}
       var service = document.getElementById('service').value;
       var message = document.getElementById('message').value.trim();
       var btn = document.getElementById('contactSubmitBtn');
+      var errBox = document.getElementById('contactErr');
+      errBox.style.display = 'none';
 
-      if (!name || !email) return;
+      if (!name || !email) {
+        errBox.textContent = 'Please enter your name and email so I can get back to you.';
+        errBox.style.display = 'block';
+        window.scrollTo({ top: errBox.offsetTop - 120, behavior: 'smooth' });
+        return;
+      }
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailOk) {
+        errBox.textContent = 'That email address does not look right. Mind double-checking it?';
+        errBox.style.display = 'block';
+        window.scrollTo({ top: errBox.offsetTop - 120, behavior: 'smooth' });
+        return;
+      }
 
       btn.disabled = true;
       btn.textContent = 'Sending...';
+      var sendOk = false;
 
       // Send to Formspree
       try {
-        await fetch('https://formspree.io/f/mvznevlo', {
+        var fsRes = await fetch('https://formspree.io/f/mvznevlo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -750,6 +766,7 @@ body{padding-top:68px;}
             message: message || 'No message provided'
           })
         });
+        if (fsRes && fsRes.ok) sendOk = true;
       } catch(e) {}
 
       // Send auto-reply via Edge Function (server-side - no key exposure, no CSP issue)
@@ -768,7 +785,15 @@ body{padding-top:68px;}
         });
       } catch(e) {}
 
-      // Show success
+      // Show success only if the message actually went through
+      if (!sendOk) {
+        btn.disabled = false;
+        btn.textContent = 'Send message';
+        errBox.innerHTML = 'Something went wrong sending your message. Please email me directly at <a href="mailto:eric@davisdigitalstudio.com" style="color:#a23b3b;font-weight:600;">eric@davisdigitalstudio.com</a> and I will get right back to you.';
+        errBox.style.display = 'block';
+        window.scrollTo({ top: errBox.offsetTop - 120, behavior: 'smooth' });
+        return;
+      }
       if (typeof gtag === 'function') {
         gtag('event', 'generate_lead', {
           event_category: 'lead',
