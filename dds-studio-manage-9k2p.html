@@ -627,6 +627,17 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         </div>
 
         <div class="card">
+          <div class="ch"><div class="ct">⬆ Bulk import (CSV)</div></div>
+          <div class="cb">
+            <div style="font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:12px;">Upload a CSV to add many prospects at once. The file needs a header row. Recognized columns (any order, extras ignored): <strong>business_name</strong> (required), contact_name, email, phone, website, site_status, source, notes. Duplicates by business name are skipped.</div>
+            <input type="file" id="pr-csv" accept=".csv,text/csv" style="font-size:13px;margin-bottom:12px;display:block;">
+            <button class="sbtn" onclick="importProspectsCsv()" id="pr-import-btn">Import file →</button>
+            <div class="result-box" id="pr-import-result"></div>
+            <div id="pr-import-progress" style="display:none;font-size:13px;color:var(--muted);margin-top:10px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
           <div class="ch">
             <div class="ct">📋 Pipeline</div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -2128,6 +2139,107 @@ async function addProspect() {
   if (r === null) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not save. Check the Edge Function allowlist note above.'; return; }
   ['pr-name','pr-contact','pr-email','pr-phone','pr-website','pr-followup','pr-notes'].forEach(id => document.getElementById(id).value = '');
   resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
+  loadProspects();
+}
+
+// Minimal CSV parser that handles quoted fields, commas inside quotes, and escaped quotes.
+function parseCsv(text) {
+  var rows = [];
+  var row = [];
+  var field = '';
+  var inQuotes = false;
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += c; }
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter(function(r) { return r.some(function(x) { return (x||'').trim() !== ''; }); });
+}
+
+async function importProspectsCsv() {
+  var fileInput = document.getElementById('pr-csv');
+  var resultEl = document.getElementById('pr-import-result');
+  var progressEl = document.getElementById('pr-import-progress');
+  var btn = document.getElementById('pr-import-btn');
+  if (!fileInput.files || !fileInput.files.length) {
+    resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Pick a CSV file first.'; return;
+  }
+  var text;
+  try { text = await fileInput.files[0].text(); }
+  catch (e) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not read the file.'; return; }
+
+  var rows = parseCsv(text);
+  if (rows.length < 2) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='File needs a header row plus at least one data row.'; return; }
+
+  var headers = rows[0].map(function(h){ return (h||'').trim().toLowerCase().replace(/\s+/g,'_'); });
+  var known = ['business_name','contact_name','email','phone','website','site_status','source','notes'];
+  var idx = {};
+  known.forEach(function(k){ idx[k] = headers.indexOf(k); });
+  if (idx.business_name === -1) {
+    resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='CSV must have a "business_name" column.'; return;
+  }
+
+  // Make sure we know existing names to skip duplicates.
+  if (!allProspects.length) { await loadProspects(); }
+  var existing = {};
+  allProspects.forEach(function(p){ if (p.business_name) existing[p.business_name.trim().toLowerCase()] = true; });
+
+  var toAdd = [];
+  var skippedDupes = 0;
+  for (var r = 1; r < rows.length; r++) {
+    var cells = rows[r];
+    var name = (cells[idx.business_name] || '').trim();
+    if (!name) continue;
+    if (existing[name.toLowerCase()]) { skippedDupes++; continue; }
+    existing[name.toLowerCase()] = true; // also dedupe within the file
+    function val(k){ return idx[k] !== -1 ? ((cells[idx[k]]||'').trim() || null) : null; }
+    toAdd.push({
+      business_name: name,
+      contact_name: val('contact_name'),
+      email: val('email'),
+      phone: val('phone'),
+      website: val('website'),
+      site_status: val('site_status') || 'No website',
+      source: val('source') || 'Imported',
+      notes: val('notes'),
+      status: 'New'
+    });
+  }
+
+  if (!toAdd.length) {
+    resultEl.style.display='block'; resultEl.style.color='var(--muted)';
+    resultEl.textContent = 'Nothing new to import' + (skippedDupes ? ' ('+skippedDupes+' duplicates skipped).' : '.');
+    return;
+  }
+
+  btn.disabled = true; btn.style.opacity = '0.6';
+  progressEl.style.display = 'block';
+  var added = 0, failed = 0;
+  for (var n = 0; n < toAdd.length; n++) {
+    progressEl.textContent = 'Importing ' + (n+1) + ' of ' + toAdd.length + '...';
+    var resp = await api('prospects', 'POST', toAdd[n]);
+    if (resp === null) { failed++; } else { added++; }
+  }
+  progressEl.style.display = 'none';
+  btn.disabled = false; btn.style.opacity = '1';
+  fileInput.value = '';
+
+  resultEl.style.display='block';
+  resultEl.style.color = failed ? 'var(--yellow)' : 'var(--green)';
+  resultEl.textContent = 'Imported ' + added + ' prospect' + (added===1?'':'s') +
+    (skippedDupes ? ', skipped ' + skippedDupes + ' duplicate' + (skippedDupes===1?'':'s') : '') +
+    (failed ? ', ' + failed + ' failed' : '') + '.';
   loadProspects();
 }
 
