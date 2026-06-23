@@ -904,6 +904,13 @@ function runAudit() {
   if (!url.match(/^https?:\/\//)) url = 'https://' + url;
 
   var displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  // Clean up the business name: if blank or junk (under 2 real chars), fall back to the domain
+  // so emails never go out reading "site score for y". Strip a leading www. from the domain fallback.
+  var cleanName = (name || '').replace(/\s+/g, ' ').trim();
+  if (cleanName.length < 2) {
+    cleanName = displayUrl.replace(/^www\./, '').split('/')[0];
+  }
+  name = cleanName;
   document.getElementById('scanUrl').textContent = displayUrl;
 
   // Show loading
