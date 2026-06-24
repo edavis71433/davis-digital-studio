@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<!-- DDS v3.0 20260621-1655 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin | Davis Digital Studio</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#0f0820;--ink:#1a1523;--muted:#7a6d8e;--cream:#faf8f5;--green:#6abf69;--red:#e05555;--yellow:#f0b429;--serif:"DM Serif Display",Georgia,serif;}
+body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+
+/* LOGIN */
+.login{min-height:100vh;background:var(--pdark);display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+.login::before{content:"";position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.25) 0%,transparent 65%);pointer-events:none;}
+.login-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px;width:100%;max-width:360px;position:relative;z-index:1;}
+.login-logo{font-family:var(--serif);font-size:20px;color:#fff;margin-bottom:3px;}
+.login-logo span{color:var(--pxl);}
+.login-sub{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:28px;letter-spacing:0.5px;}
+.login-input{width:100%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;font-family:"DM Sans",sans-serif;font-size:14px;color:#fff;outline:none;margin-bottom:10px;transition:border-color 0.15s;}
+.login-input:focus{border-color:var(--pxl);}
+.login-btn{width:100%;background:var(--p);color:#fff;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:600;padding:13px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s;}
+.login-btn:hover{opacity:0.88;}
+.login-err{font-size:12px;color:#ff9999;margin-top:8px;display:none;text-align:center;}
+
+/* SHELL */
+.admin{display:none;min-height:100vh;}
+.topbar{background:var(--pdark);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.06);}
+.topbar-logo{font-family:var(--serif);font-size:16px;color:#fff;display:flex;align-items:center;gap:10px;}
+.topbar-logo span{color:var(--pxl);}
+.admin-badge{background:rgba(224,85,85,0.2);border:1px solid rgba(224,85,85,0.25);color:#ff9999;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:1px;}
+.topbar-out{background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:"DM Sans",sans-serif;padding:6px 10px;border-radius:8px;transition:color 0.15s;}
+.topbar-out:hover{color:rgba(255,255,255,0.7);}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+.sidebar{background:#fff;border-right:1px solid rgba(91,63,160,0.08);padding:12px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.sl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 16px 4px;}
+.sn{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--muted);width:100%;border:none;background:none;font-family:"DM Sans",sans-serif;text-align:left;cursor:pointer;transition:background 0.15s;}
+.sn:hover,.sn.active{background:var(--pxxxl);color:var(--p);font-weight:600;}
+.sdiv{height:1px;background:rgba(91,63,160,0.06);margin:6px 0;}
+
+/* MAIN */
+.main{padding:28px 32px;}
+.page{display:none;animation:slideIn 0.2s ease;}
+.page.active{display:block;}
+.pt{font-family:var(--serif);font-size:26px;font-weight:400;margin-bottom:4px;}
+.ps{font-size:13px;color:var(--muted);margin-bottom:24px;}
+
+/* CLIENT BANNER */
+.client-banner{background:var(--pdark);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.cb-av{width:38px;height:38px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+.cb-info{flex:1;}
+.cb-label{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.cb-name{font-size:16px;font-weight:600;color:#fff;}
+.cb-project{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
+
+/* CLIENT SELECT */
+.client-select-wrap{margin-bottom:20px;}
+.client-select-wrap label{font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px;}
+.client-select{width:100%;max-width:380px;padding:11px 14px;border:1.5px solid rgba(91,63,160,0.2);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--ink);background:#fff;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235b3fa0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.client-select:focus{border-color:var(--p);}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;border:1px solid rgba(91,63,160,0.08);margin-bottom:16px;overflow:hidden;}
+.ch{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(91,63,160,0.06);}
+.ct{font-size:13px;font-weight:600;}
+.cb{padding:18px;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:#fff;border-radius:12px;padding:16px 18px;border:1px solid rgba(91,63,160,0.08);}
+.sv{font-family:var(--serif);font-size:24px;color:var(--p);line-height:1;margin-bottom:3px;}
+.sl2{font-size:11px;color:var(--muted);}
+
+/* FORMS */
+.fg{margin-bottom:14px;}
+.fl{font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px;}
+.fi{width:100%;padding:10px 13px;border:1.5px solid rgba(91,63,160,0.15);border-radius:9px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;transition:border-color 0.15s;box-sizing:border-box;resize:vertical;}
+.fi:focus{border-color:var(--p);background:#fff;}
+.sbtn{background:var(--p);color:#fff;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;padding:10px 22px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s;}
+.sbtn:hover{opacity:0.88;}
+.sbtn.sec{background:var(--pxxxl);color:var(--p);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* MSG THREAD */
+.thread{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--cream);border-radius:10px;margin-bottom:12px;}
+.mb{display:flex;gap:8px;}
+.mb.from-eric{flex-direction:row-reverse;}
+.mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.mav.e{background:var(--p);color:#fff;}
+.mav.c{background:#f5f0e8;color:var(--ink);border:1px solid var(--pxl);}
+.mt{background:#fff;border-radius:0 9px 9px 9px;padding:8px 12px;font-size:12px;line-height:1.6;max-width:78%;}
+.from-eric .mt{background:var(--pxxxl);border-radius:9px 0 9px 9px;}
+.mm{font-size:10px;color:var(--muted);margin-top:3px;}
+.from-eric .mm{text-align:right;}
+
+/* FILES */
+.fitem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:var(--cream);border:1px solid rgba(91,63,160,0.06);margin-bottom:8px;}
+.ficon{width:32px;height:32px;border-radius:7px;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.finfo{flex:1;min-width:0;}
+.finfo h4{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.finfo p{font-size:10px;color:var(--muted);}
+.fbadge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px;}
+.fbadge.pending{background:#fffbeb;color:#d97706;}
+.fbadge.review{background:var(--pxxxl);color:var(--p);}
+.fbadge.approved{background:#f0fdf0;color:#28a745;}
+
+/* UPLOAD ZONE */
+.uzone{border:2px dashed rgba(91,63,160,0.2);border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:var(--pxxxl);position:relative;margin-bottom:12px;transition:all 0.2s;}
+.uzone:hover{border-color:var(--p);background:var(--pxxl);}
+.uzone p{font-size:13px;color:var(--muted);}
+.uzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+
+/* INVOICE */
+.inv{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
+.inv:last-child{border-bottom:none;}
+.inv h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.inv p{font-size:11px;color:var(--muted);}
+.iamt{font-family:var(--serif);font-size:17px;text-align:right;}
+.ibadge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;display:inline-block;margin-top:2px;}
+.ibadge.pending{background:#fffbeb;color:#d97706;}
+.ibadge.paid{background:#f0fdf0;color:#28a745;}
+.ibadge.draft{background:#f5f5f5;color:var(--muted);}
+.iact{display:flex;gap:6px;margin-top:4px;}
+.iabtn{background:none;border:1px solid rgba(91,63,160,0.15);border-radius:7px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer;color:var(--p);font-family:"DM Sans",sans-serif;}
+.iabtn.del{color:var(--red);border-color:rgba(224,85,85,0.2);}
+
+/* TIMELINE */
+.tl-edit{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;background:var(--cream);margin-bottom:8px;border:1px solid rgba(91,63,160,0.06);}
+.tl-sel{border:1.5px solid rgba(91,63,160,0.15);border-radius:7px;padding:5px 8px;font-size:12px;font-family:"DM Sans",sans-serif;background:#fff;color:var(--ink);outline:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;font-size:13px;padding:10px 18px;border-radius:100px;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* RESULT BOX */
+.result-box{background:#f0fdf0;border:1px solid rgba(106,191,105,0.2);border-radius:10px;padding:14px;font-size:13px;margin-top:12px;display:none;}
+.code{font-family:monospace;background:var(--cream);border:1px solid rgba(91,63,160,0.1);border-radius:8px;padding:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;margin-top:10px;}
+
+.menu-toggle{display:none;}
+.drawer-scrim{display:none;}
+.admin-botnav{display:none;}
+@media(max-width:768px){
+  .shell{grid-template-columns:1fr;}
+  /* Sidebar becomes a slide-out drawer instead of disappearing */
+  .menu-toggle{display:flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:6px;border:none;background:rgba(255,255,255,0.10);border-radius:9px;color:#fff;cursor:pointer;flex-shrink:0;}
+  .menu-toggle svg{width:20px;height:20px;}
+  .topbar{padding:0 14px;}
+  .topbar-logo{font-size:14px;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sidebar{
+    display:block;position:fixed;top:0;left:0;height:100vh;width:248px;max-width:82vw;
+    z-index:300;transform:translateX(-100%);transition:transform 0.22s ease;
+    box-shadow:0 0 40px rgba(26,21,53,0.28);padding-top:14px;overflow-y:auto;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .drawer-scrim{display:block;position:fixed;inset:0;background:rgba(26,21,53,0.45);z-index:250;opacity:0;pointer-events:none;transition:opacity 0.22s ease;}
+  .drawer-scrim.open{opacity:1;pointer-events:auto;}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px;border-bottom:1px solid rgba(91,63,160,0.10);margin-bottom:6px;}
+  .drawer-head-title{font-family:var(--serif);font-size:15px;color:var(--ink);}
+  .drawer-close{border:none;background:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 6px;}
+  .sn{padding:12px 16px;font-size:15px;}
+  .sl{font-size:11px;padding:12px 16px 4px;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .main{padding-bottom:78px;}
+  .admin-botnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:200;background:#fff;border-top:1px solid rgba(91,63,160,0.1);padding:6px 0 env(safe-area-inset-bottom);}
+  .admin-botnav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;padding:5px 0;color:var(--muted);font-family:"DM Sans",sans-serif;cursor:pointer;}
+  .admin-botnav button span{font-size:9px;letter-spacing:0.3px;}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div class="login" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">Davis<span>Digital</span> Studio</div>
+    <div class="login-sub">ADMIN PANEL · ERIC ONLY</div>
+    <input aria-label="Admin password" class="login-input" id="ap" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign in →</button>
+    <div class="login-err" id="le">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin" id="adminWrap">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;min-width:0;">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" onclick="toggleDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-logo">Davis<span>Digital</span> Studio <span class="admin-badge">ADMIN</span></div>
+    </div>
+    <button class="topbar-out" onclick="doLogout()">Sign out</button>
+  </div>
+  <div class="drawer-scrim" id="drawerScrim" onclick="closeDrawer()"></div>
+  <nav class="admin-botnav" id="adminBotnav">
+    <button onclick="go('overview')">📊<span>Overview</span></button>
+    <button onclick="go('hub')">🗂️<span>Clients</span></button>
+    <button onclick="go('leads')">📥<span>Leads</span></button>
+    <button onclick="go('messages')">💬<span>Message</span></button>
+    <button onclick="toggleDrawer()">☰<span>More</span></button>
+  </nav>
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="adminSidebar">
+      <div class="drawer-head">
+        <span class="drawer-head-title">Menu</span>
+        <button class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">&times;</button>
+      </div>
+      <div class="sl">Dashboard</div>
+      <button class="sn active" onclick="go('overview')" id="sn-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Overview</button>
+      <button class="sn" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 7V5a2 2 0 0 1 2-2h4l2 3h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Client Hub</button>
+      <button class="sn" onclick="go('leads')" id="sn-leads"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Leads</button>
+      <div class="sdiv"></div>
+      <div class="sl">Client Work</div>
+      <button class="sn" onclick="go('messages')" id="sn-messages"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Send Message</button>
+      <button class="sn" onclick="go('files')" id="sn-files"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload Files</button>
+      <button class="sn" onclick="go('approvals')" id="sn-approvals"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Add Approval</button>
+      <button class="sn" onclick="go('timeline')" id="sn-timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Update Timeline</button>
+      <button class="sn" onclick="go('invoices')" id="sn-invoices"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Invoices</button>
+      <div class="sdiv"></div>
+      <div class="sl">Documents</div>
+      <button class="sn" onclick="go('contracts')" id="sn-contracts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Contracts &amp; Docs</button>
+      <button class="sn" onclick="go('quote')" id="sn-quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Quote Generator</button>
+      <button class="sn" onclick="go('disclosures')" id="sn-disclosures"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Disclosures</button>
+      <div class="sdiv"></div>
+      <div class="sl">Clients</div>
+      <button class="sn" onclick="go('newclient')" id="sn-newclient"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Client</button>
+      <div class="sdiv"></div>
+      <div class="sl">Outreach</div>
+      <button class="sn" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
+      <button class="sn" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Templates</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div class="pt">Welcome back, Eric</div>
+        <div class="ps" id="ovSubtitle">Davis Digital Studio Admin</div>
+        <div class="stats" id="ovStats"></div>
+        <div id="ovAttention"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Active projects</div></div><div class="cb" id="ovClients"></div></div>
+          <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Recent activity</div></div><div class="cb" id="ovActivity"></div></div>
+        </div>
+      </div>
+
+      <!-- CLIENT HUB -->
+      <div class="page" id="page-hub">
+        <div class="pt">Client Hub</div>
+        <div class="ps">Everyone you work with, in one place. Click a client to see their full record: messages, files, invoices, approvals, timeline, and any tools they have run on the site.</div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center;">
+          <input aria-label="Search clients by name, project, or email..." id="hubSearch" oninput="renderHub()" placeholder="Search clients by name, project, or email..." style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
+          <button class="sbtn" onclick="hubFilter='all';renderHub()" id="hf-all" style="background:var(--p);color:#fff;font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">All</button>
+          <button class="sbtn" onclick="hubFilter='active';renderHub()" id="hf-active" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Active</button>
+          <button class="sbtn" onclick="hubFilter='inactive';renderHub()" id="hf-inactive" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Inactive</button>
+          <button class="sbtn" onclick="loadHub()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">↻ Refresh</button>
+        </div>
+
+        <div id="hubList"></div>
+        <div id="hubDetail" style="display:none;margin-top:24px;"></div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="page-leads">
+        <div class="pt">Audit Leads</div>
+        <div class="ps">Everyone who has run a free tool on the site. Click a lead to see the full deep audit, signal table, and findings.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
+          <button class="sbtn" onclick="filterLeads('all')" id="lf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
+          <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
+          <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
+          <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
+          <button class="sbtn" onclick="filterLeads('contact')" id="lf-contact" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Contact</button>
+          <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
+        </div>
+        <div id="leadsList"></div>
+        <div id="leadDetail" style="display:none;margin-top:24px;"></div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="page" id="page-messages">
+        <div class="pt">Send Message</div>
+        <div class="ps">Message a client, they get an email notification instantly.</div>
+        <div class="client-select-wrap">
+          <label>Select client</label>
+          <select aria-label="Sel messages" class="client-select" id="sel-messages" onchange="onClientChange(this.value,'messages')">
+            <option value="">— Choose a client —</option>
+          </select>
+        </div>
+        <div class="client-banner" id="banner-messages" style="display:none;">
+          <div class="cb-av" id="bav-messages">?</div>
+          <div class="cb-info"><div class="cb-label">Currently messaging</div><div class="cb-name" id="bname-messages">—</div><div class="cb-project" id="bproj-messages"></div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">💬 Message Thread</div></div>
+          <div class="cb">
+            <div class="thread" id="msgThread"><p style="font-size:13px;color:var(--muted);text-align:center;padding:20px;">Select a client to load messages.</p></div>
+            <div id="tmplRow" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;"></div>
+            <div class="fg"><textarea aria-label="Type your message..." class="fi" id="msgText" rows="3" placeholder="Type your message..."></textarea></div>
+            <button class="sbtn" onclick="sendMsg()">Send + notify client →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILES -->
+      <div class="page" id="page-files">
+        <div class="pt">Upload Files</div>
+        <div class="ps">Upload files to a client's portal, they get an email notification.</div>
+        <div class="client-select-wrap">
+          <label>Select client</label>
+          <select aria-label="Sel files" class="client-select" id="sel-files" onchange="onClientChange(this.value,'files')">
+            <option value="">— Choose a client —</option>
+          </select>
+        </div>
+        <div class="client-banner" id="banner-files" style="display:none;">
+          <div class="cb-av" id="bav-files">?</div>
+          <div class="cb-info"><div class="cb-label">Uploading to</div><div class="cb-name" id="bname-files">—</div><div class="cb-project" id="bproj-files"></div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">📁 Client Files</div></div>
+          <div class="cb">
+            <div class="uzone"><p>📤 Click or drag files here (PDF, DOC, PPT, PNG, JPG, up to 50MB)</p><input type="file" multiple onchange="uploadFiles(this.files)"></div>
+            <div id="fileList"><p style="font-size:13px;color:var(--muted);">Select a client to see their files.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVALS -->
+      <div class="page" id="page-approvals">
+        <div class="pt">Add Approval Item</div>
+        <div class="ps">Add a deliverable for the client to review, they get an email notification.</div>
+        <div class="client-select-wrap">
+          <label>Select client</label>
+          <select aria-label="Sel approvals" class="client-select" id="sel-approvals" onchange="onClientChange(this.value,'approvals')">
+            <option value="">— Choose a client —</option>
+          </select>
+        </div>
+        <div class="client-banner" id="banner-approvals" style="display:none;">
+          <div class="cb-av" id="bav-approvals">?</div>
+          <div class="cb-info"><div class="cb-label">Adding approval for</div><div class="cb-name" id="bname-approvals">—</div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">✅ New Approval Item</div></div>
+          <div class="cb">
+            <div class="fg"><label class="fl">Deliverable title</label><input aria-label="Homepage Design — Round 1" class="fi" id="apprTitle" placeholder="e.g. Homepage Design — Round 1"></div>
+            <div class="fg"><label class="fl">Description / instructions</label><textarea aria-label="Please review the homepage design and approve or leave re…" class="fi" id="apprDesc" rows="3" placeholder="e.g. Please review the homepage design and approve or leave revision notes."></textarea></div>
+            <button class="sbtn" onclick="addApproval()">Add approval + notify client →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="page" id="page-timeline">
+        <div class="pt">Update Timeline</div>
+        <div class="ps">Update project phase statuses and progress percentage.</div>
+        <div class="client-select-wrap">
+          <label>Select client</label>
+          <select aria-label="Sel timeline" class="client-select" id="sel-timeline" onchange="onClientChange(this.value,'timeline')">
+            <option value="">— Choose a client —</option>
+          </select>
+        </div>
+        <div class="client-banner" id="banner-timeline" style="display:none;">
+          <div class="cb-av" id="bav-timeline">?</div>
+          <div class="cb-info"><div class="cb-label">Updating timeline for</div><div class="cb-name" id="bname-timeline">—</div></div>
+        </div>
+        <div class="card"><div class="ch"><div class="ct">📋 Phase Status</div></div><div class="cb" id="tlBody"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
+        <div class="card" style="margin-top:0;"><div class="ch"><div class="ct">📈 Progress %</div></div>
+          <div class="cb" style="display:flex;gap:12px;align-items:center;">
+            <input aria-label="50" class="fi" type="number" id="progressVal" min="0" max="100" placeholder="e.g. 50" style="max-width:120px;">
+            <button class="sbtn" onclick="saveProgress()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES -->
+      <div class="page" id="page-invoices">
+        <div class="pt">Invoices</div>
+        <div class="ps">View, edit, and add invoices. Clients get an email notification when you add one.</div>
+        <div class="client-select-wrap">
+          <label>Select client</label>
+          <select aria-label="Sel invoices" class="client-select" id="sel-invoices" onchange="onClientChange(this.value,'invoices')">
+            <option value="">— Choose a client —</option>
+          </select>
+        </div>
+        <div class="client-banner" id="banner-invoices" style="display:none;">
+          <div class="cb-av" id="bav-invoices">?</div>
+          <div class="cb-info"><div class="cb-label">Invoices for</div><div class="cb-name" id="bname-invoices">—</div><div class="cb-project" id="bproj-invoices"></div></div>
+        </div>
+        <div class="card"><div class="ch"><div class="ct">📋 Current Invoices</div></div><div class="cb" id="invList"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct" id="invFormTitle">💳 Add New Invoice</div></div>
+          <div class="cb">
+            <input type="hidden" id="editingInvId" value="">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Invoice name</label><input aria-label="Deposit — 50%" class="fi" id="invName" placeholder="e.g. Deposit — 50%"></div>
+              <div class="fg"><label class="fl">Amount</label><input aria-label="$1,250" class="fi" id="invAmount" placeholder="e.g. $1,250"></div>
+              <div class="fg"><label class="fl">Description</label><input aria-label="Website Redesign + SEO · Phase 1" class="fi" id="invDesc" placeholder="e.g. Website Redesign + SEO · Phase 1"></div>
+              <div class="fg"><label class="fl">Due date</label><input aria-label="Due Jun 30, 2026" class="fi" id="invDue" placeholder="e.g. Due Jun 30, 2026"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link (optional)</label><input aria-label="https://buy.stripe.com/..." class="fi" id="invStripe" placeholder="https://buy.stripe.com/..."></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Status</label>
+                <select aria-label="Invstatus" class="fi" id="invStatus">
+                  <option value="pending">Pending — show Pay Now button</option>
+                  <option value="draft">Draft — not yet due</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="sbtn" id="invSubmitBtn" onclick="saveInvoice()">Add invoice + notify client →</button>
+              <button class="sbtn sec" id="invCancelBtn" onclick="cancelEditInvoice()" style="display:none;">Cancel edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTRACTS -->
+      <div class="page" id="page-contracts">
+        <div class="pt">Contracts & Documents</div>
+        <div class="ps">Edit your contract template and push documents to any client's portal.</div>
+        <div class="card">
+          <div class="ch"><div class="ct">📃 Contract Template</div></div>
+          <div class="cb">
+            <div class="fg"><label class="fl">Contract title</label><input aria-label="Cttitle" class="fi" id="ctTitle" value="Davis Digital Studio — Project Agreement"></div>
+            <div class="fg"><label class="fl">Contract body</label><textarea aria-label="Ctbody" class="fi" id="ctBody" rows="14" style="font-size:12px;line-height:1.7;"></textarea></div>
+            <div style="display:flex;gap:10px;margin-top:6px;">
+              <button class="sbtn" onclick="saveContract()">Save template</button>
+              <button class="sbtn sec" onclick="resetContract()">Reset to default</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">📤 Push to Client</div></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Send the contract to a client's Agreement tab, they get an email notification.</p>
+            <div class="client-select-wrap" style="margin-bottom:14px;">
+              <label>Select client</label>
+              <select aria-label="Sel contracts" class="client-select" id="sel-contracts" onchange="onClientChange(this.value,'contracts')">
+                <option value="">— Choose a client —</option>
+              </select>
+            </div>
+            <div class="client-banner" id="banner-contracts" style="display:none;margin-bottom:14px;">
+              <div class="cb-av" id="bav-contracts">?</div>
+              <div class="cb-info"><div class="cb-label">Pushing contract to</div><div class="cb-name" id="bname-contracts">—</div></div>
+            </div>
+            <button class="sbtn" onclick="pushContract()">Push contract to client →</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">📄 Upload Document to Client</div></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Upload any PDF or doc directly to a client's Files section.</p>
+            <div class="client-select-wrap" style="margin-bottom:14px;">
+              <label>Select client</label>
+              <select aria-label="Sel docs" class="client-select" id="sel-docs" onchange="onClientChange(this.value,'docs')">
+                <option value="">— Choose a client —</option>
+              </select>
+            </div>
+            <div class="client-banner" id="banner-docs" style="display:none;margin-bottom:14px;">
+              <div class="cb-av" id="bav-docs">?</div>
+              <div class="cb-info"><div class="cb-label">Uploading doc to</div><div class="cb-name" id="bname-docs">—</div></div>
+            </div>
+            <div class="uzone"><p>📄 Click to upload (PDF, DOC)</p><input type="file" accept=".pdf,.doc,.docx" onchange="uploadDoc(this.files)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW CLIENT -->
+      <div class="page" id="page-newclient">
+        <div class="pt">Add New Client</div>
+        <div class="ps">Create a new client portal in one step.</div>
+        <div class="card">
+          <div class="ch"><div class="ct">👤 New Client</div></div>
+          <div class="cb">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Business name</label><input aria-label="Joe's Coffee Shop" class="fi" id="nc-name" placeholder="e.g. Joe's Coffee Shop"></div>
+              <div class="fg"><label class="fl">Client login email</label><input aria-label="owner@business.com" class="fi" id="nc-cemail" type="email" placeholder="owner@business.com"></div>
+              
+              <div class="fg"><label class="fl">Portal password <span style="font-weight:400;color:var(--muted);">(optional, leave blank if inviting)</span></label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="Leave blank to let them set their own"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
+              <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;line-height:1.6;"><strong>Invite (recommended):</strong> client gets an email link and sets their own password.<br><strong>Create with password:</strong> you set a password now and share it with them.</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <button class="sbtn" onclick="inviteClient()">Send invite →</button>
+              <button class="sbtn" onclick="createClient()" style="background:none;color:var(--p);border:1.5px solid var(--p);box-shadow:none;">Create with password</button>
+            </div>
+            <div class="result-box" id="nc-result"></div>
+            <div id="nc-email-template" style="display:none;margin-top:14px;">
+              <div class="fl" style="margin-bottom:8px;">Welcome email to send:</div>
+              <div class="code" id="nc-email-body"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUOTE GENERATOR -->
+      <div class="page" id="page-quote">
+        <div class="pt">Quote Generator</div>
+        <div class="ps">Build a branded project quote and download it as a PDF to send to clients.</div>
+        <div class="card">
+          <div class="ch"><div class="ct">📝 Quote Details</div></div>
+          <div class="cb">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Client / Business Name</label><input aria-label="Bacchus Kitchen" class="fi" id="q-client" placeholder="e.g. Bacchus Kitchen"></div>
+              <div class="fg"><label class="fl">Client Email</label><input aria-label="owner@business.com" class="fi" id="q-email" type="email" placeholder="owner@business.com"></div>
+              <div class="fg"><label class="fl">Project Name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="q-project" placeholder="e.g. Website Redesign + SEO Strategy"></div>
+              <div class="fg"><label class="fl">Quote Date</label><input aria-label="Q date" class="fi" id="q-date" type="date"></div>
+              <div class="fg"><label class="fl">Quote Valid Until</label><input aria-label="Q expires" class="fi" id="q-expires" type="date"></div>
+              <div class="fg"><label class="fl">Estimated Delivery</label><input aria-label="45 business days from deposit" class="fi" id="q-delivery" placeholder="e.g. 45 business days from deposit"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">💰 Line Items</div></div>
+          <div class="cb">
+            <div id="q-lines" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+            <button class="sbtn sec" onclick="addQuoteLine()" style="margin-bottom:0;">+ Add line item</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">📝 Notes</div></div>
+          <div class="cb">
+            <textarea aria-label="50% deposit required to begin. Remaining balance due at l…" class="fi" id="q-notes" rows="4" placeholder="e.g. 50% deposit required to begin. Remaining balance due at launch. Includes 2 rounds of revisions per deliverable."></textarea>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">👁️ Preview &amp; Download</div></div>
+          <div class="cb">
+            <button class="sbtn" onclick="previewQuote()" style="margin-bottom:10px;">Preview quote</button>
+            <div id="q-preview" style="display:none;border:1px solid rgba(91,63,160,0.15);border-radius:12px;padding:0;overflow:hidden;">
+              <iframe id="q-frame" style="width:100%;height:700px;border:none;"></iframe>
+            </div>
+            <button class="sbtn" id="q-download-btn" onclick="downloadQuote()" style="display:none;margin-top:10px;background:#16a34a;">⬇ Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISCLOSURES -->
+      <div class="page" id="page-disclosures">
+        <div class="pt">Disclosures & Legal Templates</div>
+        <div class="ps">Pre-written disclosures you can copy, email, or push to clients as needed.</div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">📊 Results Disclaimer</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Include this in proposals and discovery call follow-ups. Protects you from clients expecting guaranteed rankings or revenue.</p>
+            <textarea class="fi disc-text" rows="6" readonly>Davis Digital Studio provides web design, SEO strategy, and digital marketing services. While we apply industry best practices and aim to improve your online visibility and conversion rates, we make no guarantees of specific search engine rankings, traffic levels, or revenue outcomes. Results vary based on industry competition, market conditions, client content quality, third-party platform changes (including Google algorithm updates), and other factors outside our control. Past results do not guarantee future performance. Any projections or estimates shared during our engagement are illustrative only and should not be relied upon as financial forecasts.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">🤖 AI Tools Disclosure</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Discloses that AI tools may be used in your workflow. Recommended to include in your SOW or proposal.</p>
+            <textarea class="fi disc-text" rows="5" readonly>Davis Digital Studio may use AI-assisted tools (including but not limited to large language models, image generation, and code assistance tools) as part of our workflow to improve efficiency and quality. All AI-generated content is reviewed, edited, and approved by Eric Davis before delivery. You retain full ownership of all final deliverables. AI tools are used as productivity aids, not as a replacement for professional judgment and creative direction.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">🔒 Third-Party Platform Disclaimer</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Protects you if Netlify, Stripe, Google, or any third-party tool changes or goes down.</p>
+            <textarea class="fi disc-text" rows="5" readonly>Your project may rely on third-party platforms and services including but not limited to hosting providers, payment processors, form services, email platforms, and analytics tools. Davis Digital Studio is not responsible for downtime, data loss, pricing changes, feature removals, or policy changes by these third parties. We will work with you to implement reasonable alternatives if a service becomes unavailable, but such work may be subject to additional fees.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">♿ Accessibility Disclaimer</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Web accessibility (ADA / WCAG compliance) is a legal gray area. Include this to protect against claims.</p>
+            <textarea class="fi disc-text" rows="6" readonly>Davis Digital Studio implements web accessibility best practices including semantic HTML, appropriate color contrast, keyboard navigation, and alt text for images. However, we do not guarantee full compliance with the Americans with Disabilities Act (ADA) or WCAG 2.1/2.2 standards. Accessibility requirements vary by jurisdiction and evolve over time. If your business requires certified ADA compliance, we recommend engaging a dedicated accessibility specialist or auditing firm. Any accessibility remediation work beyond our standard practices will be scoped and quoted separately.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">🖼️ Content Ownership Disclosure</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Clarifies that stock images, fonts, and plugins may have their own licenses.</p>
+            <textarea class="fi disc-text" rows="5" readonly>Any stock images, fonts, icons, plugins, or other licensed third-party assets used in your project are subject to their respective license agreements. Davis Digital Studio will only use assets with appropriate licenses for commercial use. However, certain licenses may restrict redistribution or require attribution. Upon project completion, we will provide a list of any third-party assets used and their applicable licenses. Replacement of licensed assets with client-owned content is always available upon request.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">📧 Scope of Work Template (SOW)</div></div>
+          <div class="cb">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Send this with your proposal email to set expectations before the contract is signed. Fill in the bracketed fields.</p>
+            <textarea class="fi disc-text" rows="12" readonly>SCOPE OF WORK — Davis Digital Studio
+Client: [CLIENT NAME]
+Project: [PROJECT NAME]
+Date: [DATE]
+
+DELIVERABLES INCLUDED:
+• [e.g. Custom website — up to X pages]
+• [e.g. On-page SEO implementation]
+• [e.g. Google Business Profile setup]
+• [e.g. Contact form + email notifications]
+• [e.g. Mobile-responsive design]
+
+NOT INCLUDED IN THIS SCOPE:
+• Copywriting (client provides all written content unless copywriting add-on is purchased)
+• Photography or videography
+• Ongoing maintenance after launch (available as a monthly retainer)
+• Domain registration or third-party platform fees
+• Social media management
+
+PROCESS:
+1. Deposit received → Discovery & strategy session
+2. Wireframes / design mockups → Client review + 1 revision round
+3. Build → Client review + 1 revision round
+4. Final approval → DNS transfer + launch
+5. 30-day post-launch support window
+
+This SOW is a summary. Full terms are governed by the Project Agreement signed in the client portal.</textarea>
+            <button class="sbtn sec" onclick="copyDisc(this)" style="margin-top:8px;">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROSPECTS -->
+      <div class="page" id="page-prospects">
+        <div class="pt">Prospects</div>
+        <div class="ps">Your outreach research workspace. Log local businesses you find, qualify them with your AI Review tool, and track who you have reached out to. Send the actual emails from your outreach tool, then mark them here.</div>
+
+        <div class="stats" id="prStats" style="margin-bottom:18px;"></div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">＋ Add a prospect</div></div>
+          <div class="cb">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Business name</label><input class="fi" id="pr-name" placeholder="e.g. Joe's Taco Spot"></div>
+              <div class="fg"><label class="fl">Contact name</label><input class="fi" id="pr-contact" placeholder="e.g. Joe Martinez (optional)"></div>
+              <div class="fg"><label class="fl">Email</label><input class="fi" id="pr-email" type="email" placeholder="owner@business.com"></div>
+              <div class="fg"><label class="fl">Phone</label><input class="fi" id="pr-phone" placeholder="(optional)"></div>
+              <div class="fg"><label class="fl">Website</label><input class="fi" id="pr-website" placeholder="theirsite.com (or blank)"></div>
+              <div class="fg"><label class="fl">Site status</label>
+                <select class="fi" id="pr-sitestatus">
+                  <option>No website</option>
+                  <option>Facebook page only</option>
+                  <option>Outdated site</option>
+                  <option>Decent site</option>
+                  <option>Good site</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Source</label>
+                <select class="fi" id="pr-source">
+                  <option>Google Maps</option>
+                  <option>Yelp</option>
+                  <option>Referral</option>
+                  <option>Walk-by</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Follow-up date</label><input class="fi" id="pr-followup" type="date"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Notes</label><input class="fi" id="pr-notes" placeholder="e.g. ran AI review, scored 41, slow on mobile, no menu page"></div>
+            </div>
+            <button class="sbtn" onclick="addProspect()" style="margin-top:6px;">Add prospect →</button>
+            <div class="result-box" id="pr-result"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">⬆ Bulk import (CSV)</div></div>
+          <div class="cb">
+            <div style="font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:12px;">Upload a CSV to add many prospects at once. The file needs a header row. Recognized columns (any order, extras ignored): <strong>business_name</strong> (required), contact_name, email, phone, website, site_status, source, notes. Duplicates by business name are skipped.</div>
+            <input type="file" id="pr-csv" accept=".csv,text/csv" style="font-size:13px;margin-bottom:12px;display:block;">
+            <button class="sbtn" onclick="importProspectsCsv()" id="pr-import-btn">Import file →</button>
+            <div class="result-box" id="pr-import-result"></div>
+            <div id="pr-import-progress" style="display:none;font-size:13px;color:var(--muted);margin-top:10px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch">
+            <div class="ct">📋 Pipeline</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="prSearch" oninput="renderProspects()" placeholder="Search..." style="padding:7px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;outline:none;">
+              <button class="sbtn sec" onclick="loadProspects()" style="font-size:12px;padding:7px 14px;">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="cb" style="padding:0;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid rgba(91,63,160,0.06);">
+              <button class="prf" onclick="setProspectFilter('all')" id="prf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
+              <button class="prf" onclick="setProspectFilter('New')" id="prf-New" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">New</button>
+              <button class="prf" onclick="setProspectFilter('Emailed')" id="prf-Emailed" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Emailed</button>
+              <button class="prf" onclick="setProspectFilter('Replied')" id="prf-Replied" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Replied</button>
+              <button class="prf" onclick="setProspectFilter('Client')" id="prf-Client" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Client</button>
+              <button class="prf" onclick="setProspectFilter('Dead')" id="prf-Dead" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Dead</button>
+            </div>
+            <div id="prospectsList" style="padding:14px 18px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL TEMPLATES -->
+      <div class="page" id="page-templates">
+        <div class="pt">Email Templates</div>
+        <div class="ps">Your outreach copy, ready to paste into your sending tool. These lead with a free site review, not a hard pitch. Fill in the brackets per business. Your CAN-SPAM footer is already included.</div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">✉️ Warm and brief</div><button class="sbtn sec" onclick="copyTemplate('tpl1')" style="font-size:12px;padding:7px 16px;">Copy</button></div>
+          <div class="cb">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><strong>Subject:</strong> A quick free review of your website</div>
+            <div class="code" id="tpl1">Hi [First Name],
+
+I came across [Business Name] while looking around at local spots, and I run a small web studio here in LA called Davis Digital Studio.
+
+I built a free tool that gives you a quick, honest review of your website, things like how fast it loads on phones, how easy it is for new customers to find you on Google, and a few simple fixes that make a difference. No catch, no signup wall, you just run it and get the results.
+
+If you're curious how [Business Name]'s site is doing, you can try it here:
+
+https://davisdigitalstudio.com
+
+Hope it's useful either way.
+
+Eric Davis
+Davis Digital Studio
+eric@davisdigitalstudio.com
+https://davisdigitalstudio.com
+3727 W. Magnolia Blvd, PMB 1061, Burbank, CA 91505
+
+Not interested in hearing from me again? Just reply "unsubscribe" and I'll take you off my list.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">✉️ Personalized hook</div><button class="sbtn sec" onclick="copyTemplate('tpl2')" style="font-size:12px;padding:7px 16px;">Copy</button></div>
+          <div class="cb">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><strong>Subject:</strong> Noticed something about [Business Name]'s site</div>
+            <div class="code" id="tpl2">Hi [First Name],
+
+I'm Eric, I run a small web studio in LA called Davis Digital Studio, and I happened to land on [Business Name]'s website. I noticed [one specific, true observation, e.g. "it loads a little slow on mobile" / "there's no easy way to see your menu on a phone"], which is a really common thing for busy small businesses and usually a quick fix.
+
+I built a free review tool that breaks this kind of stuff down in plain language, what's working, what's costing you customers, and a few simple things to improve. It's genuinely free, no signup, you just run it:
+
+https://davisdigitalstudio.com
+
+Figured it might be worth two minutes for you.
+
+Eric Davis
+Davis Digital Studio
+eric@davisdigitalstudio.com
+https://davisdigitalstudio.com
+3727 W. Magnolia Blvd, PMB 1061, Burbank, CA 91505
+
+Don't want emails from me? Reply "unsubscribe" and you're off the list.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">💡 How to use these</div></div>
+          <div class="cb" style="font-size:13px;color:var(--ink);line-height:1.7;">
+            Find a business, log it in Prospects, run its site through your AI Review tool, then paste a template into your sending tool and fill in the brackets. The personalized hook converts better because it references something real about their actual site. Keep it to 15 to 20 a day from your domain so your sender reputation stays healthy, and let your warm-up run for about two weeks before the first real send.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /shell -->
+</div><!-- /admin -->
+
+<script>
+const SB_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
+const ADMIN_TOKEN = "dplaHi_BIZ17Qf4LJUfRli9lkVQJM_EbxOx_tLOBq3s";  // must EXACTLY match the ADMIN_TOKEN secret in Supabase
+const PASS_HASH = "50897cb74718d639a5b89f3efd0b144f127eee374e8e6a52c7cf3c252b8302c6";
+const DEFAULT_CONTRACT = `PROJECT AGREEMENT
+Davis Digital Studio
+
+This Project Agreement ("Agreement") is entered into between Davis Digital Studio, operated by Eric L. Davis ("Studio"), and the client identified in the project portal ("Client"). By acknowledging this Agreement in the client portal, Client agrees to be bound by its terms.
+
+1. SCOPE OF WORK
+Studio agrees to provide web design, search engine optimization (SEO) strategy, and related digital services as described in the project proposal or scope of work document provided to Client. The proposal specifies the exact page count and deliverables included in the project.
+
+Included copywriting: Clear, SEO-aware website copy for the number of core pages stated in the proposal (typically up to seven (7) pages for a custom build, such as Home, About, Services, Contact, and related core pages). Copy is written from the Client's intake questionnaire, existing materials, and the discovery conversation.
+
+Copywriting quoted separately: Blog posts or article programs, long-form sales pages, product descriptions for e-commerce catalogs, email or advertising campaigns, scripts, customer-interview-based case studies, and substantial rewrites of Client-supplied copy beyond light editing.
+
+Any services, features, or deliverables not expressly included in the agreed scope constitute "out-of-scope work" and will be quoted separately in writing before proceeding. Studio reserves the right to decline out-of-scope requests.
+
+2. PAYMENT TERMS
+A non-refundable deposit of 50% of the total project fee is due before work begins. The remaining 50% is due upon project completion, prior to live site launch, DNS transfer, or handoff of final files. All payments are due within 7 days of invoice. Invoices unpaid after 14 days will result in a pause in work. Invoices unpaid after 30 days accrue interest at 1.5% per month (18% per annum). Client is responsible for any collection costs or attorney fees incurred to recover unpaid amounts.
+
+3. REVISIONS
+Each project includes two (2) rounds of revisions per major deliverable. For purposes of this Agreement, the "major deliverables" are: (a) the initial design concept or mockup; (b) the built-out pages prior to launch; and (c) the final pre-launch site. Each of these may be revised up to two (2) times. Revisions are defined as reasonable modifications within the original scope — not new features, new pages, or changes in creative direction. Additional revision rounds, or revisions requested after final approval of a deliverable, are billed at $95/hour. All revision requests must be submitted through the client portal within 7 calendar days of delivery. Requests submitted after this window may be treated as new work.
+
+4. TIMELINE & DELAYS
+Project timelines are estimates based on timely Client participation. Studio's timeline obligations are contingent on Client providing required content, feedback, approvals, and access within 5 business days of each request. Client-caused delays extending the project by more than 14 calendar days will result in a revised delivery date. Projects inactive for 30 or more days due to Client non-response may be closed and restarted at Studio's discretion, subject to a restart fee.
+
+5. CLIENT RESPONSIBILITIES
+Client agrees to: (a) provide all required content, assets, brand materials, and login credentials in a timely manner; (b) ensure all content provided is accurate and does not infringe on third-party rights; (c) designate one point of contact for approvals; (d) respond to requests within 5 business days. Studio is not responsible for errors, omissions, or delays caused by incomplete or inaccurate client-provided content.
+
+6. INTELLECTUAL PROPERTY
+Upon receipt of full and final payment, Client owns all custom design, copy, and code created specifically for this project. Prior to final payment, all work-in-progress remains the property of Studio. Studio retains the right to display completed work in its portfolio and marketing materials unless Client requests otherwise in writing. Studio retains ownership of all pre-existing tools, frameworks, methodologies, and templates used in the project.
+
+7. THIRD-PARTY TOOLS & PLATFORMS
+Client's project may rely on third-party platforms including but not limited to web hosting, payment processors, form services, email providers, analytics tools, and content management systems. Studio is not responsible for downtime, pricing changes, feature removals, data loss, or policy changes by any third party. Additional work required due to third-party changes is subject to separate billing.
+
+8. RESULTS DISCLAIMER
+Studio makes no guarantees of specific search engine rankings, traffic levels, lead volumes, or revenue outcomes. SEO and digital marketing results vary based on industry competition, geographic market, content quality, client business factors, and Google algorithm changes. Any projections shared are illustrative only and do not constitute financial forecasts or guarantees.
+
+9. CONFIDENTIALITY
+Both parties agree to keep the other's proprietary business information, pricing, and client data confidential. Studio will not share Client logins, business data, or confidential information with third parties, except as required to deliver the project (e.g., hosting platforms). This obligation survives termination of this Agreement.
+
+10. LIMITATION OF LIABILITY
+Studio's total liability for any claim arising from this Agreement shall not exceed the total fees paid by Client for the project. In no event shall Studio be liable for indirect, incidental, special, or consequential damages, including lost profits, lost data, or business interruption, even if advised of the possibility of such damages. Some jurisdictions do not allow limitation of consequential damages; in such cases, Studio's liability is limited to the maximum extent permitted by law.
+
+11. TERMINATION & KILL FEE
+Either party may terminate this Agreement with 7 days written notice. If Client terminates after work has begun: (a) all work completed to date will be invoiced at the pro-rata project rate or hourly rate of $95/hour, whichever is greater; (b) the initial deposit is non-refundable; (c) a kill fee equal to 25% of the remaining unbilled balance is due upon termination to cover lost scheduling and opportunity cost. If Studio terminates without cause, Client receives a pro-rata refund of any unused deposit. Completed deliverables will be provided to Client upon payment of all outstanding amounts.
+
+12. FORCE MAJEURE
+Neither party shall be in default if performance is delayed or prevented by circumstances beyond reasonable control, including illness, family emergency, natural disaster, government action, or internet infrastructure failure. The affected party shall notify the other within 5 business days and make reasonable efforts to resume performance.
+
+13. DISPUTE RESOLUTION
+The parties agree to attempt to resolve any dispute through good-faith negotiation before pursuing formal remedies. If negotiation fails, disputes shall be resolved by binding arbitration in Los Angeles County, California, under the rules of the American Arbitration Association, unless the amount in dispute qualifies for California Small Claims Court (currently claims under $12,500), in which case either party may elect small claims jurisdiction.
+
+14. GOVERNING LAW
+This Agreement is governed by the laws of the State of California, without regard to its conflict of law provisions. Venue for any proceedings shall be Los Angeles County, California.
+
+15. ENTIRE AGREEMENT
+This Agreement, together with any project proposal or scope of work document, constitutes the entire agreement between the parties regarding the project and supersedes all prior discussions and representations. Modifications must be in writing and agreed to by both parties. Acknowledgment in the client portal constitutes a legally binding electronic signature under the Electronic Signatures in Global and National Commerce Act (E-SIGN) and California Civil Code § 1633.1 et seq.`;
+
+var clients = [];
+var selectedClients = {};  // keyed by context
+
+// ── AUTH ──
+async function hashPassword(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+async function doLogin() {
+  const input = document.getElementById("ap").value;
+  const hash = await hashPassword(input);
+  if (hash === PASS_HASH) {
+    document.getElementById("loginWrap").style.display = "none";
+    document.getElementById("adminWrap").style.display = "block";
+    loadOverview();
+    document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
+  } else {
+    document.getElementById("le").style.display = "block";
+    document.getElementById("ap").value = "";
+  }
+}
+function doLogout() {
+  document.getElementById("adminWrap").style.display = "none";
+  document.getElementById("loginWrap").style.display = "flex";
+  document.getElementById("ap").value = "";
+}
+document.getElementById("ap").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+// ── NAV ──
+function toggleDrawer(){
+  var sb=document.getElementById("adminSidebar"), sc=document.getElementById("drawerScrim");
+  var open=sb.classList.toggle("open"); sc.classList.toggle("open", open);
+  document.body.style.overflow = open ? "hidden" : "";
+}
+function closeDrawer(){
+  var sb=document.getElementById("adminSidebar"), sc=document.getElementById("drawerScrim");
+  sb.classList.remove("open"); sc.classList.remove("open"); document.body.style.overflow="";
+}
+function go(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".sn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  var btn = document.getElementById("sn-"+page);
+  if (btn) btn.classList.add("active");
+  closeDrawer();
+  if (page !== "overview" && page !== "leads") populateSelects(page);
+  if (page === "leads") loadLeads();
+  if (page === "hub") loadHub();
+  if (page === "messages") loadTemplates();
+  if (page === "prospects") loadProspects();
+}
+
+// ── LEADS ──
+var allLeads = [];
+var currentLeadFilter = 'all';
+
+async function loadLeads() {
+  var listEl = document.getElementById('leadsList');
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading leads...</p>';
+  document.getElementById('leadDetail').style.display = 'none';
+  var r = await api('audit_leads?select=*&order=created_at.desc&limit=200');
+  allLeads = r || [];
+  renderLeadsList();
+}
+
+function filterLeads(tool) {
+  currentLeadFilter = tool;
+  ['all','audit','report_card','ai_critique','contact'].forEach(t => {
+    var btn = document.getElementById('lf-'+t);
+    if (!btn) return;
+    if (t === tool) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
+    else { btn.style.background = 'rgba(91,63,160,0.08)'; btn.style.color = 'var(--p)'; }
+  });
+  renderLeadsList();
+}
+
+function renderLeadsList() {
+  var listEl = document.getElementById('leadsList');
+  if (!listEl) return;
+  var leads = currentLeadFilter === 'all' ? allLeads : allLeads.filter(l => l.tool === currentLeadFilter);
+  if (!leads.length) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:24px;text-align:center;background:rgba(91,63,160,0.04);border-radius:12px;">No leads in this category yet. Run a tool on your site to test.</p>';
+    return;
+  }
+  var toolLabels = { audit:'Site Audit', speed_test:'Speed Test', local_visibility:'Local Visibility', pricing_estimator:'Pricing Estimate', ai_critique:'AI Review', report_card:'Report Card', contact:'Contact' };
+  var toolColors = { audit:'#5b3fa0', speed_test:'#1a7e49', local_visibility:'#c4731a', pricing_estimator:'#8a4fb3', ai_critique:'#5b3fa0', report_card:'#c4731a', contact:'#1a7e49' };
+  listEl.innerHTML = leads.map(l => {
+    var sc = l.score == null ? '—' : l.score;
+    var scoreCol = (l.score == null) ? '#999' : (l.score < 45 ? '#e05555' : l.score < 65 ? '#f0b429' : '#6abf69');
+    var statusCol = l.status === 'contacted' ? '#1a7e49' : l.status === 'closed' ? '#999' : '#5b3fa0';
+    var d = new Date(l.created_at);
+    var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    var tLabel = toolLabels[l.tool] || l.tool;
+    var tCol = toolColors[l.tool] || '#666';
+    return '<div onclick="showLeadDetail(\''+l.id+'\')" style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s, transform 0.1s;" onmouseover="this.style.borderColor=\'var(--p)\'" onmouseout="this.style.borderColor=\'rgba(91,63,160,0.1)\'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px;">'+(l.business_name||'(no name)')+'</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(l.url||'—')+' · '+(l.client_email||'—')+'</div>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:'+tCol+'15;color:'+tCol+';letter-spacing:0.5px;text-transform:uppercase;">'+tLabel+'</span>' +
+            '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:'+statusCol+'15;color:'+statusCol+';letter-spacing:0.5px;text-transform:uppercase;">'+(l.status||'new')+'</span>' +
+            (l.city ? '<span style="font-size:11px;color:var(--muted);">'+l.city+'</span>' : '') +
+            '<span style="font-size:11px;color:var(--muted);margin-left:auto;">'+dateStr+'</span>' +
+          '</div>' +
+        '</div>' +
+        '<div style="text-align:center;flex-shrink:0;">' +
+          '<div style="font-size:26px;font-weight:700;color:'+scoreCol+';line-height:1;">'+sc+'</div>' +
+          '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Score</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function showLeadDetail(id) {
+  var lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  var detail = document.getElementById('leadDetail');
+  detail.style.display = 'block';
+
+  var scoreCol = (lead.score == null) ? '#999' : (lead.score < 45 ? '#e05555' : lead.score < 65 ? '#f0b429' : '#6abf69');
+  var pillarsHtml = '';
+  if (lead.pillars) {
+    var pl = [
+      {n:'Performance', v:lead.pillars.performance},
+      {n:'Mobile', v:lead.pillars.mobile},
+      {n:'Visibility', v:lead.pillars.visibility},
+      {n:'Local', v:lead.pillars.local}
+    ].filter(p => p.v != null);
+    if (pl.length) {
+      var w = Math.floor(100/pl.length);
+      pillarsHtml = '<div style="display:grid;grid-template-columns:repeat('+pl.length+',1fr);gap:8px;margin-bottom:16px;">' + pl.map(p => {
+        var c = p.v < 50 ? '#e05555' : p.v < 80 ? '#f0b429' : '#6abf69';
+        return '<div style="background:rgba(91,63,160,0.04);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:700;color:'+c+';">'+p.v+'</div><div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px;">'+p.n+'</div></div>';
+      }).join('') + '</div>';
+    }
+  }
+
+  // Signal table from deep_audit
+  function row(label, value, ok) {
+    var c = ok === true ? '#1a7e49' : ok === false ? '#e05555' : '#666';
+    var mark = ok === true ? '✓' : ok === false ? '✗' : '·';
+    return '<tr><td style="padding:5px 0;font-size:12px;color:var(--muted);width:55%;border-bottom:1px solid rgba(91,63,160,0.04);">'+label+'</td><td style="padding:5px 0;font-size:12px;color:'+c+';text-align:right;border-bottom:1px solid rgba(91,63,160,0.04);"><strong>'+mark+'</strong> '+value+'</td></tr>';
+  }
+  var signalHtml = '';
+  var d = lead.deep_audit;
+  if (d && d.fetchedHtml) {
+    var op = d.onPage||{}, sc = d.schema||{}, lc = d.local||{}, dc = d.discoverability||{};
+    signalHtml = '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;margin-bottom:16px;">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Signal Audit</div>' +
+      '<table style="width:100%;border-collapse:collapse;">' +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">On-Page</td></tr>' +
+        row('Title length', (op.titleLength||0)+' chars', op.titleLength>=25 && op.titleLength<=65) +
+        row('Meta description', (op.metaDescriptionLength||0)+' chars', op.metaDescriptionLength>=80 && op.metaDescriptionLength<=170) +
+        row('H1 count', String(op.h1Count||0), op.h1Count === 1) +
+        row('Canonical tag', op.canonical ? 'present' : 'missing', !!op.canonical) +
+        row('Word count', String(op.wordCount||0), (op.wordCount||0) >= 200) +
+        row('Images with alt', (op.imagesWithAlt||0)+' / '+(op.imageCount||0), (op.imageCount||0)===0 || (op.imagesWithAlt||0)/op.imageCount >= 0.8) +
+        row('Open Graph complete', (op.ogTitle && op.ogDescription && op.ogImage) ? 'yes' : 'no', op.ogTitle && op.ogDescription && op.ogImage) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Schema</td></tr>' +
+        row('LocalBusiness schema', sc.hasLocalBusiness ? ((sc.types||[]).join(', ') || 'present') : 'none', sc.hasLocalBusiness) +
+        row('Organization schema', sc.hasOrganization ? 'yes' : 'no', sc.hasOrganization) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Local Signals</td></tr>' +
+        row('Phone on page', lc.phoneOnPage ? (lc.phone || 'yes') : 'no', lc.phoneOnPage) +
+        row('Address on page', lc.zipOnPage ? 'yes' : 'no', lc.zipOnPage) +
+        row('Hours mentioned', lc.hoursMentioned ? 'yes' : 'no', lc.hoursMentioned) +
+        row('Google Maps embed', lc.googleMapsEmbed ? 'yes' : 'no', lc.googleMapsEmbed) +
+        row('Social profiles', (lc.socialLinks||[]).length ? (lc.socialLinks||[]).join(', ') : 'none', (lc.socialLinks||[]).length >= 2) +
+        '<tr><td colspan="2" style="padding:10px 0 4px;font-size:10px;color:var(--p);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Discoverability</td></tr>' +
+        row('robots.txt', dc.robotsTxt ? 'present' : 'missing', dc.robotsTxt && !dc.robotsTxtBlocksAll) +
+        row('sitemap.xml', dc.sitemapXml ? ((dc.sitemapUrlCount||0)+' URLs') : 'missing', dc.sitemapXml) +
+        row('HTTPS', d.https ? 'yes' : 'no', d.https) +
+      '</table>' +
+    '</div>';
+  }
+
+  // Findings list
+  var findingsHtml = '';
+  if (lead.findings && lead.findings.length) {
+    findingsHtml = '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;margin-bottom:16px;">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Top Findings</div>' +
+      lead.findings.map((f, i) => {
+        var fcol = f.sev === 'high' ? '#e05555' : f.sev === 'medium' ? '#f0b429' : '#6abf69';
+        return '<div style="padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.04);"><div style="display:flex;gap:8px;align-items:flex-start;"><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:'+fcol+';color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:20px;flex-shrink:0;">'+(i+1)+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+(f.title||'')+'</div><span style="font-size:9px;font-weight:700;color:'+fcol+';letter-spacing:1px;">'+(f.sev||'').toUpperCase()+'</span></div></div></div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var cwv = lead.core_web_vitals;
+  var cwvHtml = (cwv && (cwv.lcp || cwv.fcp || cwv.cls || cwv.tbt)) ?
+    '<div style="background:rgba(91,63,160,0.04);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);">LCP: '+(cwv.lcp||'—')+' · FCP: '+(cwv.fcp||'—')+' · CLS: '+(cwv.cls||'—')+' · TBT: '+(cwv.tbt||'—')+'</div>' : '';
+
+  var psiBanner = lead.psi_skipped ? '<div style="background:rgba(240,180,41,0.1);border-left:3px solid #f0b429;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#a47816;">PSI timed out for this site — Visibility and Local scores still fully measured.</div>' : '';
+
+  var statusOpts = ['new','contacted','qualified','closed'].map(s => '<option value="'+s+'" '+(lead.status===s?'selected':'')+'>'+s+'</option>').join('');
+
+  detail.innerHTML = '<div style="background:rgba(91,63,160,0.03);border-radius:16px;padding:24px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap;">' +
+      '<div style="flex:1;min-width:200px;">' +
+        '<h2 style="font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 6px;color:var(--ink);">'+(lead.business_name||'(no name)')+'</h2>' +
+        (lead.url ? '<a href="'+lead.url+'" target="_blank" style="display:inline-block;font-size:13px;color:var(--p);text-decoration:none;margin-bottom:4px;" rel="noopener">'+lead.url+' →</a><br>' : '') +
+        '<a href="mailto:'+(lead.client_email||'')+'" style="font-size:13px;color:var(--muted);text-decoration:none;">'+(lead.client_email||'—')+'</a>' +
+        (lead.city ? ' · <span style="font-size:13px;color:var(--muted);">'+lead.city+'</span>' : '') +
+      '</div>' +
+      '<div style="text-align:center;">' +
+        '<div style="font-size:42px;font-weight:700;color:'+scoreCol+';line-height:1;">'+(lead.score == null ? '—' : lead.score)+'</div>' +
+        '<div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;">Overall Score</div>' +
+      '</div>' +
+    '</div>' +
+    psiBanner +
+    pillarsHtml +
+    cwvHtml +
+    signalHtml +
+    findingsHtml +
+    '<div style="margin-top:18px;">' +
+      '<label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">Notes (follow-ups, reminders, context)</label>' +
+      '<textarea id="leadNotes-'+lead.id+'" style="width:100%;min-height:80px;font-size:13px;font-family:inherit;padding:10px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;resize:vertical;box-sizing:border-box;" placeholder="e.g. Called 6/22, left voicemail. Wants to revisit next week.">'+(lead.notes ? String(lead.notes).replace(/</g,'&lt;') : '')+'</textarea>' +
+      '<button onclick="saveLeadNote(\''+lead.id+'\')" style="margin-top:8px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Save note</button>' +
+      '<span id="noteSaved-'+lead.id+'" style="font-size:12px;color:#1a7e49;margin-left:10px;display:none;">Saved ✓</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">' +
+      '<label style="font-size:12px;color:var(--muted);">Status:</label>' +
+      '<select onchange="updateLeadStatus(\''+lead.id+'\', this.value)" style="font-size:13px;padding:6px 10px;border:1px solid rgba(91,63,160,0.2);border-radius:8px;background:#fff;">'+statusOpts+'</select>' +
+      '<a href="mailto:'+(lead.client_email||'')+'" style="display:inline-block;background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:8px 18px;border-radius:100px;text-decoration:none;">Reply →</a>' +
+      '<button onclick="document.getElementById(\'leadDetail\').style.display=\'none\'" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">Close detail</button>' +
+    '</div>' +
+  '</div>';
+
+  // Smooth scroll into view
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function saveLeadNote(id) {
+  var ta = document.getElementById('leadNotes-' + id);
+  if (!ta) return;
+  await api('audit_leads?id=eq.' + id, 'PATCH', { notes: ta.value });
+  var lead = allLeads.find(function(l){ return l.id === id; });
+  if (lead) lead.notes = ta.value;
+  var saved = document.getElementById('noteSaved-' + id);
+  if (saved) { saved.style.display = 'inline'; setTimeout(function(){ saved.style.display = 'none'; }, 2000); }
+}
+
+async function updateLeadStatus(id, status) {
+  await api('audit_leads?id=eq.'+id, 'PATCH', { status: status });
+  var lead = allLeads.find(l => l.id === id);
+  if (lead) lead.status = status;
+  renderLeadsList();
+}
+
+// ── CLIENTS ──
+async function fetchClients() {
+  var r = await api("clients?select=*&order=created_at");
+  clients = r || [];
+  return clients;
+}
+
+function populateSelects(context) {
+  fetchClients().then(() => {
+    var selId = "sel-" + context;
+    var el = document.getElementById(selId);
+    if (!el) return;
+    var current = el.value;
+    el.innerHTML = '<option value="">— Choose a client —</option>' +
+      clients.map(c => `<option value="${c.id}" ${current===c.id?"selected":""}>${c.name} · ${c.project_name||"No project"}</option>`).join("");
+    // Also populate any other selects on page (contracts has multiple)
+    ["sel-contracts","sel-docs"].forEach(id => {
+      var s = document.getElementById(id);
+      if (s && s !== el) {
+        var cv = s.value;
+        s.innerHTML = '<option value="">— Choose a client —</option>' +
+          clients.map(c => `<option value="${c.id}" ${cv===c.id?"selected":""}>${c.name} · ${c.project_name||""}</option>`).join("");
+      }
+    });
+    // Auto-select first client
+    if (!current && clients.length > 0) {
+      el.value = clients[0].id;
+      onClientChange(clients[0].id, context);
+    }
+  });
+}
+
+function onClientChange(id, context) {
+  if (!id) return;
+  var client = clients.find(c => c.id === id);
+  if (!client) return;
+  selectedClients[context] = client;
+  updateBanner(context, client);
+  // Load context-specific data
+  if (context === "messages") loadMessages(client);
+  if (context === "files") loadFiles(client);
+  if (context === "timeline") loadTimeline(client);
+  if (context === "invoices") loadInvoices(client);
+}
+
+function updateBanner(context, client) {
+  var banner = document.getElementById("banner-"+context);
+  if (!banner) return;
+  banner.style.display = "flex";
+  var av = document.getElementById("bav-"+context);
+  var nm = document.getElementById("bname-"+context);
+  var pr = document.getElementById("bproj-"+context);
+  if (av) av.textContent = client.name[0];
+  if (nm) nm.textContent = client.name;
+  if (pr) pr.textContent = client.project_name || "";
+}
+
+
+// ══════════════════════════════════════════════
+//  CLIENT HUB
+// ══════════════════════════════════════════════
+var hubFilter = "all";
+var hubClients = [];
+var hubLeads = [];
+
+// A client is INACTIVE if their project is done/archived/paused,
+// OR they have not logged into the portal in 60+ days.
+function hubIsActive(c) {
+  var status = (c.project_status || "").toLowerCase();
+  if (status.indexOf("complete") > -1 || status.indexOf("done") > -1 ||
+      status.indexOf("archiv") > -1 || status.indexOf("paused") > -1 ||
+      status.indexOf("inactive") > -1 || status.indexOf("closed") > -1) {
+    return false;
+  }
+  if (c.last_seen_at) {
+    var days = (Date.now() - new Date(c.last_seen_at)) / (1000*60*60*24);
+    if (days > 60) return false;
+  }
+  return true;
+}
+
+async function loadHub() {
+  var listEl = document.getElementById("hubList");
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading clients...</p>';
+  document.getElementById("hubDetail").style.display = "none";
+  var res = await Promise.all([
+    api("clients?select=*&order=created_at.desc"),
+    api("audit_leads?select=*&order=created_at.desc&limit=300")
+  ]);
+  hubClients = res[0] || [];
+  hubLeads = res[1] || [];
+  clients = hubClients; // keep the rest of the panel in sync
+  renderHub();
+}
+
+function renderHub() {
+  var listEl = document.getElementById("hubList");
+  if (!listEl) return;
+  // highlight active filter button
+  ["all","active","inactive"].forEach(function(f){
+    var b = document.getElementById("hf-"+f);
+    if (b) {
+      b.style.background = (f===hubFilter) ? "var(--p)" : "rgba(91,63,160,0.08)";
+      b.style.color = (f===hubFilter) ? "#fff" : "var(--p)";
+    }
+  });
+
+  var q = (document.getElementById("hubSearch").value || "").toLowerCase().trim();
+  var rows = hubClients.filter(function(c){
+    var active = hubIsActive(c);
+    if (hubFilter === "active" && !active) return false;
+    if (hubFilter === "inactive" && active) return false;
+    if (q) {
+      var hay = ((c.name||"")+" "+(c.project_name||"")+" "+(c.email||"")).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  var activeCount = hubClients.filter(hubIsActive).length;
+  var inactiveCount = hubClients.length - activeCount;
+
+  if (rows.length === 0) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:20px;text-align:center;">No clients match.</p>';
+    return;
+  }
+
+  listEl.innerHTML =
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:10px;">'+activeCount+' active · '+inactiveCount+' inactive · '+hubClients.length+' total</div>' +
+    rows.map(function(c){
+      var active = hubIsActive(c);
+      var leadCount = hubLeads.filter(function(l){
+        return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
+      }).length;
+      var lastSeen = c.last_seen_at ? ("Last seen "+fmtDate(c.last_seen_at)) : "Never logged in";
+      var dot = active
+        ? '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;"></span>'
+        : '<span style="width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;"></span>';
+      return '' +
+      '<div onclick="openHubClient(\''+c.id+'\')" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;margin-bottom:8px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;cursor:pointer;transition:box-shadow .15s;" onmouseover="this.style.boxShadow=\'0 2px 10px rgba(91,63,160,0.10)\'" onmouseout="this.style.boxShadow=\'none\'">' +
+        '<div style="display:flex;align-items:center;gap:12px;min-width:0;">' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:var(--pxxxl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;">'+((c.name||"?")[0])+'</div>' +
+          '<div style="min-width:0;">' +
+            '<div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;">'+dot+(c.name||"Unnamed")+'</div>' +
+            '<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(c.project_name||"No project")+' · '+lastSeen+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+          (leadCount>0?'<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(91,63,160,0.08);color:var(--p);">'+leadCount+' tool run'+(leadCount>1?'s':'')+'</span>':'') +
+          '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--pxxxl);color:var(--p);">'+(c.progress||0)+'%</span>' +
+          '<span style="color:var(--muted);font-size:18px;">›</span>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+}
+
+async function openHubClient(id) {
+  var c = hubClients.find(function(x){ return x.id === id; });
+  if (!c) return;
+  var detail = document.getElementById("hubDetail");
+  detail.style.display = "block";
+  detail.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading record...</p>';
+  detail.scrollIntoView({behavior:"smooth", block:"start"});
+
+  // Pull everything for this client in parallel
+  var res = await Promise.all([
+    api("messages?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("files?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("invoices?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("approvals?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("timeline?select=*&client_id=eq."+c.id+"&order=sort_order"),
+    api("intake_forms?select=*&client_id=eq."+c.id+"&order=submitted_at.desc"),
+    api("client_requests?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
+    api("activity_log?select=*&client_id=eq."+c.id+"&order=created_at.desc&limit=20")
+  ]);
+  var msgs = res[0]||[], files = res[1]||[], invs = res[2]||[], apprs = res[3]||[], tl = res[4]||[];
+  var intake = (res[5]||[])[0] || null;
+  var requests = res[6]||[];
+  var activity = res[7]||[];
+  var leads = hubLeads.filter(function(l){
+    return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
+  });
+  var active = hubIsActive(c);
+
+  function statBox(v,l){ return '<div style="text-align:center;padding:12px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:10px;"><div style="font-size:20px;font-weight:700;color:var(--p);">'+v+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">'+l+'</div></div>'; }
+  function sectionTitle(t){ return '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:22px 0 10px;">'+t+'</div>'; }
+  function empty(t){ return '<p style="font-size:12px;color:var(--muted);padding:6px 0;">'+t+'</p>'; }
+
+  var pendingInv = invs.filter(function(i){ return (i.status||"")!=="paid"; }).length;
+  var pendingAppr = apprs.filter(function(a){ return (a.status||"")==="pending"; }).length;
+
+  var html = '';
+  // Header
+  html += '<div style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;padding:22px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">';
+  html += '<div style="display:flex;align-items:center;gap:14px;">';
+  html += '<div style="width:54px;height:54px;border-radius:14px;background:var(--pxxxl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;">'+((c.name||"?")[0])+'</div>';
+  html += '<div>';
+  html += '<div style="font-size:19px;font-weight:700;">'+(c.name||"Unnamed")+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);">'+(c.project_name||"No project")+'</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(c.email||"")+'</div>';
+  html += '</div></div>';
+  html += '<div style="display:flex;gap:8px;align-items:center;">';
+  html += '<span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;background:'+(active?"rgba(34,197,94,0.12)":"rgba(148,163,184,0.15)")+';color:'+(active?"#16a34a":"#64748b")+';">'+(active?"Active":"Inactive")+'</span>';
+  html += '<button onclick="toggleHubStatus(\''+c.id+'\','+active+')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--p);cursor:pointer;">Mark '+(active?"inactive":"active")+'</button>';
+  html += '<button onclick="document.getElementById(\'hubDetail\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;">Close</button>';
+  html += '</div></div>';
+
+  // Stat row
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:18px;">';
+  html += statBox((c.progress||0)+"%","Progress");
+  html += statBox(msgs.length,"Messages");
+  html += statBox(files.length,"Files");
+  html += statBox(pendingInv,"Open invoices");
+  html += statBox(pendingAppr,"Pending approvals");
+  html += statBox(leads.length,"Tool runs");
+  html += '</div>';
+
+  // Quick jump links to the working tabs (pre-selected to this client)
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">';
+  ["messages","files","approvals","timeline","invoices"].forEach(function(ctx){
+    var label = {messages:"💬 Messages",files:"📁 Files",approvals:"✅ Approvals",timeline:"📋 Timeline",invoices:"💳 Invoices"}[ctx];
+    html += '<button onclick="hubJumpTo(\''+ctx+'\',\''+c.id+'\')" style="font-size:11px;padding:6px 12px;border-radius:8px;border:1px solid rgba(91,63,160,0.15);background:rgba(91,63,160,0.04);color:var(--p);cursor:pointer;">'+label+'</button>';
+  });
+  html += '</div>';
+
+  // Tool runs / inquiries
+  html += sectionTitle("🔍 Tool Runs & Inquiries");
+  if (leads.length === 0) {
+    html += empty("This client has not run any tools on the site (matched by email).");
+  } else {
+    html += leads.map(function(l){
+      var toolName = (l.tool||"tool").replace(/_/g," ");
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border:1px solid rgba(91,63,160,0.08);border-radius:10px;margin-bottom:6px;">'+
+        '<div><div style="font-size:13px;font-weight:600;text-transform:capitalize;">'+toolName+(l.url?' · '+l.url:'')+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);">'+(l.business_name||"")+(l.city?" · "+l.city:"")+' · '+fmtDate(l.created_at)+'</div></div>'+
+        (l.score!=null?'<span style="font-size:12px;font-weight:700;color:var(--p);">'+l.score+'/100</span>':'')+
+      '</div>';
+    }).join("");
+  }
+
+  // Recent messages
+  html += sectionTitle("💬 Recent Messages");
+  if (msgs.length === 0) { html += empty("No messages yet."); }
+  else {
+    html += msgs.slice(0,5).map(function(m){
+      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;">'+(m.text||"")+'</div></div>';
+    }).join("");
+  }
+
+  // Files
+  html += sectionTitle("📁 Files");
+  if (files.length === 0) { html += empty("No files yet."); }
+  else {
+    html += files.slice(0,8).map(function(f){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+ficon(f.name)+' '+(f.name||"")+' <span style="color:var(--muted);font-size:11px;">'+(f.size||"")+'</span></div>'+(f.url?'<a href="'+f.url+'" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;" rel="noopener">Open ↗</a>':'')+'</div>';
+    }).join("");
+  }
+
+  // Invoices
+  html += sectionTitle("💳 Invoices");
+  if (invs.length === 0) { html += empty("No invoices yet."); }
+  else {
+    html += invs.map(function(i){
+      var paid = (i.status||"")==="paid";
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:13px;">'+(i.name||"Invoice")+' <span style="color:var(--muted);font-size:11px;">'+(i.amount||"")+'</span></div><span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:100px;background:'+(paid?"rgba(34,197,94,0.12)":"rgba(245,158,11,0.12)")+';color:'+(paid?"#16a34a":"#d97706")+';">'+cap(i.status||"draft")+'</span></div>';
+    }).join("");
+  }
+
+  // Approvals
+  html += sectionTitle("✅ Approvals");
+  if (apprs.length === 0) { html += empty("No approvals yet."); }
+  else {
+    html += apprs.map(function(a){
+      var st = a.status||"pending";
+      var col = st==="approved" ? "#16a34a" : (st==="changes_requested" ? "#d97706" : "var(--muted)");
+      var label = st==="changes_requested" ? "Changes requested" : cap(st);
+      var fb = (st==="changes_requested" && a.client_feedback) ? '<div style="font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;white-space:pre-wrap;">"'+String(a.client_feedback).replace(/</g,"&lt;")+'"</div>' : "";
+      return '<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:13px;font-weight:600;">'+(a.title||"")+'</div><span style="font-size:11px;font-weight:600;color:'+col+';">'+label+'</span></div>'+fb+'</div>';
+    }).join("");
+  }
+
+  // Timeline
+  html += sectionTitle("📋 Timeline");
+  if (tl.length === 0) { html += empty("No timeline milestones yet."); }
+  else {
+    html += tl.map(function(t){
+      return '<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><span style="font-size:15px;">'+(t.icon||"📋")+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+(t.title||"")+'</div><div style="font-size:11px;color:var(--muted);">'+(t.date_label||"")+' · '+cap(t.status||"pending")+'</div></div></div>';
+    }).join("");
+  }
+
+  html += '</div>';
+
+  // ── INTAKE / PROJECT BRIEF ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📝 Project Brief / Intake</div>';
+  if (intake) {
+    function row(label, val){ return val ? '<div style="margin-bottom:9px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">'+label+'</div><div style="font-size:13px;color:#33333a;white-space:pre-wrap;">'+String(val).replace(/</g,"&lt;")+'</div></div>' : ''; }
+    html += row("Goals", intake.goals);
+    html += row("Business description", intake.business_description);
+    html += row("Target audience", intake.target_audience);
+    html += row("Brand colors", intake.brand_colors);
+    html += row("Competitors / admired sites", intake.competitors);
+    html += row("Inspiration / vibe", intake.existing_site);
+    html += row("Notes & requests", intake.special_requests);
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:8px;">Submitted '+(intake.submitted_at?fmtDate(intake.submitted_at):"—")+'</div>';
+  } else {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No project brief submitted yet. The client can fill it out under <strong>Project Brief</strong> in their portal.</p>';
+  }
+  html += '</div>';
+
+  // ── CLIENT REQUESTS ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🙋 Client Requests</div>';
+  if (requests.length === 0) {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No requests yet.</p>';
+  } else {
+    html += requests.map(function(r){
+      var st = r.status||"open";
+      var col = st==="closed" ? "#16a34a" : (st==="in_progress" ? "#d97706" : "#5b3fa0");
+      var next = st==="open" ? "in_progress" : (st==="in_progress" ? "closed" : "open");
+      var nextLabel = st==="open" ? "Start" : (st==="in_progress" ? "Mark done" : "Reopen");
+      return '<div style="padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">'+
+          '<div style="font-size:13px;font-weight:600;min-width:0;">'+(r.subject||"").replace(/</g,"&lt;")+'</div>'+
+          '<span style="font-size:10.5px;font-weight:700;color:'+col+';white-space:nowrap;">'+cap(st.replace("_"," "))+'</span>'+
+        '</div>'+
+        (r.details ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;white-space:pre-wrap;">'+String(r.details).replace(/</g,"&lt;")+'</div>' : '')+
+        '<button onclick="cycleRequest(\''+r.id+'\',\''+next+'\',\''+c.id+'\')" style="margin-top:7px;font-size:11px;padding:4px 11px;border-radius:8px;border:1px solid rgba(91,63,160,0.18);background:transparent;color:var(--p);cursor:pointer;">'+nextLabel+'</button>'+
+      '</div>';
+    }).join("");
+  }
+  html += '</div>';
+
+  // ── ACTIVITY LOG ──
+  html += '<div style="margin-top:18px;background:#fff;border:1px solid rgba(91,63,160,0.10);border-radius:12px;padding:16px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📊 Recent Activity</div>';
+  if (activity.length === 0) {
+    html += '<p style="font-size:12px;color:var(--muted);margin:0;">No recorded activity yet.</p>';
+  } else {
+    var actIcon = {logged_in:"🔓",viewed_file:"👁️",approved:"✅",requested_changes:"✏️",paid:"💳",submitted_intake:"📝",requested:"🙋",file_comment:"💬"};
+    var actLabel = {logged_in:"Logged in",viewed_file:"Viewed a file",approved:"Approved a deliverable",requested_changes:"Requested changes",paid:"Paid an invoice",submitted_intake:"Submitted project brief",requested:"Submitted a request",file_comment:"Commented on a file"};
+    html += '<div style="display:flex;flex-direction:column;gap:9px;">';
+    html += activity.map(function(a){
+      var ic = actIcon[a.action] || "•";
+      var lbl = actLabel[a.action] || cap((a.action||"").replace(/_/g," "));
+      return '<div style="display:flex;gap:10px;align-items:flex-start;">'+
+        '<div style="font-size:14px;line-height:1.3;">'+ic+'</div>'+
+        '<div style="min-width:0;flex:1;">'+
+          '<div style="font-size:12.5px;color:#33333a;">'+lbl+(a.detail && a.detail !== lbl ? ' <span style="color:var(--muted);">— '+String(a.detail).replace(/</g,"&lt;").slice(0,80)+'</span>' : '')+'</div>'+
+          '<div style="font-size:10.5px;color:var(--muted);">'+fmtDate(a.created_at)+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    html += '</div>';
+  }
+  html += '</div>';
+
+  detail.innerHTML = html;
+}
+
+// Jump to a working tab with this client pre-selected
+function hubJumpTo(ctx, clientId) {
+  go(ctx);
+  setTimeout(function(){
+    var sel = document.getElementById("sel-"+ctx);
+    if (sel) { sel.value = clientId; onClientChange(clientId, ctx); }
+  }, 120);
+}
+
+// Manually flip active/inactive (writes project_status)
+async function toggleHubStatus(id, currentlyActive) {
+  var newStatus = currentlyActive ? "Inactive" : "In Progress";
+  await api("clients?id=eq."+id, "PATCH", {project_status:newStatus});
+  toast("✓ Marked "+(currentlyActive?"inactive":"active"));
+  await loadHub();
+  openHubClient(id);
+}
+
+// ── API HELPER ──
+async function api(path, method, body) {
+  // Routes through the Edge Function so the browser never holds a key that can
+  // bypass RLS. The Edge Function uses the service role server-side, gated by ADMIN_TOKEN.
+  try {
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY },
+      body: JSON.stringify({ type: "admin_db", token: ADMIN_TOKEN, path: path, method: method || "GET", payload: body || null })
+    });
+    var j = await r.json();
+    if (j.error) { console.error("api error:", j.error, j.detail || ""); return null; }
+    return j.data;
+  } catch (e) {
+    console.error("api fetch failed:", e);
+    return null;
+  }
+}
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  checkOverdueInvoices().catch(()=>{});
+  var [cls, msgs, files, invs, leadsData, approvals] = await Promise.all([
+    api("clients?select=*"),
+    api("messages?select=*&order=created_at.desc&limit=8"),
+    api("files?select=*"),
+    api("invoices?select=*&status=eq.pending"),
+    api("audit_leads?select=*").catch(()=>[]),
+    api("approvals?select=*&status=eq.pending").catch(()=>[]),
+  ]);
+  clients = cls || [];
+  var pendingInvs = invs || [];
+  var total = pendingInvs.reduce((s,i) => s + parseFloat((i.amount||"0").replace(/[^0-9.]/g,"")), 0);
+  var newLeads = (leadsData||[]).filter(l => !l.archived && l.status !== "closed").length;
+  var clientMsgs = (msgs||[]).filter(m=>m.from_who==="client").length;
+
+  document.getElementById("ovStats").innerHTML = [
+    {v:(cls||[]).length, l:"Active clients", ic:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+    {v:newLeads, l:"New leads", ic:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'},
+    {v:clientMsgs, l:"Client messages", ic:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+    {v:"$"+(total||0).toLocaleString(), l:"Pending invoices", ic:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+  ].map(s=>`<div class="stat"><div style="display:flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg><span class="sl2">${s.l}</span></div><div class="sv">${s.v}</div></div>`).join("");
+
+  // Attention bar: overdue invoices + pending approvals
+  var overdue = pendingInvs.filter(i => i.due_date && new Date(i.due_date) < new Date());
+  var alerts = [];
+  if (overdue.length) {
+    var odTotal = overdue.reduce((s,i)=>s+parseFloat((i.amount||"0").replace(/[^0-9.]/g,"")),0);
+    alerts.push(overdue.length+" invoice"+(overdue.length>1?"s":"")+" overdue ($"+odTotal.toLocaleString()+")");
+  }
+  if ((approvals||[]).length) {
+    alerts.push((approvals.length)+" approval"+(approvals.length>1?"s":"")+" waiting on you");
+  }
+  var attEl = document.getElementById("ovAttention");
+  if (attEl) {
+    attEl.innerHTML = alerts.length
+      ? `<div style="background:#fdf3e7;border:1px solid #f0b429;border-radius:12px;padding:12px 15px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a6a0a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div style="font-size:13px;color:#9a6a0a;"><span style="font-weight:700;">Needs your attention:</span> ${alerts.join(" · ")}</div>
+        </div>`
+      : "";
+  }
+
+  // Dynamic date subtitle
+  var subEl = document.getElementById("ovSubtitle");
+  if (subEl) {
+    var d = new Date();
+    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    var mons = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    subEl.textContent = days[d.getDay()]+", "+mons[d.getMonth()]+" "+d.getDate()+" · here's where things stand";
+  }
+
+  document.getElementById("ovClients").innerHTML = clients.length === 0
+    ? "<p style='font-size:13px;color:var(--muted);'>No clients yet.</p>"
+    : clients.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
+        <div><div style="font-size:13px;font-weight:600;">${c.name}</div><div style="font-size:11px;color:var(--muted);">${c.project_name||""}</div></div>
+        <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--pxxxl);color:var(--p);">${c.progress||0}%</span>
+      </div>`).join("");
+
+  document.getElementById("ovActivity").innerHTML = (msgs||[]).slice(0,5).map(m=>`
+    <div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${m.sender_name} · ${fmtDate(m.created_at)}</div>
+      <div style="font-size:12px;">${m.text.substring(0,65)}${m.text.length>65?"...":""}</div>
+    </div>`).join("") || "<p style='font-size:13px;color:var(--muted);'>No activity.</p>";
+}
+
+// ── MESSAGES ──
+async function loadMessages(client) {
+  var data = await api("messages?select=*&client_id=eq."+client.id+"&order=created_at");
+  var thread = document.getElementById("msgThread");
+  if (!data || data.length===0) { thread.innerHTML="<p style='font-size:13px;color:var(--muted);text-align:center;padding:20px;'>No messages yet.</p>"; return; }
+  thread.innerHTML = data.map(m=>`
+    <div class="mb from-${m.from_who}">
+      <div class="mav ${m.from_who==="eric"?"e":"c"}">${m.from_who==="eric"?"E":client.name[0]}</div>
+      <div><div class="mm">${m.sender_name} · ${fmtDate(m.created_at)}</div><div class="mt">${m.text}</div></div>
+    </div>`).join("");
+  thread.scrollTop = thread.scrollHeight;
+}
+
+// ── MESSAGE TEMPLATES ──
+var _templates = [];
+
+async function loadTemplates() {
+  var data = await api("message_templates?select=*&order=created_at.asc");
+  _templates = data || [];
+  renderTemplates();
+}
+
+function renderTemplates() {
+  var row = document.getElementById("tmplRow");
+  if (!row) return;
+  var chips = _templates.map(function(t){
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(91,63,160,0.08);border-radius:100px;padding:4px 6px 4px 11px;font-size:11.5px;">'+
+      '<button onclick="insertTemplate(\''+t.id+'\')" style="background:none;border:none;color:var(--p);font-weight:600;cursor:pointer;font-size:11.5px;">'+(t.label||"").replace(/</g,"&lt;")+'</button>'+
+      '<button onclick="deleteTemplate(\''+t.id+'\')" title="Delete template" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;">×</button>'+
+    '</span>';
+  }).join("");
+  row.innerHTML = chips + '<button onclick="saveTemplate()" style="background:none;border:1px dashed rgba(91,63,160,0.3);border-radius:100px;padding:4px 12px;font-size:11.5px;color:var(--p);cursor:pointer;">+ Save current as template</button>';
+}
+
+function insertTemplate(id) {
+  var t = _templates.find(function(x){ return x.id === id; });
+  if (!t) return;
+  var box = document.getElementById("msgText");
+  box.value = (box.value ? box.value + "\n" : "") + t.body;
+  box.focus();
+}
+
+async function saveTemplate() {
+  var body = document.getElementById("msgText").value.trim();
+  if (!body) { toast("Type a message first, then save it as a template."); return; }
+  var label = prompt("Name this template (e.g. 'Weekly update', 'Invoice reminder'):");
+  if (!label) return;
+  await api("message_templates","POST",{label:label.trim(), body:body});
+  toast("✓ Template saved");
+  await loadTemplates();
+}
+
+async function deleteTemplate(id) {
+  await api("message_templates?id=eq."+id, "DELETE");
+  await loadTemplates();
+}
+
+async function sendMsg() {
+  var ctx = selectedClients["messages"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var text = document.getElementById("msgText").value.trim();
+  if (!text) { toast("Enter a message."); return; }
+  await api("messages", "POST", {client_id:ctx.id, from_who:"eric", sender_name:"Eric", text:text});
+  try { await api("notifications","POST",{client_id:ctx.id,type:"message",title:"New message from Eric",body:text.slice(0,90),link_tab:"messages"}); } catch(e){}
+  await notify("eric_message", text, "", ctx);
+  document.getElementById("msgText").value = "";
+  toast("✓ Message sent + client notified");
+  await loadMessages(ctx);
+}
+
+// ── FILES ──
+async function loadFiles(client) {
+  var data = await api("files?select=*&client_id=eq."+client.id+"&order=created_at.desc");
+  var el = document.getElementById("fileList");
+  if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No files yet.</p>"; return; }
+  el.innerHTML = data.map(f=>`
+    <div class="fitem">
+      <div class="ficon">${ficon(f.name)}</div>
+      <div class="finfo"><h4>${f.name}</h4><p>${f.from_who==="eric"?"From you":"From client"} · ${f.size||""} · ${fmtDate(f.created_at)}</p></div>
+      <span class="fbadge ${f.status}">${cap(f.status)}</span>
+      ${f.url?`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;margin-left:8px;" rel="noopener">Download</a>`:""}
+    </div>`).join("");
+}
+
+async function uploadFiles(files) {
+  var ctx = selectedClients["files"];
+  if (!ctx) { toast("Select a client first."); return; }
+  for (var file of Array.from(files)) {
+    var path = ctx.id+"/eric-"+Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.-]/g,"_");
+    var fr = await fetch(SB_URL+"/storage/v1/object/client-files/"+path, {
+      method:"POST",
+      headers:{"Authorization":"Bearer "+SB_KEY,"Content-Type":file.type||"application/octet-stream","x-upsert":"true"},
+      body:file
+    });
+    if (!fr.ok) { toast("Upload failed"); continue; }
+    var pubUrl = SB_URL+"/storage/v1/object/public/client-files/"+path;
+    var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
+    await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:file.name.split(".").pop().toUpperCase(),from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
+    try { await api("notifications","POST",{client_id:ctx.id,type:"file",title:"New file: "+file.name,body:"Eric uploaded a new file for you to review.",link_tab:"files"}); } catch(e){}
+    await notify("eric_file",file.name+" ("+size+")","",ctx);
+    toast("✓ "+file.name+" uploaded");
+  }
+  await loadFiles(ctx);
+}
+
+// ── APPROVALS ──
+async function cycleRequest(id, next, clientId) {
+  await api("client_requests?id=eq."+id, "PATCH", {status: next});
+  toast("✓ Request updated");
+  openHubClient(clientId);
+}
+
+async function addApproval() {
+  var ctx = selectedClients["approvals"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var title = document.getElementById("apprTitle").value.trim();
+  var desc = document.getElementById("apprDesc").value.trim();
+  if (!title) { toast("Enter a title."); return; }
+  await api("approvals","POST",{client_id:ctx.id,title:title,description:desc,status:"pending"});
+  // In-portal notification for the client's notification bell
+  try { await api("notifications","POST",{client_id:ctx.id,type:"approval",title:"New item to review: "+title,body:desc||"",link_tab:"approvals"}); } catch(e){}
+  await notify("approval_needed",desc,title,ctx);
+  document.getElementById("apprTitle").value="";
+  document.getElementById("apprDesc").value="";
+  toast("✓ Approval added + client notified");
+}
+
+// ── TIMELINE ──
+async function loadTimeline(client) {
+  var data = await api("timeline?select=*&client_id=eq."+client.id+"&order=sort_order");
+  var el = document.getElementById("tlBody");
+  if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No timeline items.</p>"; return; }
+  el.innerHTML = data.map(t=>`
+    <div class="tl-edit">
+      <span style="font-size:18px;">${t.icon}</span>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${t.title}</div><div style="font-size:11px;color:var(--muted);">${t.date_label}</div></div>
+      <select class="tl-sel" onchange="updatePhase('${t.id}',this.value)">
+        <option value="pending" ${t.status==="pending"?"selected":""}>⏳ Pending</option>
+        <option value="active" ${t.status==="active"?"selected":""}>🔵 Active</option>
+        <option value="done" ${t.status==="done"?"selected":""}>✅ Done</option>
+      </select>
+    </div>`).join("");
+  document.getElementById("progressVal").value = selectedClients["timeline"]?.progress || 0;
+}
+
+async function updatePhase(id, status) {
+  await api("timeline?id=eq."+id,"PATCH",{status:status});
+  // Auto-recalculate progress
+  var ctx = selectedClients["timeline"];
+  if (ctx) {
+    var pct = await autoProgress(ctx.id);
+    document.getElementById("progressVal").value = pct;
+    toast("✓ Phase updated — progress auto-set to "+pct+"%");
+  } else {
+    toast("✓ Phase updated");
+  }
+}
+
+async function saveProgress() {
+  var ctx = selectedClients["timeline"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var val = parseInt(document.getElementById("progressVal").value)||0;
+  await api("clients?id=eq."+ctx.id,"PATCH",{progress:val});
+  ctx.progress = val;
+  toast("✓ Progress updated to "+val+"%");
+}
+
+// ── INVOICES ──
+async function loadInvoices(client) {
+  var data = await api("invoices?select=*&client_id=eq."+client.id+"&order=created_at");
+  var el = document.getElementById("invList");
+  if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No invoices yet.</p>"; return; }
+  var total=0,paid=0;
+  el.innerHTML = data.map(inv=>{
+    var amt=parseFloat((inv.amount||"0").replace(/[^0-9.]/g,""))||0;
+    total+=amt; if(inv.status==="paid") paid+=amt;
+    return `<div class="inv">
+      <div><h4>${inv.name}</h4><p>${inv.description||""} · ${inv.due_date||""}</p></div>
+      <div style="text-align:right;">
+        <div class="iamt">${inv.amount}</div>
+        <span class="ibadge ${inv.status}">${cap(inv.status)}</span>
+        <div class="iact">
+          <button class="iabtn" onclick="editInvoice(${JSON.stringify(inv).replace(/"/g,"&quot;")})">Edit</button>
+          <button class="iabtn del" onclick="delInvoice('${inv.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("") + `<div style="padding:14px 0;display:flex;justify-content:space-between;border-top:2px solid rgba(91,63,160,0.08);margin-top:8px;">
+    <span style="font-size:13px;color:var(--muted);">Total: <strong>${total.toLocaleString("en-US",{style:"currency",currency:"USD"})}</strong></span>
+    <span style="font-size:13px;color:var(--muted);">Balance: <strong style="color:var(--p);font-family:var(--serif);font-size:17px;">${(total-paid).toLocaleString("en-US",{style:"currency",currency:"USD"})}</strong></span>
+  </div>`;
+}
+
+function editInvoice(inv) {
+  document.getElementById("editingInvId").value = inv.id;
+  document.getElementById("invName").value = inv.name||"";
+  document.getElementById("invAmount").value = inv.amount||"";
+  document.getElementById("invDesc").value = inv.description||"";
+  document.getElementById("invDue").value = inv.due_date||"";
+  document.getElementById("invStripe").value = inv.stripe_url||"";
+  document.getElementById("invStatus").value = inv.status||"pending";
+  document.getElementById("invFormTitle").textContent = "✏️ Edit Invoice";
+  document.getElementById("invSubmitBtn").textContent = "Save changes →";
+  document.getElementById("invCancelBtn").style.display = "inline-flex";
+  toast("Editing invoice — make changes and save.");
+  document.getElementById("invSubmitBtn").scrollIntoView({behavior:"smooth"});
+}
+
+function cancelEditInvoice() {
+  document.getElementById("editingInvId").value="";
+  document.getElementById("invName").value="";
+  document.getElementById("invAmount").value="";
+  document.getElementById("invDesc").value="";
+  document.getElementById("invDue").value="";
+  document.getElementById("invStripe").value="";
+  document.getElementById("invStatus").value="pending";
+  document.getElementById("invFormTitle").textContent="💳 Add New Invoice";
+  document.getElementById("invSubmitBtn").textContent="Add invoice + notify client →";
+  document.getElementById("invCancelBtn").style.display="none";
+}
+
+async function saveInvoice() {
+  var ctx = selectedClients["invoices"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var editId = document.getElementById("editingInvId").value;
+  var payload = {
+    client_id:ctx.id,
+    name:document.getElementById("invName").value.trim(),
+    amount:document.getElementById("invAmount").value.trim(),
+    description:document.getElementById("invDesc").value.trim(),
+    due_date:document.getElementById("invDue").value.trim(),
+    stripe_url:document.getElementById("invStripe").value.trim()||null,
+    status:document.getElementById("invStatus").value,
+  };
+  if (!payload.name||!payload.amount) { toast("Name and amount required."); return; }
+  if (editId) {
+    await api("invoices?id=eq."+editId,"PATCH",payload);
+    toast("✓ Invoice updated");
+  } else {
+    await api("invoices","POST",payload);
+    try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
+    await notify("invoice",payload.amount,payload.name,ctx);
+    toast("✓ Invoice added + client notified");
+  }
+  cancelEditInvoice();
+  await loadInvoices(ctx);
+}
+
+async function delInvoice(id) {
+  if (!confirm("Delete this invoice?")) return;
+  await api("invoices?id=eq."+id,"DELETE");
+  toast("Deleted");
+  var ctx = selectedClients["invoices"];
+  if (ctx) await loadInvoices(ctx);
+}
+
+// ── CONTRACTS ──
+function saveContract() {
+  localStorage.setItem("dds_contract", document.getElementById("ctBody").value);
+  localStorage.setItem("dds_contract_title", document.getElementById("ctTitle").value);
+  toast("✓ Contract saved");
+}
+function resetContract() {
+  if (!confirm("Reset to default?")) return;
+  document.getElementById("ctBody").value = DEFAULT_CONTRACT;
+  document.getElementById("ctTitle").value = "Davis Digital Studio — Project Agreement";
+  localStorage.removeItem("dds_contract");
+  localStorage.removeItem("dds_contract_title");
+  toast("Reset to default");
+}
+async function pushContract() {
+  var ctx = selectedClients["contracts"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var body = document.getElementById("ctBody").value;
+  var title = document.getElementById("ctTitle").value;
+  await api("messages","POST",{client_id:ctx.id,from_who:"eric",sender_name:"Eric",text:"[CONTRACT]"+title+"||"+body});
+  await notify("eric_message","Your project agreement is ready in the Agreement tab of your portal.","",ctx);
+  toast("✓ Contract pushed to "+ctx.name);
+}
+async function uploadDoc(files) {
+  var ctx = selectedClients["docs"];
+  if (!ctx) { toast("Select a client first."); return; }
+  for (var file of Array.from(files)) {
+    var path = ctx.id+"/doc-"+Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.-]/g,"_");
+    var fr = await fetch(SB_URL+"/storage/v1/object/client-files/"+path,{
+      method:"POST",headers:{"Authorization":"Bearer "+SB_KEY,"Content-Type":file.type||"application/pdf","x-upsert":"true"},body:file
+    });
+    if (!fr.ok) { toast("Upload failed"); continue; }
+    var pubUrl = SB_URL+"/storage/v1/object/public/client-files/"+path;
+    var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
+    await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:"PDF",from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
+    await notify("eric_file",file.name,"",ctx);
+    toast("✓ "+file.name+" sent to "+ctx.name);
+  }
+}
+
+// ── NEW CLIENT ──
+async function inviteClient() {
+  var name = document.getElementById("nc-name").value.trim();
+  var cemail = document.getElementById("nc-cemail").value.trim();
+  var proj = document.getElementById("nc-proj").value.trim();
+  if (!name || !cemail) { toast("Name and email are required to send an invite."); return; }
+
+  // 1) Create the client record first so it exists when they finish setup.
+  var data = await api("clients","POST",{name:name, email:cemail, project_name:proj, project_status:"In Progress", progress:0, contact_email:cemail});
+  if (!data || !data[0]) { toast("Could not create client record."); return; }
+
+  // 2) Send the Supabase invite (server-side via Edge Function — they set their own password).
+  var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    body: JSON.stringify({type:"invite_client", email:cemail, name:name})
+  });
+  var jr = {};
+  try { jr = await res.json(); } catch(e) {}
+  if (!res.ok || jr.error) {
+    toast("Client saved, but invite failed: " + (jr.error || "unknown error"));
+    return;
+  }
+  toast("Invite sent to " + cemail + " — they'll set their own password.");
+  document.getElementById("nc-name").value = "";
+  document.getElementById("nc-cemail").value = "";
+  document.getElementById("nc-proj").value = "";
+}
+
+async function createClient() {
+  var name = document.getElementById("nc-name").value.trim();
+  var cemail = document.getElementById("nc-cemail").value.trim();
+  var pass = document.getElementById("nc-pass").value.trim();
+  var proj = document.getElementById("nc-proj").value.trim();
+  if (!name || !cemail || !pass) { toast("Name, email, and password required."); return; }
+
+  // Create Supabase Auth user via the Edge Function (server-side, uses service role).
+  // The browser anon key is not allowed to call /auth/v1/admin/users directly.
+  var authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
+  });
+  var authJson = {};
+  try { authJson = await authRes.json(); } catch(e) {}
+  if (!authRes.ok || authJson.error) {
+    toast("Auth error: " + (authJson.error || "Could not create login"));
+    return;
+  }
+
+  // Create client record (no password stored)
+  var data = await api("clients","POST",{name:name, email:cemail, project_name:proj, project_status:"In Progress", progress:0, contact_email:cemail});
+  if (!data || !data[0]) { toast("Error creating client record."); return; }
+  var cid = data[0].id;
+
+  // Create default timeline
+  var phases = [
+    {title:"Discovery & Strategy",description:"Goals, SEO roadmap, brand audit",status:"active",date_label:"Week 1",icon:"🎨",sort_order:1},
+    {title:"Design & Wireframes",description:"Homepage and key page mockups",status:"pending",date_label:"Week 2",icon:"🎨",sort_order:2},
+    {title:"Build",description:"Full site build with all pages",status:"pending",date_label:"Week 3–4",icon:"🔨",sort_order:3},
+    {title:"SEO Implementation",description:"Keywords, meta tags, sitemap",status:"pending",date_label:"Week 5–6",icon:"🔍",sort_order:4},
+    {title:"Launch",description:"Final review, DNS transfer, go live",status:"pending",date_label:"Day 45",icon:"🚀",sort_order:5},
+  ].map(p => Object.assign(p, {client_id:cid}));
+  for (var ph of phases) await api("timeline","POST",ph);
+
+  // Post welcome message in portal
+  await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:"Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great."});
+
+  // Send welcome email via clever-api
+  await notify("welcome","","",{name:name, contact_email:cemail, id:cid},{email:cemail, password:pass});
+
+  var result = document.getElementById("nc-result");
+  result.style.display = "block";
+  result.innerHTML = "✓ Portal created for <strong>"+name+"</strong>!<br><span style='font-size:12px;color:var(--muted);'>Login: <code>"+cemail+"</code> · Welcome email sent to client.</span>";
+  toast("✓ " + name + " portal created + welcome email sent!");
+  await loadOverview();
+}
+
+// ── NOTIFY ──
+async function notify(type, message, subject, client, meta) {
+  if (!client) return;
+  try {
+    await fetch(SB_URL+"/functions/v1/clever-api",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+      body:JSON.stringify({type:type,clientName:client.name,clientEmail:client.contact_email||"",message:message||"",subject:subject||"",meta:meta||{}})
+    });
+  } catch(e) { console.log("notify err:",e); }
+}
+
+// ── AUTO-CALCULATE PROGRESS FROM TIMELINE ──
+async function autoProgress(clientId) {
+  var data = await api("timeline?select=*&client_id=eq."+clientId);
+  if (!data||data.length===0) return 0;
+  var done = data.filter(t=>t.status==="done").length;
+  var pct = Math.round((done/data.length)*100);
+  await api("clients?id=eq."+clientId,"PATCH",{progress:pct});
+  return pct;
+}
+
+// ── CHECK OVERDUE INVOICES ──
+async function checkOverdueInvoices() {
+  var data = await api("invoices?select=*,clients(name,contact_email)&status=eq.pending");
+  if (!data) return;
+  var cutoff = new Date(Date.now() - 7*24*60*60*1000);
+  for (var inv of data) {
+    if (new Date(inv.created_at) < cutoff && inv.clients) {
+      var c = inv.clients;
+      await notify("invoice_reminder", inv.amount, inv.name, {name:c.name||"", contact_email:c.contact_email||""});
+    }
+  }
+}
+
+// ── HELPERS ──
+function ficon(n) { var e={pdf:"📄",doc:"📝",docx:"📝",ppt:"📊",pptx:"📊",png:"🖼️",jpg:"🖼️",jpeg:"🖼️",mp4:"🎬",zip:"📦"}; return e[(n||"").split(".").pop().toLowerCase()]||"📎"; }
+function fmtDate(iso) { if(!iso) return ""; return new Date(iso).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+function cap(s) { return s?s[0].toUpperCase()+s.slice(1):""; }
+function toast(msg) { var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000); }
+
+// ── QUOTE GENERATOR ──
+var quoteLines = [];
+
+function addQuoteLine(desc, qty, rate) {
+  var id = Date.now();
+  quoteLines.push({ id, desc: desc||"", qty: qty||1, rate: rate||"" });
+  renderQuoteLines();
+}
+
+function removeQuoteLine(id) {
+  quoteLines = quoteLines.filter(l => l.id !== id);
+  renderQuoteLines();
+}
+
+function renderQuoteLines() {
+  var container = document.getElementById("q-lines");
+  if (!container) return;
+  container.innerHTML = quoteLines.length === 0
+    ? "<p style='font-size:13px;color:var(--muted);'>No line items yet. Click + Add line item below.</p>"
+    : quoteLines.map(l => `
+      <div style="display:grid;grid-template-columns:1fr 80px 100px 36px;gap:8px;align-items:center;">
+        <input aria-label="Description (e.g. Website Redesign)" class="fi" placeholder="Description (e.g. Website Redesign)" value="${l.desc}" onchange="updateLine(${l.id},'desc',this.value)" style="margin:0;">
+        <input aria-label="Qty" class="fi" placeholder="Qty" type="number" value="${l.qty}" onchange="updateLine(${l.id},'qty',this.value)" style="margin:0;text-align:center;">
+        <input aria-label="$ Rate" class="fi" placeholder="$ Rate" value="${l.rate}" onchange="updateLine(${l.id},'rate',this.value)" style="margin:0;text-align:right;">
+        <button onclick="removeQuoteLine(${l.id})" style="background:none;border:1.5px solid rgba(91,63,160,0.2);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:14px;color:var(--muted);">✕</button>
+      </div>`).join("");
+}
+
+function updateLine(id, field, val) {
+  var line = quoteLines.find(l => l.id === id);
+  if (line) line[field] = val;
+}
+
+function calcQuoteTotal() {
+  return quoteLines.reduce((sum, l) => {
+    var rate = parseFloat((l.rate||"").replace(/[^0-9.]/g,"")) || 0;
+    var qty = parseFloat(l.qty) || 1;
+    return sum + (rate * qty);
+  }, 0);
+}
+
+function previewQuote() {
+  var client = document.getElementById("q-client").value || "Client";
+  var email = document.getElementById("q-email").value || "";
+  var project = document.getElementById("q-project").value || "Project";
+  var qdate = document.getElementById("q-date").value ? new Date(document.getElementById("q-date").value).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  var expires = document.getElementById("q-expires").value ? new Date(document.getElementById("q-expires").value).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}) : "";
+  var delivery = document.getElementById("q-delivery").value || "";
+  var notes = document.getElementById("q-notes").value || "";
+  var total = calcQuoteTotal();
+  var deposit = total * 0.5;
+
+  var linesHtml = quoteLines.map(l => {
+    var rate = parseFloat((l.rate||"").replace(/[^0-9.]/g,"")) || 0;
+    var qty = parseFloat(l.qty) || 1;
+    var lineTotal = rate * qty;
+    return `<tr>
+      <td style="padding:10px 0;border-bottom:1px solid #f0ecf8;color:#1a1028;">${l.desc}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f0ecf8;text-align:center;color:#7a6d8e;">${qty}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f0ecf8;text-align:right;color:#7a6d8e;">$${rate.toLocaleString("en-US",{minimumFractionDigits:2})}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #f0ecf8;text-align:right;color:#1a1028;font-weight:600;">$${lineTotal.toLocaleString("en-US",{minimumFractionDigits:2})}</td>
+    </tr>`;
+  }).join("");
+
+  var html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+  <style>
+    * { margin:0;padding:0;box-sizing:border-box; }
+    body { font-family:'Helvetica Neue',Arial,sans-serif;background:#faf9fd;color:#1a1028;padding:40px; }
+    .quote-wrap { max-width:760px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(91,63,160,0.1); }
+    .quote-header { background:linear-gradient(135deg,#1a1028,#2d1854);padding:40px 48px;color:#fff; }
+    .quote-logo { font-family:Georgia,serif;font-size:22px;margin-bottom:4px; }
+    .quote-logo span { color:#c4a8ff; }
+    .quote-sub { font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase; }
+    .quote-body { padding:40px 48px; }
+    .quote-meta { display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid #f0ecf8; }
+    .meta-label { font-size:11px;color:#9f93b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px; }
+    .meta-val { font-size:15px;color:#1a1028;font-weight:600; }
+    .section-title { font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#9f93b8;margin-bottom:14px; }
+    table { width:100%;border-collapse:collapse;margin-bottom:24px; }
+    th { font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9f93b8;padding-bottom:8px;border-bottom:2px solid #f0ecf8;text-align:left; }
+    th:nth-child(2),th:nth-child(3),th:nth-child(4) { text-align:right; }
+    th:nth-child(2) { text-align:center; }
+    .totals { border-top:2px solid #f0ecf8;padding-top:16px;margin-bottom:24px; }
+    .total-row { display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#7a6d8e; }
+    .total-row.main { font-size:18px;font-weight:700;color:#1a1028;border-top:1px solid #e8e0f8;margin-top:8px;padding-top:12px; }
+    .deposit-box { background:#f7f4fd;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;padding:16px 20px;margin-bottom:24px; }
+    .notes-box { background:#f7f4fd;border-radius:12px;padding:16px 20px;font-size:13px;color:#7a6d8e;line-height:1.7;margin-bottom:32px; }
+    .quote-footer { font-size:11px;color:#c4bdd8;text-align:center;border-top:1px solid #f0ecf8;padding-top:20px; }
+  </style></head><body>
+  <div class="quote-wrap">
+    <div class="quote-header">
+      <div class="quote-logo">Davis<span>Digital</span> Studio</div>
+      <div class="quote-sub">Project Quote</div>
+    </div>
+    <div class="quote-body">
+      <div class="quote-meta">
+        <div><div class="meta-label">Prepared for</div><div class="meta-val">${client}</div>${email ? `<div style="font-size:13px;color:#9f93b8;margin-top:2px;">${email}</div>` : ""}</div>
+        <div><div class="meta-label">Project</div><div class="meta-val">${project}</div></div>
+        <div><div class="meta-label">Quote date</div><div class="meta-val">${qdate}</div></div>
+        ${expires ? `<div><div class="meta-label">Valid until</div><div class="meta-val">${expires}</div></div>` : ""}
+        ${delivery ? `<div><div class="meta-label">Estimated delivery</div><div class="meta-val">${delivery}</div></div>` : ""}
+        <div><div class="meta-label">Prepared by</div><div class="meta-val">Eric Davis</div><div style="font-size:13px;color:#9f93b8;margin-top:2px;">eric@davisdigitalstudio.com</div></div>
+      </div>
+
+      <div class="section-title">Project Scope</div>
+      <table>
+        <thead><tr><th>Description</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Total</th></tr></thead>
+        <tbody>${linesHtml}</tbody>
+      </table>
+
+      <div class="totals">
+        <div class="total-row main"><span>Project Total</span><span>$${total.toLocaleString("en-US",{minimumFractionDigits:2})}</span></div>
+      </div>
+
+      <div class="deposit-box">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#9f93b8;margin-bottom:6px;">Payment Schedule</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#1a1028;margin-bottom:4px;"><span>Deposit (50%) — due to begin</span><span style="font-weight:600;">$${deposit.toLocaleString("en-US",{minimumFractionDigits:2})}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#1a1028;"><span>Balance (50%) — due at launch</span><span style="font-weight:600;">$${deposit.toLocaleString("en-US",{minimumFractionDigits:2})}</span></div>
+      </div>
+
+      ${notes ? `<div class="section-title">Notes</div><div class="notes-box">${notes.replace(/\n/g,"<br>")}</div>` : ""}
+
+      <div class="quote-footer">
+        Davis Digital Studio · Eric L. Davis · Los Angeles, CA · davisdigitalstudio.com<br>
+        This quote is valid until ${expires||"30 days from issue"}. Acceptance of this quote and payment of deposit constitutes agreement to Davis Digital Studio's Project Agreement terms.
+      </div>
+    </div>
+  </div>
+  </body></html>`;
+
+  var preview = document.getElementById("q-preview");
+  var frame = document.getElementById("q-frame");
+  preview.style.display = "block";
+  document.getElementById("q-download-btn").style.display = "inline-flex";
+  frame.srcdoc = html;
+  window._quoteHtml = html;
+  window._quoteClient = client;
+  window._quoteProject = project;
+}
+
+function downloadQuote() {
+  if (!window._quoteHtml) { previewQuote(); return; }
+  var blob = new Blob([window._quoteHtml], {type:"text/html"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "Quote_" + (window._quoteClient||"Client").replace(/\s+/g,"_") + "_" + (window._quoteProject||"Project").replace(/\s+/g,"_") + ".html";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Quote downloaded — open in browser and Print → Save as PDF");
+}
+
+// ── DISCLOSURES ──
+function copyDisc(btn) {
+  var ta = btn.previousElementSibling;
+  navigator.clipboard.writeText(ta.value).then(() => {
+    btn.textContent = "Copied ✓";
+    setTimeout(() => btn.textContent = "Copy", 2000);
+  });
+}
+
+// ── PROSPECTS ──
+var allProspects = [];
+var prospectFilter = 'all';
+
+async function loadProspects() {
+  var listEl = document.getElementById('prospectsList');
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);">Loading prospects...</p>';
+  var r = await api('prospects?select=*&order=created_at.desc&limit=500');
+  if (r === null) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--red);padding:10px;line-height:1.6;">Could not load prospects. If this is the first time, your Edge Function may need the prospects table added to its allowlist. Tell Claude you saw this message and you will get a one-line fix.</div>';
+    return;
+  }
+  allProspects = r || [];
+  renderProspectStats();
+  renderProspects();
+}
+
+function renderProspectStats() {
+  var el = document.getElementById('prStats');
+  if (!el) return;
+  var total = allProspects.length;
+  var emailed = allProspects.filter(p => p.emailed).length;
+  var replied = allProspects.filter(p => p.replied).length;
+  var toContact = allProspects.filter(p => p.status === 'New').length;
+  function card(label, val) {
+    return '<div class="stat"><div class="sv">'+val+'</div><div style="font-size:11px;color:var(--muted);">'+label+'</div></div>';
+  }
+  el.innerHTML = card('Total prospects', total) + card('To contact', toContact) + card('Emailed', emailed) + card('Replied', replied);
+}
+
+function setProspectFilter(f) {
+  prospectFilter = f;
+  ['all','New','Emailed','Replied','Client','Dead'].forEach(t => {
+    var btn = document.getElementById('prf-'+t);
+    if (!btn) return;
+    if (t === f) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
+    else { btn.style.background = 'rgba(91,63,160,0.08)'; btn.style.color = 'var(--p)'; }
+  });
+  renderProspects();
+}
+
+function renderProspects() {
+  var listEl = document.getElementById('prospectsList');
+  if (!listEl) return;
+  var q = (document.getElementById('prSearch').value || '').toLowerCase();
+  var rows = allProspects.filter(p => {
+    if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
+    if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if (rows.length === 0) {
+    listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:8px 0;">No prospects here yet. Add one above to get started.</p>';
+    return;
+  }
+  var statusColors = { New:'var(--muted)', Emailed:'var(--p)', Replied:'var(--green)', Client:'var(--green)', Dead:'var(--red)' };
+  listEl.innerHTML = rows.map(function(p) {
+    var sc = statusColors[p.status] || 'var(--muted)';
+    return '<div style="border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+        '<div style="flex:1;min-width:200px;">' +
+          '<div style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+
+            (p.email ? p.email : 'no email') +
+            (p.website ? ' · '+p.website : '') +
+            ' · '+(p.site_status||'') +
+          '</div>' +
+          (p.notes ? '<div style="font-size:12px;color:var(--ink);margin-top:6px;background:var(--cream);padding:6px 10px;border-radius:7px;">'+p.notes+'</div>' : '') +
+        '</div>' +
+        '<select onchange="updateProspect(\''+p.id+'\',\'status\',this.value)" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;border:1px solid '+sc+';color:'+sc+';background:#fff;cursor:pointer;outline:none;">' +
+          ['New','Emailed','Replied','Client','Dead'].map(s => '<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div style="display:flex;gap:16px;margin-top:10px;align-items:center;flex-wrap:wrap;">' +
+        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.emailed?'checked':'')+' onchange="toggleEmailed(\''+p.id+'\',this.checked)"> Emailed'+(p.emailed_date?' ('+p.emailed_date+')':'')+'</label>' +
+        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.replied?'checked':'')+' onchange="toggleReplied(\''+p.id+'\',this.checked)"> Replied</label>' +
+        (p.follow_up_date ? '<span style="font-size:12px;color:var(--muted);">Follow up: '+p.follow_up_date+'</span>' : '') +
+        '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function addProspect() {
+  var name = (document.getElementById('pr-name').value || '').trim();
+  var resultEl = document.getElementById('pr-result');
+  if (!name) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Business name is required.'; return; }
+  var body = {
+    business_name: name,
+    contact_name: document.getElementById('pr-contact').value.trim() || null,
+    email: document.getElementById('pr-email').value.trim() || null,
+    phone: document.getElementById('pr-phone').value.trim() || null,
+    website: document.getElementById('pr-website').value.trim() || null,
+    site_status: document.getElementById('pr-sitestatus').value,
+    source: document.getElementById('pr-source').value,
+    follow_up_date: document.getElementById('pr-followup').value || null,
+    notes: document.getElementById('pr-notes').value.trim() || null,
+    status: 'New'
+  };
+  var r = await api('prospects', 'POST', body);
+  if (r === null) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not save. Check the Edge Function allowlist note above.'; return; }
+  ['pr-name','pr-contact','pr-email','pr-phone','pr-website','pr-followup','pr-notes'].forEach(id => document.getElementById(id).value = '');
+  resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
+  loadProspects();
+}
+
+// Minimal CSV parser that handles quoted fields, commas inside quotes, and escaped quotes.
+function parseCsv(text) {
+  var rows = [];
+  var row = [];
+  var field = '';
+  var inQuotes = false;
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += c; }
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter(function(r) { return r.some(function(x) { return (x||'').trim() !== ''; }); });
+}
+
+async function importProspectsCsv() {
+  var fileInput = document.getElementById('pr-csv');
+  var resultEl = document.getElementById('pr-import-result');
+  var progressEl = document.getElementById('pr-import-progress');
+  var btn = document.getElementById('pr-import-btn');
+  if (!fileInput.files || !fileInput.files.length) {
+    resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Pick a CSV file first.'; return;
+  }
+  var text;
+  try { text = await fileInput.files[0].text(); }
+  catch (e) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not read the file.'; return; }
+
+  var rows = parseCsv(text);
+  if (rows.length < 2) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='File needs a header row plus at least one data row.'; return; }
+
+  var headers = rows[0].map(function(h){ return (h||'').trim().toLowerCase().replace(/\s+/g,'_'); });
+  var known = ['business_name','contact_name','email','phone','website','site_status','source','notes'];
+  var idx = {};
+  known.forEach(function(k){ idx[k] = headers.indexOf(k); });
+  if (idx.business_name === -1) {
+    resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='CSV must have a "business_name" column.'; return;
+  }
+
+  // Make sure we know existing names to skip duplicates.
+  if (!allProspects.length) { await loadProspects(); }
+  var existing = {};
+  allProspects.forEach(function(p){ if (p.business_name) existing[p.business_name.trim().toLowerCase()] = true; });
+
+  var toAdd = [];
+  var skippedDupes = 0;
+  for (var r = 1; r < rows.length; r++) {
+    var cells = rows[r];
+    var name = (cells[idx.business_name] || '').trim();
+    if (!name) continue;
+    if (existing[name.toLowerCase()]) { skippedDupes++; continue; }
+    existing[name.toLowerCase()] = true; // also dedupe within the file
+    function val(k){ return idx[k] !== -1 ? ((cells[idx[k]]||'').trim() || null) : null; }
+    toAdd.push({
+      business_name: name,
+      contact_name: val('contact_name'),
+      email: val('email'),
+      phone: val('phone'),
+      website: val('website'),
+      site_status: val('site_status') || 'No website',
+      source: val('source') || 'Imported',
+      notes: val('notes'),
+      status: 'New'
+    });
+  }
+
+  if (!toAdd.length) {
+    resultEl.style.display='block'; resultEl.style.color='var(--muted)';
+    resultEl.textContent = 'Nothing new to import' + (skippedDupes ? ' ('+skippedDupes+' duplicates skipped).' : '.');
+    return;
+  }
+
+  btn.disabled = true; btn.style.opacity = '0.6';
+  progressEl.style.display = 'block';
+  var added = 0, failed = 0;
+  for (var n = 0; n < toAdd.length; n++) {
+    progressEl.textContent = 'Importing ' + (n+1) + ' of ' + toAdd.length + '...';
+    var resp = await api('prospects', 'POST', toAdd[n]);
+    if (resp === null) { failed++; } else { added++; }
+  }
+  progressEl.style.display = 'none';
+  btn.disabled = false; btn.style.opacity = '1';
+  fileInput.value = '';
+
+  resultEl.style.display='block';
+  resultEl.style.color = failed ? 'var(--yellow)' : 'var(--green)';
+  resultEl.textContent = 'Imported ' + added + ' prospect' + (added===1?'':'s') +
+    (skippedDupes ? ', skipped ' + skippedDupes + ' duplicate' + (skippedDupes===1?'':'s') : '') +
+    (failed ? ', ' + failed + ' failed' : '') + '.';
+  loadProspects();
+}
+
+async function updateProspect(id, field, value) {
+  var patch = {}; patch[field] = value; patch.updated_at = new Date().toISOString();
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  var p = allProspects.find(x => x.id === id); if (p) p[field] = value;
+  renderProspectStats();
+}
+
+async function toggleEmailed(id, checked) {
+  var patch = { emailed: checked, emailed_date: checked ? new Date().toISOString().split('T')[0] : null, updated_at: new Date().toISOString() };
+  if (checked) { var p = allProspects.find(x => x.id === id); if (p && p.status === 'New') patch.status = 'Emailed'; }
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  loadProspects();
+}
+
+async function toggleReplied(id, checked) {
+  var patch = { replied: checked, replied_date: checked ? new Date().toISOString().split('T')[0] : null, updated_at: new Date().toISOString() };
+  if (checked) { var p = allProspects.find(x => x.id === id); if (p && p.status !== 'Client') patch.status = 'Replied'; }
+  await api('prospects?id=eq.'+id, 'PATCH', patch);
+  loadProspects();
+}
+
+async function deleteProspect(id) {
+  if (!confirm('Delete this prospect?')) return;
+  await api('prospects?id=eq.'+id, 'DELETE');
+  loadProspects();
+}
+
+function copyTemplate(id) {
+  var text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = event.target;
+    var orig = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(function(){ btn.textContent = orig; }, 1500);
+  });
+}
+
+// Init quote page with one default line
+document.addEventListener("DOMContentLoaded", function() {
+  var today = new Date();
+  var expires = new Date(today); expires.setDate(expires.getDate()+30);
+  var qd = document.getElementById("q-date");
+  var qe = document.getElementById("q-expires");
+  if (qd) qd.value = today.toISOString().split("T")[0];
+  if (qe) qe.value = expires.toISOString().split("T")[0];
+  renderQuoteLines();
+});
+</script>
+</body>
+</html>
