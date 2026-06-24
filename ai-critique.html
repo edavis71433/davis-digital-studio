@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%255b3fa0'/><text y='.85em' x='50%25' text-anchor='middle' font-size='72' font-family='Georgia,serif' fill='white'>D</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%235b3fa0'/><text y='.85em' x='50%25' text-anchor='middle' font-size='72' font-family='Georgia,serif' fill='white'>D</text></svg>">
 <title>Free AI Website Review | Davis Digital Studio</title>
 <meta name="description" content="Get a free, plain-English review of your website in under a minute. Paste your URL, answer two quick questions, and see exactly what is helping and hurting your business online. No signup required.">
 <link rel="canonical" href="https://davisdigitalstudio.com/ai-critique">
@@ -25,8 +25,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
-<script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-EQYY0DL8JL']=true;}})()</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EQYY0DL8JL"></script>
+<script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})()</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -887,6 +887,7 @@ body{padding-top:68px;}
       if(!data || !data.blocks || !data.blocks.length){ return fail('empty'); }
       state.result = data;
       renderResult(data);
+      if(typeof gtag === 'function'){ gtag('event', 'ai_review_complete', { tool: 'ai_critique' }); }
     })
     .catch(function(err){
       clearLoadTimers();
@@ -1017,7 +1018,7 @@ body{padding-top:68px;}
   if (!c) setTimeout(function(){ var b=document.getElementById('cookieBanner'); if(b) b.style.display='flex'; }, 2000);
 })();
 function acceptCookies(){ localStorage.setItem('cookie_consent','accepted'); document.getElementById('cookieBanner').style.display='none'; }
-function declineCookies(){ localStorage.setItem('cookie_consent','declined'); window['ga-disable-G-EQYY0DL8JL']=true; document.getElementById('cookieBanner').style.display='none'; }
+function declineCookies(){ localStorage.setItem('cookie_consent','declined'); window['ga-disable-G-V4WF04NX7F']=true; document.getElementById('cookieBanner').style.display='none'; }
 
 // Footer year
 document.getElementById('footerYear').textContent = new Date().getFullYear();

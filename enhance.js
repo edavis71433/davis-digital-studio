@@ -44,3 +44,15 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   apply(); // set correct state on load (e.g. refreshed mid-page)
 })();
+
+/* Booking-click tracking: fires a GA4 event when any Calendly booking link is clicked.
+   Added once here so it covers every page that loads enhance.js, no per-link edits. */
+(function () {
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href*="calendly.com/eric-davisdigitalstudio"]');
+    if (!a) return;
+    if (typeof gtag === "function") {
+      gtag("event", "book_call_click", { location: window.location.pathname });
+    }
+  }, true);
+})();
