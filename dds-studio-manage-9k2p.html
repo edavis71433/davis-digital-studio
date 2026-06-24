@@ -144,7 +144,36 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .result-box{background:#f0fdf0;border:1px solid rgba(106,191,105,0.2);border-radius:10px;padding:14px;font-size:13px;margin-top:12px;display:none;}
 .code{font-family:monospace;background:var(--cream);border:1px solid rgba(91,63,160,0.1);border-radius:8px;padding:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;margin-top:10px;}
 
-@media(max-width:768px){.shell{grid-template-columns:1fr;}.sidebar{display:none;}.stats{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
+.menu-toggle{display:none;}
+.drawer-scrim{display:none;}
+.admin-botnav{display:none;}
+@media(max-width:768px){
+  .shell{grid-template-columns:1fr;}
+  /* Sidebar becomes a slide-out drawer instead of disappearing */
+  .menu-toggle{display:flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:6px;border:none;background:rgba(255,255,255,0.10);border-radius:9px;color:#fff;cursor:pointer;flex-shrink:0;}
+  .menu-toggle svg{width:20px;height:20px;}
+  .topbar{padding:0 14px;}
+  .topbar-logo{font-size:14px;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sidebar{
+    display:block;position:fixed;top:0;left:0;height:100vh;width:248px;max-width:82vw;
+    z-index:300;transform:translateX(-100%);transition:transform 0.22s ease;
+    box-shadow:0 0 40px rgba(26,21,53,0.28);padding-top:14px;overflow-y:auto;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .drawer-scrim{display:block;position:fixed;inset:0;background:rgba(26,21,53,0.45);z-index:250;opacity:0;pointer-events:none;transition:opacity 0.22s ease;}
+  .drawer-scrim.open{opacity:1;pointer-events:auto;}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px;border-bottom:1px solid rgba(91,63,160,0.10);margin-bottom:6px;}
+  .drawer-head-title{font-family:var(--serif);font-size:15px;color:var(--ink);}
+  .drawer-close{border:none;background:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 6px;}
+  .sn{padding:12px 16px;font-size:15px;}
+  .sl{font-size:11px;padding:12px 16px 4px;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .main{padding-bottom:78px;}
+  .admin-botnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:200;background:#fff;border-top:1px solid rgba(91,63,160,0.1);padding:6px 0 env(safe-area-inset-bottom);}
+  .admin-botnav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;padding:5px 0;color:var(--muted);font-family:"DM Sans",sans-serif;cursor:pointer;}
+  .admin-botnav button span{font-size:9px;letter-spacing:0.3px;}
+}
 </style>
 </head>
 <body>
@@ -164,13 +193,28 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 <!-- ADMIN -->
 <div class="admin" id="adminWrap">
   <div class="topbar">
-    <div class="topbar-logo">Davis<span>Digital</span> Studio <span class="admin-badge">ADMIN</span></div>
+    <div style="display:flex;align-items:center;min-width:0;">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" onclick="toggleDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-logo">Davis<span>Digital</span> Studio <span class="admin-badge">ADMIN</span></div>
+    </div>
     <button class="topbar-out" onclick="doLogout()">Sign out</button>
   </div>
+  <div class="drawer-scrim" id="drawerScrim" onclick="closeDrawer()"></div>
+  <nav class="admin-botnav" id="adminBotnav">
+    <button onclick="go('overview')">📊<span>Overview</span></button>
+    <button onclick="go('hub')">🗂️<span>Clients</span></button>
+    <button onclick="go('leads')">📥<span>Leads</span></button>
+    <button onclick="go('messages')">💬<span>Message</span></button>
+    <button onclick="toggleDrawer()">☰<span>More</span></button>
+  </nav>
   <div class="shell">
 
     <!-- SIDEBAR -->
-    <div class="sidebar">
+    <div class="sidebar" id="adminSidebar">
+      <div class="drawer-head">
+        <span class="drawer-head-title">Menu</span>
+        <button class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">&times;</button>
+      </div>
       <div class="sl">Dashboard</div>
       <button class="sn active" onclick="go('overview')" id="sn-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Overview</button>
       <button class="sn" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 7V5a2 2 0 0 1 2-2h4l2 3h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Client Hub</button>
@@ -442,11 +486,14 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
               <div class="fg"><label class="fl">Business name</label><input aria-label="Joe's Coffee Shop" class="fi" id="nc-name" placeholder="e.g. Joe's Coffee Shop"></div>
               <div class="fg"><label class="fl">Client login email</label><input aria-label="owner@business.com" class="fi" id="nc-cemail" type="email" placeholder="owner@business.com"></div>
               
-              <div class="fg"><label class="fl">Portal password</label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="e.g. Coffee2026!"></div>
+              <div class="fg"><label class="fl">Portal password <span style="font-weight:400;color:var(--muted);">(optional — leave blank if inviting)</span></label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="Leave blank to let them set their own"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
-              <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;">Client logs in with their email + password. Welcome email sent automatically.</div>
+              <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;line-height:1.6;"><strong>Invite (recommended):</strong> client gets an email link and sets their own password.<br><strong>Create with password:</strong> you set a password now and share it with them.</div>
             </div>
-            <button class="sbtn" onclick="createClient()" style="margin-top:6px;">Create client portal →</button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <button class="sbtn" onclick="inviteClient()">Send invite →</button>
+              <button class="sbtn" onclick="createClient()" style="background:none;color:var(--p);border:1.5px solid var(--p);box-shadow:none;">Create with password</button>
+            </div>
             <div class="result-box" id="nc-result"></div>
             <div id="nc-email-template" style="display:none;margin-top:14px;">
               <div class="fl" style="margin-bottom:8px;">Welcome email to send:</div>
@@ -810,12 +857,22 @@ function doLogout() {
 document.getElementById("ap").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 
 // ── NAV ──
+function toggleDrawer(){
+  var sb=document.getElementById("adminSidebar"), sc=document.getElementById("drawerScrim");
+  var open=sb.classList.toggle("open"); sc.classList.toggle("open", open);
+  document.body.style.overflow = open ? "hidden" : "";
+}
+function closeDrawer(){
+  var sb=document.getElementById("adminSidebar"), sc=document.getElementById("drawerScrim");
+  sb.classList.remove("open"); sc.classList.remove("open"); document.body.style.overflow="";
+}
 function go(page) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".sn").forEach(b => b.classList.remove("active"));
   document.getElementById("page-"+page).classList.add("active");
   var btn = document.getElementById("sn-"+page);
   if (btn) btn.classList.add("active");
+  closeDrawer();
   if (page !== "overview" && page !== "leads") populateSelects(page);
   if (page === "leads") loadLeads();
   if (page === "hub") loadHub();
@@ -1785,6 +1842,34 @@ async function uploadDoc(files) {
 }
 
 // ── NEW CLIENT ──
+async function inviteClient() {
+  var name = document.getElementById("nc-name").value.trim();
+  var cemail = document.getElementById("nc-cemail").value.trim();
+  var proj = document.getElementById("nc-proj").value.trim();
+  if (!name || !cemail) { toast("Name and email are required to send an invite."); return; }
+
+  // 1) Create the client record first so it exists when they finish setup.
+  var data = await api("clients","POST",{name:name, email:cemail, project_name:proj, project_status:"In Progress", progress:0, contact_email:cemail});
+  if (!data || !data[0]) { toast("Could not create client record."); return; }
+
+  // 2) Send the Supabase invite (server-side via Edge Function — they set their own password).
+  var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    body: JSON.stringify({type:"invite_client", email:cemail, name:name})
+  });
+  var jr = {};
+  try { jr = await res.json(); } catch(e) {}
+  if (!res.ok || jr.error) {
+    toast("Client saved, but invite failed: " + (jr.error || "unknown error"));
+    return;
+  }
+  toast("Invite sent to " + cemail + " — they'll set their own password.");
+  document.getElementById("nc-name").value = "";
+  document.getElementById("nc-cemail").value = "";
+  document.getElementById("nc-proj").value = "";
+}
+
 async function createClient() {
   var name = document.getElementById("nc-name").value.trim();
   var cemail = document.getElementById("nc-cemail").value.trim();

@@ -546,6 +546,61 @@ serve(async (req) => {
       }
     }
 
+    // ── INVITE CLIENT (privileged — service role) ──
+    // Self-service onboarding: admin supplies an email; Supabase emails the client
+    // an invite link, and THEY set their own password via the /set-password page.
+    // redirectTo must be added to Supabase Auth > URL Configuration > Redirect URLs.
+    if (type === 'invite_client') {
+      const { email, name } = body;
+      if (!email) return json({ error: 'email required' }, 400);
+      if (!SB_SERVICE) return json({ error: 'Server missing SERVICE_ROLE_KEY secret' }, 500);
+      try {
+        const res = await fetch(`${SB_URL}/auth/v1/invite`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+          body: JSON.stringify({
+            email,
+            data: name ? { full_name: name } : {},
+            redirect_to: 'https://davisdigitalstudio.com/set-password.html',
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          return json({ error: data.msg || data.message || data.error_description || 'Could not send invite', status: res.status }, 200);
+        }
+        return json({ ok: true, user_id: data.id || (data.user && data.user.id) || null });
+      } catch (e) {
+        return json({ error: 'invite_failed', message: String(e) }, 200);
+      }
+    }
+
+    // ── PASSWORD RESET (recovery email) ──
+    // Public: portal "Forgot password" calls this. Sends Supabase recovery email
+    // that lands on /set-password.html where the client picks a new password.
+    if (type === 'reset_password') {
+      const { email } = body;
+      if (!email) return json({ error: 'email required' }, 400);
+      if (!SB_SERVICE) return json({ error: 'Server missing SERVICE_ROLE_KEY secret' }, 500);
+      try {
+        const res = await fetch(`${SB_URL}/auth/v1/recover`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+          body: JSON.stringify({
+            email,
+            redirect_to: 'https://davisdigitalstudio.com/set-password.html',
+          }),
+        });
+        // Supabase returns 200 even if the email doesn't exist (prevents account enumeration).
+        if (!res.ok) {
+          let data: any = {}; try { data = await res.json(); } catch (_) {}
+          return json({ error: data.msg || data.message || 'Could not send reset email', status: res.status }, 200);
+        }
+        return json({ ok: true });
+      } catch (e) {
+        return json({ error: 'reset_failed', message: String(e) }, 200);
+      }
+    }
+
     // ── AUDIT LEAD — persists to DB + sends emails ──
     if (type === 'audit_lead') {
       const { clientName, clientEmail, meta = {} } = body;

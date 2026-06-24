@@ -255,7 +255,18 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 }
 @media (min-width: 769px) {
   .mobile-nav { display: none !important; }
+  .more-sheet, .more-scrim { display: none !important; }
 }
+.more-scrim{position:fixed;inset:0;background:rgba(26,21,53,0.45);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.2s ease;}
+.more-scrim.open{opacity:1;pointer-events:auto;}
+.more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:310;background:#fff;border-radius:18px 18px 0 0;padding:8px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(26,21,53,0.22);transform:translateY(100%);transition:transform 0.24s ease;}
+.more-sheet.open{transform:translateY(0);}
+.more-sheet-handle{width:40px;height:4px;border-radius:3px;background:rgba(91,63,160,0.2);margin:8px auto 12px;}
+.more-sheet-title{font-family:var(--serif,"DM Serif Display");font-size:16px;color:var(--ink,#1a1523);margin-bottom:12px;text-align:center;}
+.more-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.more-grid button{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--cream,#faf8f5);border:1px solid rgba(91,63,160,0.08);border-radius:12px;padding:14px 6px;font-size:22px;cursor:pointer;font-family:"DM Sans",sans-serif;color:var(--ink,#1a1523);}
+.more-grid button span{font-size:11px;color:var(--muted,#5e5270);}
+.more-grid button:active{background:rgba(91,63,160,0.08);}
 @media (max-width: 768px) {
   .main-content { padding-bottom: 80px; }
 }
@@ -406,7 +417,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <span id="loginBtnText">Sign in →</span>
       </button>
       <div class="login-error" id="loginError">Incorrect email or password. Check your welcome email.</div>
-      <p class="login-note">Your login was sent in your welcome email.<br><a href="mailto:eric@davisdigitalstudio.com?subject=Portal%20Login%20Help&body=Hi%20Eric%2C%20I%20need%20help%20accessing%20my%20portal.">Forgot your password?</a> Email Eric directly.</p>
+      <div class="login-error" id="resetMsg" style="display:none;background:#eef7f0;border-color:rgba(46,125,82,0.25);color:#2e7d52;"></div>
+      <p class="login-note">First time here? Use the link in your invitation email to set a password.<br><a href="#" id="forgotLink" onclick="forgotPassword();return false;">Forgot your password?</a></p>
     </div>
   </div>
 </div>
@@ -1527,6 +1539,43 @@ async function requestAddon(name) {
 }
 
 // ── HELPERS ──
+function openMoreSheet(){
+  document.getElementById("moreSheet").classList.add("open");
+  document.getElementById("moreScrim").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeMoreSheet(){
+  document.getElementById("moreSheet").classList.remove("open");
+  document.getElementById("moreScrim").classList.remove("open");
+  document.body.style.overflow="";
+}
+function navMore(page){ closeMoreSheet(); nav(page); }
+async function forgotPassword(){
+  var emailEl = document.getElementById("loginUser");
+  var email = (emailEl.value || "").trim();
+  var msg = document.getElementById("resetMsg");
+  var err = document.getElementById("loginError");
+  err.style.display = "none";
+  if (!email){
+    err.textContent = "Enter your email above first, then tap “Forgot your password.”";
+    err.style.display = "block";
+    emailEl.focus();
+    return;
+  }
+  var link = document.getElementById("forgotLink");
+  link.textContent = "Sending…";
+  try {
+    await fetch(SUPABASE_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY },
+      body: JSON.stringify({ type: "reset_password", email: email })
+    });
+  } catch(e) {}
+  // Always show success (don't reveal whether an account exists).
+  msg.textContent = "If that email has a portal account, a reset link is on its way. Check your inbox.";
+  msg.style.display = "block";
+  link.textContent = "Resend reset link";
+}
 function nav(page) {
   updateLastSeen();
   document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
@@ -1877,9 +1926,29 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   <button onclick="nav('dashboard')">📊<br><span>Home</span></button>
   <button onclick="nav('files')">📁<br><span>Files</span></button>
   <button onclick="nav('messages')">💬<br><span>Messages</span></button>
-  <button onclick="nav('invoices')">💳<br><span>Invoices</span></button>
   <button onclick="nav('approvals')">✅<br><span>Approvals</span></button>
-  <button onclick="nav('guide')">📖<br><span>Guide</span></button>
+  <button onclick="openMoreSheet()">☰<br><span>More</span></button>
+</div>
+
+<!-- MORE SHEET (mobile) -->
+<div class="more-scrim" id="moreScrim" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="moreSheet" role="dialog" aria-label="More sections">
+  <div class="more-sheet-handle"></div>
+  <div class="more-sheet-title">All sections</div>
+  <div class="more-grid">
+    <button onclick="navMore('dashboard')">📊<span>Home</span></button>
+    <button onclick="navMore('onboarding')">🚀<span>Onboarding</span></button>
+    <button onclick="navMore('services')">🧩<span>Services</span></button>
+    <button onclick="navMore('timeline')">📅<span>Timeline</span></button>
+    <button onclick="navMore('files')">📁<span>Files</span></button>
+    <button onclick="navMore('approvals')">✅<span>Approvals</span></button>
+    <button onclick="navMore('messages')">💬<span>Messages</span></button>
+    <button onclick="navMore('feedback')">📝<span>Feedback</span></button>
+    <button onclick="navMore('invoices')">💳<span>Invoices</span></button>
+    <button onclick="navMore('contract')">📄<span>Contract</span></button>
+    <button onclick="navMore('links')">🔗<span>Links</span></button>
+    <button onclick="navMore('guide')">📖<span>Guide</span></button>
+  </div>
 </div>
 
 
