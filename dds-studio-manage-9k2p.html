@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin — Davis Digital Studio</title>
+<title>Admin | Davis Digital Studio</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -291,7 +291,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <!-- MESSAGES -->
       <div class="page" id="page-messages">
         <div class="pt">Send Message</div>
-        <div class="ps">Message a client — they get an email notification instantly.</div>
+        <div class="ps">Message a client, they get an email notification instantly.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel messages" class="client-select" id="sel-messages" onchange="onClientChange(this.value,'messages')">
@@ -316,7 +316,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <!-- FILES -->
       <div class="page" id="page-files">
         <div class="pt">Upload Files</div>
-        <div class="ps">Upload files to a client's portal — they get an email notification.</div>
+        <div class="ps">Upload files to a client's portal, they get an email notification.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel files" class="client-select" id="sel-files" onchange="onClientChange(this.value,'files')">
@@ -330,7 +330,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card">
           <div class="ch"><div class="ct">📁 Client Files</div></div>
           <div class="cb">
-            <div class="uzone"><p>📤 Click or drag files here (PDF, DOC, PPT, PNG, JPG — up to 50MB)</p><input type="file" multiple onchange="uploadFiles(this.files)"></div>
+            <div class="uzone"><p>📤 Click or drag files here (PDF, DOC, PPT, PNG, JPG, up to 50MB)</p><input type="file" multiple onchange="uploadFiles(this.files)"></div>
             <div id="fileList"><p style="font-size:13px;color:var(--muted);">Select a client to see their files.</p></div>
           </div>
         </div>
@@ -339,7 +339,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <!-- APPROVALS -->
       <div class="page" id="page-approvals">
         <div class="pt">Add Approval Item</div>
-        <div class="ps">Add a deliverable for the client to review — they get an email notification.</div>
+        <div class="ps">Add a deliverable for the client to review, they get an email notification.</div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel approvals" class="client-select" id="sel-approvals" onchange="onClientChange(this.value,'approvals')">
@@ -442,7 +442,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
         <div class="card" style="margin-top:0;">
           <div class="ch"><div class="ct">📤 Push to Client</div></div>
           <div class="cb">
-            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Send the contract to a client's Agreement tab — they get an email notification.</p>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Send the contract to a client's Agreement tab, they get an email notification.</p>
             <div class="client-select-wrap" style="margin-bottom:14px;">
               <label>Select client</label>
               <select aria-label="Sel contracts" class="client-select" id="sel-contracts" onchange="onClientChange(this.value,'contracts')">
@@ -486,7 +486,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
               <div class="fg"><label class="fl">Business name</label><input aria-label="Joe's Coffee Shop" class="fi" id="nc-name" placeholder="e.g. Joe's Coffee Shop"></div>
               <div class="fg"><label class="fl">Client login email</label><input aria-label="owner@business.com" class="fi" id="nc-cemail" type="email" placeholder="owner@business.com"></div>
               
-              <div class="fg"><label class="fl">Portal password <span style="font-weight:400;color:var(--muted);">(optional — leave blank if inviting)</span></label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="Leave blank to let them set their own"></div>
+              <div class="fg"><label class="fl">Portal password <span style="font-weight:400;color:var(--muted);">(optional, leave blank if inviting)</span></label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="Leave blank to let them set their own"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
               <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;line-height:1.6;"><strong>Invite (recommended):</strong> client gets an email link and sets their own password.<br><strong>Create with password:</strong> you set a password now and share it with them.</div>
             </div>
