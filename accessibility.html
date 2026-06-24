@@ -66,8 +66,7 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .nav-mob a{font-size:15px;font-weight:500;color:#1a1523;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
 .nav-mob a:last-child{border-bottom:none;}
 .mob-cta{background:#5b3fa0;color:#fff !important;border-radius:100px;text-align:center;padding:12px !important;margin-top:8px;font-weight:600 !important;}
-@media(max-width:900px){.nav-links{display:none;}.nav-ham{display:flex;}}
-
+@media(max-width:900px){
 
 /* ── Footer mobile responsive fix ── */
 @media (max-width: 768px) {
@@ -105,18 +104,9 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
     grid-template-columns: 1fr !important;
   }
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
 
 }
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
-
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
-.nav-links{display:none;}.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
 
 /* NAV-FINAL-V4 */
 
@@ -159,18 +149,16 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
 .nav-mob .mob-cta:hover{background:#4a3280!important;}
 body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+@media(max-width:900px){.nav{padding:0 20px;}
 
 /* Dropdown gap fix - bridge pseudo-element */
 .nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
 .nav-drop:hover .nav-drop-menu{display:block;}
 
-
 /* Dropdown bridge - prevents menu closing when moving mouse down */
 .nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
 .nav-drop{padding-bottom:0;}
-
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","name":"Accessibility Statement | Davis Digital Studio","url":"https://davisdigitalstudio.com/accessibility","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://davisdigitalstudio.com"}}
@@ -188,6 +176,8 @@ body{padding-top:68px;}
   <meta name="twitter:title" content="Accessibility Statement | Davis Digital Studio">
   <meta name="twitter:description" content="Davis Digital Studio is committed to making our website accessible to everyone.">
   <meta name="twitter:image" content="https://davisdigitalstudio.com/og-image.jpg">
+<link rel="stylesheet" href="/enhance.css">
+<link rel="stylesheet" href="/hero-grid.css">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -425,5 +415,6 @@ function declineCookies(){localStorage.setItem('cookie_consent','declined');wind
 function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
 </script>
   <script src="/concierge.js" defer></script>
+<script src="/enhance.js" defer></script>
 </body>
 </html>

@@ -62,8 +62,7 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .nav-mob a{font-size:15px;font-weight:500;color:#1a1523;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
 .nav-mob a:last-child{border-bottom:none;}
 .mob-cta{background:#5b3fa0;color:#fff !important;border-radius:100px;text-align:center;padding:12px !important;margin-top:8px;font-weight:600 !important;}
-@media(max-width:900px){.nav-links{display:none;}.nav-ham{display:flex;}}
-
+@media(max-width:900px){
 
 /* ── Footer mobile responsive fix ── */
 @media (max-width: 768px) {
@@ -101,18 +100,9 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
     grid-template-columns: 1fr !important;
   }
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
 
 }
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
-
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
-.nav-links{display:none;}.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
 
 /* NAV-FINAL-V4 */
 
@@ -155,18 +145,25 @@ body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; 
 .nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
 .nav-mob .mob-cta:hover{background:#4a3280!important;}
 body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
+@media(max-width:900px){.nav{padding:0 20px;}
 
 /* Dropdown gap fix - bridge pseudo-element */
 .nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
 .nav-drop:hover .nav-drop-menu{display:block;}
 
-
 /* Dropdown bridge - prevents menu closing when moving mouse down */
 .nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
 .nav-drop{padding-bottom:0;}
 
+.legal-summary{background:linear-gradient(180deg,#f7f4fd 0%,#faf8f5 100%);border:1px solid rgba(91,63,160,0.14);border-left:3px solid var(--p);border-radius:14px;padding:22px 24px;margin:0 0 40px;}
+.legal-summary .ls-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.legal-summary .ls-label svg{width:15px;height:15px;}
+.legal-summary h2.ls-h{font-family:var(--serif);font-size:19px !important;font-weight:400;color:var(--ink);margin:0 0 12px !important;letter-spacing:-0.2px;}
+.legal-summary ul{margin:0 !important;list-style:none;}
+.legal-summary li{position:relative;padding-left:24px;font-size:14px !important;line-height:1.7 !important;color:var(--ink) !important;margin-bottom:9px !important;}
+.legal-summary li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--pxl);}
+.legal-summary .ls-foot{font-size:12px !important;color:var(--muted) !important;margin:12px 0 0 !important;padding-top:12px;border-top:1px solid rgba(91,63,160,0.1);}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TermsOfService","name":"Terms of Service | Davis Digital Studio","url":"https://davisdigitalstudio.com/terms","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://davisdigitalstudio.com"}}
@@ -184,6 +181,8 @@ body{padding-top:68px;}
   <meta name="twitter:title" content="Terms of Service | Davis Digital Studio">
   <meta name="twitter:description" content="Terms of service for Davis Digital Studio web design and SEO services.">
   <meta name="twitter:image" content="https://davisdigitalstudio.com/og-image.jpg">
+<link rel="stylesheet" href="/enhance.css">
+<link rel="stylesheet" href="/hero-grid.css">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -285,6 +284,23 @@ class="hero" role="banner">
   <span class="updated">Effective June 20, 2026</span>
 
   <p>These Terms of Service govern your use of davisdigitalstudio.com and any services provided by Davis Digital Studio ("we," "us," "our"), operated by Eric Davis, based in Los Angeles, CA. By using our site or purchasing services, you agree to these terms.</p>
+
+  <div class="legal-summary">
+    <div class="ls-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      In plain language
+    </div>
+    <h2 class="ls-h">The short version</h2>
+    <ul>
+      <li>You pay 50% to start a project and 50% before it goes live. Each deliverable includes two rounds of revisions.</li>
+      <li>Once you've paid in full, the custom design and code are yours. I keep my own reusable tools and frameworks.</li>
+      <li>Payments run through Stripe. I never see or store your card details.</li>
+      <li>I can show finished work in my portfolio unless you ask me in writing not to.</li>
+      <li>I don't guarantee specific Google rankings or revenue. No honest web person can, and the full terms say so plainly.</li>
+      <li>Either of us can end a project with 7 days' written notice. You pay for the work done up to that point.</li>
+    </ul>
+    <p class="ls-foot">This summary is here to make the terms easy to understand. If the summary and the full terms below ever seem to disagree, the full terms are what govern our agreement.</p>
+  </div>
 
   <h2>Services</h2>
   <p>Davis Digital Studio provides web design, SEO strategy, digital audits, and related consulting services for small businesses. Specific deliverables, timelines, and pricing are outlined in individual project proposals or invoices agreed upon before work begins.</p>
@@ -423,5 +439,6 @@ function declineCookies(){localStorage.setItem('cookie_consent','declined');wind
 function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
 </script>
   <script src="/concierge.js" defer></script>
+<script src="/enhance.js" defer></script>
 </body>
 </html>

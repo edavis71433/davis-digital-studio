@@ -1568,28 +1568,53 @@ function formatDate(iso) {
 var _msgPollInterval = null;
 var _lastMsgCount = 0;
 
-function startMsgPoll() {
-  if (_msgPollInterval) clearInterval(_msgPollInterval);
-  _msgPollInterval = setInterval(async function() {
-    if (!CLIENT) return;
-    var { data } = await sb.from("messages")
-      .select("id,from_who,sender_name,text,created_at")
-      .eq("client_id", CLIENT.id)
-      .order("created_at");
-    if (!data) return;
-    // Check for new messages
-    if (data.length > _lastMsgCount) {
-      _lastMsgCount = data.length;
-      var newMsgs = data.slice(-( data.length - _lastMsgCount + 1));
-      var fromEric = newMsgs.filter(m => m.from_who === "eric");
-      if (fromEric.length > 0 && document.getElementById("page-messages").classList.contains("active") === false) {
-        setBadge("badge-messages", fromEric.length);
-        showToast("💬 New message from Eric");
-      }
-      renderMessages(data);
+var _msgVisibilityBound = false;
+async function _pollMessagesOnce() {
+  if (!CLIENT) return;
+  var { data } = await sb.from("messages")
+    .select("id,from_who,sender_name,text,created_at")
+    .eq("client_id", CLIENT.id)
+    .order("created_at");
+  if (!data) return;
+  if (data.length > _lastMsgCount) {
+    var newMsgs = data.slice(_lastMsgCount);
+    var fromEric = newMsgs.filter(m => m.from_who === "eric");
+    var onMessages = document.getElementById("page-messages")
+      && document.getElementById("page-messages").classList.contains("active");
+    if (fromEric.length > 0 && !onMessages) {
+      setBadge("badge-messages", fromEric.length);
+      showToast("💬 New message from Eric");
     }
-    _lastMsgCount = data.length;
-  }, 15000);
+    renderMessages(data);
+  }
+  _lastMsgCount = data.length;
+}
+function startMsgPoll() {
+  stopMsgPoll();
+  // Only poll while the tab is actually visible (saves the client's
+  // battery and your Supabase quota when the tab is in the background).
+  if (document.visibilityState === "visible") {
+    _msgPollInterval = setInterval(_pollMessagesOnce, 15000);
+  }
+  if (!_msgVisibilityBound) {
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        _pollMessagesOnce();              // instant catch-up on return
+        if (!_msgPollInterval) {
+          _msgPollInterval = setInterval(_pollMessagesOnce, 15000);
+        }
+      } else {
+        stopMsgPoll();                    // zero background requests
+      }
+    });
+    _msgVisibilityBound = true;
+  }
+}
+function stopMsgPoll() {
+  if (_msgPollInterval) {
+    clearInterval(_msgPollInterval);
+    _msgPollInterval = null;
+  }
 }
 
 // ── Update last seen on activity ──
