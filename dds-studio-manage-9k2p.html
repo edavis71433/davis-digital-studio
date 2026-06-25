@@ -673,6 +673,13 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
                 </select>
               </div>
               <div class="fg"><label class="fl">Follow-up date</label><input class="fi" id="pr-followup" type="date"></div>
+              <div class="fg"><label class="fl">Priority</label>
+                <select class="fi" id="pr-priority">
+                  <option>High</option>
+                  <option selected>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Notes</label><input class="fi" id="pr-notes" placeholder="e.g. ran AI review, scored 41, slow on mobile, no menu page"></div>
             </div>
             <button class="sbtn" onclick="addProspect()" style="margin-top:6px;">Add prospect →</button>
@@ -683,7 +690,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         <div class="card">
           <div class="ch"><div class="ct">⬆ Bulk import (CSV)</div></div>
           <div class="cb">
-            <div style="font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:12px;">Upload a CSV to add many prospects at once. The file needs a header row. Recognized columns (any order, extras ignored): <strong>business_name</strong> (required), contact_name, email, phone, website, site_status, source, notes. Duplicates by business name are skipped.</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:12px;">Upload a CSV to add many prospects at once. The file needs a header row. Recognized columns (any order, extras ignored): <strong>business_name</strong> (required), contact_name, email, phone, website, site_status, source, priority, notes. Duplicates by business name are skipped.</div>
             <input type="file" id="pr-csv" accept=".csv,text/csv" style="font-size:13px;margin-bottom:12px;display:block;">
             <button class="sbtn" onclick="importProspectsCsv()" id="pr-import-btn">Import file →</button>
             <div class="result-box" id="pr-import-result"></div>
@@ -707,6 +714,13 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
               <button class="prf" onclick="setProspectFilter('Replied')" id="prf-Replied" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Replied</button>
               <button class="prf" onclick="setProspectFilter('Client')" id="prf-Client" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Client</button>
               <button class="prf" onclick="setProspectFilter('Dead')" id="prf-Dead" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Dead</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid rgba(91,63,160,0.06);align-items:center;">
+              <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:2px;">Priority</span>
+              <button class="prpf" onclick="setPriorityFilter('all')" id="prpf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
+              <button class="prpf" onclick="setPriorityFilter('High')" id="prpf-High" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">High</button>
+              <button class="prpf" onclick="setPriorityFilter('Medium')" id="prpf-Medium" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Medium</button>
+              <button class="prpf" onclick="setPriorityFilter('Low')" id="prpf-Low" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Low</button>
             </div>
             <div id="prospectsList" style="padding:14px 18px;"></div>
           </div>
@@ -2177,6 +2191,9 @@ function copyDisc(btn) {
 // ── PROSPECTS ──
 var allProspects = [];
 var prospectFilter = 'all';
+var priorityFilter = 'all';
+var PRIORITY_COLORS = { High:{bg:'#C6EFCE',fg:'#0B6623'}, Medium:{bg:'#FFF2CC',fg:'#7F6000'}, Low:{bg:'#F2F2F2',fg:'#808080'} };
+var PRIORITY_RANK = { High:0, Medium:1, Low:2 };
 
 async function loadProspects() {
   var listEl = document.getElementById('prospectsList');
@@ -2216,14 +2233,31 @@ function setProspectFilter(f) {
   renderProspects();
 }
 
+function setPriorityFilter(f) {
+  priorityFilter = f;
+  ['all','High','Medium','Low'].forEach(t => {
+    var btn = document.getElementById('prpf-'+t);
+    if (!btn) return;
+    if (t === f) { btn.style.background = 'var(--p)'; btn.style.color = '#fff'; }
+    else { btn.style.background = 'rgba(91,63,160,0.08)'; btn.style.color = 'var(--p)'; }
+  });
+  renderProspects();
+}
+
 function renderProspects() {
   var listEl = document.getElementById('prospectsList');
   if (!listEl) return;
   var q = (document.getElementById('prSearch').value || '').toLowerCase();
   var rows = allProspects.filter(p => {
     if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
+    if (priorityFilter !== 'all' && (p.priority || 'Medium') !== priorityFilter) return false;
     if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
     return true;
+  });
+  rows.sort(function(a,b){
+    var ra = PRIORITY_RANK[a.priority] != null ? PRIORITY_RANK[a.priority] : 1;
+    var rb = PRIORITY_RANK[b.priority] != null ? PRIORITY_RANK[b.priority] : 1;
+    return ra - rb;
   });
   if (rows.length === 0) {
     listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:8px 0;">No prospects here yet. Add one above to get started.</p>';
@@ -2232,10 +2266,18 @@ function renderProspects() {
   var statusColors = { New:'var(--muted)', Emailed:'var(--p)', Replied:'var(--green)', Client:'var(--green)', Dead:'var(--red)' };
   listEl.innerHTML = rows.map(function(p) {
     var sc = statusColors[p.status] || 'var(--muted)';
+    var prio = p.priority || 'Medium';
+    var pcol = PRIORITY_COLORS[prio] || PRIORITY_COLORS.Medium;
+    var badge = '<button onclick="cyclePriority(\''+p.id+'\')" title="Click to change priority" '+
+      'style="font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 9px;border-radius:100px;border:none;cursor:pointer;'+
+      'background:'+pcol.bg+';color:'+pcol.fg+';">'+prio+'</button>';
     return '<div style="border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
         '<div style="flex:1;min-width:200px;">' +
-          '<div style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+            '<span style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</span>' +
+            badge +
+          '</div>' +
           '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+
             (p.email ? p.email : 'no email') +
             (p.website ? ' · '+p.website : '') +
@@ -2270,12 +2312,14 @@ async function addProspect() {
     site_status: document.getElementById('pr-sitestatus').value,
     source: document.getElementById('pr-source').value,
     follow_up_date: document.getElementById('pr-followup').value || null,
+    priority: document.getElementById('pr-priority').value || 'Medium',
     notes: document.getElementById('pr-notes').value.trim() || null,
     status: 'New'
   };
   var r = await api('prospects', 'POST', body);
   if (r === null) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='Could not save. Check the Edge Function allowlist note above.'; return; }
   ['pr-name','pr-contact','pr-email','pr-phone','pr-website','pr-followup','pr-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pr-priority').value = 'Medium';
   resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
   loadProspects();
 }
@@ -2321,7 +2365,7 @@ async function importProspectsCsv() {
   if (rows.length < 2) { resultEl.style.display='block'; resultEl.style.color='var(--red)'; resultEl.textContent='File needs a header row plus at least one data row.'; return; }
 
   var headers = rows[0].map(function(h){ return (h||'').trim().toLowerCase().replace(/\s+/g,'_'); });
-  var known = ['business_name','contact_name','email','phone','website','site_status','source','notes'];
+  var known = ['business_name','contact_name','email','phone','website','site_status','source','priority','notes'];
   var idx = {};
   known.forEach(function(k){ idx[k] = headers.indexOf(k); });
   if (idx.business_name === -1) {
@@ -2342,6 +2386,13 @@ async function importProspectsCsv() {
     if (existing[name.toLowerCase()]) { skippedDupes++; continue; }
     existing[name.toLowerCase()] = true; // also dedupe within the file
     function val(k){ return idx[k] !== -1 ? ((cells[idx[k]]||'').trim() || null) : null; }
+    function normPriority(v){
+      if (!v) return 'Medium';
+      var s = v.trim().toLowerCase();
+      if (s === 'high') return 'High';
+      if (s === 'low') return 'Low';
+      return 'Medium';
+    }
     toAdd.push({
       business_name: name,
       contact_name: val('contact_name'),
@@ -2350,6 +2401,7 @@ async function importProspectsCsv() {
       website: val('website'),
       site_status: val('site_status') || 'No website',
       source: val('source') || 'Imported',
+      priority: normPriority(val('priority')),
       notes: val('notes'),
       status: 'New'
     });
@@ -2386,6 +2438,17 @@ async function updateProspect(id, field, value) {
   await api('prospects?id=eq.'+id, 'PATCH', patch);
   var p = allProspects.find(x => x.id === id); if (p) p[field] = value;
   renderProspectStats();
+}
+
+async function cyclePriority(id) {
+  var order = ['High','Medium','Low'];
+  var p = allProspects.find(x => x.id === id);
+  if (!p) return;
+  var cur = order.indexOf(p.priority || 'Medium');
+  var next = order[(cur + 1) % order.length];
+  p.priority = next;
+  await updateProspect(id, 'priority', next);
+  renderProspects();
 }
 
 async function toggleEmailed(id, checked) {
