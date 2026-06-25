@@ -1860,9 +1860,8 @@ async function markProjectComplete() {
     // 3. Post a closing message into their portal
     try {
       await api("messages","POST",{
-        client_id: ctx.id, sender:"eric",
-        body:"Your project is complete and live — congratulations! 🎉 I just emailed you a short survey about how it went. Your feedback genuinely helps my studio, and it only takes a minute.",
-        created_at:new Date().toISOString()
+        client_id: ctx.id, from_who:"eric", sender_name:"Eric",
+        text:"Your project is complete and live — congratulations! 🎉 I just emailed you a short survey about how it went. Your feedback genuinely helps my studio, and it only takes a minute."
       });
     } catch(e){}
 
