@@ -269,10 +269,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   bottom: 0; left: 0; right: 0;
   background: #fff;
   border-top: 1px solid rgba(91,63,160,0.1);
-  display: flex !important;
+  display: none;
   z-index: 200;
   padding: 8px 0 env(safe-area-inset-bottom);
 }
+body.logged-in .mobile-nav { display: flex; }
 .mobile-nav button {
   flex: 1;
   background: none;
@@ -945,6 +946,7 @@ sb.auth.onAuthStateChange(async function(event, session) {
       CLIENT = clientData;
       document.getElementById("loginScreen").style.display = "none";
       document.getElementById("portal").style.display = "block";
+      document.body.classList.add("logged-in");
       if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
       initPortal();
       startMsgPoll();
@@ -955,6 +957,7 @@ sb.auth.onAuthStateChange(async function(event, session) {
     CLIENT = null;
     document.getElementById("portal").style.display = "none";
     document.getElementById("loginScreen").style.display = "flex";
+    document.body.classList.remove("logged-in");
     if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "none";
   }
   if (event === "TOKEN_REFRESHED") {
