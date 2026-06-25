@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dds-v2';
+const CACHE_NAME = 'dds-v3';
 const PRECACHE = [
   '/about',
   '/services',
