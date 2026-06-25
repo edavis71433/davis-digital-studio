@@ -495,7 +495,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
               
               <div class="fg"><label class="fl">Portal password <span style="font-weight:400;color:var(--muted);">(optional, leave blank if inviting)</span></label><input aria-label="Coffee2026!" class="fi" id="nc-pass" placeholder="Leave blank to let them set their own"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Project name</label><input aria-label="Website Redesign + SEO Strategy" class="fi" id="nc-proj" placeholder="e.g. Website Redesign + SEO Strategy"></div>
-              <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;line-height:1.6;"><strong>Invite (recommended):</strong> client gets an email link and sets their own password.<br><strong>Create with password:</strong> you set a password now and share it with them.</div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Welcome message <span style="font-weight:400;color:var(--muted);">(tailored to this client — posts to their portal inbox)</span></label><textarea aria-label="Welcome message and checklist for this client" class="fi" id="nc-welcome" rows="10" style="resize:vertical;font-family:inherit;line-height:1.6;" placeholder="Write this client's welcome + everything you need from them to get started. Leave blank to use the default welcome."></textarea></div>
+              <div style="grid-column:span 2;font-size:12px;color:var(--muted);padding:6px 0;line-height:1.6;"><strong>Invite (recommended):</strong> client gets an email link to set their own password. Your welcome message above is waiting in their portal when they log in.<br><strong>Create with password:</strong> you set a password now and share it with them.</div>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
               <button class="sbtn" onclick="inviteClient()">Send invite →</button>
@@ -2018,11 +2019,17 @@ async function inviteClient() {
   var name = document.getElementById("nc-name").value.trim();
   var cemail = document.getElementById("nc-cemail").value.trim();
   var proj = document.getElementById("nc-proj").value.trim();
+  var welcome = document.getElementById("nc-welcome").value.trim();
   if (!name || !cemail) { toast("Name and email are required to send an invite."); return; }
 
   // 1) Create the client record first so it exists when they finish setup.
   var data = await api("clients","POST",{name:name, email:cemail, project_name:proj, project_status:"In Progress", progress:0, contact_email:cemail});
   if (!data || !data[0]) { toast("Could not create client record."); return; }
+  var cid = data[0].id;
+
+  // 1b) Post the tailored welcome message to their portal inbox (source of truth).
+  var welcomeText = welcome || ("Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great.");
+  await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
 
   // 2) Send the Supabase invite (server-side via Edge Function — they set their own password).
   var res = await fetch(SB_URL + "/functions/v1/clever-api", {
@@ -2033,13 +2040,15 @@ async function inviteClient() {
   var jr = {};
   try { jr = await res.json(); } catch(e) {}
   if (!res.ok || jr.error) {
-    toast("Client saved, but invite failed: " + (jr.error || "unknown error"));
+    toast("Client saved + welcome posted, but invite email failed: " + (jr.error || "unknown error"));
     return;
   }
-  toast("Invite sent to " + cemail + " — they'll set their own password.");
+  toast("Invite sent to " + cemail + " — welcome message is waiting in their portal.");
   document.getElementById("nc-name").value = "";
   document.getElementById("nc-cemail").value = "";
   document.getElementById("nc-proj").value = "";
+  document.getElementById("nc-welcome").value = "";
+  await loadOverview();
 }
 
 async function createClient() {
@@ -2078,8 +2087,10 @@ async function createClient() {
   ].map(p => Object.assign(p, {client_id:cid}));
   for (var ph of phases) await api("timeline","POST",ph);
 
-  // Post welcome message in portal
-  await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:"Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great."});
+  // Post welcome message in portal (tailored if provided, else default)
+  var welcome = document.getElementById("nc-welcome").value.trim();
+  var welcomeText = welcome || ("Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great.");
+  await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
 
   // Send welcome email via clever-api
   await notify("welcome","","",{name:name, contact_email:cemail, id:cid},{email:cemail, password:pass});
@@ -2088,6 +2099,7 @@ async function createClient() {
   result.style.display = "block";
   result.innerHTML = "✓ Portal created for <strong>"+name+"</strong>!<br><span style='font-size:12px;color:var(--muted);'>Login: <code>"+cemail+"</code> · Welcome email sent to client.</span>";
   toast("✓ " + name + " portal created + welcome email sent!");
+  document.getElementById("nc-welcome").value = "";
   await loadOverview();
 }
 
