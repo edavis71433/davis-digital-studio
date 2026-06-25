@@ -216,7 +216,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .msg-content{max-width:75%;}
 .msg-meta{font-size:10px;color:var(--muted);margin-bottom:4px;}
 .from-client .msg-meta{text-align:right;}
-.msg-text{background:var(--pxxxl);border-radius:0 12px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;}
+.msg-text{background:var(--pxxxl);border-radius:0 12px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;}
 .from-client .msg-text{background:var(--warm);border-radius:12px 0 12px 12px;}
 .msg-compose{display:flex;gap:8px;margin-top:14px;border-top:1px solid rgba(91,63,160,0.06);padding-top:14px;align-items:flex-end;}
 .msg-input{flex:1;background:var(--cream);border:1.5px solid rgba(91,63,160,0.12);border-radius:16px;padding:10px 16px;font-family:"DM Sans",sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;min-height:42px;max-height:120px;}
@@ -1033,9 +1033,9 @@ async function initPortal() {
   document.getElementById("statsRow").innerHTML = [
     {val: CLIENT.progress + "%", label: "Project complete", cls: "purple"},
     {val: CLIENT.project_status || "In Progress", label: "Current status", cls: ""},
-    {val: "$" + balanceDue, label: "Balance due today", cls: "green"},
+    {val: "$" + balanceDue, label: "Balance due", cls: "green", id: "stat-balance"},
     {val: CLIENT.project_name ? CLIENT.project_name.split(" ")[0] : "Project", label: "Active project", cls: ""},
-  ].map(s => `<div class="stat"><div class="stat-val ${s.cls}">${s.val}</div><div class="stat-label">${s.label}</div></div>`).join("");
+  ].map(s => `<div class="stat"><div class="stat-val ${s.cls}"${s.id?' id="'+s.id+'"':''}>${s.val}</div><div class="stat-label">${s.label}</div></div>`).join("");
   
   // Progress
   setTimeout(() => {
@@ -1621,6 +1621,8 @@ async function loadInvoices() {
   document.getElementById("invoiceBody").innerHTML = html;
   window._unpaidInvoices = data.filter(i => i.status === "pending").length;
   window._unpaidTotal = data.filter(i => i.status === "pending").reduce((s,i)=>s+(parseFloat(i.amount?.replace(/[^0-9.]/g,""))||0),0);
+  var balEl = document.getElementById("stat-balance");
+  if (balEl) balEl.textContent = "$" + (window._unpaidTotal || 0).toLocaleString();
   updateAttention();
 }
 

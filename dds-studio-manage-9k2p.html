@@ -96,7 +96,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
 .mav.e{background:var(--p);color:#fff;}
 .mav.c{background:#f5f0e8;color:var(--ink);border:1px solid var(--pxl);}
-.mt{background:#fff;border-radius:0 9px 9px 9px;padding:8px 12px;font-size:12px;line-height:1.6;max-width:78%;}
+.mt{background:#fff;border-radius:0 9px 9px 9px;padding:8px 12px;font-size:12px;line-height:1.6;max-width:78%;white-space:pre-wrap;}
 .from-eric .mt{background:var(--pxxxl);border-radius:9px 0 9px 9px;}
 .mm{font-size:10px;color:var(--muted);margin-top:3px;}
 .from-eric .mm{text-align:right;}
@@ -1415,7 +1415,7 @@ async function openHubClient(id) {
   if (msgs.length === 0) { html += empty("No messages yet."); }
   else {
     html += msgs.slice(0,5).map(function(m){
-      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;">'+(m.text||"")+'</div></div>';
+      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;white-space:pre-wrap;">'+(m.text||"")+'</div></div>';
     }).join("");
   }
 
