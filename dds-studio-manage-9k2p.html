@@ -853,6 +853,32 @@ var clients = [];
 var selectedClients = {};  // keyed by context
 
 // ── AUTH ──
+// Admin login is remembered across refreshes via localStorage with an expiry,
+// so a hard refresh no longer kicks you back to the password screen.
+var ADMIN_SESSION_KEY = "dds_admin_session";
+var ADMIN_SESSION_HOURS = 12; // re-enter password after this many hours
+
+function adminSessionValid() {
+  try {
+    var raw = localStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return false;
+    var exp = parseInt(raw, 10);
+    if (!exp || Date.now() > exp) { localStorage.removeItem(ADMIN_SESSION_KEY); return false; }
+    return true;
+  } catch (e) { return false; }
+}
+
+function setAdminSession() {
+  try { localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_HOURS*3600*1000)); } catch (e) {}
+}
+
+function showAdminApp() {
+  document.getElementById("loginWrap").style.display = "none";
+  document.getElementById("adminWrap").style.display = "block";
+  loadOverview();
+  document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
+}
+
 async function hashPassword(str) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
@@ -861,21 +887,24 @@ async function doLogin() {
   const input = document.getElementById("ap").value;
   const hash = await hashPassword(input);
   if (hash === PASS_HASH) {
-    document.getElementById("loginWrap").style.display = "none";
-    document.getElementById("adminWrap").style.display = "block";
-    loadOverview();
-    document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
+    setAdminSession();
+    showAdminApp();
   } else {
     document.getElementById("le").style.display = "block";
     document.getElementById("ap").value = "";
   }
 }
 function doLogout() {
+  try { localStorage.removeItem(ADMIN_SESSION_KEY); } catch (e) {}
   document.getElementById("adminWrap").style.display = "none";
   document.getElementById("loginWrap").style.display = "flex";
   document.getElementById("ap").value = "";
 }
 document.getElementById("ap").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+// On page load, restore the session if it's still valid (this is what fixes
+// the "hard refresh logs me out" problem).
+if (adminSessionValid()) { showAdminApp(); }
 
 // ── NAV ──
 function toggleDrawer(){
