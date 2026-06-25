@@ -1392,6 +1392,7 @@ async function openHubClient(id) {
     html += '<option value="'+p+'"'+((c.maintenance_plan||'')===p?' selected':'')+'>'+lbl+'</option>';
   });
   html += '</select>';
+  html += '<button onclick="resetClientPassword(\''+c.id+'\',\''+(c.email||'').replace(/'/g,"\\'")+'\',\''+(c.name||'').replace(/'/g,"\\'")+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid rgba(91,63,160,0.25);background:#fff;color:var(--p);cursor:pointer;">🔑 Set / reset password</button>';
   html += '</div></div>';
 
   // Tool runs / inquiries
@@ -1991,12 +1992,39 @@ function resetContract() {
 async function pushContract() {
   var ctx = selectedClients["contracts"];
   if (!ctx) { toast("Select a client first."); return; }
-  var body = document.getElementById("ctBody").value;
-  var title = document.getElementById("ctTitle").value;
-  await api("messages","POST",{client_id:ctx.id,from_who:"eric",sender_name:"Eric",text:"[CONTRACT]"+title+"||"+body});
+  await api("messages","POST",{client_id:ctx.id,from_who:"eric",sender_name:"Eric",text:"Your project agreement is ready to review and sign. Head to the Agreement tab in your portal, give it a read, and acknowledge at the bottom to get us started."});
   await notify("eric_message","Your project agreement is ready in the Agreement tab of your portal.","",ctx);
-  toast("✓ Contract pushed to "+ctx.name);
+  toast("✓ Contract notification sent to "+ctx.name);
 }
+async function resetClientPassword(cid, email, name) {
+  if (!email) { toast("This client has no email on file."); return; }
+  var pass = prompt("Set a new password for "+(name||email)+".\n\nThey'll use it at davisdigitalstudio.com with their email. No link, no expiry.\n\nSuggested: ForeignCode2026!", "");
+  if (pass === null) return;
+  pass = pass.trim();
+  if (pass.length < 8) { toast("Password must be at least 8 characters."); return; }
+  toast("Setting password...");
+  // Try dedicated reset_password handler first; fall back to create_client_auth (also sets password on existing user).
+  var ok = false, errMsg = "";
+  for (var typeAttempt of ["reset_password","create_client_auth"]) {
+    try {
+      var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
+        body: JSON.stringify({type: typeAttempt, email: email, password: pass})
+      });
+      var jr = {};
+      try { jr = await res.json(); } catch(e) {}
+      if (res.ok && !jr.error) { ok = true; break; }
+      errMsg = jr.error || ("HTTP "+res.status);
+    } catch(e) { errMsg = e.message; }
+  }
+  if (ok) {
+    toast("✓ Password set for "+(name||email)+". Text it to them — they sign in at davisdigitalstudio.com.");
+  } else {
+    toast("Could not set password: "+errMsg);
+  }
+}
+
 async function uploadDoc(files) {
   var ctx = selectedClients["docs"];
   if (!ctx) { toast("Select a client first."); return; }
