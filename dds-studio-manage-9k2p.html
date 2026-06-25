@@ -1327,6 +1327,39 @@ async function openHubClient(id) {
   });
   html += '</div>';
 
+  // ── Status, launch & care controls ──
+  var contractOk = !!c.contract_acked_at;
+  var briefOk = !!intake;
+  var launched = (c.progress||0) >= 100 || !!c.launched_at;
+  function statusChip(){
+    if ((c.progress||0) >= 100) return ['Live','#1d8a5a','#e9f7f0'];
+    if ((c.progress||0) >= 90) return ['Launching','#4435a0','#eef0fd'];
+    if (pendingAppr > 0) return ['In review','#a96a00','#fff6e6'];
+    if (!contractOk || !briefOk) return ['Onboarding','#c0392b','#fdeeee'];
+    return ['On track','#2f7d32','#eef7ee'];
+  }
+  var sc = statusChip();
+  html += '<div style="margin-top:18px;padding:16px;background:#faf9fc;border:1px solid rgba(91,63,160,0.10);border-radius:12px;">';
+  html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">';
+  html += '<span style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;background:'+sc[2]+';color:'+sc[1]+';">'+sc[0]+'</span>';
+  html += '<span style="font-size:12px;color:'+(contractOk?'#1d8a5a':'#c0392b')+';">'+(contractOk?'✓':'○')+' Agreement '+(contractOk?'signed':'unsigned')+'</span>';
+  html += '<span style="font-size:12px;color:'+(briefOk?'#1d8a5a':'#c0392b')+';">'+(briefOk?'✓':'○')+' Brief '+(briefOk?'submitted':'pending')+'</span>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
+  if (!launched) {
+    html += '<button onclick="markLaunched(\''+c.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;">🚀 Mark as launched</button>';
+  } else {
+    var ld = c.launched_at ? new Date(c.launched_at).toLocaleDateString() : 'date not set';
+    html += '<span style="font-size:12px;color:var(--muted);">🚀 Launched '+ld+'</span>';
+  }
+  html += '<select id="hubPlan-'+c.id+'" onchange="setMaintenancePlan(\''+c.id+'\',this.value)" style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(91,63,160,0.18);background:#fff;color:var(--ink);cursor:pointer;">';
+  ['','Care Lite','Care Standard','Care Plus'].forEach(function(p){
+    var lbl = p || 'No maintenance plan';
+    html += '<option value="'+p+'"'+((c.maintenance_plan||'')===p?' selected':'')+'>'+lbl+'</option>';
+  });
+  html += '</select>';
+  html += '</div></div>';
+
   // Tool runs / inquiries
   html += sectionTitle("🔍 Tool Runs & Inquiries");
   if (leads.length === 0) {
@@ -1480,6 +1513,23 @@ async function toggleHubStatus(id, currentlyActive) {
   openHubClient(id);
 }
 
+async function markLaunched(id) {
+  if (!confirm("Mark this project as launched? This sets progress to 100%, stamps the launch date, and starts the client's 30-day support window in their portal.")) return;
+  var nowIso = new Date().toISOString();
+  await api("clients?id=eq."+id, "PATCH", {progress:100, project_status:"Live", launched_at:nowIso});
+  try { await api("activity_log", "POST", {client_id:id, action:"launched", detail:"Project marked launched"}); } catch(e){}
+  toast("🚀 Launched! Client's portal now shows post-launch care.");
+  await loadHub();
+  openHubClient(id);
+}
+
+async function setMaintenancePlan(id, plan) {
+  await api("clients?id=eq."+id, "PATCH", {maintenance_plan: plan || null});
+  toast(plan ? ("✓ Plan set: "+plan) : "✓ Maintenance plan cleared");
+  var c = hubClients.find(function(x){ return x.id === id; });
+  if (c) c.maintenance_plan = plan || null;
+}
+
 // ── API HELPER ──
 async function api(path, method, body) {
   // Routes through the Edge Function so the browser never holds a key that can
@@ -1523,7 +1573,7 @@ async function loadOverview() {
     {v:"$"+(total||0).toLocaleString(), l:"Pending invoices", ic:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
   ].map(s=>`<div class="stat"><div style="display:flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg><span class="sl2">${s.l}</span></div><div class="sv">${s.v}</div></div>`).join("");
 
-  // Attention bar: overdue invoices + pending approvals
+  // Attention bar: overdue invoices + pending approvals + unanswered messages + stale projects
   var overdue = pendingInvs.filter(i => i.due_date && new Date(i.due_date) < new Date());
   var alerts = [];
   if (overdue.length) {
@@ -1533,6 +1583,28 @@ async function loadOverview() {
   if ((approvals||[]).length) {
     alerts.push((approvals.length)+" approval"+(approvals.length>1?"s":"")+" waiting on you");
   }
+  // Unanswered client messages: latest message per client is from the client.
+  try {
+    var latestByClient = {};
+    (msgs||[]).forEach(function(m){
+      if (!latestByClient[m.client_id]) latestByClient[m.client_id] = m; // msgs are desc, first seen is latest
+    });
+    var needReply = Object.values(latestByClient).filter(function(m){ return m.from_who === "client"; }).length;
+    if (needReply) alerts.push(needReply+" client message"+(needReply>1?"s":"")+" awaiting your reply");
+  } catch(e){}
+  // Stale projects: active clients with no activity in 7+ days.
+  try {
+    var acts = await api("activity_log?select=client_id,created_at&order=created_at.desc&limit=200").catch(()=>[]);
+    var lastSeen = {};
+    (acts||[]).forEach(function(a){ if (!lastSeen[a.client_id]) lastSeen[a.client_id] = a.created_at; });
+    var weekAgo = Date.now() - 7*86400000;
+    var stale = (cls||[]).filter(function(c){
+      if ((c.progress||0) >= 100) return false; // launched projects aren't "stale"
+      var ls = lastSeen[c.id] ? new Date(lastSeen[c.id]).getTime() : 0;
+      return ls < weekAgo;
+    }).length;
+    if (stale) alerts.push(stale+" project"+(stale>1?"s":"")+" with no client activity in 7+ days");
+  } catch(e){}
   var attEl = document.getElementById("ovAttention");
   if (attEl) {
     attEl.innerHTML = alerts.length
