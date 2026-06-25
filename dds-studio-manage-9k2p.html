@@ -2002,25 +2002,21 @@ async function resetClientPassword(cid, email, name) {
   pass = pass.trim();
   if (pass.length < 8) { toast("Password must be at least 8 characters."); return; }
   toast("Setting password...");
-  // Try dedicated reset_password handler first; fall back to create_client_auth (also sets password on existing user).
-  var ok = false, errMsg = "";
-  for (var typeAttempt of ["reset_password","create_client_auth"]) {
-    try {
-      var res = await fetch(SB_URL + "/functions/v1/clever-api", {
-        method: "POST",
-        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
-        body: JSON.stringify({type: typeAttempt, email: email, password: pass})
-      });
-      var jr = {};
-      try { jr = await res.json(); } catch(e) {}
-      if (res.ok && !jr.error) { ok = true; break; }
-      errMsg = jr.error || ("HTTP "+res.status);
-    } catch(e) { errMsg = e.message; }
-  }
-  if (ok) {
-    toast("✓ Password set for "+(name||email)+". Text it to them — they sign in at davisdigitalstudio.com.");
-  } else {
-    toast("Could not set password: "+errMsg);
+  try {
+    var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
+      body: JSON.stringify({type: "reset_password", email: email, password: pass})
+    });
+    var jr = {};
+    try { jr = await res.json(); } catch(e) {}
+    if (res.ok && jr.ok) {
+      toast("✓ Password set for "+(name||email)+". Text it to them — they sign in at davisdigitalstudio.com.");
+    } else {
+      toast("Could not set password: "+(jr.error || ("HTTP "+res.status)));
+    }
+  } catch(e) {
+    toast("Could not set password: "+e.message);
   }
 }
 
