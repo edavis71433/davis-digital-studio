@@ -34,9 +34,12 @@ https://www.davisdigitalstudio.com/*  https://davisdigitalstudio.com/:splat  301
 /function-test.html     /404.html                       404!
 
 # Block internal working docs (in case any copy lingers in the deploy)
+/_internal/*              /404.html                       404!
 /DEEP-DIVE-FINDINGS.md     /404.html                     404!
+/DEPLOY-MANIFEST.txt      /404.html                       404!
 /qa-report.md             /404.html                       404!
 /site_copy.json           /404.html                       404!
 /supabase-email-templates.md  /404.html                   404!
+/email-nurture-sequence.html  /404.html                   404!
 
 /*                      /404.html                       404

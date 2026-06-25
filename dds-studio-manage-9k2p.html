@@ -797,6 +797,10 @@ Don't want emails from me? Reply "unsubscribe" and you're off the list.</div>
 <script>
 const SB_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
+// Shared secret sent on privileged Edge Function calls (create_client_auth, invite_client, reset_password).
+// MUST match the ADMIN_SHARED_SECRET secret set on the clever-api Edge Function in Supabase.
+// This is the same long random string set as ADMIN_SHARED_SECRET in Supabase. Keep them identical.
+const ADMIN_SECRET = "71377f613a8ab6077cb4fcfba68cfc3018c1fb8df1cdc9abf6101a4d207af004";
 const ADMIN_TOKEN = "dplaHi_BIZ17Qf4LJUfRli9lkVQJM_EbxOx_tLOBq3s";  // must EXACTLY match the ADMIN_TOKEN secret in Supabase
 const PASS_HASH = "50897cb74718d639a5b89f3efd0b144f127eee374e8e6a52c7cf3c252b8302c6";
 const DEFAULT_CONTRACT = `PROJECT AGREEMENT
@@ -2023,7 +2027,7 @@ async function inviteClient() {
   // 2) Send the Supabase invite (server-side via Edge Function — they set their own password).
   var res = await fetch(SB_URL + "/functions/v1/clever-api", {
     method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
     body: JSON.stringify({type:"invite_client", email:cemail, name:name})
   });
   var jr = {};
@@ -2049,7 +2053,7 @@ async function createClient() {
   // The browser anon key is not allowed to call /auth/v1/admin/users directly.
   var authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
     method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY},
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
     body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
   });
   var authJson = {};
