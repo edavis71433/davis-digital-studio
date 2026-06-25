@@ -381,6 +381,13 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
             <button class="sbtn" onclick="saveProgress()">Save</button>
           </div>
         </div>
+        <div class="card" style="margin-top:0;border:1.5px solid rgba(91,63,160,0.25);"><div class="ch"><div class="ct">🎉 Project Complete</div></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Sets progress to 100%, marks the project complete, and emails the client a wrap-up with a link to a short satisfaction survey (which prompts a Google review on a positive rating). Use this once the site is live and handed off.</p>
+            <button class="sbtn" style="background:var(--p);color:#fff;" onclick="markProjectComplete()">Mark complete &amp; send survey email</button>
+            <div id="completeResult" style="font-size:12.5px;margin-top:12px;"></div>
+          </div>
+        </div>
       </div>
 
       <!-- INVOICES -->
@@ -1710,6 +1717,52 @@ async function saveProgress() {
   await api("clients?id=eq."+ctx.id,"PATCH",{progress:val});
   ctx.progress = val;
   toast("✓ Progress updated to "+val+"%");
+}
+
+async function markProjectComplete() {
+  var ctx = selectedClients["timeline"];
+  var out = document.getElementById("completeResult");
+  if (!ctx) { toast("Select a client first."); return; }
+  if (!confirm("Mark "+ctx.name+"'s project complete and email them the satisfaction survey?")) return;
+
+  out.style.color = "var(--muted)";
+  out.textContent = "Working…";
+
+  try {
+    // 1. Set progress to 100 and flag complete
+    await api("clients?id=eq."+ctx.id,"PATCH",{ progress:100, status:"complete", completed_at:new Date().toISOString() });
+    ctx.progress = 100;
+
+    // 2. Log it
+    try { await api("activity_log","POST",{ client_id: ctx.id, action:"project_complete", detail:"Project marked complete; survey email sent" }); } catch(e){}
+
+    // 3. Post a closing message into their portal
+    try {
+      await api("messages","POST",{
+        client_id: ctx.id, sender:"eric",
+        body:"Your project is complete and live — congratulations! 🎉 I just emailed you a short survey about how it went. Your feedback genuinely helps my studio, and it only takes a minute.",
+        created_at:new Date().toISOString()
+      });
+    } catch(e){}
+
+    // 4. Send the completion + survey email via the Edge Function.
+    //    The survey link carries the client id + name so the response ties back to them.
+    var surveyUrl = "https://davisdigitalstudio.com/project-survey?c=" + encodeURIComponent(ctx.id) + "&n=" + encodeURIComponent(ctx.name);
+    await notify(
+      "project_complete",
+      surveyUrl,
+      "Your project is live 🎉",
+      { name: ctx.name, contact_email: ctx.contact_email || "" },
+      { survey_url: surveyUrl }
+    );
+
+    out.style.color = "#1a7e49";
+    out.innerHTML = "✓ Marked complete. Survey email sent to <strong>" + (ctx.contact_email || ctx.name) + "</strong>.";
+    toast("✓ " + ctx.name + " — project complete + survey email sent!");
+  } catch(e) {
+    out.style.color = "var(--red)";
+    out.textContent = "Something went wrong: " + (e.message || e) + ". Check the Edge Function is deployed.";
+  }
 }
 
 // ── INVOICES ──

@@ -655,6 +655,26 @@ serve(async (req) => {
     }
 
     // ── WELCOME — new client portal created (sent from admin createClient) ──
+    if (type === 'project_complete') {
+      const name = body.clientName || (body.client && body.client.name) || 'there';
+      const email = body.clientEmail || (body.client && (body.client.contact_email || body.client.email)) || '';
+      const surveyUrl = (body.meta && body.meta.survey_url) || body.message || 'https://davisdigitalstudio.com/project-survey';
+      if (!email) return json({ error: 'no client email' }, 400);
+      const html = notifyShell(
+        `Your project is live, ${name} 🎉`,
+        [
+          `It's official, your project is complete and live. It's been a genuine pleasure building this with you.`,
+          `Before you go, would you take one minute to tell me how it went? Your honest feedback helps me get better, and as a growing studio it means the world coming from someone I actually built for.`,
+          `The survey is short, I promise, just a few quick questions.`,
+        ],
+        { label: 'Share your feedback →', href: surveyUrl }
+      );
+      await sendEmail(email, `Your project is live 🎉 — one quick favor`, html);
+      // Notify Eric for the record
+      await sendEmail(ERIC, `Project complete: ${name}`, notifyShell(`Project marked complete`, [`${name} (${email}) was marked complete and sent the satisfaction survey.`]));
+      return json({ ok: true });
+    }
+
     if (type === 'welcome') {
       const name = body.clientName || (body.client && body.client.name) || 'there';
       const email = body.clientEmail || (body.client && (body.client.contact_email || body.client.email)) || '';
