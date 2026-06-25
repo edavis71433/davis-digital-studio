@@ -937,21 +937,25 @@ var CLIENT = null;
 var currentFilter = "all";
 
 // ── SESSION PERSISTENCE — auto-login if session exists ──
+async function enterPortalForSession(session) {
+  if (!session || CLIENT) return;
+  var email = session.user.email;
+  var { data: clientData } = await sb.from("clients").select("*").eq("email", email).single();
+  if (clientData) {
+    CLIENT = clientData;
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("portal").style.display = "block";
+    document.body.classList.add("logged-in");
+    if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
+    initPortal();
+    startMsgPoll();
+    updateLastSeen();
+  }
+}
+
 sb.auth.onAuthStateChange(async function(event, session) {
-  if (event === "SIGNED_IN" && session && !CLIENT) {
-    // Fetch client data by email
-    var email = session.user.email;
-    var { data: clientData } = await sb.from("clients").select("*").eq("email", email).single();
-    if (clientData) {
-      CLIENT = clientData;
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("portal").style.display = "block";
-      document.body.classList.add("logged-in");
-      if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
-      initPortal();
-      startMsgPoll();
-      updateLastSeen();
-    }
+  if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session && !CLIENT) {
+    await enterPortalForSession(session);
   }
   if (event === "SIGNED_OUT") {
     CLIENT = null;
@@ -964,6 +968,15 @@ sb.auth.onAuthStateChange(async function(event, session) {
     // Session refreshed silently — do nothing
   }
 });
+
+// On page load (including hard refresh), restore an existing session immediately
+// so the user isn't bounced back to the login screen.
+(async function restoreSessionOnLoad() {
+  try {
+    var { data } = await sb.auth.getSession();
+    if (data && data.session) { await enterPortalForSession(data.session); }
+  } catch (e) { /* no session — stay on login screen */ }
+})();
 
 // ── LOGIN ──
 async function login() {
