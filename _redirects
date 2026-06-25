@@ -24,6 +24,9 @@ https://www.davisdigitalstudio.com/*  https://davisdigitalstudio.com/:splat  301
 /ai-critique            /ai-critique.html               200
 /review                 /ai-critique                    301
 /ai-review              /ai-critique                    301
+/portal-terms           /portal-terms.html              200
+/ai-disclaimer          /ai-disclaimer.html             200
+/contact-disclaimer     /contact-disclaimer.html        200
 
 # Block source-code artifacts from ever being served as text
 /*.ts                   /404.html                       404!
