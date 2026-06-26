@@ -411,6 +411,227 @@ body.logged-in .mobile-nav { display: flex; }
 @media(max-width:900px) { .svc-grid { grid-template-columns:1fr 1fr; } }
 @media(max-width:580px) { .svc-grid { grid-template-columns:1fr; } }
 
+
+/* ===== PORTAL REDESIGN LAYER v2.0 (appended; overrides win) ===== */
+/* ============================================================
+   DDS CLIENT PORTAL — REDESIGN LAYER v2.0
+   Appended after the original <style>. Cascade overrides win.
+   Login/session/data code untouched. Tokens extended.
+   Tuned for a calm, premium, reassuring CLIENT experience.
+   ============================================================ */
+
+:root{
+  --bg:#f7f5f2;
+  --surface:#ffffff;
+  --surface-2:#faf9fc;
+  --surface-3:#f3f0f9;
+  --line:#ece8f1;
+  --line-strong:#ddd6ea;
+  --ink:#171221;
+  --ink-2:#574d68;
+  --muted:#8b8098;
+  --p:#5b3fa0;
+  --p-600:#4a3286;
+  --p-700:#3a2769;
+  --p-soft:#f1ecf9;
+  --p-ring:rgba(91,63,160,0.22);
+  --green:#1f9d57; --green-soft:#e7f6ee;
+  --red:#dc4747;   --red-soft:#fdecec;
+  --amber:#d68a12; --amber-soft:#fdf3e3;
+  --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:22px;
+  --sh-1:0 1px 2px rgba(23,18,33,0.05), 0 1px 1px rgba(23,18,33,0.03);
+  --sh-2:0 4px 16px rgba(23,18,33,0.07), 0 1px 3px rgba(23,18,33,0.04);
+  --sh-3:0 14px 44px rgba(23,18,33,0.16);
+  --sh-pop:0 24px 70px rgba(23,18,33,0.26);
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+
+body{ background:var(--bg); color:var(--ink); }
+::selection{ background:var(--p-ring); }
+*:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--p-ring); border-radius:8px; }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{ background:var(--surface); border-right:1px solid var(--line); }
+.sidebar-label{
+  font-size:10.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase;
+  color:var(--muted); padding:0 14px; margin:16px 0 6px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+  font-size:14px; font-weight:500; color:var(--ink-2);
+  padding:10px 12px; border-radius:var(--r-sm); border:none; background:transparent;
+  cursor:pointer; transition:all .15s var(--ease); position:relative; margin-bottom:1px;
+}
+.nav-item .nav-icon svg{ color:var(--muted); transition:color .15s var(--ease); }
+.nav-item:hover{ background:var(--surface-3); color:var(--ink); }
+.nav-item:hover .nav-icon svg{ color:var(--ink-2); }
+.nav-item.active{ background:var(--p-soft); color:var(--p-700); font-weight:600; }
+.nav-item.active .nav-icon svg{ color:var(--p); }
+.nav-item.active::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:3px; height:18px; background:var(--p); border-radius:0 3px 3px 0;
+}
+.sidebar-divider{ height:1px; background:var(--line); margin:12px 8px; }
+.nav-badge{
+  margin-left:auto; font-size:11px; font-weight:700; background:var(--p); color:#fff;
+  min-width:18px; height:18px; padding:0 5px; border-radius:100px; display:inline-flex;
+  align-items:center; justify-content:center; line-height:1;
+}
+
+/* ---------- MAIN / PAGES ---------- */
+.main-content{ background:var(--bg); }
+.page-view{ animation:pageIn .32s var(--ease); }
+@keyframes pageIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+/* ---------- CARDS ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--sh-1); overflow:hidden; transition:box-shadow .2s var(--ease);
+}
+.card:hover{ box-shadow:var(--sh-2); }
+.card-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:15px 18px; border-bottom:1px solid var(--line);
+}
+.card-title{ font-size:14px; font-weight:600; color:var(--ink); }
+.card-title svg{ color:var(--p); }
+.card-action{
+  font-size:12.5px; font-weight:600; color:var(--p); background:transparent; border:none;
+  cursor:pointer; padding:4px 8px; border-radius:6px; transition:background .15s var(--ease);
+}
+.card-action:hover{ background:var(--p-soft); }
+.card-body{ padding:16px 18px; }
+
+/* ---------- STATS ---------- */
+.stats-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
+
+/* ---------- PROGRESS ---------- */
+.progress-bar{ height:8px; background:var(--surface-3); border-radius:100px; overflow:hidden; }
+.progress-fill{
+  height:100%; background:linear-gradient(90deg,#7c5cd0,#5b3fa0); border-radius:100px;
+  transition:width .6s var(--ease);
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-primary, button.primary, .login-btn{
+  background:var(--p); color:#fff; border:none; font-weight:600; font-size:14px;
+  padding:11px 20px; border-radius:100px; cursor:pointer; transition:all .18s var(--ease);
+  box-shadow:0 1px 2px rgba(91,63,160,0.25);
+}
+.btn-primary:hover, .login-btn:hover{ background:var(--p-600); box-shadow:0 4px 14px rgba(91,63,160,0.3); transform:translateY(-1px); }
+
+/* ---------- INPUTS ---------- */
+input[type=text], input[type=email], input[type=password], textarea, select{
+  font-family:"DM Sans",sans-serif; font-size:14px; color:var(--ink);
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r);
+  padding:11px 14px; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0 0 3px var(--p-ring); outline:none; }
+::placeholder{ color:#a99fb6; }
+
+/* ---------- WORK TABS (Files + Approvals merged) ---------- */
+.ptabs{ display:flex; gap:2px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+.ptab{
+  appearance:none; background:transparent; border:none; cursor:pointer;
+  font-size:14px; font-weight:500; color:var(--muted); padding:11px 16px 13px;
+  position:relative; white-space:nowrap; transition:color .15s var(--ease);
+}
+.ptab:hover{ color:var(--ink-2); }
+.ptab.active{ color:var(--p-700); font-weight:600; }
+.ptab.active::after{
+  content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:2px;
+  background:var(--p); border-radius:2px 2px 0 0;
+}
+.ptab .ptab-badge{
+  font-size:11px; font-weight:700; background:var(--p); color:#fff;
+  min-width:18px; padding:0 6px; height:18px; border-radius:100px; margin-left:6px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.ptab-panel{ display:none; }
+.ptab-panel.active{ display:block; animation:pageIn .25s var(--ease); }
+
+/* ---------- TOAST ---------- */
+.toast{
+  background:var(--ink); color:#fff; border-radius:var(--r); box-shadow:var(--sh-3);
+  font-size:14px; font-weight:500; padding:13px 18px;
+}
+
+/* ============================================================
+   AI PROJECT ASSISTANT — floating button + chat panel
+   ============================================================ */
+.ai-fab{
+  position:fixed; right:22px; bottom:22px; z-index:7000;
+  width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#7c5cd0,#5b3fa0); color:#fff;
+  box-shadow:0 10px 30px rgba(91,63,160,0.4); display:flex; align-items:center; justify-content:center;
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.ai-fab:hover{ transform:translateY(-3px) scale(1.04); box-shadow:0 16px 40px rgba(91,63,160,0.5); }
+.ai-fab:active{ transform:scale(.96); }
+@media(max-width:760px){ .ai-fab{ right:16px; bottom:80px; width:52px; height:52px; } }
+
+.ai-fab-pulse{
+  position:absolute; inset:0; border-radius:50%; background:rgba(124,92,208,0.5);
+  animation:aiPulse 2.6s var(--ease) infinite; z-index:-1;
+}
+@keyframes aiPulse{ 0%{ transform:scale(1); opacity:.5; } 70%,100%{ transform:scale(1.7); opacity:0; } }
+
+.ai-panel{
+  position:fixed; right:22px; bottom:90px; z-index:7001;
+  width:min(400px,calc(100vw - 32px)); height:min(560px,calc(100vh - 130px));
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-xl);
+  box-shadow:var(--sh-pop); display:none; flex-direction:column; overflow:hidden;
+}
+.ai-panel.open{ display:flex; animation:aiPanelIn .26s var(--ease); }
+@keyframes aiPanelIn{ from{ opacity:0; transform:translateY(16px) scale(.97); } to{ opacity:1; transform:none; } }
+@media(max-width:760px){
+  .ai-panel{ right:8px; left:8px; bottom:8px; width:auto; height:min(76vh,560px); }
+}
+
+.ai-panel-head{
+  display:flex; align-items:center; gap:11px; padding:16px 18px;
+  background:linear-gradient(135deg,#221544,#0f0820); color:#fff;
+}
+.ai-panel-head .ai-orb{
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,#7c5cd0,#9d7ce0); display:flex; align-items:center; justify-content:center;
+}
+.ai-panel-head .t{ font-size:14.5px; font-weight:600; }
+.ai-panel-head .s{ font-size:12px; color:rgba(255,255,255,0.6); }
+.ai-panel-x{ margin-left:auto; background:transparent; border:none; color:rgba(255,255,255,0.7); font-size:22px; cursor:pointer; line-height:1; padding:4px; }
+.ai-panel-x:hover{ color:#fff; }
+
+.ai-msgs{ flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px; background:var(--surface-2); }
+.ai-msg{ max-width:85%; font-size:14px; line-height:1.6; padding:11px 14px; border-radius:var(--r-lg); white-space:pre-wrap; }
+.ai-msg.bot{ align-self:flex-start; background:var(--surface); border:1px solid var(--line); color:var(--ink); border-bottom-left-radius:5px; }
+.ai-msg.user{ align-self:flex-end; background:var(--p); color:#fff; border-bottom-right-radius:5px; }
+.ai-typing{ align-self:flex-start; display:flex; gap:4px; padding:12px 14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); border-bottom-left-radius:5px; }
+.ai-typing span{ width:7px; height:7px; border-radius:50%; background:var(--muted); animation:aiDot 1.2s var(--ease) infinite; }
+.ai-typing span:nth-child(2){ animation-delay:.2s; } .ai-typing span:nth-child(3){ animation-delay:.4s; }
+@keyframes aiDot{ 0%,60%,100%{ opacity:.25; transform:scale(.8);} 30%{ opacity:1; transform:scale(1);} }
+
+.ai-suggest{ display:flex; flex-wrap:wrap; gap:7px; padding:0 18px 12px; background:var(--surface-2); }
+.ai-suggest button{
+  font-size:12.5px; font-weight:500; color:var(--p-700); background:var(--p-soft);
+  border:1px solid var(--p-ring); border-radius:100px; padding:7px 13px; cursor:pointer;
+  transition:all .15s var(--ease);
+}
+.ai-suggest button:hover{ background:#fff; border-color:var(--p); }
+
+.ai-input-row{ display:flex; gap:9px; padding:14px 16px; border-top:1px solid var(--line); background:var(--surface); }
+.ai-input-row input{ flex:1; border-radius:100px; }
+.ai-send{
+  width:42px; height:42px; flex-shrink:0; border-radius:50%; border:none; cursor:pointer;
+  background:var(--p); color:#fff; display:flex; align-items:center; justify-content:center;
+  transition:background .15s var(--ease);
+}
+.ai-send:hover{ background:var(--p-600); }
+.ai-send:disabled{ background:var(--line-strong); cursor:not-allowed; }
+.ai-disclaim{ font-size:10.5px; color:var(--muted); text-align:center; padding:0 16px 10px; background:var(--surface); }
+
 </style>
 </head>
 <body>
@@ -1358,6 +1579,7 @@ async function loadTimeline() {
   const { data, error } = await sb.from("timeline")
     .select("*").eq("client_id", CLIENT.id).order("sort_order");
   if (error) { renderError("timelineBody", "loadTimeline()"); return; }
+  try { window._timelineCache = (data||[]).map(function(t){ return { name:t.name||t.title, status:t.status, date:t.date||t.target_date }; }); } catch(e){}
   if (!data) { document.getElementById("timelineBody").innerHTML = ""; return; }
   
   var active = data.find(t => t.status === "active");
@@ -1650,6 +1872,7 @@ async function loadInvoices() {
   const { data, error } = await sb.from("invoices")
     .select("*").eq("client_id", CLIENT.id).order("created_at");
   if (error) { renderError("invoiceBody", "loadInvoices()"); return; }
+  try { window._invoiceCache = (data||[]).map(function(i){ return { label:i.label||i.description, amount:i.amount, status:i.status, paid:i.paid }; }); } catch(e){}
   if (!data) { document.getElementById("invoiceBody").innerHTML = '<div class="empty-state"><div class="ei">🧾</div><p>No invoices yet.</p></div>'; return; }
   
   var total = 0; var paid = 0;
@@ -1683,6 +1906,7 @@ async function loadApprovals() {
   const { data, error } = await sb.from("approvals")
     .select("*").eq("client_id", CLIENT.id).order("created_at");
   if (error) { renderError("approvalsBody", "loadApprovals()"); return; }
+  try { window._approvalsCache = (data||[]).map(function(a){ return { title:a.title||a.name, status:a.status }; }); } catch(e){}
   if (!data) { document.getElementById("approvalsBody").innerHTML = ""; return; }
   
   var pending = data.filter(a => a.status === "pending").length;
@@ -2181,6 +2405,219 @@ var _svcModalEl = document.getElementById("svcModal");
 if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   if (e.target === this) closeSvcModal();
 });
+
+
+/* ===== PORTAL REDESIGN JS LAYER v2.0 ===== */
+
+/* ============================================================
+   DDS CLIENT PORTAL — REDESIGN JS LAYER v2.0
+   AI project assistant + nav consolidation.
+   Reuses: nav(), showToast(), CLIENT, sb, loadTimeline,
+   loadApprovals, loadInvoices, loadMessages. Login/session
+   code is NOT touched.
+   ============================================================ */
+(function(){
+  var EDGE_FN = "https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api";
+  var aiHistory = [];   // [{role, content}]
+  var aiBooted = false;
+
+  /* ---- build the floating button + chat panel ---- */
+  function buildAi(){
+    if (document.getElementById("aiFab")) return;
+
+    var fab = document.createElement("button");
+    fab.id = "aiFab"; fab.className = "ai-fab"; fab.setAttribute("aria-label","Ask about your project");
+    fab.innerHTML =
+      '<span class="ai-fab-pulse"></span>'+
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>';
+    fab.onclick = toggleAi;
+    document.body.appendChild(fab);
+
+    var panel = document.createElement("div");
+    panel.id = "aiPanel"; panel.className = "ai-panel"; panel.setAttribute("role","dialog"); panel.setAttribute("aria-label","Project assistant");
+    panel.innerHTML =
+      '<div class="ai-panel-head">'+
+        '<div class="ai-orb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div>'+
+        '<div><div class="t">Project Assistant</div><div class="s">Ask about your project anytime</div></div>'+
+        '<button class="ai-panel-x" onclick="PortalAI.close()" aria-label="Close">&times;</button>'+
+      '</div>'+
+      '<div class="ai-msgs" id="aiMsgs"></div>'+
+      '<div class="ai-suggest" id="aiSuggest"></div>'+
+      '<div class="ai-input-row">'+
+        '<input id="aiInput" type="text" placeholder="Ask a question…" autocomplete="off" '+
+          'onkeydown="if(event.key===\'Enter\'){event.preventDefault();PortalAI.send();}">'+
+        '<button class="ai-send" id="aiSend" onclick="PortalAI.send()" aria-label="Send">'+
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'+
+        '</button>'+
+      '</div>'+
+      '<div class="ai-disclaim">For exact dates or changes, message Eric directly.</div>';
+    document.body.appendChild(panel);
+  }
+
+  function toggleAi(){
+    var p = document.getElementById("aiPanel");
+    if (!p) return;
+    if (p.classList.contains("open")) closeAi();
+    else openAi();
+  }
+  function openAi(){
+    var p = document.getElementById("aiPanel");
+    p.classList.add("open");
+    // kill the attention pulse once they've engaged
+    var pulse = document.querySelector(".ai-fab-pulse"); if (pulse) pulse.style.display="none";
+    if (!aiBooted){ aiBooted = true; greet(); }
+    setTimeout(function(){ var i=document.getElementById("aiInput"); if(i) i.focus(); }, 200);
+  }
+  function closeAi(){ var p=document.getElementById("aiPanel"); if(p) p.classList.remove("open"); }
+
+  function greet(){
+    var name = (window.CLIENT && CLIENT.name) ? String(CLIENT.name).split(" ")[0] : "there";
+    addBot("Hi " + name + "! I can answer questions about your project, your timeline, anything you're waiting on, and your invoices. What would you like to know?");
+    renderSuggestions();
+  }
+  function renderSuggestions(){
+    var host = document.getElementById("aiSuggest");
+    if (!host) return;
+    var chips = ["What's the status of my project?","What do you need from me?","When will it be done?","Do I have anything to approve?"];
+    host.innerHTML = chips.map(function(c){ return '<button onclick="PortalAI.ask(this.textContent)">'+c+'</button>'; }).join("");
+  }
+
+  function addBot(text){
+    var m = document.createElement("div"); m.className="ai-msg bot"; m.textContent=text;
+    document.getElementById("aiMsgs").appendChild(m); scrollMsgs();
+  }
+  function addUser(text){
+    var m = document.createElement("div"); m.className="ai-msg user"; m.textContent=text;
+    document.getElementById("aiMsgs").appendChild(m); scrollMsgs();
+  }
+  function showTyping(){
+    var t = document.createElement("div"); t.className="ai-typing"; t.id="aiTyping";
+    t.innerHTML="<span></span><span></span><span></span>";
+    document.getElementById("aiMsgs").appendChild(t); scrollMsgs();
+  }
+  function hideTyping(){ var t=document.getElementById("aiTyping"); if(t) t.remove(); }
+  function scrollMsgs(){ var b=document.getElementById("aiMsgs"); if(b) b.scrollTop=b.scrollHeight; }
+
+  function ask(text){ var i=document.getElementById("aiInput"); if(i) i.value=text; send(); }
+
+  function send(){
+    var input = document.getElementById("aiInput");
+    var text = (input.value||"").trim();
+    if (!text) return;
+    input.value = "";
+    document.getElementById("aiSuggest").innerHTML = "";
+    addUser(text);
+    aiHistory.push({ role:"user", content:text });
+    document.getElementById("aiSend").disabled = true;
+    showTyping();
+
+    fetch(EDGE_FN, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ type:"ai_project_help", context: buildContext(), messages: aiHistory.slice(-10) })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      hideTyping();
+      document.getElementById("aiSend").disabled = false;
+      var reply = (d && (d.reply || d.text)) || "";
+      if (!reply){
+        addBot("I couldn't reach the assistant just now. For anything time-sensitive, the quickest path is to message Eric directly from the Messages tab.");
+        return;
+      }
+      addBot(reply);
+      aiHistory.push({ role:"assistant", content:reply });
+    })
+    .catch(function(){
+      hideTyping();
+      document.getElementById("aiSend").disabled = false;
+      addBot("Something went wrong on my end. Please try again, or message Eric directly from the Messages tab.");
+    });
+  }
+
+  /* Build a compact, client-scoped snapshot from already-loaded data. */
+  function buildContext(){
+    var c = window.CLIENT || {};
+    var ctx = {
+      project: c.project_name || "Your project",
+      status: c.project_status || "In progress",
+      progress: (c.progress == null ? null : c.progress),
+      phase: c.current_phase || c.phase || null
+    };
+    // pull rendered/loaded arrays if the app cached them; otherwise omit
+    try { if (window._timelineCache) ctx.timeline = window._timelineCache; } catch(e){}
+    try { if (window._approvalsCache) ctx.pendingApprovals = window._approvalsCache; } catch(e){}
+    try { if (window._invoiceCache) ctx.invoices = window._invoiceCache; } catch(e){}
+    return ctx;
+  }
+
+  /* ============================================================
+     NAV CONSOLIDATION + FILES/APPROVALS TAB MERGE
+     Reorganizes the sidebar into fewer groups. The nav() function
+     and all page-view divs are untouched; we only restyle/regroup
+     the sidebar buttons and add a "More" group toggle.
+     ============================================================ */
+  function consolidateNav(){
+    var sidebar = document.querySelector(".sidebar > div");
+    if (!sidebar) return;
+
+    // Find existing nav buttons by id (keep the real onclick=nav(...) handlers).
+    function btn(id){ return document.getElementById("nav-"+id); }
+    var ids = ["dashboard","timeline","files","approvals","messages","invoices","services","feedback","onboarding","guide","contract","links"];
+    var map = {}; ids.forEach(function(id){ map[id]=btn(id); });
+
+    // Wipe the sidebar's current children, then rebuild grouped.
+    sidebar.innerHTML = "";
+
+    function label(t){ var d=document.createElement("div"); d.className="sidebar-label"; d.textContent=t; sidebar.appendChild(d); }
+    function divider(){ var d=document.createElement("div"); d.className="sidebar-divider"; sidebar.appendChild(d); }
+    function put(id){ if(map[id]) sidebar.appendChild(map[id]); }
+
+    label("Your Project");
+    put("dashboard"); put("timeline");
+    divider();
+    label("Work");
+    put("files"); put("approvals"); put("messages");
+    divider();
+    label("Billing & Docs");
+    put("invoices"); put("contract");
+    divider();
+
+    // "More" collapsible group for low-frequency items
+    var moreToggle = document.createElement("button");
+    moreToggle.className = "nav-item"; moreToggle.id = "nav-more-toggle";
+    moreToggle.innerHTML = '<span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>More';
+    var moreWrap = document.createElement("div");
+    moreWrap.id = "nav-more-wrap"; moreWrap.style.display = "none";
+    moreToggle.onclick = function(){
+      var open = moreWrap.style.display !== "none";
+      moreWrap.style.display = open ? "none" : "block";
+    };
+    sidebar.appendChild(moreToggle);
+    sidebar.appendChild(moreWrap);
+    ["services","feedback","onboarding","guide","links"].forEach(function(id){ if(map[id]) moreWrap.appendChild(map[id]); });
+  }
+
+  /* ============================================================
+     BOOT — wait until the portal is actually shown (CLIENT set)
+     ============================================================ */
+  function whenLoggedIn(cb){
+    var tries = 0;
+    var iv = setInterval(function(){
+      tries++;
+      if (window.CLIENT && document.body.classList.contains("logged-in")){
+        clearInterval(iv); cb();
+      } else if (tries > 120){ clearInterval(iv); } // ~60s safety
+    }, 500);
+  }
+
+  whenLoggedIn(function(){
+    try { consolidateNav(); } catch(e){ console.log("[portal] nav consolidate skipped:", e.message); }
+    buildAi();
+  });
+
+  /* expose namespace for inline handlers */
+  window.PortalAI = { open:openAi, close:closeAi, send:send, ask:ask };
+})();
 
 </script>
 
