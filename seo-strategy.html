@@ -124,6 +124,16 @@ body{padding-top:68px;}
 
 </style>
 <link rel="stylesheet" href="/enhance.css">
+<style>
+@media(max-width:768px){
+  .ftr-cred-grid{grid-template-columns:1fr 1fr!important;}
+  .ftr-cols-grid{grid-template-columns:1fr 1fr!important;gap:28px!important;}
+  .ftr-cols-grid > div:first-child{grid-column:span 2;}
+}
+@media(max-width:480px){
+  .ftr-cred-grid{grid-template-columns:1fr!important;}
+}
+</style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -131,7 +141,7 @@ body{padding-top:68px;}
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/about">About Eric</a>
+    <a href="/about">About Us</a>
     <div class="nav-drop">
       <button class="nav-drop-btn">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="nav-drop-menu">
@@ -177,7 +187,7 @@ body{padding-top:68px;}
 </nav>
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
   <a href="/">Home</a>
-  <a href="/about">About Eric</a>
+  <a href="/about">About Us</a>
   <div class="nav-mob-group" id="mobServices">
     <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="nav-mob-sub">
@@ -322,13 +332,13 @@ body{padding-top:68px;}
 </section>
 <footer class="site-footer" role="contentinfo">
   <div style="max-width:1100px;margin:0 auto;padding:40px 52px 0;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;margin-bottom:40px;">
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div><div style="font-size:13px;color:#fff;font-weight:500;">Eric L. Davis</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design &amp; SEO Strategist</div></div>
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Day Job</div><div style="font-size:13px;color:#fff;font-weight:500;">Kaiser Permanente</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">IT Consultant III · 9+ years</div></div>
+    <div class="ftr-cred-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;margin-bottom:40px;">
+      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div><div style="font-size:13px;color:#fff;font-weight:500;">Eric Davis</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design &amp; SEO Strategist</div></div>
+      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Background</div><div style="font-size:13px;color:#fff;font-weight:500;">Enterprise digital team</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Domain Name Manager &amp; Content Producer · 9+ years</div></div>
       <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Education</div><div style="font-size:13px;color:#fff;font-weight:500;">M.S. Business Analytics</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">CSUN · Dean's Scholar</div></div>
       <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Scale</div><div style="font-size:13px;color:#fff;font-weight:500;">Enterprise scale</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Enterprise governance experience</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;">
+    <div class="ftr-cols-grid" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;">
       <div>
         <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
         <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
@@ -367,7 +377,7 @@ body{padding-top:68px;}
       </div>
     </div>
     <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric Davis</p>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
         <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>

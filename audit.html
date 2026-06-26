@@ -376,7 +376,7 @@ body{padding-top:68px;}
   <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
   <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/about">About Eric</a>
+    <a href="/about">About Us</a>
     <div class="nav-drop">
       <button class="nav-drop-btn">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="nav-drop-menu">
@@ -422,7 +422,7 @@ body{padding-top:68px;}
 </nav>
 <div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
   <a href="/">Home</a>
-  <a href="/about">About Eric</a>
+  <a href="/about">About Us</a>
   <div class="nav-mob-group" id="mobServices">
     <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="nav-mob-sub">
@@ -739,13 +739,13 @@ body{padding-top:68px;}
     <div class="footer-trust-inner" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;">
       <div>
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Eric L. Davis</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Eric Davis</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design &amp; SEO Strategist</div>
       </div>
       <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Day Job</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Kaiser Permanente</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">IT Consultant III &middot; 9+ years</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Background</div>
+        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Enterprise digital team</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Domain Name Manager &amp; Content Producer &middot; 9+ years</div>
       </div>
       <div>
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Education</div>
@@ -799,12 +799,12 @@ body{padding-top:68px;}
     <div class="footer-col">
       <div class="footer-col-title">Company</div>
       <a href="/work">Case Studies</a>
-      <a href="/about">About Eric</a>
+      <a href="/about">About Us</a>
       <a href="/contact">Contact</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <div class="footer-copy">© <span id="footerYear">2026</span> Davis Digital Studio · Eric L. Davis · Los Angeles, CA</div>
+    <div class="footer-copy">© <span id="footerYear">2026</span> Davis Digital Studio · Eric Davis</div>
     <div class="footer-legal">
       <a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
@@ -1518,7 +1518,7 @@ function unlockReport() {
     '</div>'+
     '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">If you want, I am happy to walk through any of these with you, just reply to this email and we can talk it through. No pressure either way.</p>'+
     '<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 24px;">Eric</p>'+
-    '<p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p>'+
+    '<p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p>'+
     '</div>'+
 '</body></html>';
 
@@ -1650,7 +1650,7 @@ function sendNotification(d, bizLabel, issues, deep) {
     '</div></body></html>';
 
   // User-facing confirm, generic, no detailed findings, drives toward paid audit
-  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f7f4fd;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:32px 24px;"><p style="font-family:Georgia,serif;font-size:17px;color:#1a1523;margin:0 0 20px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">Hi'+(d.name?' '+d.name:'')+',</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">I took a look at your site. Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific things worth looking at, some quick fixes, a couple that need more attention.</p>'+(issues.length?'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">The first thing I would start with is <strong>'+issues[0].title+'</strong>. That is usually where the quickest wins are.</p>':'')+'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">If you want to talk through any of it, just reply to this email, happy to help. No pressure either way.</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 24px;">Eric</p><p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio · Los Angeles, CA<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p></div></body></html>';
+  var quickConfirm = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f7f4fd;font-family:Helvetica Neue,Arial,sans-serif;"><div style="max-width:480px;margin:0 auto;padding:32px 24px;"><p style="font-family:Georgia,serif;font-size:17px;color:#1a1523;margin:0 0 20px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">Hi'+(d.name?' '+d.name:'')+',</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">I took a look at your site. Your overall score came in at <strong style="color:'+scoreColor+';">'+d.overall+'/100</strong>. I found '+issues.length+' specific things worth looking at, some quick fixes, a couple that need more attention.</p>'+(issues.length?'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">The first thing I would start with is <strong>'+issues[0].title+'</strong>. That is usually where the quickest wins are.</p>':'')+'<p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 16px;">If you want to talk through any of it, just reply to this email, happy to help. No pressure either way.</p><p style="font-size:15px;color:#1a1523;line-height:1.7;margin:0 0 24px;">Eric</p><p style="font-size:12px;color:#9a8fae;line-height:1.6;margin:0;border-top:1px solid #ede8f7;padding-top:16px;">Eric Davis · Davis Digital Studio<br><a href="https://davisdigitalstudio.com" style="color:#5b3fa0;text-decoration:none;">davisdigitalstudio.com</a></p></div></body></html>';
 
   fetch(EDGE_FN, {
     method:'POST', headers:{'Content-Type':'application/json'},
