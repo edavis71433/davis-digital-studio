@@ -1014,6 +1014,15 @@ async function login() {
     return;
   }
 
+  // If a session-restore handler already loaded the portal (e.g. the client
+  // arrived already logged in from the set-password code flow), CLIENT is set
+  // and the portal is showing. Just reset the button and stop — no double load.
+  if (CLIENT) {
+    btn.innerHTML = "Sign in to your portal →";
+    btn.disabled = false;
+    return;
+  }
+
   // Step 2: fetch client project data by email
   const { data: clientData, error: clientError } = await sb.from("clients")
     .select("*").eq("email", user).single();
@@ -1029,7 +1038,10 @@ async function login() {
   CLIENT = clientData;
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("portal").style.display = "block";
+  document.body.classList.add("logged-in");
   if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
+  btn.innerHTML = "Sign in to your portal →";
+  btn.disabled = false;
   initPortal();
   startMsgPoll();
   updateLastSeen();
