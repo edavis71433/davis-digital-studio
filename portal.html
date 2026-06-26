@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.3 20260626-debug-tracer -->
+<!-- DDS v3.6 20260626-sw-killswitch -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -940,8 +940,37 @@ const SUPABASE_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
 const STRIPE_URL = "https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00";
 
+// ── SERVICE WORKER KILL-SWITCH ──
+// The portal makes live auth POSTs to Supabase. A stale service worker can
+// intercept and hang those requests. The portal must never be controlled by a
+// service worker, so unregister any that exist and clear their caches on load.
+(function killServiceWorker(){
+  try {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(r){ r.unregister(); });
+      }).catch(function(){});
+    }
+    if (window.caches && caches.keys) {
+      caches.keys().then(function(keys){
+        keys.forEach(function(k){ caches.delete(k); });
+      }).catch(function(){});
+    }
+  } catch(e){}
+})();
+
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    // supabase-js v2 uses a navigator LockManager for token handling. In some
+    // browser contexts that lock never releases and signInWithPassword hangs
+    // forever (no error, no return). Providing a no-op lock disables it.
+    lock: async (name, acquireTimeout, fn) => { return await fn(); },
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 var CLIENT = null;
 var currentFilter = "all";
@@ -983,9 +1012,13 @@ sb.auth.onAuthStateChange(async function(event, session) {
 // so the user isn't bounced back to the login screen.
 (async function restoreSessionOnLoad() {
   try {
-    var { data } = await sb.auth.getSession();
+    console.log("[boot] restoreSessionOnLoad: calling getSession");
+    var sessP = sb.auth.getSession();
+    var toP = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("getSession hung")); }, 8000); });
+    var { data } = await Promise.race([sessP, toP]);
+    console.log("[boot] getSession returned. session=", !!(data && data.session));
     if (data && data.session) { await enterPortalForSession(data.session); }
-  } catch (e) { /* no session — stay on login screen */ }
+  } catch (e) { console.log("[boot] restoreSessionOnLoad failed:", e.message); }
 })();
 
 // ── LOGIN ──
@@ -1023,9 +1056,15 @@ async function login() {
   // Step 1: authenticate with Supabase Auth (passwords are hashed server-side)
   var authData, authError;
   try {
-    var r = await sb.auth.signInWithPassword({ email: user, password: pass });
+    // Race the sign-in against an 8s timeout. If signInWithPassword hangs
+    // (never resolves), this rejects so we can see it instead of spinning forever.
+    var signInPromise = sb.auth.signInWithPassword({ email: user, password: pass });
+    var timeoutPromise = new Promise(function(_, reject){
+      setTimeout(function(){ reject(new Error("signInWithPassword did not return in 8s (hang)")); }, 8000);
+    });
+    var r = await Promise.race([signInPromise, timeoutPromise]);
     authData = r.data; authError = r.error;
-  } catch(e) { _dbg("2: signIn THREW: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
+  } catch(e) { _dbg("2: signIn FAILED: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
   _dbg("2: signIn returned. error=" + (authError ? authError.message : "none"));
 
   if (authError || !authData.user) {
