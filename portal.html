@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.1 20260626-spinner-fix -->
+<!-- DDS v3.2 20260626-spinner-guard -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1001,6 +1001,16 @@ async function login() {
   btn.disabled = true;
   err.style.display = "none";
 
+  // Safety net: no matter what happens below, never leave the button spinning
+  // forever. If we're still on the login screen after 12s, reset it.
+  var _loginGuard = setTimeout(function(){
+    if (document.getElementById("loginScreen").style.display !== "none") {
+      btn.innerHTML = "Sign in to your portal →";
+      btn.disabled = false;
+      showErr("That took too long. Check your connection and try again.");
+    }
+  }, 12000);
+
   // Step 1: authenticate with Supabase Auth (passwords are hashed server-side)
   const { data: authData, error: authError } = await sb.auth.signInWithPassword({
     email: user,
@@ -1008,6 +1018,7 @@ async function login() {
   });
 
   if (authError || !authData.user) {
+    clearTimeout(_loginGuard);
     showErr("Incorrect email or password. Check your welcome email.");
     btn.innerHTML = "Sign in to your portal →";
     btn.disabled = false;
@@ -1018,6 +1029,7 @@ async function login() {
   // arrived already logged in from the set-password code flow), CLIENT is set
   // and the portal is showing. Just reset the button and stop — no double load.
   if (CLIENT) {
+    clearTimeout(_loginGuard);
     btn.innerHTML = "Sign in to your portal →";
     btn.disabled = false;
     return;
@@ -1028,6 +1040,7 @@ async function login() {
     .select("*").eq("email", user).single();
 
   if (clientError || !clientData) {
+    clearTimeout(_loginGuard);
     showErr("Account found but no project data. Contact eric@davisdigitalstudio.com.");
     btn.innerHTML = "Sign in to your portal →";
     btn.disabled = false;
@@ -1036,6 +1049,7 @@ async function login() {
   }
 
   CLIENT = clientData;
+  clearTimeout(_loginGuard);
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("portal").style.display = "block";
   document.body.classList.add("logged-in");
@@ -1096,14 +1110,16 @@ async function initPortal() {
   }
   renderPostLaunch();
   
-  await loadAll();
-  renderAddons();
-  await loadFeedback();
-  await loadBriefState();
-  checkWelcome();
+  // Each step is independently guarded so one failing query or undefined
+  // helper can never stop the portal from loading.
+  try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
+  try { renderAddons(); } catch(e){ console.error("renderAddons:", e); }
+  try { await loadFeedback(); } catch(e){ console.error("loadFeedback:", e); }
+  try { await loadBriefState(); } catch(e){ console.error("loadBriefState:", e); }
+  try { checkWelcome(); } catch(e){ console.error("checkWelcome:", e); }
   try { await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "logged_in", detail: "Opened the portal" }); } catch(e){}
-  setTimeout(initContract, 300);
-  setTimeout(checkUnreadOnLoad, 1000);
+  setTimeout(function(){ try { initContract(); } catch(e){ console.error("initContract:", e); } }, 300);
+  setTimeout(function(){ try { if (typeof checkUnreadOnLoad === "function") checkUnreadOnLoad(); } catch(e){} }, 1000);
 }
 
 // ── WELCOME FLOW ──
