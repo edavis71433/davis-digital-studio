@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.6 20260626-sw-killswitch -->
+<!-- DDS v3.7 20260626-plain-client -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -940,37 +940,8 @@ const SUPABASE_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
 const STRIPE_URL = "https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00";
 
-// ── SERVICE WORKER KILL-SWITCH ──
-// The portal makes live auth POSTs to Supabase. A stale service worker can
-// intercept and hang those requests. The portal must never be controlled by a
-// service worker, so unregister any that exist and clear their caches on load.
-(function killServiceWorker(){
-  try {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs){
-        regs.forEach(function(r){ r.unregister(); });
-      }).catch(function(){});
-    }
-    if (window.caches && caches.keys) {
-      caches.keys().then(function(keys){
-        keys.forEach(function(k){ caches.delete(k); });
-      }).catch(function(){});
-    }
-  } catch(e){}
-})();
-
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    // supabase-js v2 uses a navigator LockManager for token handling. In some
-    // browser contexts that lock never releases and signInWithPassword hangs
-    // forever (no error, no return). Providing a no-op lock disables it.
-    lock: async (name, acquireTimeout, fn) => { return await fn(); },
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var CLIENT = null;
 var currentFilter = "all";
