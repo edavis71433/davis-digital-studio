@@ -941,65 +941,47 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const STRIPE_URL = "https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00";
 
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    // Disable the Web Locks navigator lock. In some browser/SDK combinations a
-    // stale or un-released lock makes signInWithPassword/getSession hang forever
-    // (spinner never finishes, no error). A no-op lock just runs the callback.
-    lock: async function(_name, _acquireTimeout, fn){ return await fn(); }
-  }
-});
+// Same plain init the admin panel uses (which logs in fine). No custom lock or
+// options — those did not help and we keep this identical to the working admin.
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var CLIENT = null;
 var currentFilter = "all";
 
-// ── SESSION PERSISTENCE — auto-login if session exists ──
-async function enterPortalForSession(session) {
-  if (!session || CLIENT) return;
-  var email = session.user.email;
-  var { data: clientData } = await sb.from("clients").select("*").eq("email", email).single();
-  if (clientData) {
-    CLIENT = clientData;
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("portal").style.display = "block";
-    document.body.classList.add("logged-in");
-    if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
-    initPortal();
-    startMsgPoll();
-    updateLastSeen();
-  }
+// ── SHOW THE PORTAL once we have a client row ──
+// Single shared entry point. No onAuthStateChange listener (that was firing a
+// duplicate, overlapping clients query on load and could wedge the session).
+// Mirrors the admin panel's proven flow: sign in, fetch the row, show the app.
+function enterPortal(clientData) {
+  CLIENT = clientData;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("portal").style.display = "block";
+  document.body.classList.add("logged-in");
+  if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
+  try { initPortal(); startMsgPoll(); updateLastSeen(); }
+  catch (e) { console.error("initPortal error:", e); }
 }
 
-sb.auth.onAuthStateChange(async function(event, session) {
-  if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session && !CLIENT) {
-    await enterPortalForSession(session);
-  }
-  if (event === "SIGNED_OUT") {
-    CLIENT = null;
-    document.getElementById("portal").style.display = "none";
-    document.getElementById("loginScreen").style.display = "flex";
-    document.body.classList.remove("logged-in");
-    if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "none";
-  }
-  if (event === "TOKEN_REFRESHED") {
-    // Session refreshed silently — do nothing
-  }
-});
+// Fetch the client row for a signed-in email. Never hangs: races a 6s timeout.
+async function fetchClientRow(email) {
+  try {
+    var q = sb.from("clients").select("*").eq("email", email).single();
+    var to = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("clients query timeout")); }, 6000); });
+    var r = await Promise.race([q, to]);
+    return (r && r.data) ? r.data : null;
+  } catch (e) { console.log("[portal] fetchClientRow failed:", e.message); return null; }
+}
 
-// On page load (including hard refresh), restore an existing session immediately
-// so the user isn't bounced back to the login screen.
+// On page load, restore an existing session (like the admin does). Simple and
+// non-overlapping: one getSession, one row fetch, done.
 (async function restoreSessionOnLoad() {
   try {
-    console.log("[boot] restoreSessionOnLoad: calling getSession");
-    var sessP = sb.auth.getSession();
-    var toP = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("getSession hung")); }, 8000); });
-    var { data } = await Promise.race([sessP, toP]);
-    console.log("[boot] getSession returned. session=", !!(data && data.session));
-    if (data && data.session) { await enterPortalForSession(data.session); }
-  } catch (e) { console.log("[boot] restoreSessionOnLoad failed:", e.message); }
+    var { data } = await sb.auth.getSession();
+    if (data && data.session && data.session.user) {
+      var row = await fetchClientRow(data.session.user.email);
+      if (row) enterPortal(row);
+    }
+  } catch (e) { /* stay on login screen */ }
 })();
 
 // ── LOGIN ──
@@ -1019,87 +1001,40 @@ async function login() {
 
   if (!user || !pass) { showErr("Please enter your username and password."); return; }
 
-  btn.innerHTML = "<div class=\"spinner\"></div> Signing in..."; btn.style.opacity="0.8";
+  btn.innerHTML = "<div class=\"spinner\"></div> Signing in...";
+  btn.style.opacity = "0.8";
   btn.disabled = true;
   err.style.display = "none";
-  _dbg("1: starting sign-in");
 
-  // Safety net: no matter what happens below, never leave the button spinning
-  // forever. If we're still on the login screen after 12s, reset it.
-  var _loginGuard = setTimeout(function(){
-    if (document.getElementById("loginScreen").style.display !== "none") {
-      btn.innerHTML = "Sign in to your portal →";
-      btn.disabled = false;
-      _dbg("TIMEOUT: stuck after 12s — last step above is where it hung");
-    }
-  }, 12000);
+  function reset() { btn.innerHTML = "Sign in to your portal →"; btn.style.opacity = "1"; btn.disabled = false; }
 
-  // Step 1: authenticate with Supabase Auth (passwords are hashed server-side)
-  var authData, authError;
+  // Step 1: authenticate. Same call the admin login uses (which works).
+  var data, error;
   try {
-    // Race the sign-in against an 8s timeout. If signInWithPassword hangs
-    // (never resolves), this rejects so we can see it instead of spinning forever.
-    var signInPromise = sb.auth.signInWithPassword({ email: user, password: pass });
-    var timeoutPromise = new Promise(function(_, reject){
-      setTimeout(function(){ reject(new Error("signInWithPassword did not return in 8s (hang)")); }, 8000);
-    });
-    var r = await Promise.race([signInPromise, timeoutPromise]);
-    authData = r.data; authError = r.error;
-  } catch(e) { _dbg("2: signIn FAILED: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
-  _dbg("2: signIn returned. error=" + (authError ? authError.message : "none"));
-
-  if (authError || !authData.user) {
-    clearTimeout(_loginGuard);
-    showErr("Incorrect email or password. Check your welcome email.");
-    btn.innerHTML = "Sign in to your portal →";
-    btn.disabled = false;
-    return;
-  }
-
-  if (CLIENT) {
-    clearTimeout(_loginGuard);
-    _dbg("3: CLIENT already set by auto-login — entering portal");
-    btn.innerHTML = "Sign in to your portal →";
-    btn.disabled = false;
-    return;
-  }
-
-  _dbg("3: fetching client row for " + user);
-  // Step 2: fetch client project data by email
-  var clientData, clientError;
-  try {
-    var r2 = await sb.from("clients").select("*").eq("email", user).single();
-    clientData = r2.data; clientError = r2.error;
-  } catch(e) { _dbg("4: clients query THREW: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
-  _dbg("4: clients query returned. error=" + (clientError ? clientError.message : "none") + " row=" + (clientData ? "yes" : "no"));
-
-  if (clientError || !clientData) {
-    clearTimeout(_loginGuard);
-    showErr("Account found but no project data. Contact eric@davisdigitalstudio.com.");
-    btn.innerHTML = "Sign in to your portal →";
-    btn.disabled = false;
-    await sb.auth.signOut();
-    return;
-  }
-
-  CLIENT = clientData;
-  clearTimeout(_loginGuard);
-  _dbg("5: got client row, showing portal");
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("portal").style.display = "block";
-  document.body.classList.add("logged-in");
-  if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
-  btn.innerHTML = "Sign in to your portal →";
-  btn.disabled = false;
-  try {
-    initPortal();
-    startMsgPoll();
-    updateLastSeen();
-    _dbg("6: initPortal kicked off — portal should be visible");
+    var r = await sb.auth.signInWithPassword({ email: user, password: pass });
+    data = r.data; error = r.error;
   } catch (e) {
-    console.error("initPortal error:", e);
-    _dbg("6: initPortal THREW: " + e.message);
+    reset(); showErr("Sign in failed. Please try again."); return;
   }
+
+  if (error || !data || !data.session) {
+    reset();
+    showErr("Incorrect email or password. Check your welcome email.");
+    document.getElementById("loginPass").value = "";
+    return;
+  }
+
+  // Step 2: load this client's project row (timeout-protected, never hangs).
+  var row = await fetchClientRow(user);
+  reset();
+
+  if (!row) {
+    showErr("Signed in, but no project data was found for this account. Contact eric@davisdigitalstudio.com.");
+    try { await sb.auth.signOut(); } catch (e) {}
+    return;
+  }
+
+  enterPortal(row);
 }
 
 function showErr(msg) {
