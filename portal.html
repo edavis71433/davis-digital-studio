@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.2 20260626-spinner-guard -->
+<!-- DDS v3.3 20260626-debug-tracer -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -989,6 +989,14 @@ sb.auth.onAuthStateChange(async function(event, session) {
 })();
 
 // ── LOGIN ──
+function _dbg(msg){
+  var d = document.getElementById("loginError");
+  if(!d) return;
+  d.style.display="block";
+  d.style.background="#eef0fd"; d.style.color="#4435a0"; d.style.borderColor="rgba(91,63,160,0.3)";
+  d.textContent = "DEBUG: " + msg;
+  console.log("[login]", msg);
+}
 async function login() {
   var user = document.getElementById("loginUser").value.trim();
   var pass = document.getElementById("loginPass").value.trim();
@@ -1000,6 +1008,7 @@ async function login() {
   btn.innerHTML = "<div class=\"spinner\"></div> Signing in..."; btn.style.opacity="0.8";
   btn.disabled = true;
   err.style.display = "none";
+  _dbg("1: starting sign-in");
 
   // Safety net: no matter what happens below, never leave the button spinning
   // forever. If we're still on the login screen after 12s, reset it.
@@ -1007,15 +1016,17 @@ async function login() {
     if (document.getElementById("loginScreen").style.display !== "none") {
       btn.innerHTML = "Sign in to your portal →";
       btn.disabled = false;
-      showErr("That took too long. Check your connection and try again.");
+      _dbg("TIMEOUT: stuck after 12s — last step above is where it hung");
     }
   }, 12000);
 
   // Step 1: authenticate with Supabase Auth (passwords are hashed server-side)
-  const { data: authData, error: authError } = await sb.auth.signInWithPassword({
-    email: user,
-    password: pass
-  });
+  var authData, authError;
+  try {
+    var r = await sb.auth.signInWithPassword({ email: user, password: pass });
+    authData = r.data; authError = r.error;
+  } catch(e) { _dbg("2: signIn THREW: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
+  _dbg("2: signIn returned. error=" + (authError ? authError.message : "none"));
 
   if (authError || !authData.user) {
     clearTimeout(_loginGuard);
@@ -1025,19 +1036,22 @@ async function login() {
     return;
   }
 
-  // If a session-restore handler already loaded the portal (e.g. the client
-  // arrived already logged in from the set-password code flow), CLIENT is set
-  // and the portal is showing. Just reset the button and stop — no double load.
   if (CLIENT) {
     clearTimeout(_loginGuard);
+    _dbg("3: CLIENT already set by auto-login — entering portal");
     btn.innerHTML = "Sign in to your portal →";
     btn.disabled = false;
     return;
   }
 
+  _dbg("3: fetching client row for " + user);
   // Step 2: fetch client project data by email
-  const { data: clientData, error: clientError } = await sb.from("clients")
-    .select("*").eq("email", user).single();
+  var clientData, clientError;
+  try {
+    var r2 = await sb.from("clients").select("*").eq("email", user).single();
+    clientData = r2.data; clientError = r2.error;
+  } catch(e) { _dbg("4: clients query THREW: " + e.message); clearTimeout(_loginGuard); btn.innerHTML="Sign in to your portal →"; btn.disabled=false; return; }
+  _dbg("4: clients query returned. error=" + (clientError ? clientError.message : "none") + " row=" + (clientData ? "yes" : "no"));
 
   if (clientError || !clientData) {
     clearTimeout(_loginGuard);
@@ -1050,6 +1064,7 @@ async function login() {
 
   CLIENT = clientData;
   clearTimeout(_loginGuard);
+  _dbg("5: got client row, showing portal");
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("portal").style.display = "block";
   document.body.classList.add("logged-in");
@@ -1060,9 +1075,10 @@ async function login() {
     initPortal();
     startMsgPoll();
     updateLastSeen();
+    _dbg("6: initPortal kicked off — portal should be visible");
   } catch (e) {
-    // Portal is already shown; an init error shouldn't trap the user on a spinner.
     console.error("initPortal error:", e);
+    _dbg("6: initPortal THREW: " + e.message);
   }
 }
 
