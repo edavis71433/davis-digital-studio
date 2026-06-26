@@ -1398,6 +1398,25 @@ async function loadFiles() {
   setBadge("badge-files", pending);
 }
 
+// Generate a short-lived signed URL on demand and open it.
+// The bucket is private, so files are never accessible without this.
+// RLS on storage ensures a client can only sign paths under their own folder.
+async function downloadFile(storagePath) {
+  if (!storagePath) { showToast("This file can't be downloaded."); return; }
+  try {
+    const { data, error } = await sb.storage
+      .from("client-files")
+      .createSignedUrl(storagePath, 120); // valid for 2 minutes
+    if (error || !data || !data.signedUrl) {
+      showToast("Couldn't open that file. Try again or contact Eric.");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  } catch (e) {
+    showToast("Couldn't open that file. Try again or contact Eric.");
+  }
+}
+
 function renderFiles() {
   var list = currentFilter === "all" ? allFiles
     : allFiles.filter(f => f.from_who === currentFilter);
@@ -1410,7 +1429,7 @@ function renderFiles() {
         <div class="file-info"><h4>${f.name}</h4><p>${f.type||""} · ${f.size||""} · ${formatDate(f.created_at)}</p></div>
         <span class="file-status ${f.status}">${cap(f.status)}</span>
         <div class="file-actions">
-          ${f.url ? `<a href="${f.url}" target="_blank" class="file-btn" download rel="noopener">Download</a>` : ""}
+          ${f.storage_path ? `<button class="file-btn" onclick="downloadFile('${f.storage_path.replace(/'/g,"\\'")}')">Download</button>` : ""}
           <button class="file-btn" onclick="toggleFileComments('${f.id}')">💬 Comments</button>
           ${f.from_who === "eric" && f.status === "pending" ? `<button class="file-btn" onclick="approveFile('${f.id}')">Approve ✓</button>` : ""}
           ${f.from_who === "client" ? `<button class="file-btn danger" onclick="deleteFile('${f.id}','${f.storage_path}')">Delete</button>` : ""}
@@ -1517,9 +1536,9 @@ async function uploadFile(file) {
   
   fill.style.width = "80%";
   
-  // Get public URL
-  const { data: urlData } = sb.storage.from("client-files").getPublicUrl(path);
-  
+  // NOTE: the `client-files` bucket is PRIVATE. We do NOT store a public URL.
+  // Downloads are served on demand via short-lived signed URLs (see downloadFile).
+
   // Save to files table
   var ext = file.name.split(".").pop().toUpperCase();
   var size = file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+" MB" : (file.size/1024).toFixed(0)+" KB";
@@ -1531,8 +1550,7 @@ async function uploadFile(file) {
     type: ext,
     from_who: "client",
     status: "review",
-    storage_path: path,
-    url: urlData?.publicUrl || null
+    storage_path: path
   });
   
   fill.style.width = "100%";

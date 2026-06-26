@@ -183,6 +183,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   .admin-botnav button span{font-size:9px;letter-spacing:0.3px;}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -192,9 +193,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   <div class="login-card">
     <div class="login-logo">Davis<span>Digital</span> Studio</div>
     <div class="login-sub">ADMIN PANEL · ERIC ONLY</div>
-    <input aria-label="Admin password" class="login-input" id="ap" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <input aria-label="Admin email" class="login-input" id="aem" type="email" autocomplete="username" placeholder="Admin email" onkeydown="if(event.key==='Enter')doLogin()">
+    <input aria-label="Admin password" class="login-input" id="ap" type="password" autocomplete="current-password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Sign in →</button>
-    <div class="login-err" id="le">Incorrect password.</div>
+    <div class="login-err" id="le">Incorrect email or password.</div>
   </div>
 </div>
 
@@ -806,12 +808,22 @@ Don't want emails from me? Reply "unsubscribe" and you're off the list.</div>
 <script>
 const SB_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
-// Shared secret sent on privileged Edge Function calls (create_client_auth, invite_client, reset_password).
-// MUST match the ADMIN_SHARED_SECRET secret set on the clever-api Edge Function in Supabase.
-// This is the same long random string set as ADMIN_SHARED_SECRET in Supabase. Keep them identical.
-const ADMIN_SECRET = "71377f613a8ab6077cb4fcfba68cfc3018c1fb8df1cdc9abf6101a4d207af004";
-const ADMIN_TOKEN = "dplaHi_BIZ17Qf4LJUfRli9lkVQJM_EbxOx_tLOBq3s";  // must EXACTLY match the ADMIN_TOKEN secret in Supabase
-const PASS_HASH = "50897cb74718d639a5b89f3efd0b144f127eee374e8e6a52c7cf3c252b8302c6";
+
+// Admin now signs in with Supabase Auth. The browser holds an ordinary session,
+// not a secret. The Edge Function verifies this session server-side and checks
+// the `admins` allowlist table before running any privileged action. There is no
+// admin secret or service-role token in this file anymore.
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// Returns the current admin's access token (JWT) to send on privileged calls,
+// or "" if not signed in. Privileged Edge Function routes reject empty/non-admin.
+async function adminJwt() {
+  try {
+    const { data } = await sb.auth.getSession();
+    return (data && data.session && data.session.access_token) || "";
+  } catch (e) { return ""; }
+}
+
 const DEFAULT_CONTRACT = `PROJECT AGREEMENT
 Davis Digital Studio
 
@@ -866,24 +878,10 @@ var clients = [];
 var selectedClients = {};  // keyed by context
 
 // ── AUTH ──
-// Admin login is remembered across refreshes via localStorage with an expiry,
-// so a hard refresh no longer kicks you back to the password screen.
-var ADMIN_SESSION_KEY = "dds_admin_session";
-var ADMIN_SESSION_HOURS = 12; // re-enter password after this many hours
-
-function adminSessionValid() {
-  try {
-    var raw = localStorage.getItem(ADMIN_SESSION_KEY);
-    if (!raw) return false;
-    var exp = parseInt(raw, 10);
-    if (!exp || Date.now() > exp) { localStorage.removeItem(ADMIN_SESSION_KEY); return false; }
-    return true;
-  } catch (e) { return false; }
-}
-
-function setAdminSession() {
-  try { localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_HOURS*3600*1000)); } catch (e) {}
-}
+// Admin signs in with Supabase Auth. The session is managed by the Supabase
+// client (persisted + auto-refreshed). On load we check for an existing session
+// so a refresh doesn't kick you out. Privileged calls carry the session JWT,
+// and the Edge Function confirms the account is in the `admins` allowlist.
 
 function showAdminApp() {
   document.getElementById("loginWrap").style.display = "none";
@@ -892,32 +890,48 @@ function showAdminApp() {
   document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
 }
 
-async function hashPassword(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-}
-async function doLogin() {
-  const input = document.getElementById("ap").value;
-  const hash = await hashPassword(input);
-  if (hash === PASS_HASH) {
-    setAdminSession();
-    showAdminApp();
-  } else {
-    document.getElementById("le").style.display = "block";
-    document.getElementById("ap").value = "";
-  }
-}
-function doLogout() {
-  try { localStorage.removeItem(ADMIN_SESSION_KEY); } catch (e) {}
+function showLogin() {
   document.getElementById("adminWrap").style.display = "none";
   document.getElementById("loginWrap").style.display = "flex";
-  document.getElementById("ap").value = "";
+  var ap = document.getElementById("ap"); if (ap) ap.value = "";
 }
-document.getElementById("ap").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 
-// On page load, restore the session if it's still valid (this is what fixes
-// the "hard refresh logs me out" problem).
-if (adminSessionValid()) { showAdminApp(); }
+async function doLogin() {
+  var email = (document.getElementById("aem").value || "").trim();
+  var password = document.getElementById("ap").value || "";
+  var err = document.getElementById("le");
+  err.style.display = "none";
+  if (!email || !password) { err.textContent = "Enter your email and password."; err.style.display = "block"; return; }
+  try {
+    var { data, error } = await sb.auth.signInWithPassword({ email: email, password: password });
+    if (error || !data || !data.session) {
+      err.textContent = "Incorrect email or password.";
+      err.style.display = "block";
+      document.getElementById("ap").value = "";
+      return;
+    }
+    // Signed in. The Edge Function still checks the admins allowlist on every
+    // privileged call, so a non-admin login can see the shell but cannot read
+    // or write any data.
+    showAdminApp();
+  } catch (e) {
+    err.textContent = "Sign in failed. Try again.";
+    err.style.display = "block";
+  }
+}
+
+async function doLogout() {
+  try { await sb.auth.signOut(); } catch (e) {}
+  showLogin();
+}
+
+// On page load, restore an existing Supabase session if present.
+(async function () {
+  try {
+    var { data } = await sb.auth.getSession();
+    if (data && data.session) { showAdminApp(); }
+  } catch (e) { /* stay on login */ }
+})();
 
 // ── NAV ──
 function toggleDrawer(){
@@ -1576,14 +1590,22 @@ async function setMaintenancePlan(id, plan) {
 
 // ── API HELPER ──
 async function api(path, method, body) {
-  // Routes through the Edge Function so the browser never holds a key that can
-  // bypass RLS. The Edge Function uses the service role server-side, gated by ADMIN_TOKEN.
+  // Routes through the Edge Function so the browser never holds the service-role
+  // key. The function verifies the admin's session JWT (sent below) against the
+  // `admins` allowlist before using the service role server-side.
   try {
+    var jwt = await adminJwt();
+    if (!jwt) { console.error("api error: not signed in"); showLogin(); return null; }
     var r = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY },
-      body: JSON.stringify({ type: "admin_db", token: ADMIN_TOKEN, path: path, method: method || "GET", payload: body || null })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + SB_KEY,
+        "x-dds-user-jwt": jwt
+      },
+      body: JSON.stringify({ type: "admin_db", path: path, method: method || "GET", payload: body || null })
     });
+    if (r.status === 401) { console.error("api error: unauthorized"); showLogin(); return null; }
     var j = await r.json();
     if (j.error) { console.error("api error:", j.error, j.detail || ""); return null; }
     return j.data;
@@ -2012,9 +2034,11 @@ async function resetClientPassword(cid, email, name) {
   if (pass.length < 8) { toast("Password must be at least 8 characters."); return; }
   toast("Setting password...");
   try {
+    var jwt = await adminJwt();
+    if (!jwt) { toast("Please sign in again."); showLogin(); return; }
     var res = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
-      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
       body: JSON.stringify({type: "reset_password", email: email, password: pass})
     });
     var jr = {};
@@ -2064,9 +2088,11 @@ async function deleteClient(cid, email, name) {
   var authNote = "";
   if (email) {
     try {
+      var jwt = await adminJwt();
+      if (!jwt) { toast("Please sign in again."); showLogin(); return; }
       var res = await fetch(SB_URL + "/functions/v1/clever-api", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-admin": ADMIN_SECRET },
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
         body: JSON.stringify({ type: "delete_client_auth", email: email })
       });
       var jr = {};
@@ -2122,9 +2148,11 @@ async function inviteClient() {
   await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
 
   // 2) Send the Supabase invite (server-side via Edge Function — they set their own password).
+  var jwt = await adminJwt();
+  if (!jwt) { toast("Please sign in again."); showLogin(); return; }
   var res = await fetch(SB_URL + "/functions/v1/clever-api", {
     method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
     body: JSON.stringify({type:"invite_client", email:cemail, name:name})
   });
   var jr = {};
@@ -2150,9 +2178,11 @@ async function createClient() {
 
   // Create Supabase Auth user via the Edge Function (server-side, uses service role).
   // The browser anon key is not allowed to call /auth/v1/admin/users directly.
+  var jwt = await adminJwt();
+  if (!jwt) { toast("Please sign in again."); showLogin(); return; }
   var authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
     method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-admin":ADMIN_SECRET},
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
     body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
   });
   var authJson = {};
