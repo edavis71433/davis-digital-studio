@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v3.0 20260621-1655 -->
+<!-- DDS v4.0 redesign 20260626 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -182,6 +182,366 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   .admin-botnav button{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;padding:5px 0;color:var(--muted);font-family:"DM Sans",sans-serif;cursor:pointer;}
   .admin-botnav button span{font-size:9px;letter-spacing:0.3px;}
 }
+
+/* ===== REDESIGN LAYER v4.0 (appended; overrides win) ===== */
+/* ============================================================
+   DDS ADMIN — REDESIGN LAYER  (v4.0)
+   Appended after the original <style>; cascade overrides win.
+   Original markup/JS untouched. Tokens extended, not replaced.
+   ============================================================ */
+
+:root{
+  /* extend existing palette with surface + elevation system */
+  --bg:#f6f4f1;            /* app canvas, warmer near-paper */
+  --surface:#ffffff;
+  --surface-2:#faf9fc;
+  --surface-3:#f3f0f9;
+  --line:#eae6f0;          /* hairline */
+  --line-strong:#ded7ea;
+  --ink:#171221;
+  --ink-2:#574d68;
+  --muted:#8b8098;
+  --p:#5b3fa0;
+  --p-600:#4a3286;
+  --p-700:#3a2769;
+  --p-soft:#f1ecf9;
+  --p-ring:rgba(91,63,160,0.22);
+  --green:#1f9d57; --green-soft:#e7f6ee;
+  --red:#dc4747;   --red-soft:#fdecec;
+  --amber:#d68a12; --amber-soft:#fdf3e3;
+  --blue:#2f6df0;  --blue-soft:#eaf1fe;
+  --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:22px;
+  --sh-1:0 1px 2px rgba(23,18,33,0.05), 0 1px 1px rgba(23,18,33,0.03);
+  --sh-2:0 4px 14px rgba(23,18,33,0.07), 0 1px 3px rgba(23,18,33,0.04);
+  --sh-3:0 12px 40px rgba(23,18,33,0.16), 0 4px 12px rgba(23,18,33,0.08);
+  --sh-pop:0 24px 70px rgba(23,18,33,0.28);
+  --ease:cubic-bezier(.32,.72,0,1);
+  --serif:"DM Serif Display",Georgia,serif;
+}
+
+body{ background:var(--bg); color:var(--ink); }
+::selection{ background:var(--p-ring); }
+
+/* smooth, accessible focus ring everywhere */
+*:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--p-ring); border-radius:8px; }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+
+/* ---------- TOPBAR ---------- */
+.topbar{
+  background:rgba(246,244,241,0.82); backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line); height:60px; padding:0 20px;
+}
+.topbar-logo{ font-family:var(--serif); font-size:19px; letter-spacing:-0.2px; color:var(--ink); }
+.topbar-logo span{ color:var(--p); }
+.admin-badge{
+  font-family:"DM Sans",sans-serif; font-size:9.5px; font-weight:600; letter-spacing:1px;
+  background:var(--p-soft); color:var(--p-600); padding:3px 8px; border-radius:100px; vertical-align:2px;
+}
+.topbar-out{
+  font-size:13px; font-weight:500; color:var(--ink-2); background:transparent;
+  border:1px solid var(--line-strong); padding:7px 14px; border-radius:100px; cursor:pointer;
+  transition:all .18s var(--ease);
+}
+.topbar-out:hover{ background:var(--surface); border-color:var(--muted); color:var(--ink); }
+
+/* command-k pill in the topbar center */
+.cmdk-pill{
+  display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px 0 14px;
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:100px;
+  color:var(--muted); font-size:13px; cursor:pointer; transition:all .18s var(--ease);
+  box-shadow:var(--sh-1); min-width:220px;
+}
+.cmdk-pill:hover{ border-color:var(--p-ring); box-shadow:var(--sh-2); color:var(--ink-2); }
+.cmdk-pill kbd{
+  margin-left:auto; font-family:"DM Sans",sans-serif; font-size:11px; font-weight:600;
+  background:var(--surface-3); color:var(--ink-2); border:1px solid var(--line);
+  padding:2px 7px; border-radius:6px; line-height:1.4;
+}
+@media(max-width:760px){ .cmdk-pill{ display:none; } }
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  background:var(--surface); border-right:1px solid var(--line); padding:14px 12px 28px;
+  width:236px;
+}
+.sl{
+  font-size:10.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase;
+  color:var(--muted); padding:0 10px; margin:18px 0 6px;
+}
+.sl:first-of-type{ margin-top:4px; }
+.sn{
+  display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+  font-size:14px; font-weight:500; color:var(--ink-2);
+  padding:9px 11px; border-radius:var(--r-sm); border:none; background:transparent;
+  cursor:pointer; transition:all .15s var(--ease); position:relative; margin-bottom:1px;
+}
+.sn svg{ color:var(--muted); transition:color .15s var(--ease); }
+.sn:hover{ background:var(--surface-3); color:var(--ink); }
+.sn:hover svg{ color:var(--ink-2); }
+.sn.active{ background:var(--p-soft); color:var(--p-700); font-weight:600; }
+.sn.active svg{ color:var(--p); }
+.sn.active::before{
+  content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:3px; height:18px; background:var(--p); border-radius:0 3px 3px 0;
+}
+.sdiv{ height:1px; background:var(--line); margin:14px 6px; }
+
+/* ---------- MAIN / PAGES ---------- */
+.main{ background:var(--bg); padding:28px 32px 64px; }
+@media(max-width:760px){ .main{ padding:18px 16px 90px; } }
+.page{ animation:pageIn .32s var(--ease); }
+@keyframes pageIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+.pt{
+  font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-0.4px;
+  color:var(--ink); margin-bottom:3px;
+}
+.ps{ font-size:14.5px; color:var(--muted); margin-bottom:26px; }
+
+/* ---------- CARDS ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--sh-1); padding:20px; transition:box-shadow .2s var(--ease), border-color .2s var(--ease);
+}
+.card:hover{ box-shadow:var(--sh-2); }
+.ch{ margin-bottom:14px; }
+.ct{ font-size:14px; font-weight:600; color:var(--ink); display:flex; align-items:center; }
+.ct svg{ color:var(--p); }
+
+/* ---------- STAT CARDS (cockpit) ---------- */
+.stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
+.stat{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:18px 20px; box-shadow:var(--sh-1); position:relative; overflow:hidden;
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.stat:hover{ transform:translateY(-2px); box-shadow:var(--sh-2); }
+.stat .sv{ font-family:var(--serif); font-size:30px; line-height:1; color:var(--ink); letter-spacing:-0.5px; }
+.stat .skv{ font-size:12.5px; font-weight:500; color:var(--muted); margin-top:7px; }
+.stat .strend{ font-size:11.5px; font-weight:600; margin-top:6px; }
+.stat .strend.up{ color:var(--green); }
+.stat .strend.down{ color:var(--red); }
+
+/* ---------- BUTTONS ---------- */
+button, .btn{ font-family:"DM Sans",sans-serif; }
+.btn-primary, button.primary, .login-btn, .save-btn{
+  background:var(--p); color:#fff; border:none; font-weight:600; font-size:14px;
+  padding:10px 18px; border-radius:100px; cursor:pointer; transition:all .18s var(--ease);
+  box-shadow:0 1px 2px rgba(91,63,160,0.25);
+}
+.btn-primary:hover, button.primary:hover, .login-btn:hover, .save-btn:hover{
+  background:var(--p-600); box-shadow:0 4px 14px rgba(91,63,160,0.3); transform:translateY(-1px);
+}
+.btn-primary:active, .login-btn:active{ transform:translateY(0); }
+.btn-ghost{
+  background:transparent; color:var(--p); border:1px solid var(--line-strong); font-weight:600;
+  font-size:13px; padding:8px 15px; border-radius:100px; cursor:pointer; transition:all .18s var(--ease);
+}
+.btn-ghost:hover{ background:var(--p-soft); border-color:var(--p-ring); }
+
+/* ---------- TABS (client workspace) ---------- */
+.wtabs{
+  display:flex; gap:2px; border-bottom:1px solid var(--line); margin-bottom:22px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.wtabs::-webkit-scrollbar{ display:none; }
+.wtab{
+  appearance:none; background:transparent; border:none; cursor:pointer;
+  font-size:14px; font-weight:500; color:var(--muted); padding:11px 14px 13px;
+  position:relative; white-space:nowrap; transition:color .15s var(--ease);
+}
+.wtab:hover{ color:var(--ink-2); }
+.wtab.active{ color:var(--p-700); font-weight:600; }
+.wtab.active::after{
+  content:""; position:absolute; left:10px; right:10px; bottom:-1px; height:2px;
+  background:var(--p); border-radius:2px 2px 0 0;
+}
+.wtab .wcount{
+  font-size:11px; font-weight:600; background:var(--surface-3); color:var(--ink-2);
+  padding:1px 7px; border-radius:100px; margin-left:6px;
+}
+
+/* ---------- INPUTS ---------- */
+input[type=text], input[type=email], input[type=password], input[type=number],
+input[type=date], textarea, select, .login-input{
+  font-family:"DM Sans",sans-serif; font-size:14px; color:var(--ink);
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r);
+  padding:10px 13px; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+input:focus, textarea:focus, select:focus, .login-input:focus{
+  border-color:var(--p); box-shadow:0 0 0 3px var(--p-ring); outline:none;
+}
+::placeholder{ color:#a99fb6; }
+
+/* ---------- BADGES / CHIPS ---------- */
+.badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+  padding:3px 10px; border-radius:100px; letter-spacing:0.2px;
+}
+.badge.green{ background:var(--green-soft); color:var(--green); }
+.badge.red{ background:var(--red-soft); color:var(--red); }
+.badge.amber{ background:var(--amber-soft); color:var(--amber); }
+.badge.blue{ background:var(--blue-soft); color:var(--blue); }
+.badge.gray{ background:var(--surface-3); color:var(--ink-2); }
+.badge .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* ---------- BOTTOM NAV (mobile) ---------- */
+.admin-botnav{
+  background:rgba(255,255,255,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--line);
+}
+.admin-botnav button{ color:var(--muted); font-size:10.5px; }
+.admin-botnav button.active{ color:var(--p); }
+
+/* ---------- LOGIN ---------- */
+.login{ background:radial-gradient(120% 120% at 50% 0%, #1a1138 0%, #0f0820 60%); }
+.login-card{
+  background:var(--surface); border-radius:var(--r-xl); box-shadow:var(--sh-pop);
+  border:1px solid rgba(255,255,255,0.08); padding:40px 36px;
+}
+.login-logo{ font-family:var(--serif); font-size:24px; color:var(--ink); }
+.login-logo span{ color:var(--p); }
+.login-sub{ font-size:10.5px; letter-spacing:1.5px; color:var(--muted); }
+
+/* ============================================================
+   COMMAND PALETTE
+   ============================================================ */
+.cmdk-overlay{
+  position:fixed; inset:0; z-index:9000; display:none;
+  background:rgba(15,8,32,0.4); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  align-items:flex-start; justify-content:center; padding-top:14vh;
+  animation:fadeIn .15s var(--ease);
+}
+.cmdk-overlay.open{ display:flex; }
+@keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+.cmdk{
+  width:min(620px,92vw); background:var(--surface); border-radius:var(--r-lg);
+  box-shadow:var(--sh-pop); border:1px solid var(--line); overflow:hidden;
+  animation:cmdkIn .22s var(--ease);
+}
+@keyframes cmdkIn{ from{ opacity:0; transform:translateY(-10px) scale(.98); } to{ opacity:1; transform:none; } }
+.cmdk-input-row{ display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); }
+.cmdk-input-row svg{ color:var(--muted); flex-shrink:0; }
+.cmdk-input{
+  flex:1; border:none !important; box-shadow:none !important; font-size:16px; padding:0 !important;
+  background:transparent; color:var(--ink);
+}
+.cmdk-input:focus{ box-shadow:none !important; }
+.cmdk-results{ max-height:54vh; overflow-y:auto; padding:8px; }
+.cmdk-group-label{ font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); padding:10px 12px 5px; }
+.cmdk-item{
+  display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--r-sm);
+  cursor:pointer; font-size:14px; color:var(--ink-2);
+}
+.cmdk-item .cmdk-ico{
+  width:30px; height:30px; border-radius:8px; background:var(--surface-3); color:var(--p);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.cmdk-item .cmdk-label{ font-weight:500; color:var(--ink); }
+.cmdk-item .cmdk-sub{ font-size:12px; color:var(--muted); }
+.cmdk-item .cmdk-meta{ margin-left:auto; font-size:11.5px; color:var(--muted); }
+.cmdk-item.sel{ background:var(--p-soft); }
+.cmdk-item.sel .cmdk-ico{ background:var(--p); color:#fff; }
+.cmdk-empty{ padding:32px 16px; text-align:center; color:var(--muted); font-size:14px; }
+.cmdk-foot{
+  display:flex; gap:16px; padding:10px 16px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--muted);
+}
+.cmdk-foot kbd{
+  font-family:"DM Sans"; background:var(--surface-3); border:1px solid var(--line);
+  border-radius:5px; padding:1px 6px; font-size:11px; margin-right:3px;
+}
+
+/* ============================================================
+   AI DRAWER / MODAL
+   ============================================================ */
+.ai-modal-overlay{
+  position:fixed; inset:0; z-index:8500; display:none;
+  background:rgba(15,8,32,0.45); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:20px; animation:fadeIn .15s var(--ease);
+}
+.ai-modal-overlay.open{ display:flex; }
+.ai-modal{
+  width:min(560px,94vw); max-height:86vh; overflow:hidden; display:flex; flex-direction:column;
+  background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--sh-pop); border:1px solid var(--line);
+  animation:cmdkIn .22s var(--ease);
+}
+.ai-modal-head{
+  display:flex; align-items:center; gap:11px; padding:18px 20px; border-bottom:1px solid var(--line);
+}
+.ai-spark{
+  width:34px; height:34px; border-radius:9px; flex-shrink:0;
+  background:linear-gradient(135deg,#7c5cd0,#5b3fa0); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+.ai-modal-head .t{ font-size:15px; font-weight:600; color:var(--ink); }
+.ai-modal-head .s{ font-size:12.5px; color:var(--muted); }
+.ai-modal-x{ margin-left:auto; background:transparent; border:none; cursor:pointer; color:var(--muted); font-size:22px; line-height:1; padding:4px; }
+.ai-modal-body{ padding:20px; overflow-y:auto; }
+.ai-draft{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r);
+  padding:15px; font-size:14px; line-height:1.65; color:var(--ink); white-space:pre-wrap;
+  min-height:120px;
+}
+.ai-draft[contenteditable=true]:focus{ border-color:var(--p); box-shadow:0 0 0 3px var(--p-ring); outline:none; }
+.ai-modal-foot{ display:flex; gap:10px; padding:16px 20px; border-top:1px solid var(--line); }
+.ai-thinking{ display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px; padding:30px 8px; justify-content:center; }
+.ai-dots{ display:inline-flex; gap:4px; }
+.ai-dots span{ width:7px; height:7px; border-radius:50%; background:var(--p); animation:aiDot 1.2s var(--ease) infinite; }
+.ai-dots span:nth-child(2){ animation-delay:.2s; } .ai-dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes aiDot{ 0%,60%,100%{ opacity:.25; transform:scale(.8);} 30%{ opacity:1; transform:scale(1);} }
+
+/* AI suggestion chips */
+.ai-chip{
+  display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500;
+  background:linear-gradient(135deg,rgba(124,92,208,0.1),rgba(91,63,160,0.06));
+  color:var(--p-700); border:1px solid var(--p-ring); border-radius:100px;
+  padding:6px 13px; cursor:pointer; transition:all .15s var(--ease);
+}
+.ai-chip:hover{ background:var(--p-soft); border-color:var(--p); }
+
+/* Today / triage cockpit */
+.triage{
+  background:linear-gradient(135deg, #ffffff, #faf8ff);
+  border:1px solid var(--p-ring); border-radius:var(--r-lg); padding:20px 22px; margin-bottom:24px;
+  box-shadow:var(--sh-1); position:relative; overflow:hidden;
+}
+.triage::before{
+  content:""; position:absolute; top:-40px; right:-30px; width:160px; height:160px;
+  background:radial-gradient(circle, rgba(124,92,208,0.14), transparent 70%); pointer-events:none;
+}
+.triage-head{ display:flex; align-items:center; gap:9px; margin-bottom:4px; }
+.triage-head .ai-spark{ width:28px; height:28px; border-radius:8px; }
+.triage-head .tt{ font-size:14px; font-weight:600; color:var(--ink); }
+.triage-body{ font-size:14.5px; line-height:1.7; color:var(--ink-2); }
+.triage-item{ display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--line); }
+.triage-item:first-child{ border-top:none; }
+.triage-item .ti-act{ margin-left:auto; }
+
+/* empty states that teach */
+.empty{
+  text-align:center; padding:48px 24px; color:var(--muted);
+}
+.empty .e-ico{
+  width:52px; height:52px; border-radius:14px; background:var(--surface-3); color:var(--p);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+}
+.empty .e-title{ font-size:16px; font-weight:600; color:var(--ink); margin-bottom:6px; }
+.empty .e-sub{ font-size:13.5px; line-height:1.6; max-width:320px; margin:0 auto 18px; }
+
+/* skeleton loading */
+.skel{ background:linear-gradient(90deg, var(--surface-3) 25%, var(--surface-2) 37%, var(--surface-3) 63%); background-size:400% 100%; animation:skel 1.4s ease infinite; border-radius:8px; }
+@keyframes skel{ 0%{ background-position:100% 50%; } 100%{ background-position:0 50%; } }
+
+/* toast upgrade */
+.toast{
+  background:var(--ink); color:#fff; border-radius:var(--r); box-shadow:var(--sh-3);
+  font-size:14px; font-weight:500; padding:13px 18px;
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -207,6 +567,10 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <button class="menu-toggle" id="menuToggle" aria-label="Open menu" onclick="toggleDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <div class="topbar-logo">Davis<span>Digital</span> Studio <span class="admin-badge">ADMIN</span></div>
     </div>
+    <button class="cmdk-pill" onclick="DDS.openCmd()" aria-label="Open command palette">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Search or jump to…</span><kbd>⌘K</kbd>
+    </button>
     <button class="topbar-out" onclick="doLogout()">Sign out</button>
   </div>
   <div class="drawer-scrim" id="drawerScrim" onclick="closeDrawer()"></div>
@@ -257,6 +621,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
       <div class="page active" id="page-overview">
         <div class="pt">Welcome back, Eric</div>
         <div class="ps" id="ovSubtitle">Davis Digital Studio Admin</div>
+        <div class="triage" id="ddsTriage"></div>
         <div class="stats" id="ovStats"></div>
         <div id="ovAttention"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -2729,6 +3094,324 @@ document.addEventListener("DOMContentLoaded", function() {
   if (qe) qe.value = expires.toISOString().split("T")[0];
   renderQuoteLines();
 });
+
+/* ===== REDESIGN JS LAYER v4.0 ===== */
+
+/* ============================================================
+   DDS ADMIN — REDESIGN JS LAYER (v4.0)
+   Appended after original script. Reuses existing functions:
+   go(), toast(), api(), openHubClient(), hubJumpTo(), loadHub(),
+   selectedClients, clients, hubClients, sendMsg, EDGE fn pattern.
+   ============================================================ */
+(function(){
+  var EDGE_FN = "https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api";
+
+  /* ---- safe getter for the currently focused client across the app ---- */
+  function activeClient(){
+    try{
+      if (typeof selectedClients === "object" && selectedClients){
+        var ctxs = ["messages","files","timeline","invoices","contracts"];
+        for (var i=0;i<ctxs.length;i++){ if (selectedClients[ctxs[i]]) return selectedClients[ctxs[i]]; }
+      }
+    }catch(e){}
+    return null;
+  }
+
+  /* ============================================================
+     COMMAND PALETTE  (Cmd/Ctrl-K)
+     ============================================================ */
+  var CMD_ACTIONS = [
+    { group:"Go to", label:"Today",            sub:"Dashboard overview", ico:"home",  run:function(){ go("overview"); } },
+    { group:"Go to", label:"Clients",          sub:"All client records", ico:"users", run:function(){ go("hub"); } },
+    { group:"Go to", label:"Leads",            sub:"Inbound enquiries",  ico:"inbox", run:function(){ go("leads"); } },
+    { group:"Go to", label:"Prospects",        sub:"Outreach pipeline",  ico:"target",run:function(){ go("prospects"); } },
+    { group:"Go to", label:"Email templates",  sub:"Saved templates",    ico:"mail",  run:function(){ go("templates"); } },
+    { group:"Create",label:"Add new client",   sub:"Onboard a client",   ico:"plus",  run:function(){ go("newclient"); } },
+    { group:"Create",label:"New invoice",      sub:"Bill a client",      ico:"dollar",run:function(){ go("invoices"); } },
+    { group:"Create",label:"New quote",        sub:"Build a quote PDF",  ico:"file",  run:function(){ go("quote"); } },
+    { group:"Create",label:"Send a message",   sub:"Message a client",   ico:"chat",  run:function(){ go("messages"); } },
+    { group:"AI",    label:"Draft a reply with AI", sub:"For the open message", ico:"spark", run:function(){ openAiReply(); } },
+    { group:"AI",    label:"What needs my attention?", sub:"AI triage of today", ico:"spark", run:function(){ go("overview"); setTimeout(runTriage,150); } }
+  ];
+
+  var ICONS = {
+    home:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    users:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+    inbox:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+    target:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>',
+    mail:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>',
+    plus:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    dollar:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+    file:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    chat:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    spark:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>'
+  };
+
+  var cmdState = { items:[], sel:0, q:"" };
+
+  function buildCmdOverlay(){
+    if (document.getElementById("cmdkOverlay")) return;
+    var o = document.createElement("div");
+    o.className = "cmdk-overlay"; o.id = "cmdkOverlay";
+    o.innerHTML =
+      '<div class="cmdk" role="dialog" aria-label="Command palette">'+
+        '<div class="cmdk-input-row">'+
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'+
+          '<input class="cmdk-input" id="cmdkInput" placeholder="Search clients, actions, pages…" autocomplete="off" spellcheck="false">'+
+        '</div>'+
+        '<div class="cmdk-results" id="cmdkResults"></div>'+
+        '<div class="cmdk-foot"><span><kbd>↑↓</kbd>navigate</span><span><kbd>↵</kbd>open</span><span><kbd>esc</kbd>close</span></div>'+
+      '</div>';
+    document.body.appendChild(o);
+    o.addEventListener("click", function(e){ if (e.target===o) closeCmd(); });
+    document.getElementById("cmdkInput").addEventListener("input", function(e){ cmdState.q=e.target.value; renderCmd(); });
+    document.getElementById("cmdkInput").addEventListener("keydown", cmdKeydown);
+  }
+
+  function openCmd(){
+    buildCmdOverlay();
+    cmdState.q=""; cmdState.sel=0;
+    document.getElementById("cmdkOverlay").classList.add("open");
+    var inp=document.getElementById("cmdkInput"); inp.value=""; inp.focus();
+    renderCmd();
+  }
+  function closeCmd(){ var o=document.getElementById("cmdkOverlay"); if(o) o.classList.remove("open"); }
+
+  function computeItems(){
+    var q = cmdState.q.toLowerCase().trim();
+    var out = [];
+    // client results (jump straight into a client record)
+    var src = (typeof hubClients!=="undefined" && hubClients && hubClients.length) ? hubClients
+            : (typeof clients!=="undefined" && clients ? clients : []);
+    (src||[]).forEach(function(c){
+      var hay = ((c.name||"")+" "+(c.project_name||"")+" "+(c.email||"")).toLowerCase();
+      if (!q || hay.indexOf(q)>-1){
+        out.push({ group:"Clients", label:c.name||"Unnamed", sub:c.project_name||c.email||"", ico:"users",
+          run:(function(cl){ return function(){ go("hub"); setTimeout(function(){ if(typeof openHubClient==="function") openHubClient(cl.id); },180); }; })(c) });
+      }
+    });
+    CMD_ACTIONS.forEach(function(a){
+      var hay=(a.label+" "+a.sub+" "+a.group).toLowerCase();
+      if (!q || hay.indexOf(q)>-1) out.push(a);
+    });
+    return out.slice(0,40);
+  }
+
+  function renderCmd(){
+    cmdState.items = computeItems();
+    if (cmdState.sel >= cmdState.items.length) cmdState.sel = Math.max(0, cmdState.items.length-1);
+    var box = document.getElementById("cmdkResults");
+    if (!cmdState.items.length){ box.innerHTML='<div class="cmdk-empty">No matches. Try a client name or "invoice".</div>'; return; }
+    var html=""; var lastGroup=null;
+    cmdState.items.forEach(function(it, idx){
+      if (it.group!==lastGroup){ html+='<div class="cmdk-group-label">'+it.group+'</div>'; lastGroup=it.group; }
+      html+='<div class="cmdk-item'+(idx===cmdState.sel?' sel':'')+'" data-idx="'+idx+'">'+
+        '<div class="cmdk-ico">'+(ICONS[it.ico]||ICONS.file)+'</div>'+
+        '<div><div class="cmdk-label">'+esc(it.label)+'</div>'+(it.sub?'<div class="cmdk-sub">'+esc(it.sub)+'</div>':'')+'</div>'+
+        '</div>';
+    });
+    box.innerHTML=html;
+    Array.prototype.forEach.call(box.querySelectorAll(".cmdk-item"), function(el){
+      el.addEventListener("mouseenter", function(){ cmdState.sel=+el.getAttribute("data-idx"); paintSel(); });
+      el.addEventListener("click", function(){ runSel(); });
+    });
+  }
+  function paintSel(){
+    var els=document.querySelectorAll("#cmdkResults .cmdk-item");
+    Array.prototype.forEach.call(els,function(el){ el.classList.toggle("sel", +el.getAttribute("data-idx")===cmdState.sel); });
+  }
+  function runSel(){ var it=cmdState.items[cmdState.sel]; if(it){ closeCmd(); setTimeout(it.run,30); } }
+  function cmdKeydown(e){
+    if (e.key==="ArrowDown"){ e.preventDefault(); cmdState.sel=Math.min(cmdState.items.length-1,cmdState.sel+1); paintSel(); scrollSel(); }
+    else if (e.key==="ArrowUp"){ e.preventDefault(); cmdState.sel=Math.max(0,cmdState.sel-1); paintSel(); scrollSel(); }
+    else if (e.key==="Enter"){ e.preventDefault(); runSel(); }
+    else if (e.key==="Escape"){ e.preventDefault(); closeCmd(); }
+  }
+  function scrollSel(){ var el=document.querySelector("#cmdkResults .cmdk-item.sel"); if(el) el.scrollIntoView({block:"nearest"}); }
+
+  /* ============================================================
+     AI — REPLY DRAFTER
+     Calls Edge Function type:"ai_draft_reply"
+     ============================================================ */
+  function buildAiModal(){
+    if (document.getElementById("aiModal")) return;
+    var o=document.createElement("div");
+    o.className="ai-modal-overlay"; o.id="aiModal";
+    o.innerHTML=
+      '<div class="ai-modal" role="dialog" aria-label="AI assistant">'+
+        '<div class="ai-modal-head">'+
+          '<div class="ai-spark">'+ICONS.spark+'</div>'+
+          '<div><div class="t" id="aiTitle">Draft a reply</div><div class="s" id="aiSub">Claude writes a first draft in your voice</div></div>'+
+          '<button class="ai-modal-x" onclick="DDS.closeAi()" aria-label="Close">&times;</button>'+
+        '</div>'+
+        '<div class="ai-modal-body" id="aiBody"></div>'+
+        '<div class="ai-modal-foot" id="aiFoot"></div>'+
+      '</div>';
+    document.body.appendChild(o);
+    o.addEventListener("click",function(e){ if(e.target===o) closeAi(); });
+  }
+  function closeAi(){ var o=document.getElementById("aiModal"); if(o) o.classList.remove("open"); }
+
+  function openAiReply(){
+    buildAiModal();
+    var client = activeClient();
+    document.getElementById("aiModal").classList.add("open");
+    document.getElementById("aiTitle").textContent="Draft a reply";
+    document.getElementById("aiSub").textContent= client ? ("To "+(client.name||"client")) : "Pick a client in Messages first";
+    var body=document.getElementById("aiBody"), foot=document.getElementById("aiFoot");
+    if (!client){
+      body.innerHTML='<div class="empty" style="padding:24px 8px;"><div class="e-ico">'+ICONS.chat+'</div><div class="e-title">No conversation open</div><div class="e-sub">Open a client in the Message tab, then ask Claude to draft a reply to their latest message.</div></div>';
+      foot.innerHTML='<button class="btn-ghost" onclick="DDS.closeAi()">Close</button><button class="btn-primary" style="margin-left:auto;" onclick="DDS.go(\'messages\');DDS.closeAi();">Go to Messages</button>';
+      return;
+    }
+    // gather the last few messages for this client from the DOM thread if present
+    var ctx = gatherThread(client);
+    body.innerHTML=
+      '<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">Optional steer (tone, what to say)</div>'+
+      '<input id="aiSteer" type="text" placeholder="e.g. warm, confirm Tuesday call, keep it short" style="width:100%;margin-bottom:14px;">'+
+      '<div class="ai-draft" id="aiDraft" contenteditable="false" style="display:none;"></div>'+
+      '<div id="aiThink" style="display:none;"><div class="ai-thinking"><span class="ai-dots"><span></span><span></span><span></span></span> Drafting a reply…</div></div>';
+    foot.innerHTML=
+      '<button class="btn-ghost" onclick="DDS.closeAi()">Cancel</button>'+
+      '<button class="btn-primary" id="aiGenBtn" style="margin-left:auto;" onclick="DDS.genReply()">Generate draft</button>';
+    window._aiCtx = ctx;
+  }
+
+  function gatherThread(client){
+    // Best-effort: scrape rendered message bubbles for context.
+    var msgs=[];
+    try{
+      var nodes=document.querySelectorAll("#msgThread .msg, #page-messages .msg, .msg-bubble");
+      Array.prototype.forEach.call(nodes,function(n){ var t=(n.innerText||"").trim(); if(t) msgs.push(t); });
+    }catch(e){}
+    return { client:{ name:client.name, project:client.project_name }, recent: msgs.slice(-6) };
+  }
+
+  function genReply(){
+    var steer=(document.getElementById("aiSteer")||{}).value||"";
+    document.getElementById("aiThink").style.display="block";
+    document.getElementById("aiGenBtn").disabled=true;
+    document.getElementById("aiGenBtn").textContent="Working…";
+    fetch(EDGE_FN,{ method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ type:"ai_draft_reply", context:window._aiCtx, steer:steer })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      document.getElementById("aiThink").style.display="none";
+      var draft = (d && (d.reply||d.text||d.draft)) || "";
+      if (!draft){ aiError(d); return; }
+      var el=document.getElementById("aiDraft");
+      el.textContent=draft; el.style.display="block"; el.contentEditable="true";
+      document.getElementById("aiFoot").innerHTML=
+        '<button class="btn-ghost" onclick="DDS.genReply()">Regenerate</button>'+
+        '<button class="btn-primary" style="margin-left:auto;" onclick="DDS.useDraft()">Use this reply</button>';
+    }).catch(function(){ document.getElementById("aiThink").style.display="none"; aiError(); });
+  }
+  function aiError(d){
+    var msg = (d && d.message) ? d.message : "Claude couldn't draft that right now. The AI route may not be deployed yet.";
+    document.getElementById("aiBody").insertAdjacentHTML("beforeend",
+      '<div class="badge red" style="margin-top:12px;">Couldn\'t draft</div><div style="font-size:13px;color:var(--muted);margin-top:6px;">'+esc(msg)+'</div>');
+    var b=document.getElementById("aiGenBtn"); if(b){ b.disabled=false; b.textContent="Try again"; }
+  }
+  function useDraft(){
+    var txt=(document.getElementById("aiDraft")||{}).innerText||"";
+    // try to drop it into the message composer if one exists
+    var box = document.querySelector("#msgText, #page-messages textarea, textarea[id*='msg']");
+    if (box){ box.value=txt; box.focus(); toast("✓ Draft added to composer — review & send"); }
+    else { navigator.clipboard && navigator.clipboard.writeText(txt); toast("✓ Draft copied to clipboard"); }
+    closeAi();
+  }
+
+  /* ============================================================
+     AI — DASHBOARD TRIAGE  (type:"ai_triage")
+     ============================================================ */
+  function runTriage(){
+    var host=document.getElementById("ddsTriage");
+    if(!host) return;
+    host.innerHTML=
+      '<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">What needs you today</div></div>'+
+      '<div class="ai-thinking" style="justify-content:flex-start;padding:14px 0 4px;"><span class="ai-dots"><span></span><span></span><span></span></span> Scanning your clients, leads & invoices…</div>';
+    // assemble a compact snapshot from already-loaded arrays
+    var snap = buildSnapshot();
+    fetch(EDGE_FN,{ method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ type:"ai_triage", snapshot:snap })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if (d && Array.isArray(d.items) && d.items.length){ renderTriage(d); }
+      else { triageFallback(snap); }
+    }).catch(function(){ triageFallback(snap); });
+  }
+  function renderTriage(d){
+    var host=document.getElementById("ddsTriage"); if(!host) return;
+    var rows=d.items.map(function(it){
+      var jump = it.go ? ('<button class="btn-ghost ti-act" onclick="DDS.go(\''+it.go+'\')">Open</button>') : '';
+      return '<div class="triage-item"><div><strong style="color:var(--ink);font-weight:600;">'+esc(it.title||"")+'</strong>'+
+        (it.detail?'<div style="font-size:13px;color:var(--muted);margin-top:2px;">'+esc(it.detail)+'</div>':'')+'</div>'+jump+'</div>';
+    }).join("");
+    host.innerHTML='<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">What needs you today</div></div>'+
+      (d.summary?'<div class="triage-body" style="margin:6px 0 10px;">'+esc(d.summary)+'</div>':'')+rows;
+  }
+  function buildSnapshot(){
+    function arr(n){ try{ return (typeof window[n]!=="undefined" && window[n]) ? window[n] : []; }catch(e){ return []; } }
+    var cl=arr("hubClients").length?arr("hubClients"):arr("clients");
+    var lд=arr("allLeads");
+    return {
+      clients: (cl||[]).map(function(c){ return { name:c.name, project:c.project_name, status:c.project_status, progress:c.progress }; }),
+      leadCount: (lд||[]).length,
+      newLeads: (lд||[]).filter(function(l){ return (l.status||"new")==="new"; }).length
+    };
+  }
+  function triageFallback(snap){
+    // local heuristic if AI route unavailable — never leave it blank
+    var host=document.getElementById("ddsTriage"); if(!host) return;
+    var items=[];
+    if (snap.newLeads>0) items.push({title:snap.newLeads+" new lead"+(snap.newLeads>1?"s":"")+" waiting", detail:"Reply while they're warm", go:"leads"});
+    (snap.clients||[]).forEach(function(c){
+      if (c.status && /progress/i.test(c.status) && (c.progress==null || c.progress<100))
+        items.push({title:c.name+" — project in progress", detail:"Check messages & timeline", go:"hub"});
+    });
+    if (!items.length) items.push({title:"You're all caught up", detail:"No urgent items across clients, leads, or invoices."});
+    renderTriage({ items:items.slice(0,5) });
+  }
+
+  /* ---- utilities ---- */
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]; }); }
+
+  /* ============================================================
+     GLOBAL KEYBOARD SHORTCUTS
+     ============================================================ */
+  document.addEventListener("keydown", function(e){
+    var meta = e.metaKey || e.ctrlKey;
+    if (meta && (e.key==="k"||e.key==="K")){ e.preventDefault(); var o=document.getElementById("cmdkOverlay"); (o&&o.classList.contains("open"))?closeCmd():openCmd(); return; }
+    if (e.key==="Escape"){ closeCmd(); closeAi(); }
+    // single-key nav when not typing
+    var tag=(e.target.tagName||"").toLowerCase();
+    if (!meta && !["input","textarea","select"].includes(tag) && !e.target.isContentEditable){
+      if (e.key==="g"){ window._gPrime=true; setTimeout(function(){ window._gPrime=false; },800); return; }
+      if (window._gPrime){
+        window._gPrime=false;
+        if (e.key==="t"){ go("overview"); } else if (e.key==="c"){ go("hub"); }
+        else if (e.key==="l"){ go("leads"); } else if (e.key==="p"){ go("prospects"); }
+      }
+    }
+  });
+
+  /* run triage automatically when landing on overview */
+  var _origGo = window.go;
+  if (typeof _origGo==="function"){
+    window.go = function(page){ _origGo.apply(this, arguments); if (page==="overview"){ setTimeout(runTriage, 120); } };
+  }
+
+  /* expose a small namespace for inline handlers */
+  window.DDS = {
+    openCmd:openCmd, closeCmd:closeCmd,
+    openAiReply:openAiReply, closeAi:closeAi, genReply:genReply, useDraft:useDraft,
+    runTriage:runTriage, go:function(p){ (window.go||function(){})(p); }
+  };
+
+  /* boot: run triage if overview is the initial active page */
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(function(){ if (document.getElementById("ddsTriage")) runTriage(); }, 700);
+  });
+})();
+
 </script>
 </body>
 </html>
