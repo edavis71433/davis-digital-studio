@@ -70,6 +70,16 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
   .login-right{padding:32px 28px;}
 }
 
+/* ── Mobile file card fix: stack info above actions, stop word-per-line wrap ── */
+@media(max-width:640px){
+  .file-item{flex-wrap:wrap;align-items:flex-start;row-gap:10px;}
+  .file-info{flex:1 1 auto;min-width:0;}
+  .file-info p{white-space:normal;word-break:normal;overflow-wrap:anywhere;}
+  .file-status{order:3;}
+  .file-actions{flex-basis:100%;width:100%;flex-wrap:wrap;gap:8px;}
+  .file-actions .file-btn{flex:1 1 auto;text-align:center;min-height:40px;display:inline-flex;align-items:center;justify-content:center;}
+}
+
 /* PORTAL */
 .portal{display:none;min-height:100vh;}
 .topbar{background:var(--pdark);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.06);}
@@ -81,8 +91,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .topbar-right{display:flex;align-items:center;gap:12px;}
 .status-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(106,191,105,0.15);border:1px solid rgba(106,191,105,0.3);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green);}
 .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
-.topbar-btn{background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:color 0.15s;padding:6px 10px;border-radius:8px;}
-.topbar-btn:hover{color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.06);}
+.topbar-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;transition:background 0.15s,border-color 0.15s;padding:7px 14px;border-radius:100px;}
+.topbar-btn:hover{color:#fff;background:rgba(255,255,255,0.16);border-color:rgba(255,255,255,0.3);}
 
 /* LAYOUT */
 .portal-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px);}
@@ -2174,6 +2184,7 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
     <button onclick="navMore('links')">🔗<span>Links</span></button>
     <button onclick="navMore('guide')">📖<span>Guide</span></button>
   </div>
+  <button onclick="closeMoreSheet();logout();" style="width:100%;margin-top:14px;padding:13px;border-radius:12px;border:1px solid rgba(224,85,85,0.25);background:#fff;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Sign out</button>
 </div>
 
 
