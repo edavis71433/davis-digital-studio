@@ -1042,9 +1042,14 @@ async function login() {
   if (document.getElementById("mobileNav")) document.getElementById("mobileNav").style.display = "flex";
   btn.innerHTML = "Sign in to your portal →";
   btn.disabled = false;
-  initPortal();
-  startMsgPoll();
-  updateLastSeen();
+  try {
+    initPortal();
+    startMsgPoll();
+    updateLastSeen();
+  } catch (e) {
+    // Portal is already shown; an init error shouldn't trap the user on a spinner.
+    console.error("initPortal error:", e);
+  }
 }
 
 function showErr(msg) {
@@ -1055,6 +1060,12 @@ function showErr(msg) {
 
 // ── PORTAL INIT ──
 async function initPortal() {
+  // Default any missing fields so a half-filled client record can't crash render.
+  CLIENT.name = CLIENT.name || "there";
+  CLIENT.project_name = CLIENT.project_name || "Your Project";
+  CLIENT.project_status = CLIENT.project_status || "In Progress";
+  CLIENT.progress = (CLIENT.progress == null) ? 0 : CLIENT.progress;
+
   var h = new Date().getHours();
   var g = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
   document.getElementById("greeting").textContent = g + ", " + CLIENT.name + " 👋";
