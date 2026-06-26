@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4">
 </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V4WF04NX7F");</script>
@@ -941,7 +941,17 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const STRIPE_URL = "https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00";
 
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // Disable the Web Locks navigator lock. In some browser/SDK combinations a
+    // stale or un-released lock makes signInWithPassword/getSession hang forever
+    // (spinner never finishes, no error). A no-op lock just runs the callback.
+    lock: async function(_name, _acquireTimeout, fn){ return await fn(); }
+  }
+});
 
 var CLIENT = null;
 var currentFilter = "all";
