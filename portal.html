@@ -1828,6 +1828,17 @@ async function deleteFile(id, path) {
 }
 
 // ── MESSAGES ──
+// Escape any text that came from a user (client or admin) before putting it in
+// innerHTML, so a message body or name containing HTML/script renders as inert
+// text instead of executing. Used on every untrusted value in the message UI.
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 var allMessages = [];
 
 async function loadMessages() {
@@ -1843,8 +1854,8 @@ async function loadMessages() {
   document.getElementById("dashMsgs").innerHTML = recent.length === 0
     ? "<div class=\"empty-state\"><div class=\"ei\">💬</div><p>No messages yet.<br>Have a question or want to share feedback? Send Eric a note below — he typically replies within 24 hours.</p></div>"
     : recent.map(m => `<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${m.sender_name} · ${formatDate(m.created_at)}</div>
-        <p style="font-size:12px;line-height:1.5;">${m.text.substring(0,80)}${m.text.length>80?"...":""}</p></div>`).join("");
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${esc(m.sender_name)} · ${formatDate(m.created_at)}</div>
+        <p style="font-size:12px;line-height:1.5;">${esc(m.text.substring(0,80))}${m.text.length>80?"...":""}</p></div>`).join("");
 }
 
 function renderMessages(msgs) {
@@ -1855,8 +1866,8 @@ function renderMessages(msgs) {
     <div class="msg-bubble from-${m.from_who}">
       <div class="msg-av ${m.from_who==="client"?"client":""}">${m.from_who==="client"?CLIENT.name[0]:"E"}</div>
       <div class="msg-content">
-        <div class="msg-meta">${m.sender_name} · ${formatDate(m.created_at)}</div>
-        <div class="msg-text">${m.text}</div>
+        <div class="msg-meta">${esc(m.sender_name)} · ${formatDate(m.created_at)}</div>
+        <div class="msg-text">${esc(m.text)}</div>
       </div>
     </div>`).join("");
   thread.scrollTop = thread.scrollHeight;

@@ -875,7 +875,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
               <button class="sbtn" onclick="inviteClient()">Send invite →</button>
-              <button class="sbtn" onclick="createClient()" style="background:none;color:var(--p);border:1.5px solid var(--p);box-shadow:none;">Create with password</button>
+              <button class="sbtn" id="nc-create-btn" onclick="createClient()" style="background:none;color:var(--p);border:1.5px solid var(--p);box-shadow:none;">Create with password</button>
             </div>
             <div class="result-box" id="nc-result"></div>
             <div id="nc-email-template" style="display:none;margin-top:14px;">
@@ -1803,7 +1803,7 @@ async function openHubClient(id) {
   if (msgs.length === 0) { html += empty("No messages yet."); }
   else {
     html += msgs.slice(0,5).map(function(m){
-      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;white-space:pre-wrap;">'+(m.text||"")+'</div></div>';
+      return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.06);"><div style="font-size:11px;color:var(--muted);">'+escHtml(m.sender_name||m.from_who)+' · '+fmtDate(m.created_at)+'</div><div style="font-size:13px;white-space:pre-wrap;">'+escHtml(m.text||"")+'</div></div>';
     }).join("");
   }
 
@@ -2064,8 +2064,8 @@ async function loadOverview() {
 
   document.getElementById("ovActivity").innerHTML = (msgs||[]).slice(0,5).map(m=>`
     <div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${m.sender_name} · ${fmtDate(m.created_at)}</div>
-      <div style="font-size:12px;">${m.text.substring(0,65)}${m.text.length>65?"...":""}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${escHtml(m.sender_name)} · ${fmtDate(m.created_at)}</div>
+      <div style="font-size:12px;">${escHtml(m.text.substring(0,65))}${m.text.length>65?"...":""}</div>
     </div>`).join("") || "<p style='font-size:13px;color:var(--muted);'>No activity.</p>";
 }
 
@@ -2077,7 +2077,7 @@ async function loadMessages(client) {
   thread.innerHTML = data.map(m=>`
     <div class="mb from-${m.from_who}">
       <div class="mav ${m.from_who==="eric"?"e":"c"}">${m.from_who==="eric"?"E":client.name[0]}</div>
-      <div><div class="mm">${m.sender_name} · ${fmtDate(m.created_at)}</div><div class="mt">${m.text}</div></div>
+      <div><div class="mm">${escHtml(m.sender_name)} · ${fmtDate(m.created_at)}</div><div class="mt">${escHtml(m.text)}</div></div>
     </div>`).join("");
   thread.scrollTop = thread.scrollHeight;
 }
@@ -2535,35 +2535,70 @@ async function inviteClient() {
   await loadOverview();
 }
 
+var _creatingClient = false;
 async function createClient() {
+  if (_creatingClient) return;             // block double-click → no duplicate accounts
   var name = document.getElementById("nc-name").value.trim();
   var cemail = document.getElementById("nc-cemail").value.trim();
   var pass = document.getElementById("nc-pass").value.trim();
   var proj = document.getElementById("nc-proj").value.trim();
   if (!name || !cemail || !pass) { toast("Name, email, and password required."); return; }
 
-  // Create Supabase Auth user via the Edge Function (server-side, uses service role).
-  // The browser anon key is not allowed to call /auth/v1/admin/users directly.
   var jwt = await adminJwt();
   if (!jwt) { toast("Please sign in again."); showLogin(); return; }
-  var authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
-    method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
-    body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
-  });
-  var authJson = {};
-  try { authJson = await authRes.json(); } catch(e) {}
+
+  _creatingClient = true;
+  var createBtn = document.getElementById("nc-create-btn");
+  if (createBtn) createBtn.disabled = true;
+  var cleanup = function () { _creatingClient = false; if (createBtn) createBtn.disabled = false; };
+
+  // Roll back the auth user we just made, so a failed create leaves NOTHING behind
+  // (no orphaned login that blocks reusing the email).
+  async function rollbackAuth() {
+    try {
+      await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+        body: JSON.stringify({ type: "delete_client_auth", email: cemail })
+      });
+    } catch (e) {}
+  }
+
+  // STEP 1 — create the Auth login (server-side, service role).
+  var authRes, authJson = {};
+  try {
+    authRes = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({type: "create_client_auth", email: cemail, password: pass})
+    });
+    try { authJson = await authRes.json(); } catch(e) {}
+  } catch (e) {
+    cleanup(); toast("Network error creating login. Nothing was created. Try again.");
+    return;
+  }
   if (!authRes.ok || authJson.error) {
+    cleanup();
     toast("Auth error: " + (authJson.error || "Could not create login"));
     return;
   }
 
-  // Create client record (no password stored)
+  // STEP 2 — create the client row. If this fails, roll back the auth user.
   var data = await api("clients","POST",{name:name, email:cemail, project_name:proj, project_status:"In Progress", progress:0, contact_email:cemail});
-  if (!data || !data[0]) { toast("Error creating client record."); return; }
+  if (!data || !data[0]) {
+    await rollbackAuth();                  // undo step 1 → no orphaned login
+    cleanup();
+    toast("Couldn't create the client record. The login was rolled back, nothing was left behind. Try again.");
+    return;
+  }
   var cid = data[0].id;
 
-  // Create default timeline
+  // From here the client EXISTS and is usable. The remaining steps are
+  // best-effort polish; if one fails we keep the client and report it rather
+  // than tearing everything down.
+  var warnings = [];
+
+  // STEP 3 — default timeline (best-effort, per-row).
   var phases = [
     {title:"Discovery & Strategy",description:"Goals, SEO roadmap, brand audit",status:"active",date_label:"Week 1",icon:"🎨",sort_order:1},
     {title:"Design & Wireframes",description:"Homepage and key page mockups",status:"pending",date_label:"Week 2",icon:"🎨",sort_order:2},
@@ -2571,21 +2606,25 @@ async function createClient() {
     {title:"SEO Implementation",description:"Keywords, meta tags, sitemap",status:"pending",date_label:"Week 5–6",icon:"🔍",sort_order:4},
     {title:"Launch",description:"Final review, DNS transfer, go live",status:"pending",date_label:"Day 45",icon:"🚀",sort_order:5},
   ].map(p => Object.assign(p, {client_id:cid}));
-  for (var ph of phases) await api("timeline","POST",ph);
+  for (var ph of phases) { var t = await api("timeline","POST",ph); if (!t) warnings.push("timeline"); }
 
-  // Post welcome message in portal (tailored if provided, else default)
+  // STEP 4 — welcome message (best-effort).
   var welcome = document.getElementById("nc-welcome").value.trim();
   var welcomeText = welcome || ("Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great.");
-  await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
+  var wm = await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
+  if (!wm) warnings.push("welcome message");
 
-  // Send welcome email via clever-api
-  await notify("welcome","","",{name:name, contact_email:cemail, id:cid},{email:cemail, password:pass});
+  // STEP 5 — welcome email (best-effort; never blocks success).
+  try { await notify("welcome","","",{name:name, contact_email:cemail, id:cid},{email:cemail, password:pass}); }
+  catch (e) { warnings.push("welcome email"); }
 
   var result = document.getElementById("nc-result");
   result.style.display = "block";
-  result.innerHTML = "✓ Portal created for <strong>"+name+"</strong>!<br><span style='font-size:12px;color:var(--muted);'>Login: <code>"+cemail+"</code> · Welcome email sent to client.</span>";
-  toast("✓ " + name + " portal created + welcome email sent!");
+  var warnNote = warnings.length ? ("<br><span style='font-size:12px;color:var(--red);'>Created, but these steps need a retry: " + warnings.join(", ") + ".</span>") : "";
+  result.innerHTML = "✓ Portal created for <strong>"+name+"</strong>!<br><span style='font-size:12px;color:var(--muted);'>Login: <code>"+cemail+"</code> · Welcome email sent to client.</span>" + warnNote;
+  toast(warnings.length ? ("Portal created with " + warnings.length + " step(s) to retry.") : ("✓ " + name + " portal created + welcome email sent!"));
   document.getElementById("nc-welcome").value = "";
+  cleanup();
   await loadOverview();
 }
 
@@ -2627,6 +2666,10 @@ async function checkOverdueInvoices() {
 // ── HELPERS ──
 function ficon(n) { var e={pdf:"📄",doc:"📝",docx:"📝",ppt:"📊",pptx:"📊",png:"🖼️",jpg:"🖼️",jpeg:"🖼️",mp4:"🎬",zip:"📦"}; return e[(n||"").split(".").pop().toLowerCase()]||"📎"; }
 function fmtDate(iso) { if(!iso) return ""; return new Date(iso).toLocaleDateString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+// Escape untrusted text (client message bodies, names) before innerHTML so a
+// malicious message can't execute script inside the admin session. Top-level so
+// every render function can use it.
+function escHtml(s) { return String(s==null?"":s).replace(/[&<>"']/g, function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]; }); }
 function cap(s) { return s?s[0].toUpperCase()+s.slice(1):""; }
 function toast(msg) { var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000); }
 
