@@ -4082,52 +4082,78 @@ document.addEventListener("DOMContentLoaded", function() {
   /* ============================================================
      AI — DASHBOARD TRIAGE  (type:"ai_triage")
      ============================================================ */
+  /* ============================================================
+     AI MANAGER — HOME BRIEFING  (type:"home_brief")
+     Reads leads + invoices + projects SERVER-SIDE via the Edge
+     Function, returns a grounded briefing: a warm verdict plus the
+     things that actually need Eric today. Each lead item gets a
+     one-tap "Draft for me" that jumps to the lead and pre-drafts a
+     reply. Errors show on screen — never swallowed.
+     ============================================================ */
   function runTriage(){
     var host=document.getElementById("ddsTriage");
     if(!host) return;
     host.innerHTML=
-      '<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">What needs you today</div></div>'+
-      '<div class="ai-thinking" style="justify-content:flex-start;padding:14px 0 4px;"><span class="ai-dots"><span></span><span></span><span></span></span> Scanning your clients, leads & invoices…</div>';
-    // assemble a compact snapshot from already-loaded arrays
-    var snap = buildSnapshot();
-    fetch(EDGE_FN,{ method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ type:"ai_triage", snapshot:snap })
-    }).then(function(r){ return r.json(); }).then(function(d){
-      if (d && Array.isArray(d.items) && d.items.length){ renderTriage(d); }
-      else { triageFallback(snap); }
-    }).catch(function(){ triageFallback(snap); });
+      '<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">Your manager</div></div>'+
+      '<div class="ai-thinking" style="justify-content:flex-start;padding:14px 0 4px;"><span class="ai-dots"><span></span><span></span><span></span></span> Reading your leads, invoices &amp; projects…</div>';
+    adminJwt().then(function(jwt){
+      if(!jwt){ host.innerHTML=''; return; }
+      return fetch(EDGE_FN,{ method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+        body:JSON.stringify({ type:"home_brief" })
+      }).then(function(r){ return r.json(); }).then(function(j){
+        var d = (j && j.data) ? j.data : null;
+        if (d && typeof d.verdict === "string"){ renderTriage(d); }
+        else if (j && j.error){ triageError(j.error); }
+        else { triageError("No briefing came back."); }
+      });
+    }).catch(function(e){ triageError(String(e)); });
   }
+
   function renderTriage(d){
     var host=document.getElementById("ddsTriage"); if(!host) return;
-    var rows=d.items.map(function(it){
-      var jump = it.go ? ('<button class="btn-ghost ti-act" onclick="DDS.go(\''+it.go+'\')">Open</button>') : '';
+    var items = Array.isArray(d.items) ? d.items : [];
+    var rows = items.map(function(it){
+      var act = "";
+      if (it.canDraft && it.kind === "lead" && it.refId){
+        // One tap: open the lead and pre-draft a reply for it.
+        act = '<button class="btn-primary ti-act" style="font-size:12px;padding:7px 13px;" '+
+              'onclick="DDS.briefDraft(\''+esc(it.refId)+'\')">Draft for me</button>';
+      } else if (it.go){
+        act = '<button class="btn-ghost ti-act" onclick="DDS.go(\''+esc(it.go)+'\')">Open</button>';
+      }
       return '<div class="triage-item"><div><strong style="color:var(--ink);font-weight:600;">'+esc(it.title||"")+'</strong>'+
-        (it.detail?'<div style="font-size:13px;color:var(--muted);margin-top:2px;">'+esc(it.detail)+'</div>':'')+'</div>'+jump+'</div>';
+        (it.detail?'<div style="font-size:13px;color:var(--muted);margin-top:2px;">'+esc(it.detail)+'</div>':'')+'</div>'+act+'</div>';
     }).join("");
-    host.innerHTML='<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">What needs you today</div></div>'+
-      (d.summary?'<div class="triage-body" style="margin:6px 0 10px;">'+esc(d.summary)+'</div>':'')+rows;
+    host.innerHTML='<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">Your manager</div></div>'+
+      (d.verdict?'<div class="triage-body" style="margin:6px 0 10px;font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);">'+esc(d.verdict)+'</div>':'')+
+      rows;
   }
-  function buildSnapshot(){
-    function arr(n){ try{ return (typeof window[n]!=="undefined" && window[n]) ? window[n] : []; }catch(e){ return []; } }
-    var cl=arr("hubClients").length?arr("hubClients"):arr("clients");
-    var lд=arr("allLeads");
-    return {
-      clients: (cl||[]).map(function(c){ return { name:c.name, project:c.project_name, status:c.project_status, progress:c.progress }; }),
-      leadCount: (lд||[]).length,
-      newLeads: (lд||[]).filter(function(l){ return (l.status||"new")==="new"; }).length
-    };
-  }
-  function triageFallback(snap){
-    // local heuristic if AI route unavailable — never leave it blank
+
+  function triageError(msg){
     var host=document.getElementById("ddsTriage"); if(!host) return;
-    var items=[];
-    if (snap.newLeads>0) items.push({title:snap.newLeads+" new lead"+(snap.newLeads>1?"s":"")+" waiting", detail:"Reply while they're warm", go:"leads"});
-    (snap.clients||[]).forEach(function(c){
-      if (c.status && /progress/i.test(c.status) && (c.progress==null || c.progress<100))
-        items.push({title:c.name+" — project in progress", detail:"Check messages & timeline", go:"hub"});
-    });
-    if (!items.length) items.push({title:"You're all caught up", detail:"No urgent items across clients, leads, or invoices."});
-    renderTriage({ items:items.slice(0,5) });
+    host.innerHTML='<div class="triage-head"><div class="ai-spark">'+ICONS.spark+'</div><div class="tt">Your manager</div></div>'+
+      '<div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;">Could not load your briefing right now. '+
+      '<span style="color:var(--red);">'+esc(msg)+'</span><br>'+
+      '<button class="btn-ghost" style="margin-top:10px;" onclick="DDS.runTriage()">Try again</button></div>';
+  }
+
+  // Jump to a lead from the briefing and immediately pre-draft a reply.
+  // refId is the real leads-table id; the leads UI keys form-leads as 'os_'+id.
+  function briefDraft(refId){
+    go("leads");
+    setTimeout(function(){
+      try {
+        if (typeof loadLeads === "function") {
+          loadLeads().then(function(){
+            try {
+              if (typeof showLeadDetail === "function") showLeadDetail('os_'+refId);
+              setTimeout(function(){ try { if (typeof osDraftReply === "function") osDraftReply(refId); } catch(e){} }, 400);
+            } catch(e){}
+          });
+        }
+      } catch(e){}
+    }, 200);
   }
 
   /* ---- utilities ---- */
@@ -4162,7 +4188,8 @@ document.addEventListener("DOMContentLoaded", function() {
   window.DDS = {
     openCmd:openCmd, closeCmd:closeCmd,
     openAiReply:openAiReply, closeAi:closeAi, genReply:genReply, useDraft:useDraft,
-    runTriage:runTriage, go:function(p){ (window.go||function(){})(p); }
+    runTriage:runTriage, briefDraft:briefDraft,
+    go:function(p){ (window.go||function(){})(p); }
   };
 
   /* boot: run triage if overview is the initial active page */
