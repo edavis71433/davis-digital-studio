@@ -663,6 +663,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
           <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
+          <button class="sbtn" onclick="deleteTestLeads()" style="background:transparent;color:var(--red);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(224,85,85,0.25);cursor:pointer;">🧹 Delete test leads</button>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <button id="lv-board" onclick="setLeadView('board')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;background:var(--p);color:#fff;">Pipeline board</button>
@@ -1583,6 +1584,7 @@ function renderLeadsList() {
           '<div style="font-size:26px;font-weight:700;color:'+scoreCol+';line-height:1;">'+sc+'</div>' +
           '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Score</div>' +
         '</div>' +
+        '<button onclick="event.stopPropagation();deleteOneLead(\''+l.id+'\',\''+String(l.business_name||'this lead').replace(/[\\\\\']/g,"")+'\')" title="Delete lead" style="flex-shrink:0;align-self:flex-start;background:none;border:1px solid rgba(224,85,85,0.25);color:var(--red);width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:14px;line-height:1;">&times;</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1896,6 +1898,82 @@ async function updateLeadStatus(id, status) {
   var lead = allLeads.find(l => l.id === id);
   if (lead) lead.status = status;
   renderLeadsList();
+}
+
+// Delete a single lead. Handles BOTH kinds:
+//  • Studio OS form leads (id starts 'os_') → lead_delete route (removes messages too)
+//  • audit_leads (tool runs) → admin_db DELETE
+async function deleteOneLead(id, label) {
+  if (!confirm('Delete "'+(label||'this lead')+'"? This cannot be undone.')) return;
+  var ok = false;
+  try {
+    var lead = allLeads.find(function(l){ return l.id === id; });
+    if (lead && lead.tool === 'contact' && lead._osLeadId) {
+      var jwt = await adminJwt();
+      var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+        body: JSON.stringify({ type: "lead_delete", id: lead._osLeadId })
+      });
+      var j = await r.json();
+      ok = !!(j && j.ok);
+    } else {
+      var res = await api('audit_leads?id=eq.' + id, 'DELETE');
+      ok = (res !== null);
+    }
+  } catch(e){ ok = false; }
+  if (ok) {
+    allLeads = allLeads.filter(function(l){ return l.id !== id; });
+    renderLeadsList();
+    try { if (_leadView === "board") renderLeadsBoard(); } catch(e){}
+    toast("Lead deleted");
+  } else {
+    toast("Could not delete that lead");
+  }
+}
+
+// Bulk-clear obvious test/diagnostic leads. Matches name/subject/email containing
+// "test" or "diagnostic" (case-insensitive). Form leads go through lead_delete in
+// one batched call; any matching audit_leads are removed too. Always confirms first.
+async function deleteTestLeads() {
+  var rx = /(test|diagnostic)/i;
+  var matches = allLeads.filter(function(l){
+    var hay = ((l.business_name||'') + ' ' + (l.subject||'') + ' ' + (l.client_email||'')).toLowerCase();
+    return rx.test(hay);
+  });
+  if (!matches.length) { toast("No test or diagnostic leads found"); return; }
+  if (!confirm('Found '+matches.length+' lead'+(matches.length>1?'s':'')+' that look like test/diagnostic rows. Delete them all? This cannot be undone.')) return;
+
+  var osIds = [];
+  var auditIds = [];
+  matches.forEach(function(l){
+    if (l.tool === 'contact' && l._osLeadId) osIds.push(l._osLeadId);
+    else auditIds.push(l.id);
+  });
+
+  var failed = 0;
+  // 1) form leads — one batched lead_delete call
+  if (osIds.length) {
+    try {
+      var jwt = await adminJwt();
+      var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+        body: JSON.stringify({ type: "lead_delete", ids: osIds })
+      });
+      var j = await r.json();
+      if (!(j && j.ok)) failed += osIds.length;
+    } catch(e){ failed += osIds.length; }
+  }
+  // 2) audit leads — delete each
+  for (var i=0;i<auditIds.length;i++){
+    var res = await api('audit_leads?id=eq.'+auditIds[i], 'DELETE');
+    if (res === null) failed++;
+  }
+
+  await loadLeads();
+  var removed = matches.length - failed;
+  toast(removed + " lead" + (removed===1?'':'s') + " deleted" + (failed ? (", " + failed + " failed") : ""));
 }
 
 // ── CLIENTS ──
