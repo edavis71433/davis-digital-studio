@@ -827,7 +827,26 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- TIMELINE -->
       <div class="page-view" id="page-timeline">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:20px;">Project Timeline</h2>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:20px;">Your Project</h2>
+
+        <!-- Live spine status on the Project tab (real stage, whose-turn, feed) -->
+        <div class="card" id="projSpineCard" style="display:none;margin-bottom:20px;">
+          <div class="card-header"><div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Current status
+          </div></div>
+          <div style="padding:20px;">
+            <div id="projSpineTurn" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13.5px;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+              <span id="projSpineStage" style="font-size:15px;font-weight:600;color:var(--ink);"></span>
+              <span id="projSpinePct" style="font-size:13px;font-weight:700;color:var(--p);"></span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="projSpineFill" style="width:0%;"></div></div>
+            <div id="projSpineFeed" style="margin-top:18px;"></div>
+          </div>
+        </div>
+
+        <h3 style="font-family:var(--serif);font-size:18px;font-weight:400;margin:0 0 12px;color:var(--muted);">Project phases</h3>
         <div class="card"><div class="card-body" id="timelineBody"></div></div>
       </div>
 
@@ -2747,6 +2766,34 @@ function spineEventLine(ev){
   return (ev.type || "Update").replace(/[._]/g," ");
 }
 
+
+// Mirror the Home spine card onto the Project tab (same data, second location).
+function mirrorSpineToProjectTab(project, feed){
+  var card = document.getElementById("projSpineCard");
+  if (!card || !project) { if(card) card.style.display="none"; return; }
+  card.style.display = "block";
+  document.getElementById("projSpineStage").textContent = spineStageLabel(project.stage);
+  document.getElementById("projSpinePct").textContent = (project.progress||0) + "%";
+  setTimeout(function(){ var f=document.getElementById("projSpineFill"); if(f) f.style.width=(project.progress||0)+"%"; }, 200);
+  var turn = document.getElementById("projSpineTurn");
+  if (project.ball_in_court === "client") {
+    turn.style.background="rgba(240,180,41,0.12)"; turn.style.border="1px solid rgba(240,180,41,0.35)";
+    turn.innerHTML='<span style="font-size:16px;">\u270B</span><span style="color:var(--ink);"><strong>It\u2019s your turn.</strong> Eric is waiting on something from you. Check your messages or files for what\u2019s needed.</span>';
+  } else {
+    turn.style.background="rgba(106,191,105,0.12)"; turn.style.border="1px solid rgba(106,191,105,0.35)";
+    turn.innerHTML='<span style="font-size:16px;">\u2713</span><span style="color:var(--ink);"><strong>You\u2019re all set.</strong> Eric is working on your project. Nothing is needed from you right now.</span>';
+  }
+  var feedEl = document.getElementById("projSpineFeed");
+  if (!feed || !feed.length) { feedEl.innerHTML=''; return; }
+  var head='<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
+  feedEl.innerHTML = head + feed.map(function(ev){
+    return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">'+
+      '<span style="width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:6px;flex-shrink:0;"></span>'+
+      '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">'+spineEventLine(ev)+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+spineTimeAgo(ev.created_at)+'</div></div></div>';
+  }).join("");
+}
+
 async function loadProjectSpine(){
   var card = document.getElementById("spineCard");
   if (!card) return;
@@ -2791,7 +2838,7 @@ async function loadProjectSpine(){
 
   // Activity feed
   var feedEl = document.getElementById("spineFeed");
-  if (!feed.length) { feedEl.innerHTML = ''; return; }
+  if (!feed.length) { feedEl.innerHTML = ''; try { mirrorSpineToProjectTab(project, feed); } catch(e){} return; }
   var head = '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
   var items = feed.map(function(ev){
     return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">' +
@@ -2801,6 +2848,7 @@ async function loadProjectSpine(){
            '</div>';
   }).join("");
   feedEl.innerHTML = head + items;
+  try { mirrorSpineToProjectTab(project, feed); } catch(e){}
 }
 </script>
 

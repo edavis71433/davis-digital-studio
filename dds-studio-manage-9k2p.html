@@ -622,6 +622,13 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <div class="triage" id="ddsTriage"></div>
         <div class="stats" id="ovStats"></div>
         <div id="ovAttention"></div>
+        <div class="card" id="whoNeedsMeCard" style="display:none;margin-bottom:16px;border:1.5px solid rgba(91,63,160,0.2);">
+          <div class="ch"><div class="ct">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            What needs you today
+          </div></div>
+          <div class="cb" id="whoNeedsMeBody"></div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Active projects</div></div><div class="cb" id="ovClients"></div></div>
           <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Recent activity</div></div><div class="cb" id="ovActivity"></div></div>
@@ -2127,7 +2134,54 @@ async function api(path, method, body) {
 }
 
 // ── OVERVIEW ──
+
+// "What needs you today" — reads the project spine and surfaces action items:
+//  • ball in YOUR court but stalled (you owe them a move)
+//  • ball in CLIENT court a while (they may need a nudge)
+async function loadWhoNeedsMe(){
+  try {
+    var jwt = await adminJwt(); if (!jwt) return;
+    var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type:"admin_db", method:"GET", path:"projects?select=id,name,stage,ball_in_court,progress,updated_at,contacts(name)&stage=neq.complete&order=updated_at.asc" })
+    });
+    var jr = await res.json();
+    var rows = (jr && jr.data) || [];
+    var card = document.getElementById("whoNeedsMeCard");
+    var body = document.getElementById("whoNeedsMeBody");
+    if (!card || !body) return;
+    if (!Array.isArray(rows) || !rows.length) { card.style.display="none"; return; }
+
+    var now = Date.now(), DAY=86400000;
+    var items = [];
+    rows.forEach(function(p){
+      var who = (p.contacts && p.contacts.name) ? p.contacts.name : "A client";
+      var days = p.updated_at ? Math.floor((now - new Date(p.updated_at).getTime())/DAY) : 0;
+      if (p.ball_in_court === "agency") {
+        // You owe them a move. Flag if it's been sitting.
+        items.push({ urgent: days>=2, who:who, name:p.name, msg: days>=2 ? ("Your move, sitting "+days+" days") : "Your move on this", stage:p.stage });
+      } else if (p.ball_in_court === "client" && days>=4) {
+        // They've been sitting; nudge candidate.
+        items.push({ urgent:false, who:who, name:p.name, msg:"Waiting on them "+days+" days, consider a nudge", stage:p.stage });
+      }
+    });
+    if (!items.length) { card.style.display="none"; return; }
+    // urgent first
+    items.sort(function(a,b){ return (b.urgent?1:0)-(a.urgent?1:0); });
+    card.style.display="block";
+    body.innerHTML = items.map(function(it){
+      var dot = it.urgent ? "var(--red)" : "var(--yellow)";
+      return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+dot+';margin-top:6px;flex-shrink:0;"></span>'+
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+it.who+' · '+it.name+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);margin-top:1px;">'+it.msg+'</div></div></div>';
+    }).join("");
+  } catch(e){}
+}
+
 async function loadOverview() {
+  try { loadWhoNeedsMe(); } catch(e){}
   checkOverdueInvoices().catch(()=>{});
   var [cls, msgs, files, invs, leadsData, approvals] = await Promise.all([
     api("clients?select=*"),
@@ -2287,6 +2341,28 @@ async function sendMsg() {
   await loadMessages(ctx);
 }
 
+
+// Fire a client_visible spine event for a given admin client context (matched by
+// email to their contact). Reused by approvals/files/invoices. Best-effort.
+async function emitClientEventByCtx(ctx, eventType, payload){
+  try {
+    if (!ctx) return;
+    var email = (ctx.contact_email || ctx.email || "").toLowerCase();
+    if (!email) return;
+    if (!window.__ddsContactsByEmail || !Object.keys(window.__ddsContactsByEmail).length) {
+      if (typeof loadContactsMap === "function") await loadContactsMap();
+    }
+    var contactId = (window.__ddsContactsByEmail || {})[email];
+    if (!contactId) return;
+    var jwt = await adminJwt(); if (!jwt) return;
+    await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({ type: "emit_event", eventType: eventType, actor: "admin", contact: contactId, payload: payload || {}, clientVisible: true })
+    });
+  } catch(e){}
+}
+
 // Drops a client_visible "message" event into the spine feed for this client,
 // matched to their contact by email. Best-effort; never blocks messaging.
 async function emitClientMessageToFeed(client, text) {
@@ -2344,6 +2420,7 @@ async function uploadFiles(files) {
     await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:file.name.split(".").pop().toUpperCase(),from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
     try { await api("notifications","POST",{client_id:ctx.id,type:"file",title:"New file: "+file.name,body:"Eric uploaded a new file for you to review.",link_tab:"files"}); } catch(e){}
     await notify("eric_file",file.name+" ("+size+")","",ctx);
+    try { await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
     toast("✓ "+file.name+" uploaded");
   }
   await loadFiles(ctx);
@@ -2368,6 +2445,7 @@ async function addApproval() {
   await notify("approval_needed",desc,title,ctx);
   document.getElementById("apprTitle").value="";
   document.getElementById("apprDesc").value="";
+  try { await emitClientEventByCtx(ctx, "approval.requested", { title: title }); } catch(e){}
   toast("✓ Approval added + client notified");
 }
 
@@ -2533,6 +2611,7 @@ async function saveInvoice() {
     await api("invoices","POST",payload);
     try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
     await notify("invoice",payload.amount,payload.name,ctx);
+    try { await emitClientEventByCtx(ctx, "invoice.sent", { amount: payload.amount, name: payload.name }); } catch(e){}
     toast("✓ Invoice added + client notified");
   }
   cancelEditInvoice();
