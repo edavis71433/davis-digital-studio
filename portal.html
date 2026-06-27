@@ -2822,6 +2822,22 @@ async function loadProjectSpine(){
   // Stage + progress
   document.getElementById("spineStage").textContent = spineStageLabel(project.stage);
   document.getElementById("spinePct").textContent = (project.progress || 0) + "%";
+
+  // ── Unify: make the OLD top-of-portal stats reflect the spine (one source) ──
+  try {
+    var sp = (project.progress || 0);
+    var sLabel = spineStageLabel(project.stage);
+    var pctEl = document.getElementById("dash-pct"); if (pctEl) pctEl.textContent = sp + "%";
+    var fillEl = document.getElementById("progressFill"); if (fillEl) setTimeout(function(){ fillEl.style.width = sp + "%"; }, 250);
+    var phaseEl = document.getElementById("dash-phase"); if (phaseEl) phaseEl.textContent = "Currently in: " + sLabel;
+    var statusEl = document.getElementById("topbarStatus"); if (statusEl) statusEl.textContent = (project.ball_in_court === "client") ? "Awaiting your review" : sLabel;
+    var sr = document.getElementById("statsRow");
+    if (sr) {
+      var cards = sr.querySelectorAll(".stat");
+      if (cards[0]) { var v0 = cards[0].querySelector(".stat-val"); if (v0) v0.textContent = sp + "%"; }
+      if (cards[1]) { var v1 = cards[1].querySelector(".stat-val"); if (v1) v1.textContent = sLabel; }
+    }
+  } catch(e){}
   setTimeout(function(){ var f=document.getElementById("spineFill"); if(f) f.style.width = (project.progress||0) + "%"; }, 200);
 
   // Whose-turn banner — the single most reassuring element.
