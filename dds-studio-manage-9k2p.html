@@ -656,7 +656,6 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
           <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
           <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
-          <button class="sbtn" onclick="filterLeads('contact')" id="lf-contact" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Contact</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
         </div>
         <div id="leadsList"></div>
@@ -2524,7 +2523,6 @@ async function inviteClient() {
   try { jr = await res.json(); } catch(e) {}
   if (!res.ok || jr.error) {
     toast("Invite failed [" + (jr.step || "?") + " / " + (jr.status || res.status) + "]: " + (jr.error || "unknown error"));
-    console.log("invite_client full response:", jr);
     return;
   }
   toast("Invite sent to " + cemail + " — welcome message is waiting in their portal.");

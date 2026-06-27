@@ -1159,7 +1159,9 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 <script>
 const SUPABASE_URL = "https://qksstlqzbhesadrrofgn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo";
-const STRIPE_URL = "https://buy.stripe.com/14A3cu6kQaRD3tU1FI0VO00";
+// Payment links are per-invoice (inv.stripe_url), set from the admin panel.
+// No generic studio-wide Stripe link: a shared link with no amount/invoice
+// association would let a client pay the wrong amount against the wrong invoice.
 
 const { createClient } = supabase;
 // Same plain init the admin panel uses (which logs in fine). No custom lock or
@@ -1206,14 +1208,6 @@ async function fetchClientRow(email) {
 })();
 
 // ── LOGIN ──
-function _dbg(msg){
-  var d = document.getElementById("loginError");
-  if(!d) return;
-  d.style.display="block";
-  d.style.background="#eef0fd"; d.style.color="#4435a0"; d.style.borderColor="rgba(91,63,160,0.3)";
-  d.textContent = "DEBUG: " + msg;
-  console.log("[login]", msg);
-}
 async function login() {
   var user = document.getElementById("loginUser").value.trim();
   var pass = document.getElementById("loginPass").value.trim();
@@ -1622,7 +1616,7 @@ async function loadFiles() {
     ? "<div class=\"empty-state\"><div class=\"ei\">📁</div><p>No files yet</p></div>"
     : recent.map(f => `<div class="file-item" style="margin-bottom:6px;">
         <div class="file-thumb">${fileIcon(f.name)}</div>
-        <div class="file-info"><h4>${f.name}</h4><p>${f.type||""} · ${f.size||""}</p></div>
+        <div class="file-info"><h4>${esc(f.name)}</h4><p>${esc(f.type||"")} · ${esc(f.size||"")}</p></div>
         <span class="file-status ${f.status}">${cap(f.status)}</span></div>`).join("");
   
   // Badge
@@ -1658,7 +1652,7 @@ function renderFiles() {
     : list.map(f => `
       <div class="file-item" id="file-${f.id}">
         <div class="file-thumb">${fileIcon(f.name)}</div>
-        <div class="file-info"><h4>${f.name}</h4><p>${f.type||""} · ${f.size||""} · ${formatDate(f.created_at)}</p></div>
+        <div class="file-info"><h4>${esc(f.name)}</h4><p>${esc(f.type||"")} · ${esc(f.size||"")} · ${formatDate(f.created_at)}</p></div>
         <span class="file-status ${f.status}">${cap(f.status)}</span>
         <div class="file-actions">
           ${f.storage_path ? `<button class="file-btn" onclick="downloadFile('${f.storage_path.replace(/'/g,"\\'")}')">Download</button>` : ""}
@@ -1839,6 +1833,18 @@ function esc(s) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+// Escape a value that will sit inside a single-quoted JS string literal inside an
+// inline onclick="..." attribute. Without this, an apostrophe in a title or name
+// (e.g. "Homepage's hero") breaks the handler. Backslash-escape JS-special chars,
+// then HTML-escape so the attribute itself stays well-formed.
+function escAttr(s) {
+  var js = String(s == null ? "" : s)
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, " ");
+  return js.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 var allMessages = [];
 
 async function loadMessages() {
@@ -1929,7 +1935,7 @@ async function loadInvoices() {
     var payBtn = inv.status === "pending" && inv.stripe_url
       ? `<a href="${inv.stripe_url}" target="_blank" class="pay-btn" rel="noopener">💳 Pay now →</a>` : "";
     return `<div class="inv-item">
-      <div class="inv-left"><h4>${inv.name}</h4><p>${inv.description||""}<br>${inv.due_date||""}</p></div>
+      <div class="inv-left"><h4>${esc(inv.name)}</h4><p>${esc(inv.description||"")}<br>${esc(inv.due_date||"")}</p></div>
       <div class="inv-right"><div class="inv-amount">${inv.amount}</div>
       <span class="inv-badge ${inv.status}">${cap(inv.status)}</span>${payBtn}</div></div>`;
   }).join("");
@@ -1966,13 +1972,13 @@ async function loadApprovals() {
       <div class="card" style="margin-bottom:12px;" id="appr-${a.id}">
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <h4 style="font-size:15px;font-weight:600;flex:1;">${a.title}</h4>
+            <h4 style="font-size:15px;font-weight:600;flex:1;">${esc(a.title)}</h4>
             <span class="file-status ${a.status==="pending"?"pending":"approved"}">${a.status==="pending"?"Needs review":"Approved"}</span>
           </div>
-          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;">${a.description || "Review this deliverable and click Approve or Request revision below."}</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;">${esc(a.description) || "Review this deliverable and click Approve or Request revision below."}</p>
           ${a.status==="pending" ? `<div class="appr-btns">
             <button class="btn-approve" onclick="approve('${a.id}')">✓ Approve</button>
-            <button class="btn-revise" onclick="requestRevision('${a.id}','${a.title}')">Request revision</button>
+            <button class="btn-revise" onclick="requestRevision('${a.id}','${escAttr(a.title)}')">Request revision</button>
           </div>` : `<p style="font-size:12px;color:var(--green);font-weight:600;">✓ Approved</p>`}
         </div>
       </div>`).join("");

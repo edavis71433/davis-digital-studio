@@ -467,7 +467,7 @@ body{padding-top:68px;}
 </footer>
 
 <script>
-var PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
+var EDGE_FN = 'https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api';
 var strategy = 'mobile';
 
 function setStrategy(s) {
@@ -521,25 +521,38 @@ function runTest() {
   document.getElementById('runBtn').disabled = true;
   animateSteps();
 
-  var psiUrl = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=' +
-    encodeURIComponent(url) + '&strategy=' + strategy +
-    '&category=performance&category=seo&category=accessibility&category=best-practices' +
-    '&key=' + PSI_KEY;
-
-  fetch(psiUrl)
+  // Runs server-side through the Edge Function proxy so the API key never
+  // appears in the browser. The proxy returns { data: <raw PSI result> }.
+  fetch(EDGE_FN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'psi_fetch',
+      url: url,
+      strategy: strategy,
+      categories: ['performance', 'seo', 'accessibility', 'best-practices']
+    })
+  })
     .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function(resp) {
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      if (data.error) { showError(data.error.message || 'Could not analyze that URL. Check it and try again.'); return; }
+      if (resp.error) {
+        if (resp.error === 'rate_limited') { showError('You have run a few tests quickly. Please wait a minute and try again.'); return; }
+        if (resp.error === 'timeout') { showError('That site took too long to analyze. Try again, or check that the URL is reachable.'); return; }
+        showError(resp.message || resp.error || 'Could not analyze that URL. Check it and try again.');
+        return;
+      }
+      var data = resp.data;
+      if (!data || (data.error)) { showError((data && data.error && data.error.message) || 'Could not analyze that URL. Check it and try again.'); return; }
       renderResults(url, data);
     })
     .catch(function() {
       clearInterval(stepTimer);
       document.getElementById('stLoading').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      showError('Could not connect to Google. Check your URL and try again.');
+      showError('Could not run the test right now. Check your URL and try again.');
     });
 }
 

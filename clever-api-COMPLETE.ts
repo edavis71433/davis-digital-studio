@@ -4,21 +4,129 @@ const RESEND_KEY = Deno.env.get('RESEND_KEY') || '';
 const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_KEY') || ''; // matches the ANTHROPIC_KEY secret in Supabase
 const ERIC = 'eric@davisdigitalstudio.com';
 const FROM = 'Davis Digital Studio <noreply@davisdigitalstudio.com>';
-const PSI_KEY = 'AIzaSyBNBUiz_mbNeKhhxMMMTREMSvVXO5e1BgE';
+const PSI_KEY = Deno.env.get('PSI_KEY') || ''; // set as an Edge Function secret in Supabase; rotate the old hardcoded key in Google Cloud
 
 // Service-role key + project URL for privileged server-side calls (creating auth users).
 // These MUST be set as Edge Function secrets in Supabase (see deploy notes).
 const SB_URL = Deno.env.get('SUPABASE_URL') || 'https://qksstlqzbhesadrrofgn.supabase.co';
 const SB_SERVICE = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
+// ── CORS: allowlist real origins instead of '*' ──
+// Add any new front-end origin here (e.g. a Netlify deploy-preview URL) if needed.
+const ALLOWED_ORIGINS = [
+  'https://davisdigitalstudio.com',
+  'https://www.davisdigitalstudio.com',
+];
+
+function corsFor(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
+
+// Kept for the email/notification helpers below that reference `cors` directly.
+// Uses the canonical origin; per-request CORS is applied at the response layer.
 const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0],
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Vary': 'Origin',
 };
 
-function json(payload: unknown, status = 200) {
+// ── Shared-secret gate for privileged (service-role) actions ──
+// The admin panel must send this exact secret in the `x-dds-admin` header.
+// Set ADMIN_SHARED_SECRET as an Edge Function secret in Supabase.
+const ADMIN_SECRET = Deno.env.get('ADMIN_SHARED_SECRET') || '';
+// create_client_auth + invite_client create/modify accounts and must be admin-only.
+// reset_password is intentionally NOT here: clients trigger it from the portal "forgot password"
+// flow, and Supabase only ever emails the real account owner. It is rate-limited instead.
+const PRIVILEGED_TYPES = new Set(['create_client_auth', 'invite_client']);
+
+function isAuthorizedAdmin(req: Request): boolean {
+  if (!ADMIN_SECRET) return false; // fail closed if the secret was never set
+  return req.headers.get('x-dds-admin') === ADMIN_SECRET;
+}
+
+// ── Admin allowlist (JWT model) ──
+// The admin panel signs in as a real Supabase user and sends that session token
+// in `x-dds-user-jwt`. We verify the token with Supabase, then confirm the email
+// is on this allowlist before doing anything with the service role. This is the
+// real protection for admin_db / delete_client_auth (not the convenience password
+// gate in the HTML). Add admin emails here, comma-separated, via the
+// ADMIN_EMAILS secret, or fall back to the single owner email.
+const ADMIN_EMAILS = new Set(
+  (Deno.env.get('ADMIN_EMAILS') || ERIC)
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+);
+
+// Verify the caller's Supabase session JWT and confirm they are an allowlisted
+// admin. Returns the verified email on success, or null on any failure.
+async function verifyAdminJwt(req: Request): Promise<string | null> {
+  const jwt = req.headers.get('x-dds-user-jwt') || '';
+  if (!jwt) return null;
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/user`, {
+      headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${jwt}` },
+    });
+    if (!res.ok) return null;
+    const user = await res.json();
+    const email = (user && user.email ? String(user.email) : '').toLowerCase();
+    if (email && ADMIN_EMAILS.has(email)) return email;
+    return null;
+  } catch (_e) {
+    return null;
+  }
+}
+
+// True if the request carries EITHER a valid admin shared secret OR a valid
+// admin session JWT. Used to gate the account-creation routes.
+async function isAdminRequest(req: Request): Promise<boolean> {
+  if (isAuthorizedAdmin(req)) return true;
+  return (await verifyAdminJwt(req)) !== null;
+}
+
+// Tables the admin_db route is allowed to touch. Anything not listed is rejected,
+// so a stolen admin token still can't reach Supabase's auth/storage internals.
+const ADMIN_DB_TABLES = new Set([
+  'clients', 'messages', 'files', 'invoices', 'approvals', 'timeline',
+  'intake_forms', 'activity_log', 'audit_leads', 'client_requests',
+  'message_templates', 'notifications', 'prospects', 'discovery_intake', 'addons',
+]);
+
+// ── Simple in-memory per-IP rate limiter for cost-bearing AI/PSI routes ──
+// Resets when the function cold-starts; good enough to stop casual abuse/cost runaway.
+const RATE_LIMITED_TYPES = new Set(['psi_fetch', 'deep_audit', 'ai_critique', 'ai_critique_email', 'concierge', 'reset_password', 'ai_draft_reply', 'ai_triage', 'ai_project_help']);
+const RATE_MAX = 12;            // requests allowed per window, per IP
+const RATE_WINDOW_MS = 60_000;  // 1 minute
+const rateHits = new Map<string, { count: number; resetAt: number }>();
+
+function clientIp(req: Request): string {
+  const fwd = req.headers.get('x-forwarded-for') || '';
+  return fwd.split(',')[0].trim() || req.headers.get('x-real-ip') || 'unknown';
+}
+
+function isRateLimited(req: Request): boolean {
+  const ip = clientIp(req);
+  const now = Date.now();
+  const rec = rateHits.get(ip);
+  if (!rec || now > rec.resetAt) {
+    rateHits.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  rec.count++;
+  return rec.count > RATE_MAX;
+}
+
+function json(payload: unknown, status = 200, corsHeaders: Record<string, string> = cors) {
   return new Response(JSON.stringify(payload), {
-    headers: { ...cors, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     status,
   });
 }
@@ -493,17 +601,36 @@ ${DDS_KNOWLEDGE}`;
 // ===== end added helpers =====
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  const reqCors = corsFor(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: reqCors });
 
   try {
     const body = await req.json();
     const { type } = body;
 
+    // Rate-limit the cost-bearing AI / PageSpeed routes (per IP).
+    if (RATE_LIMITED_TYPES.has(type) && isRateLimited(req)) {
+      return json({ error: 'rate_limited', message: 'Too many requests. Please wait a minute and try again.' }, 429, reqCors);
+    }
+
+    // Gate privileged service-role actions: accept the admin shared secret OR a
+    // verified admin session JWT (the admin panel sends the latter).
+    if (PRIVILEGED_TYPES.has(type) && !(await isAdminRequest(req))) {
+      return json({ error: 'unauthorized' }, 401, reqCors);
+    }
+
     // ── PSI PROXY ──
     if (type === 'psi_fetch') {
       const { url } = body;
       if (!url) return json({ error: 'No URL provided' }, 400);
-      const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile&category=performance&category=seo&category=accessibility&key=${PSI_KEY}`;
+      // Optional strategy ('mobile' default) and category list, validated against
+      // an allowlist so callers can't inject arbitrary query params.
+      const strategy = body.strategy === 'desktop' ? 'desktop' : 'mobile';
+      const ALLOWED_CATS = ['performance', 'seo', 'accessibility', 'best-practices'];
+      let cats = Array.isArray(body.categories) ? body.categories.filter((c) => ALLOWED_CATS.includes(c)) : [];
+      if (cats.length === 0) cats = ['performance', 'seo', 'accessibility'];
+      const catParams = cats.map((c) => `&category=${c}`).join('');
+      const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}${catParams}&key=${PSI_KEY}`;
       try {
         const psiRes = await fetch(psiUrl, { signal: AbortSignal.timeout(90000) });
         const psiData = await psiRes.json();
@@ -543,6 +670,98 @@ serve(async (req) => {
         return json({ ok: true, user_id: data.id || (data.user && data.user.id) || null });
       } catch (e) {
         return json({ error: 'auth_create_failed', message: String(e) }, 200);
+      }
+    }
+
+    // ── ADMIN DB PROXY (privileged — service role, JWT-gated) ──
+    // The admin panel sends PostgREST-style requests (path + method + payload) and
+    // we run them with the service role AFTER verifying the caller is an allowlisted
+    // admin. This is what lets the panel read/write client data without ever holding
+    // the service-role key in the browser. The table allowlist blocks anything that
+    // isn't a known app table.
+    if (type === 'admin_db') {
+      const admin = await verifyAdminJwt(req);
+      if (!admin) return json({ error: 'unauthorized' }, 401, reqCors);
+      if (!SB_SERVICE) return json({ error: 'Server missing SERVICE_ROLE_KEY secret' }, 500, reqCors);
+      const path = String(body.path || '');
+      const method = String(body.method || 'GET').toUpperCase();
+      const payload = body.payload || null;
+      if (!path) return json({ error: 'path required' }, 400, reqCors);
+      // First path segment up to ? or / is the table name; must be allowlisted.
+      const table = path.split('?')[0].split('/')[0];
+      if (!ADMIN_DB_TABLES.has(table)) {
+        return json({ error: 'table_not_allowed', detail: table }, 403, reqCors);
+      }
+      if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(method)) {
+        return json({ error: 'method_not_allowed', detail: method }, 405, reqCors);
+      }
+      try {
+        const headers: Record<string, string> = {
+          'apikey': SB_SERVICE,
+          'Authorization': `Bearer ${SB_SERVICE}`,
+          'Content-Type': 'application/json',
+          // Return affected rows on writes so the panel can consume `data`.
+          'Prefer': 'return=representation',
+        };
+        const init: RequestInit = { method, headers };
+        if (payload !== null && method !== 'GET' && method !== 'DELETE') {
+          init.body = JSON.stringify(payload);
+        }
+        const res = await fetch(`${SB_URL}/rest/v1/${path}`, init);
+        const text = await res.text();
+        let data: unknown = null;
+        try { data = text ? JSON.parse(text) : null; } catch (_e) { data = text; }
+        if (!res.ok) {
+          return json({ error: 'db_error', status: res.status, detail: data }, 200, reqCors);
+        }
+        return json({ data }, 200, reqCors);
+      } catch (e) {
+        return json({ error: 'admin_db_failed', detail: String(e) }, 200, reqCors);
+      }
+    }
+
+    // ── DELETE CLIENT AUTH USER (privileged — service role, JWT-gated) ──
+    // Removes the Supabase login for a client by email. Used by the admin panel's
+    // delete-client flow and by createClient's rollback when a half-made client fails.
+    if (type === 'delete_client_auth') {
+      const admin = await verifyAdminJwt(req);
+      if (!admin) return json({ error: 'unauthorized' }, 401, reqCors);
+      if (!SB_SERVICE) return json({ error: 'Server missing SERVICE_ROLE_KEY secret' }, 500, reqCors);
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!email) return json({ error: 'email required' }, 400, reqCors);
+      try {
+        // Find the auth user id by email. GoTrue's admin list endpoint supports a
+        // per_page page; we scan the first pages for a case-insensitive email match.
+        // (Most studios will never exceed a page or two of users.)
+        let matchId: string | null = null;
+        for (let page = 1; page <= 5 && !matchId; page++) {
+          const listRes = await fetch(
+            `${SB_URL}/auth/v1/admin/users?page=${page}&per_page=200`,
+            { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } },
+          );
+          if (!listRes.ok) break;
+          const listData = await listRes.json();
+          const users = Array.isArray(listData) ? listData : (listData.users || []);
+          if (!users.length) break;
+          const match = users.find((u: any) => (u.email || '').toLowerCase() === email);
+          if (match && match.id) matchId = match.id;
+          if (users.length < 200) break; // last page reached
+        }
+        if (!matchId) {
+          // Nothing to delete is a success for rollback purposes.
+          return json({ ok: true, deleted: false, note: 'no matching auth user' }, 200, reqCors);
+        }
+        const delRes = await fetch(`${SB_URL}/auth/v1/admin/users/${matchId}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` },
+        });
+        if (!delRes.ok) {
+          const detail = await delRes.text();
+          return json({ error: 'delete_failed', status: delRes.status, detail }, 200, reqCors);
+        }
+        return json({ ok: true, deleted: true }, 200, reqCors);
+      } catch (e) {
+        return json({ error: 'delete_client_auth_failed', detail: String(e) }, 200, reqCors);
       }
     }
 
@@ -804,6 +1023,170 @@ serve(async (req) => {
         return json({ data: out });
       } catch (e) {
         return json({ error: 'concierge_failed', message: String(e) });
+      }
+    }
+
+    // ── DIGITAL REPORT CARD REQUEST ──
+    // report-card.html submits a name/email/city/url. We (1) store it as a lead so it
+    // shows under the "report_card" filter in the admin panel, and (2) email the
+    // visitor a confirmation plus notify Eric. Storing the lead is best-effort and
+    // never blocks the emails.
+    if (type === 'report_card') {
+      const name = String(body.name || '').trim();
+      const email = String(body.email || '').trim();
+      const city = String(body.city || '').trim();
+      const url = String(body.url || '').trim();
+      if (!email) return json({ error: 'email required' }, 400);
+
+      // (1) Best-effort lead capture.
+      try {
+        const key = SB_SERVICE || Deno.env.get('SUPABASE_ANON_KEY') || '';
+        if (key) {
+          await fetch(`${SB_URL}/rest/v1/audit_leads`, {
+            method: 'POST',
+            headers: { 'apikey': key, 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              tool: 'report_card',
+              business_name: name || null,
+              client_email: email,
+              url: url || null,
+              city: city || null,
+            }),
+          });
+        }
+      } catch (_e) { /* lead capture is best-effort */ }
+
+      // (2) Emails. Visitor confirmation + Eric notification.
+      try {
+        await sendEmail(
+          email,
+          'Your Digital Report Card is on the way',
+          notifyShell(
+            'Your Digital Report Card is on the way',
+            [
+              `Thanks${name ? ', ' + name : ''}! I've received your request and I'm putting together your free Digital Report Card now.`,
+              'Expect it within a few minutes. If you don\'t see it, check your spam folder, or just reply to this email and I\'ll resend it.',
+            ],
+          ),
+        );
+      } catch (_e) { /* don't fail the request on visitor email */ }
+
+      try {
+        await sendEmail(
+          ERIC,
+          `Report Card request: ${name || email}`,
+          notifyShell(
+            'New Digital Report Card request',
+            [
+              `Business: ${name || '(not provided)'}`,
+              `Email: ${email}`,
+              `City: ${city || '(not provided)'}`,
+              `Website: ${url || '(not provided)'}`,
+            ],
+            { label: 'Open admin', href: 'https://davisdigitalstudio.com/dds-studio-manage-9k2p' },
+          ),
+        );
+      } catch (_e) { /* don't fail the request on notify email */ }
+
+      return json({ ok: true });
+    }
+
+    // ── AI: DRAFT A REPLY (admin panel) ──
+    // Given a client-conversation context and an optional steer, draft a reply in
+    // Eric's voice. Returns { reply }. The panel also accepts text/draft.
+    if (type === 'ai_draft_reply') {
+      if (!ANTHROPIC_KEY) return json({ error: 'Server missing ANTHROPIC_KEY secret' }, 500);
+      const ctx = body.context || {};
+      const steer = String(body.steer || '').slice(0, 600);
+      const system = `You are helping Eric Davis, owner of Davis Digital Studio (a Los Angeles web design studio), draft a reply to a client in his client portal. Write in Eric's voice: plain, warm, professional, and direct. No em dashes. No corporate filler. Keep it concise and human. Do not invent commitments, prices, dates, or deliverables that are not supported by the context. If something needs Eric's input, write a natural placeholder in [brackets]. Output ONLY the reply text, with no preamble, quotes, or sign-off boilerplate beyond a simple "— Eric" if a sign-off fits.`;
+      const userMsg = `CONTEXT (JSON):\n${JSON.stringify(ctx).slice(0, 6000)}\n\n${steer ? 'STEER (what Eric wants this reply to do): ' + steer : 'Draft a helpful, appropriate reply to the most recent client message.'}`;
+      try {
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 700, system, messages: [{ role: 'user', content: userMsg }] }),
+          signal: AbortSignal.timeout(30000),
+        });
+        const aiData = await aiRes.json();
+        if (aiData.error) return json({ error: aiData.error.message || 'ai_error' }, 200);
+        let text = '';
+        if (Array.isArray(aiData.content)) text = aiData.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('\n');
+        return json({ reply: (text || '').trim() });
+      } catch (e) {
+        return json({ error: 'ai_draft_failed', message: String(e) }, 200);
+      }
+    }
+
+    // ── AI: DASHBOARD TRIAGE (admin panel) ──
+    // Given a compact snapshot of clients/leads/invoices, return a short prioritized
+    // "what needs you today" list. Returns { summary, items:[{title, detail, go}] }.
+    // The panel has its own non-AI fallback if this fails or returns nothing.
+    if (type === 'ai_triage') {
+      if (!ANTHROPIC_KEY) return json({ error: 'Server missing ANTHROPIC_KEY secret' }, 500);
+      const snapshot = body.snapshot || {};
+      const system = `You are a sharp operations assistant for Eric Davis, who runs Davis Digital Studio solo. Given a snapshot of his clients, leads, and invoices, identify what actually needs his attention today and put it in priority order. Be specific and brief. No em dashes. Respond with ONLY a JSON object, no markdown, no backticks, in exactly this shape:
+{"summary":"one short sentence","items":[{"title":"short action","detail":"one line of why/what","go":"clients|leads|invoices|messages or empty string"}]}
+Rules: at most 5 items. "go" must be one of clients, leads, invoices, messages, or an empty string. If nothing is urgent, return a calm summary and an empty items array. Never invent data that is not in the snapshot.`;
+      const userMsg = `SNAPSHOT (JSON):\n${JSON.stringify(snapshot).slice(0, 6000)}`;
+      try {
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 700, system, messages: [{ role: 'user', content: userMsg }] }),
+          signal: AbortSignal.timeout(30000),
+        });
+        const aiData = await aiRes.json();
+        if (aiData.error) return json({ error: aiData.error.message || 'ai_error' }, 200);
+        let text = '';
+        if (Array.isArray(aiData.content)) text = aiData.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('\n');
+        text = (text || '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+        let parsed: any = null;
+        try { parsed = JSON.parse(text); } catch (_e) { parsed = null; }
+        if (!parsed || !Array.isArray(parsed.items)) return json({ summary: '', items: [] });
+        // Validate "go" values against the allowed tabs.
+        const ALLOWED_GO = new Set(['clients', 'leads', 'invoices', 'messages', '']);
+        parsed.items = parsed.items.slice(0, 5).map((it: any) => ({
+          title: String(it.title || '').slice(0, 140),
+          detail: String(it.detail || '').slice(0, 200),
+          go: ALLOWED_GO.has(it.go) ? it.go : '',
+        }));
+        return json({ summary: String(parsed.summary || '').slice(0, 240), items: parsed.items });
+      } catch (e) {
+        return json({ error: 'ai_triage_failed', message: String(e) }, 200);
+      }
+    }
+
+    // ── AI: PROJECT HELP (client portal) ──
+    // A focused assistant for a logged-in client, answering questions about THEIR
+    // project from the provided context. Returns { reply }.
+    if (type === 'ai_project_help') {
+      if (!ANTHROPIC_KEY) return json({ error: 'Server missing ANTHROPIC_KEY secret' }, 500);
+      const ctx = body.context || {};
+      const history = Array.isArray(body.messages)
+        ? body.messages
+            .filter((m: any) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+            .slice(-10)
+            .map((m: any) => ({ role: m.role, content: m.content.slice(0, 1500) }))
+        : [];
+      const system = `You are the project assistant inside the Davis Digital Studio client portal, helping a specific logged-in client understand the status of their own web project. Eric Davis is the designer. Answer ONLY from the project context provided below. Be warm, plain, and concise. No em dashes. If the answer is not in the context, say so honestly and suggest they message Eric directly from the Messages tab rather than guessing. Never invent timelines, prices, or commitments.
+
+PROJECT CONTEXT (JSON):
+${JSON.stringify(ctx).slice(0, 6000)}`;
+      const msgs = history.length ? history : [{ role: 'user', content: 'What is the current status of my project?' }];
+      try {
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, system, messages: msgs }),
+          signal: AbortSignal.timeout(30000),
+        });
+        const aiData = await aiRes.json();
+        if (aiData.error) return json({ error: aiData.error.message || 'ai_error' }, 200);
+        let text = '';
+        if (Array.isArray(aiData.content)) text = aiData.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('\n');
+        return json({ reply: (text || '').trim() });
+      } catch (e) {
+        return json({ error: 'ai_project_help_failed', message: String(e) }, 200);
       }
     }
 
