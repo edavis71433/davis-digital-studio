@@ -920,7 +920,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
             <div class="msg-thread" id="msgThread"></div>
             <div class="msg-compose">
               <textarea aria-label="Message Eric..." class="msg-input" id="msgInput" placeholder="Message Eric..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
-              <button class="msg-send" onclick="sendMsg()">Send</button>
+              <button class="msg-send" id="msgSend" onclick="sendMsg()">Send</button>
             </div>
           </div>
         </div>
@@ -1784,20 +1784,25 @@ async function uploadFile(file) {
     status: "review",
     storage_path: path
   });
-  
+
   fill.style.width = "100%";
-  
+
   setTimeout(() => {
     wrap.style.display = "none";
     fill.style.width = "0%";
   }, 500);
-  
-  if (!dbErr) {
-    showToast("✓ " + file.name + " uploaded");
-    await loadFiles();
-    // Notify Eric
-    await sendNotification("file_uploaded", file.name + " (" + size + ")");
+
+  if (dbErr) {
+    // The file reached storage but the DB row failed. Roll back the storage
+    // object so we don't leave an orphan the client can't see or manage.
+    try { await sb.storage.from("client-files").remove([path]); } catch (e) {}
+    showToast("Upload didn't finish. Please try again.");
+    return;
   }
+
+  showToast("✓ " + file.name + " uploaded");
+  await loadFiles();
+  try { await sendNotification("file_uploaded", file.name + " (" + size + ")"); } catch (e) {}
 }
 
 async function approveFile(id) {
@@ -1808,8 +1813,16 @@ async function approveFile(id) {
 
 async function deleteFile(id, path) {
   if (!confirm("Delete this file?")) return;
-  await sb.storage.from("client-files").remove([path]);
-  await sb.from("files").delete().eq("id", id);
+  // Delete the DB row first and confirm it. If the row delete fails we stop,
+  // so we never remove the storage object while the row still points at it.
+  var dbOk = false;
+  try {
+    var { error } = await sb.from("files").delete().eq("id", id);
+    if (!error) dbOk = true;
+  } catch (e) {}
+  if (!dbOk) { showToast("Couldn't delete that file. Please try again."); return; }
+  // Row is gone; best-effort remove the storage object.
+  try { await sb.storage.from("client-files").remove([path]); } catch (e) {}
   showToast("File deleted");
   await loadFiles();
 }
@@ -1849,21 +1862,43 @@ function renderMessages(msgs) {
   thread.scrollTop = thread.scrollHeight;
 }
 
+var _sendingMsg = false;
 async function sendMsg() {
+  if (_sendingMsg) return;                 // guard against double-click / Enter-spam
   var input = document.getElementById("msgInput");
   var text = input.value.trim();
   if (!text) return;
+
+  _sendingMsg = true;
+  var sendBtn = document.getElementById("msgSend");
+  if (sendBtn) sendBtn.disabled = true;
+
+  // Do NOT clear the input until the DB confirms the insert. If the write fails
+  // (offline, RLS, server error) the client keeps their text and we tell them.
+  var ok = false;
+  try {
+    var { error } = await sb.from("messages").insert({
+      client_id: CLIENT.id,
+      from_who: "client",
+      sender_name: CLIENT.name,
+      text: text
+    });
+    if (error) {
+      showToast("Message didn't send. Check your connection and try again.");
+    } else {
+      ok = true;
+    }
+  } catch (e) {
+    showToast("Message didn't send. Check your connection and try again.");
+  } finally {
+    _sendingMsg = false;
+    if (sendBtn) sendBtn.disabled = false;
+  }
+
+  if (!ok) return;                         // leave the text in the box for a retry
   input.value = "";
-  
-  await sb.from("messages").insert({
-    client_id: CLIENT.id,
-    from_who: "client",
-    sender_name: CLIENT.name,
-    text: text
-  });
-  
   await loadMessages();
-  await sendNotification("client_message", text);
+  try { await sendNotification("client_message", text); } catch (e) {}
 }
 
 // ── INVOICES ──
@@ -2179,20 +2214,35 @@ function setPriority(p) {
   });
 }
 
+var _sendingFeedback = false;
 async function submitFeedback() {
+  if (_sendingFeedback) return;
   var subject = document.getElementById("fb-subject").value;
   var text = document.getElementById("fb-text").value.trim();
   if (!subject) { showToast("Please select a deliverable."); return; }
   if (!text) { showToast("Please enter your feedback."); return; }
-  
-  // Save as a message with special prefix
-  var fullText = "[FEEDBACK · " + subject + " · " + fbPriority.toUpperCase() + "] " + text;
-  await sb.from("messages").insert({
-    client_id: CLIENT.id, from_who: "client",
-    sender_name: CLIENT.name, text: fullText
-  });
 
-  // Save to client_requests so it's trackable (open/in-progress/closed) on the admin side
+  _sendingFeedback = true;
+
+  // Save as a message with special prefix. This is the primary record, so we
+  // check it before clearing the form or claiming success.
+  var fullText = "[FEEDBACK · " + subject + " · " + fbPriority.toUpperCase() + "] " + text;
+  var ok = false;
+  try {
+    var { error } = await sb.from("messages").insert({
+      client_id: CLIENT.id, from_who: "client",
+      sender_name: CLIENT.name, text: fullText
+    });
+    if (!error) ok = true;
+  } catch (e) {}
+
+  if (!ok) {
+    _sendingFeedback = false;
+    showToast("Couldn't send your feedback. Check your connection and try again.");
+    return;                                // keep the form filled for a retry
+  }
+
+  // Secondary records are best-effort; the feedback is already saved above.
   try {
     await sb.from("client_requests").insert({
       client_id: CLIENT.id,
@@ -2203,12 +2253,13 @@ async function submitFeedback() {
     });
     await sb.from("activity_log").insert({ client_id: CLIENT.id, action: "requested", detail: "Submitted feedback: " + subject });
   } catch(e){}
-  
+
   document.getElementById("fb-subject").value = "";
   document.getElementById("fb-text").value = "";
   showToast("✓ Feedback sent to Eric!");
-  await sendNotification("client_message", "Feedback on " + subject + ": " + text);
+  try { await sendNotification("client_message", "Feedback on " + subject + ": " + text); } catch (e) {}
   await loadFeedback();
+  _sendingFeedback = false;
 }
 
 async function loadFeedback() {
