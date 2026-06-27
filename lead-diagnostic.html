@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Intake Diagnostic</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#faf8f5;color:#1a1523;max-width:640px;margin:0 auto;padding:32px 20px;line-height:1.5}
+  h1{font-size:20px;margin-bottom:4px}
+  p.sub{color:#7a6d8e;font-size:14px;margin-top:0}
+  button{background:#5b3fa0;color:#fff;border:none;font-size:15px;font-weight:600;padding:12px 22px;border-radius:10px;cursor:pointer;margin:8px 0}
+  button:disabled{opacity:.5}
+  pre{background:#1e1338;color:#c4f0d4;padding:16px;border-radius:10px;overflow:auto;font-size:12.5px;white-space:pre-wrap;word-break:break-word;margin-top:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .verdict{padding:14px 16px;border-radius:10px;font-weight:600;margin-top:14px;font-size:14px}
+  .ok{background:#e4f0eb;color:#1f6f54;border:1px solid #bfe0d2}
+  .bad{background:#fbe9ea;color:#a83440;border:1px solid #f0c4c4}
+  .info{background:#f8eedb;color:#9a6510;border:1px solid #ead3a3}
+  label{font-size:13px;font-weight:600;display:block;margin:10px 0 4px}
+  input{width:100%;padding:10px 12px;border:1px solid #d8cfe8;border-radius:8px;font-size:14px}
+</style>
+</head>
+<body>
+  <h1>Lead Intake Diagnostic</h1>
+  <p class="sub">This calls <code>lead_intake</code> exactly like your contact form does, but shows the raw response so we can see the real error. Nothing is hidden.</p>
+
+  <label for="dname">Name</label>
+  <input id="dname" value="Diagnostic Test">
+  <label for="demail">Email</label>
+  <input id="demail" value="diagnostic@example.com">
+  <label for="dmsg">Message</label>
+  <input id="dmsg" value="This is a diagnostic lead_intake test.">
+
+  <div class="row">
+    <button id="goBtn" onclick="runTest()">Run lead_intake test</button>
+  </div>
+
+  <div id="verdict"></div>
+  <pre id="out">Press the button to run the test. The raw response from the Edge Function will appear here.</pre>
+
+<script>
+async function runTest(){
+  var btn = document.getElementById('goBtn');
+  var out = document.getElementById('out');
+  var verdict = document.getElementById('verdict');
+  btn.disabled = true; btn.textContent = 'Running...';
+  verdict.innerHTML = '';
+  out.textContent = 'Calling lead_intake...';
+
+  var payload = {
+    type: 'lead_intake',
+    name: document.getElementById('dname').value,
+    email: document.getElementById('demail').value,
+    source: 'website_form',
+    subject: 'Diagnostic',
+    message: document.getElementById('dmsg').value
+  };
+
+  var report = {};
+  report.sent = payload;
+
+  try {
+    var res = await fetch('https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    report.httpStatus = res.status;
+    var textBody = await res.text();
+    report.rawBody = textBody;
+    try { report.parsed = JSON.parse(textBody); } catch(e){ report.parsed = '(not JSON)'; }
+
+    out.textContent = JSON.stringify(report, null, 2);
+
+    // Interpret
+    var p = report.parsed || {};
+    if (res.status === 200 && p.ok === true && p.id) {
+      verdict.className = 'verdict ok';
+      verdict.textContent = 'SUCCESS: lead_intake wrote a row (id ' + p.id + '). The route works. If it is not showing in the admin panel, the bug is display-side.';
+    } else if (res.status === 401) {
+      verdict.className = 'verdict bad';
+      verdict.textContent = 'GATEWAY 401: the Edge Function is rejecting unauthenticated calls. JWT verification is ON for this function and must be turned off (or the call needs the anon key).';
+    } else if (p.error === 'no service key') {
+      verdict.className = 'verdict bad';
+      verdict.textContent = 'NO SERVICE KEY: the SERVICE_ROLE_KEY secret is not set on the Edge Function.';
+    } else if (p.error === 'lead_create_failed') {
+      verdict.className = 'verdict bad';
+      verdict.textContent = 'WRITE FAILED: the route ran but the insert into the leads table was rejected. See detail above (likely the table does not exist, or a column/constraint issue).';
+    } else if (p.error === 'Unknown type') {
+      verdict.className = 'verdict bad';
+      verdict.textContent = 'UNKNOWN TYPE: the deployed function does not have the lead_intake route. Redeploy clever-api.ts.';
+    } else if (p.error) {
+      verdict.className = 'verdict info';
+      verdict.textContent = 'ROUTE RETURNED AN ERROR: ' + p.error + (p.detail ? ' — see detail above.' : '');
+    } else {
+      verdict.className = 'verdict info';
+      verdict.textContent = 'Unexpected response. Read the raw body above.';
+    }
+  } catch(e){
+    report.fetchError = String(e);
+    out.textContent = JSON.stringify(report, null, 2);
+    verdict.className = 'verdict bad';
+    verdict.textContent = 'NETWORK/CORS ERROR: the browser could not complete the call. ' + String(e) + '. This often means CORS blocked it (origin not allowed) or the network blocked Supabase.';
+  }
+  btn.disabled = false; btn.textContent = 'Run lead_intake test';
+}
+</script>
+</body>
+</html>
