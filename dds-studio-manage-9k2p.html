@@ -1488,8 +1488,52 @@ async function loadLeads() {
   if (!listEl) return;
   listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading leads...</p>';
   document.getElementById('leadDetail').style.display = 'none';
-  var r = await api('audit_leads?select=*&order=created_at.desc&limit=200');
-  allLeads = r || [];
+
+  // Source 1: existing audit_leads (audit tool, report card, AI review)
+  var auditLeads = await api('audit_leads?select=*&order=created_at.desc&limit=200');
+  auditLeads = auditLeads || [];
+
+  // Source 2: NEW Studio OS contact-form leads (the leads table), via the
+  // lead_list route. Mapped onto the same shape the leads UI already expects,
+  // tagged tool:'contact' so the existing "Contact Form" filter shows them.
+  var formLeads = [];
+  try {
+    var jwt = await adminJwt();
+    if (jwt) {
+      var lr = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+        body: JSON.stringify({ type: "lead_list" })
+      });
+      var lj = await lr.json();
+      var rows = (lj && lj.data) || [];
+      formLeads = rows.map(function(l){
+        return {
+          id: 'os_' + l.id,            // prefix so it never collides with audit_leads ids
+          _osLeadId: l.id,             // real leads-table id, for reply/detail
+          tool: 'contact',
+          business_name: l.name || (l.email || 'Lead'),
+          client_email: l.email || '',
+          url: '',
+          city: '',
+          score: null,
+          status: l.status || 'new',
+          subject: l.subject || '',
+          last_message: l.last_message || '',
+          source: l.source || 'website_form',
+          unread: !!l.unread,
+          created_at: l.created_at,
+          updated_at: l.updated_at
+        };
+      });
+    }
+  } catch(e) { /* best-effort: if it fails, audit leads still show */ }
+
+  // Merge, newest first.
+  allLeads = auditLeads.concat(formLeads).sort(function(a,b){
+    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+  });
+
   renderLeadsList();
   try { if (_leadView==="board") renderLeadsBoard(); } catch(e){}
 }
@@ -1642,11 +1686,88 @@ function convertLeadToClient(id){
 }
 
 
+// ── Studio OS form-lead detail: conversation + AI draft + reply ──
+async function showOsLeadDetail(lead, detail) {
+  detail.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading conversation...</p>';
+  var d = null;
+  try {
+    var jwt = await adminJwt();
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({ type: "lead_detail", id: lead._osLeadId })
+    });
+    var j = await r.json();
+    d = (j && j.data) || null;
+  } catch(e) {}
+  if (!d || !d.lead) { detail.innerHTML = '<p style="font-size:13px;color:#9a2d2d;padding:14px;">Could not load this lead.</p>'; return; }
+
+  var L = d.lead; var msgs = d.messages || [];
+  var esc = function(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var threadHtml = msgs.filter(function(m){return m.who!=='ai_draft';}).map(function(m){
+    var me = (m.who === 'me');
+    return '<div style="max-width:80%;'+(me?'margin-left:auto;background:var(--p);color:#fff;':'background:#fff;border:1px solid rgba(91,63,160,0.12);color:var(--ink);')+'border-radius:14px;padding:11px 14px;margin-bottom:8px;font-size:14px;line-height:1.45;white-space:pre-wrap;">'+esc(m.body)+'</div>';
+  }).join('');
+  var existingDraft = msgs.filter(function(m){return m.who==='ai_draft';}).pop();
+
+  detail.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
+      '<div style="width:44px;height:44px;border-radius:12px;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">'+((L.name||'?').charAt(0).toUpperCase())+'</div>'+
+      '<div><div style="font-size:18px;font-weight:700;">'+esc(L.name||'Unknown')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted);">'+esc(L.source||'website_form')+(L.email?' · '+esc(L.email):'')+'</div></div>'+
+      '<button onclick="document.getElementById(\'leadDetail\').style.display=\'none\'" style="margin-left:auto;background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Close</button>'+
+    '</div>'+
+    (L.subject?'<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">About: <b style="color:var(--ink);">'+esc(L.subject)+'</b></div>':'')+
+    '<div style="margin-bottom:14px;">'+threadHtml+'</div>'+
+    '<div style="border:1px solid rgba(31,111,84,0.25);background:rgba(31,111,84,0.06);border-radius:12px;padding:14px;">'+
+      '<div style="font-size:12px;font-weight:700;color:#1f6f54;margin-bottom:8px;">Reply</div>'+
+      '<textarea id="osReplyText" style="width:100%;min-height:90px;border:1px solid rgba(91,63,160,0.15);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;line-height:1.5;resize:vertical;" placeholder="Write your reply, or let your manager draft one...">'+(existingDraft?esc(existingDraft.body):'')+'</textarea>'+
+      '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
+        '<button id="osSendBtn" onclick="osSendReply(\''+L.id+'\')" style="background:var(--p);color:#fff;border:none;font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Send reply</button>'+
+        '<button id="osDraftBtn" onclick="osDraftReply(\''+L.id+'\')" style="background:#fff;color:var(--ink);border:1px solid rgba(91,63,160,0.2);font-weight:500;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Draft for me</button>'+
+      '</div>'+
+    '</div>';
+}
+async function osDraftReply(osId){
+  var btn = document.getElementById('osDraftBtn'); var ta = document.getElementById('osReplyText');
+  if(btn){ btn.disabled=true; btn.textContent='Drafting...'; }
+  try {
+    var jwt = await adminJwt();
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", { method:"POST",
+      headers:{ "Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt },
+      body: JSON.stringify({ type:"lead_ai_draft", id: osId }) });
+    var j = await r.json();
+    if (j && j.draft && ta) ta.value = j.draft;
+  } catch(e){}
+  if(btn){ btn.disabled=false; btn.textContent='Draft for me'; }
+}
+async function osSendReply(osId){
+  var ta = document.getElementById('osReplyText'); var btn = document.getElementById('osSendBtn');
+  var body = ta ? ta.value.trim() : '';
+  if(!body) return;
+  if(btn){ btn.disabled=true; btn.textContent='Sending...'; }
+  try {
+    var jwt = await adminJwt();
+    await fetch(SB_URL + "/functions/v1/clever-api", { method:"POST",
+      headers:{ "Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt },
+      body: JSON.stringify({ type:"lead_reply", id: osId, body: body, from_ai:false }) });
+    await loadLeads();
+    var lead = allLeads.find(function(l){return l.id==='os_'+osId;});
+    if(lead) showLeadDetail(lead.id);
+  } catch(e){ if(btn){ btn.disabled=false; btn.textContent='Send reply'; } }
+}
+
 function showLeadDetail(id) {
   var lead = allLeads.find(l => l.id === id);
   if (!lead) return;
   var detail = document.getElementById('leadDetail');
   detail.style.display = 'block';
+
+  // Studio OS contact-form leads get a conversation + reply view.
+  if (lead.tool === 'contact' && lead._osLeadId) {
+    showOsLeadDetail(lead, detail);
+    return;
+  }
 
   var scoreCol = (lead.score == null) ? '#999' : (lead.score < 45 ? '#e05555' : lead.score < 65 ? '#f0b429' : '#6abf69');
   var pillarsHtml = '';
