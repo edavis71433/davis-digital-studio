@@ -777,6 +777,28 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
           <a href="mailto:eric@davisdigitalstudio.com?subject=Referral%20for%20Davis%20Digital%20Studio&body=Hi%20Eric%2C%20I'd%20like%20to%20introduce%20you%20to..." style="display:inline-block;background:#fff;color:#5b3fa0;font-size:13px;font-weight:600;padding:10px 20px;border-radius:100px;text-decoration:none;">Refer someone →</a>
         </div>
         <div class="stats-row" id="statsRow"></div>
+
+        <!-- Project Spine: live status + whose-turn + activity feed -->
+        <div class="card" id="spineCard" style="display:none;margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Where your project stands
+            </div>
+          </div>
+          <div style="padding:20px;">
+            <!-- whose-turn banner -->
+            <div id="spineTurn" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13.5px;"></div>
+            <!-- stage + progress -->
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+              <span id="spineStage" style="font-size:15px;font-weight:600;color:var(--ink);"></span>
+              <span id="spinePct" style="font-size:13px;font-weight:700;color:var(--p);"></span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="spineFill" style="width:0%;"></div></div>
+            <!-- feed -->
+            <div id="spineFeed" style="margin-top:18px;"></div>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div class="card">
             <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</div><span id="dash-pct" style="font-size:13px;font-weight:700;color:var(--p);"></span></div>
@@ -1300,6 +1322,7 @@ async function initPortal() {
   // Each step is independently guarded so one failing query or undefined
   // helper can never stop the portal from loading.
   try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
+  try { await loadProjectSpine(); } catch(e){ console.error("spine:", e); }
   try { renderAddons(); } catch(e){ console.error("renderAddons:", e); }
   try { await loadFeedback(); } catch(e){ console.error("loadFeedback:", e); }
   try { await loadBriefState(); } catch(e){ console.error("loadBriefState:", e); }
@@ -2689,6 +2712,96 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   window.PortalAI = { open:openAi, close:closeAi, send:send, ask:ask };
 })();
 
+</script>
+
+<!-- Project Spine (client status + feed) -->
+<script>
+// Friendly labels for stages and event types.
+var SPINE_STAGE_LABEL = {
+  kickoff: "Kickoff", content: "Gathering your content", design: "Design",
+  build: "Building your site", review: "Your review", launch: "Launch", complete: "Complete"
+};
+function spineStageLabel(s){ return SPINE_STAGE_LABEL[s] || (s ? s.charAt(0).toUpperCase()+s.slice(1) : "In progress"); }
+
+function spineTimeAgo(iso){
+  try {
+    var d = new Date(iso), now = new Date(), sec = Math.floor((now-d)/1000);
+    if (sec < 60) return "just now";
+    var min = Math.floor(sec/60); if (min < 60) return min+" min ago";
+    var hr = Math.floor(min/60); if (hr < 24) return hr+(hr===1?" hour ago":" hours ago");
+    var day = Math.floor(hr/24); if (day < 7) return day+(day===1?" day ago":" days ago");
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  } catch(e){ return ""; }
+}
+
+// Turn one event into a plain-English line for the client.
+function spineEventLine(ev){
+  var p = ev.payload || {};
+  if (ev.type === "project.stage_advanced") {
+    var to = spineStageLabel(p.to_stage);
+    if (p.note) return "Moved to " + to + ". " + p.note;
+    return "Moved to " + to + ".";
+  }
+  if (ev.type === "project.launched") return "Your site launched. Congratulations!";
+  // generic fallback
+  return (ev.type || "Update").replace(/[._]/g," ");
+}
+
+async function loadProjectSpine(){
+  var card = document.getElementById("spineCard");
+  if (!card) return;
+  var jwt = "";
+  try { var s = await sb.auth.getSession(); jwt = (s && s.data && s.data.session && s.data.session.access_token) || ""; } catch(e){}
+  if (!jwt) return; // not signed in; leave hidden
+
+  var res, jr = {};
+  try {
+    res = await fetch(SUPABASE_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({ type: "client_project" })
+    });
+    jr = await res.json();
+  } catch(e){ return; }
+
+  var data = (jr && jr.data) || {};
+  var project = data.project;
+  var feed = Array.isArray(data.feed) ? data.feed : [];
+
+  // No project yet for this client: keep the card hidden, nothing to show.
+  if (!project) { card.style.display = "none"; return; }
+  card.style.display = "block";
+
+  // Stage + progress
+  document.getElementById("spineStage").textContent = spineStageLabel(project.stage);
+  document.getElementById("spinePct").textContent = (project.progress || 0) + "%";
+  setTimeout(function(){ var f=document.getElementById("spineFill"); if(f) f.style.width = (project.progress||0) + "%"; }, 200);
+
+  // Whose-turn banner — the single most reassuring element.
+  var turn = document.getElementById("spineTurn");
+  if (project.ball_in_court === "client") {
+    turn.style.background = "rgba(240,180,41,0.12)";
+    turn.style.border = "1px solid rgba(240,180,41,0.35)";
+    turn.innerHTML = '<span style="font-size:16px;">\u270B</span><span style="color:var(--ink);"><strong>It\u2019s your turn.</strong> Eric is waiting on something from you. Check your messages or files for what\u2019s needed.</span>';
+  } else {
+    turn.style.background = "rgba(106,191,105,0.12)";
+    turn.style.border = "1px solid rgba(106,191,105,0.35)";
+    turn.innerHTML = '<span style="font-size:16px;">\u2713</span><span style="color:var(--ink);"><strong>You\u2019re all set.</strong> Eric is working on your project. Nothing is needed from you right now.</span>';
+  }
+
+  // Activity feed
+  var feedEl = document.getElementById("spineFeed");
+  if (!feed.length) { feedEl.innerHTML = ''; return; }
+  var head = '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
+  var items = feed.map(function(ev){
+    return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">' +
+             '<span style="width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:6px;flex-shrink:0;"></span>' +
+             '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">' + spineEventLine(ev) + '</div>' +
+             '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + spineTimeAgo(ev.created_at) + '</div></div>' +
+           '</div>';
+  }).join("");
+  feedEl.innerHTML = head + items;
+}
 </script>
 
 <!-- Mobile bottom nav -->
