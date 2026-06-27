@@ -665,6 +665,12 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
           <button class="sbtn" onclick="deleteTestLeads()" style="background:transparent;color:var(--red);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(224,85,85,0.25);cursor:pointer;">🧹 Delete test leads</button>
         </div>
+        <div id="leadSelectBar" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 14px;background:var(--p-soft,#f1ecf9);border:1px solid rgba(91,63,160,0.2);border-radius:10px;">
+          <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--p);cursor:pointer;"><input type="checkbox" id="leadSelectAll" onchange="toggleSelectAllLeads(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--p);"> Select all shown</label>
+          <span id="leadSelectCount" style="font-size:12px;color:var(--muted);">0 selected</span>
+          <button onclick="deleteSelectedLeads()" id="leadDeleteSelBtn" style="margin-left:auto;background:var(--red);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Delete selected</button>
+          <button onclick="clearLeadSelection()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Clear</button>
+        </div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <button id="lv-board" onclick="setLeadView('board')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;background:var(--p);color:#fff;">Pipeline board</button>
           <button id="lv-list" onclick="setLeadView('list')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;background:transparent;color:var(--muted);">List</button>
@@ -1570,6 +1576,7 @@ function renderLeadsList() {
     var tCol = toolColors[l.tool] || '#666';
     return '<div onclick="showLeadDetail(\''+l.id+'\')" style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s, transform 0.1s;" onmouseover="this.style.borderColor=\'var(--p)\'" onmouseout="this.style.borderColor=\'rgba(91,63,160,0.1)\'">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">' +
+        '<input type="checkbox" onclick="event.stopPropagation();toggleLeadSelect(\''+l.id+'\',this.checked)" '+(_selectedLeads.has(l.id)?'checked':'')+' title="Select lead" style="flex-shrink:0;width:17px;height:17px;margin-top:2px;cursor:pointer;accent-color:var(--p);">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px;">'+(l.business_name||'(no name)')+'</div>' +
           '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(l.url||'—')+' · '+(l.client_email||'—')+'</div>' +
@@ -1588,6 +1595,7 @@ function renderLeadsList() {
       '</div>' +
     '</div>';
   }).join('');
+  try { updateLeadSelectBar(); } catch(e){}
 }
 
 
@@ -1935,6 +1943,88 @@ async function deleteOneLead(id, label) {
 // Bulk-clear obvious test/diagnostic leads. Matches name/subject/email containing
 // "test" or "diagnostic" (case-insensitive). Form leads go through lead_delete in
 // one batched call; any matching audit_leads are removed too. Always confirms first.
+// ── LEAD MULTI-SELECT + DELETE ────────────────────────────────────────────
+// Free selection: check any leads you want gone (spam, fakes, anything) and
+// delete them in one pass. Works across both lead types.
+var _selectedLeads = new Set();
+
+function toggleLeadSelect(id, checked) {
+  if (checked) _selectedLeads.add(id); else _selectedLeads.delete(id);
+  updateLeadSelectBar();
+}
+
+function clearLeadSelection() {
+  _selectedLeads.clear();
+  var sa = document.getElementById('leadSelectAll'); if (sa) sa.checked = false;
+  renderLeadsList();
+  updateLeadSelectBar();
+}
+
+// "Select all shown" respects the current filter (only the visible leads).
+function visibleLeads() {
+  return currentLeadFilter === 'all' ? allLeads : allLeads.filter(function(l){ return l.tool === currentLeadFilter; });
+}
+
+function toggleSelectAllLeads(checked) {
+  var vis = visibleLeads();
+  if (checked) vis.forEach(function(l){ _selectedLeads.add(l.id); });
+  else vis.forEach(function(l){ _selectedLeads.delete(l.id); });
+  renderLeadsList();
+  updateLeadSelectBar();
+}
+
+function updateLeadSelectBar() {
+  var bar = document.getElementById('leadSelectBar');
+  var count = document.getElementById('leadSelectCount');
+  if (!bar) return;
+  var n = _selectedLeads.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  if (count) count.textContent = n + ' selected';
+}
+
+async function deleteSelectedLeads() {
+  var ids = Array.from(_selectedLeads);
+  if (!ids.length) { toast("Nothing selected"); return; }
+  if (!confirm('Delete '+ids.length+' selected lead'+(ids.length>1?'s':'')+'? This cannot be undone.')) return;
+
+  var btn = document.getElementById('leadDeleteSelBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+
+  // Split by type: form leads batch through lead_delete; audit leads delete each.
+  var osIds = [], auditIds = [];
+  ids.forEach(function(id){
+    var l = allLeads.find(function(x){ return x.id === id; });
+    if (l && l.tool === 'contact' && l._osLeadId) osIds.push(l._osLeadId);
+    else auditIds.push(id);
+  });
+
+  var failed = 0;
+  if (osIds.length) {
+    try {
+      var jwt = await adminJwt();
+      var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+        body: JSON.stringify({ type: "lead_delete", ids: osIds })
+      });
+      var j = await r.json();
+      if (!(j && j.ok)) failed += osIds.length;
+    } catch(e){ failed += osIds.length; }
+  }
+  for (var i=0;i<auditIds.length;i++){
+    var res = await api('audit_leads?id=eq.'+auditIds[i], 'DELETE');
+    if (res === null) failed++;
+  }
+
+  _selectedLeads.clear();
+  var sa = document.getElementById('leadSelectAll'); if (sa) sa.checked = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Delete selected'; }
+  await loadLeads();
+  updateLeadSelectBar();
+  var removed = ids.length - failed;
+  toast(removed + " lead" + (removed===1?'':'s') + " deleted" + (failed ? (", " + failed + " failed") : ""));
+}
+
 async function deleteTestLeads() {
   var rx = /(test|diagnostic)/i;
   var matches = allLeads.filter(function(l){
