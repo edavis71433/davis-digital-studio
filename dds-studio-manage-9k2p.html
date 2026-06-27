@@ -663,7 +663,12 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
         </div>
-        <div id="leadsList"></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button id="lv-board" onclick="setLeadView('board')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;background:var(--p);color:#fff;">Pipeline board</button>
+          <button id="lv-list" onclick="setLeadView('list')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;background:transparent;color:var(--muted);">List</button>
+        </div>
+        <div id="leadsBoard"></div>
+        <div id="leadsList" style="display:none;"></div>
         <div id="leadDetail" style="display:none;margin-top:24px;"></div>
       </div>
 
@@ -1395,6 +1400,7 @@ async function loadLeads() {
   var r = await api('audit_leads?select=*&order=created_at.desc&limit=200');
   allLeads = r || [];
   renderLeadsList();
+  try { if (_leadView==="board") renderLeadsBoard(); } catch(e){}
 }
 
 function filterLeads(tool) {
@@ -1446,6 +1452,104 @@ function renderLeadsList() {
     '</div>';
   }).join('');
 }
+
+
+// ── LEAD PIPELINE KANBAN ──────────────────────────────────────────────────
+var LEAD_STAGES = [
+  { key:'new',       label:'New',       color:'#5b3fa0' },
+  { key:'qualified', label:'Qualified', color:'#1a7e49' },
+  { key:'proposal',  label:'Proposal',  color:'#c4731a' },
+  { key:'won',       label:'Won',       color:'#6abf69' },
+  { key:'lost',      label:'Lost',      color:'#999999' },
+];
+var _leadView = 'board';
+function setLeadView(v){
+  _leadView = v;
+  document.getElementById('leadsBoard').style.display = (v==='board') ? 'block' : 'none';
+  document.getElementById('leadsList').style.display = (v==='list') ? 'block' : 'none';
+  var b=document.getElementById('lv-board'), l=document.getElementById('lv-list');
+  if (b&&l){
+    var on='background:var(--p);color:#fff;border:none;';
+    var off='background:transparent;color:var(--muted);border:1px solid rgba(91,63,160,0.15);';
+    b.style.cssText='font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;cursor:pointer;'+(v==='board'?on:off);
+    l.style.cssText='font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;cursor:pointer;'+(v==='list'?on:off);
+  }
+  if (v==='board') renderLeadsBoard();
+}
+
+function leadStageOf(l){
+  var s = l.pipeline_stage || (l.status==='closed'?'won':l.status==='contacted'?'qualified':'new');
+  return LEAD_STAGES.some(function(x){return x.key===s;}) ? s : 'new';
+}
+
+function renderLeadsBoard(){
+  var wrap = document.getElementById('leadsBoard');
+  if (!wrap) return;
+  var leads = currentLeadFilter==='all' ? allLeads : allLeads.filter(function(l){return l.tool===currentLeadFilter;});
+  var byStage = {}; LEAD_STAGES.forEach(function(s){ byStage[s.key]=[]; });
+  leads.forEach(function(l){ byStage[leadStageOf(l)].push(l); });
+
+  wrap.innerHTML =
+    '<div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;">' +
+    LEAD_STAGES.map(function(s){
+      var cards = byStage[s.key].map(function(l){
+        var sc = (l.score==null)?'':('<span style="font-size:11px;font-weight:700;color:'+((l.score<45)?'#e05555':(l.score<65)?'#f0b429':'#6abf69')+';">'+l.score+'</span>');
+        var conv = (s.key==='won')
+          ? '<button onclick="event.stopPropagation();convertLeadToClient(\''+l.id+'\')" style="margin-top:8px;width:100%;font-size:11px;font-weight:600;padding:6px;border-radius:8px;border:none;background:var(--p);color:#fff;cursor:pointer;">Convert to client →</button>'
+          : '';
+        return '<div draggable="true" ondragstart="leadDragStart(event,\''+l.id+'\')" onclick="showLeadDetail(\''+l.id+'\')" '+
+          'style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:10px;padding:11px;margin-bottom:9px;cursor:grab;">'+
+          '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">'+
+            '<div style="font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;">'+(l.business_name||'(no name)')+'</div>'+sc+
+          '</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(l.client_email||l.url||'')+'</div>'+
+          conv+
+        '</div>';
+      }).join('');
+      return '<div ondragover="event.preventDefault()" ondrop="leadDrop(event,\''+s.key+'\')" '+
+        'style="flex:0 0 220px;min-width:220px;background:rgba(91,63,160,0.04);border-radius:12px;padding:10px;">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:0 2px;">'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:'+s.color+';"></span>'+
+          '<span style="font-size:12px;font-weight:700;color:var(--ink);">'+s.label+'</span>'+
+          '<span style="font-size:11px;color:var(--muted);margin-left:auto;">'+byStage[s.key].length+'</span>'+
+        '</div>'+
+        (cards || '<div style="font-size:11px;color:var(--muted);text-align:center;padding:14px 0;">Drop here</div>')+
+      '</div>';
+    }).join('') +
+    '</div>';
+}
+
+var _draggedLeadId = null;
+function leadDragStart(e, id){ _draggedLeadId = id; try{ e.dataTransfer.effectAllowed='move'; }catch(_){} }
+async function leadDrop(e, stageKey){
+  e.preventDefault();
+  if (!_draggedLeadId) return;
+  var id = _draggedLeadId; _draggedLeadId = null;
+  // optimistic UI
+  var lead = allLeads.find(function(l){return String(l.id)===String(id);});
+  if (lead) lead.pipeline_stage = stageKey;
+  renderLeadsBoard();
+  try { await api('audit_leads?id=eq.'+id, 'PATCH', { pipeline_stage: stageKey }); }
+  catch(err){ toast('Could not move lead'); }
+}
+
+// Convert a won lead into a real client: prefill the create-client form and jump
+// to it, so it runs the existing (auto-linking) createClient flow.
+function convertLeadToClient(id){
+  var lead = allLeads.find(function(l){return String(l.id)===String(id);});
+  if (!lead) return;
+  go('clients');
+  setTimeout(function(){
+    try {
+      var n=document.getElementById('nc-name'); if(n) n.value = lead.business_name||'';
+      var em=document.getElementById('nc-cemail'); if(em) em.value = lead.client_email||'';
+      var pr=document.getElementById('nc-proj'); if(pr) pr.value = (lead.business_name? lead.business_name+' — Website':'') ;
+      toast('Lead loaded into new-client form. Set a password and create.');
+      if(n) n.scrollIntoView({behavior:'smooth',block:'center'});
+    } catch(e){}
+  }, 250);
+}
+
 
 function showLeadDetail(id) {
   var lead = allLeads.find(l => l.id === id);
