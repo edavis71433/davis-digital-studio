@@ -803,6 +803,22 @@ body{padding-top:68px;}
         });
       } catch(e) {}
 
+      // Also file this as a lead in Studio OS (best-effort, never blocks the form)
+      try {
+        await fetch('https://qksstlqzbhesadrrofgn.supabase.co/functions/v1/clever-api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'lead_intake',
+            name: name,
+            email: email,
+            source: 'website_form',
+            subject: (service && service !== 'Not specified') ? service : (business || 'New inquiry'),
+            message: message || ''
+          })
+        });
+      } catch(e) {}
+
       // Show success only if the message actually went through
       if (!sendOk) {
         btn.disabled = false;
