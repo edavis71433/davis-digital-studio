@@ -2764,6 +2764,33 @@ async function inviteClient() {
   if (!data || !data[0]) { toast("Could not create client record."); return; }
   var cid = data[0].id;
 
+  // 1a) AUTO-LINK: create a matching contact (new CRM model) with the SAME email
+  // and the auth user id, plus a project, so the spine works from day one and we
+  // never get the old client/contact/login email mismatch again. Best-effort.
+  try {
+    var authUid = (authJson && authJson.user_id) ? authJson.user_id : null;
+    var contactRow = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({
+        type: "admin_db", method: "POST", path: "contacts",
+        payload: { name: name, email: cemail.toLowerCase(), stage: "active", source: "created", auth_user_id: authUid }
+      })
+    });
+    var cjson = {}; try { cjson = await contactRow.json(); } catch(e){}
+    var newContactId = (cjson && cjson.data && cjson.data[0] && cjson.data[0].id) ? cjson.data[0].id : null;
+    if (newContactId) {
+      await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+        body: JSON.stringify({
+          type: "admin_db", method: "POST", path: "projects",
+          payload: { contact_id: newContactId, name: proj || (name + " — Project"), stage: "kickoff", ball_in_court: "agency", progress: 0 }
+        })
+      });
+    }
+  } catch(e){}
+
   // 1b) Post the tailored welcome message to their portal inbox (source of truth).
   var welcomeText = welcome || ("Welcome to your project portal, "+name+"! This is where you can track your project, share files, leave feedback, and message me directly. Let's build something great.");
   await api("messages","POST",{client_id:cid, from_who:"eric", sender_name:"Eric", text:welcomeText});
