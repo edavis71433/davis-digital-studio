@@ -2804,7 +2804,7 @@ async function loadProspects() {
   listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);">Loading prospects...</p>';
   var r = await api('prospects?select=*&order=created_at.desc&limit=500');
   if (r === null) {
-    listEl.innerHTML = '<div style="font-size:13px;color:var(--red);padding:10px;line-height:1.6;">Could not load prospects. If this is the first time, your Edge Function may need the prospects table added to its allowlist. Tell Claude you saw this message and you will get a one-line fix.</div>';
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:10px;line-height:1.6;">Couldn\'t load prospects right now. Refresh the page, or check your connection and try again.</div>';
     return;
   }
   allProspects = r || [];
@@ -3306,7 +3306,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }).catch(function(){ document.getElementById("aiThink").style.display="none"; aiError(); });
   }
   function aiError(d){
-    var msg = (d && d.message) ? d.message : "Claude couldn't draft that right now. The AI route may not be deployed yet.";
+    var msg = (d && d.message) ? d.message : "Couldn't draft a reply right now. Please try again in a moment.";
     document.getElementById("aiBody").insertAdjacentHTML("beforeend",
       '<div class="badge red" style="margin-top:12px;">Couldn\'t draft</div><div style="font-size:13px;color:var(--muted);margin-top:6px;">'+esc(msg)+'</div>');
     var b=document.getElementById("aiGenBtn"); if(b){ b.disabled=false; b.textContent="Try again"; }
