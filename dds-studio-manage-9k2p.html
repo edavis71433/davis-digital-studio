@@ -606,6 +606,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn" onclick="go('leads')" id="sn-leads"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Leads</button>
       <button class="sn" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
       <button class="sn" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
+      <button class="sn" onclick="go('visibility')" id="sn-visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Visibility</button>
       <button class="sn" onclick="go('quote')" id="sn-quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Build quote</button>
       <div class="sdiv"></div>
       <div class="sl">Library</div>
@@ -1182,6 +1183,20 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         <div id="reportsBody" style="margin-top:18px;"></div>
       </div>
 
+      <!-- VISIBILITY -->
+      <div class="page" id="page-visibility">
+        <div class="pt">Visibility</div>
+        <div class="ps">Site health for every site you watch — yours and your clients'. Real scores from Google PageSpeed plus on-page and local signal checks. Run a check to see where each site stands and whether it's trending up or down.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center;">
+          <input id="visAddUrl" placeholder="Add a site to watch (e.g. example.com)" style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
+          <button class="sbtn" onclick="visAddSite()" style="font-size:12px;padding:9px 18px;">+ Add site</button>
+          <button class="sbtn sec" onclick="visSyncClients()" style="font-size:12px;padding:9px 16px;">↻ Sync client sites</button>
+          <button class="sbtn" onclick="visCheckAll()" id="visCheckAllBtn" style="background:var(--green);color:#fff;font-size:12px;padding:9px 16px;">▶ Check all</button>
+        </div>
+        <div id="visResult" style="font-size:12.5px;color:var(--muted);margin-bottom:12px;"></div>
+        <div id="visList"></div>
+      </div>
+
       <!-- EMAIL TEMPLATES -->
       <div class="page" id="page-templates">
         <div class="pt">Email Templates</div>
@@ -1401,6 +1416,7 @@ function go(page) {
   if (page === "messages") loadTemplates();
   if (page === "prospects") loadProspects();
   if (page === "reports") loadReports();
+  if (page === "visibility") loadVisibility();
 }
 
 // ── LEADS ──
@@ -1486,6 +1502,150 @@ async function loadReports(){
   html += '</div>';
 
   body.innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════════
+//  VISIBILITY — SITE HEALTH MONITORING
+// ══════════════════════════════════════════════
+async function visEdge(payload){
+  var jwt = await adminJwt();
+  if (!jwt) { showLogin(); return null; }
+  try {
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify(payload)
+    });
+    return await r.json();
+  } catch(e){ return { error: String(e) }; }
+}
+
+var _visSites = [];
+
+async function loadVisibility(){
+  var list = document.getElementById('visList');
+  if (!list) return;
+  list.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Loading your sites…</p>';
+  var j = await visEdge({ type:"visibility_list" });
+  if (!j || j.error) { list.innerHTML = '<p style="font-size:13px;color:var(--red);padding:14px;">Could not load sites'+(j&&j.error?': '+esc(j.error):'')+'</p>'; return; }
+  _visSites = (j.data) || [];
+  renderVisibility();
+}
+
+function visScoreColor(v){
+  if (v == null) return '#999';
+  return v < 50 ? '#e05555' : v < 80 ? '#f0b429' : '#1f9d57';
+}
+
+function visTrend(latest, previous){
+  if (!latest || latest.overall == null || !previous || previous.overall == null) return '';
+  var d = latest.overall - previous.overall;
+  if (d === 0) return '<span style="font-size:11px;color:var(--muted);">— no change</span>';
+  var up = d > 0;
+  return '<span style="font-size:11px;font-weight:600;color:'+(up?'#1f9d57':'#e05555')+';">'+(up?'▲ +':'▼ ')+d+'</span>';
+}
+
+function renderVisibility(){
+  var list = document.getElementById('visList');
+  if (!list) return;
+  if (!_visSites.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);"><div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px;">No sites yet</div><div style="font-size:13px;">Add a site above, or sync your client sites, then run a check.</div></div>';
+    return;
+  }
+  list.innerHTML = _visSites.map(function(row){
+    var s = row.site, L = row.latest, P = row.previous;
+    var overall = L && L.overall != null ? L.overall : null;
+    var oc = visScoreColor(overall);
+    var srcBadge = s.source === 'client' ? 'Client' : (s.source === 'self' ? 'Your site' : 'Watched');
+    function pill(label, v){
+      var c = visScoreColor(v);
+      return '<div style="text-align:center;background:rgba(91,63,160,0.04);border-radius:8px;padding:8px 6px;"><div style="font-size:16px;font-weight:700;color:'+c+';">'+(v==null?'—':v)+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">'+label+'</div></div>';
+    }
+    var checkedStr = L && L.checked_at ? ('Checked '+fmtDate(L.checked_at)) : 'Never checked';
+    var failBadge = (L && L.ok === false) ? '<span style="font-size:10px;font-weight:700;color:#e05555;background:#fdecec;padding:2px 8px;border-radius:100px;">Check failed</span>' : '';
+    return '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:14px;padding:18px;margin-bottom:12px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">'+
+        '<div style="min-width:0;flex:1;">'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+            '<span style="font-size:15px;font-weight:600;color:var(--ink);">'+esc(s.label||s.url)+'</span>'+
+            '<span style="font-size:10px;font-weight:700;color:var(--p);background:var(--p-soft,#f1ecf9);padding:2px 8px;border-radius:100px;">'+srcBadge+'</span>'+
+            failBadge+
+          '</div>'+
+          '<a href="'+esc(s.url)+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--muted);text-decoration:none;">'+esc(s.url)+' ↗</a>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+checkedStr+'  '+visTrend(L,P)+'</div>'+
+        '</div>'+
+        '<div style="text-align:center;flex-shrink:0;">'+
+          '<div style="font-size:34px;font-weight:700;color:'+oc+';line-height:1;">'+(overall==null?'—':overall)+'</div>'+
+          '<div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Health</div>'+
+        '</div>'+
+      '</div>'+
+      (L && L.ok !== false ? '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;">'+
+        pill('Performance', L?L.performance:null)+pill('Mobile', L?L.mobile:null)+pill('Visibility', L?L.visibility:null)+pill('Local', L?L.local:null)+
+      '</div>' : (L && L.error ? '<div style="font-size:12px;color:#9a2d2d;margin-top:10px;">'+esc(L.error)+'</div>' : ''))+
+      '<div style="display:flex;gap:8px;margin-top:14px;">'+
+        '<button onclick="visCheckOne(\''+s.id+'\',this)" style="background:var(--p);color:#fff;border:none;font-size:12px;font-weight:600;padding:7px 16px;border-radius:8px;cursor:pointer;">Check now</button>'+
+        '<button onclick="visRemoveSite(\''+s.id+'\',\''+esc(String(s.label||s.url)).replace(/'/g,"")+'\')" style="background:transparent;color:var(--red);border:1px solid rgba(224,85,85,0.25);font-size:12px;padding:7px 14px;border-radius:8px;cursor:pointer;">Remove</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+async function visAddSite(){
+  var inp = document.getElementById('visAddUrl');
+  var url = (inp && inp.value || '').trim();
+  if (!url) { toast("Enter a site URL"); return; }
+  var j = await visEdge({ type:"visibility_add", url:url });
+  if (!j || j.error) {
+    toast(j && j.error === 'already_watching' ? "Already watching that site" : "Could not add site");
+    return;
+  }
+  if (inp) inp.value = '';
+  toast("Site added");
+  await loadVisibility();
+}
+
+async function visRemoveSite(id, label){
+  if (!confirm('Stop watching "'+(label||'this site')+'"? Its check history will be removed.')) return;
+  var j = await visEdge({ type:"visibility_remove", id:id });
+  if (!j || j.error) { toast("Could not remove"); return; }
+  toast("Removed");
+  await loadVisibility();
+}
+
+async function visSyncClients(){
+  var res = document.getElementById('visResult');
+  if (res) res.textContent = 'Syncing client sites…';
+  var j = await visEdge({ type:"visibility_sync_clients" });
+  if (!j || j.error) { if(res) res.textContent = ''; toast("Sync failed"); return; }
+  var added = (j.data && j.data.added) || 0;
+  if (res) res.textContent = added ? ('Added '+added+' client site'+(added>1?'s':'')+'.') : 'All client sites already on the list.';
+  await loadVisibility();
+}
+
+async function visCheckOne(id, btn){
+  if (btn){ btn.disabled = true; btn.textContent = 'Checking…'; }
+  var j = await visEdge({ type:"visibility_check", id:id });
+  if (btn){ btn.disabled = false; btn.textContent = 'Check now'; }
+  if (!j || j.error) { toast("Check failed"+(j&&j.error?': '+j.error:'')); return; }
+  if (j.data && j.data.ok === false) { toast("Could not score that site"); }
+  await loadVisibility();
+}
+
+async function visCheckAll(){
+  var btn = document.getElementById('visCheckAllBtn');
+  var res = document.getElementById('visResult');
+  if (!_visSites.length) { toast("No sites to check"); return; }
+  if (btn){ btn.disabled = true; btn.textContent = 'Checking…'; }
+  var n = _visSites.length, done = 0, failed = 0;
+  for (var i=0;i<_visSites.length;i++){
+    if (res) res.textContent = 'Checking '+(i+1)+' of '+n+'… (PageSpeed can take ~30s each)';
+    var j = await visEdge({ type:"visibility_check", id:_visSites[i].site.id });
+    if (!j || j.error || (j.data && j.data.ok === false)) failed++; else done++;
+  }
+  if (btn){ btn.disabled = false; btn.textContent = '▶ Check all'; }
+  if (res) res.textContent = 'Checked '+done+' site'+(done===1?'':'s')+(failed?(', '+failed+' failed'):'')+'.';
+  await loadVisibility();
 }
 
 
