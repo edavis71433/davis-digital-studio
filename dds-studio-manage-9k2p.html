@@ -593,6 +593,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn active" onclick="go('overview')" id="sn-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Today</button>
       <button class="sn" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients</button>
       <button class="sn" onclick="go('newclient')" id="sn-newclient" style="margin-top:6px;color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
+      <button class="sn" onclick="go('team')" id="sn-team"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team</button>
       <div class="sdiv"></div>
       <div class="sl">Client work</div>
       <button class="sn" onclick="go('messages')" id="sn-messages"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message</button>
@@ -956,6 +957,41 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
               <div class="code" id="nc-email-body"></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="page" id="page-team">
+        <div class="pt">Team</div>
+        <div class="ps">Invite people to your admin panel and control what each can do. Access takes effect the moment you set it; revoking it cuts someone off immediately. Your clients are not shown here.</div>
+
+        <div class="card">
+          <div class="ch"><div class="ct">👤 Add a team member</div></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Enter their email and choose their access level. They get an email invite to set their <strong>own</strong> password — you never see or set it. Once they accept, they land with exactly the access you picked.</p>
+            <div class="two-col">
+              <div class="fg"><label class="fl">Email</label><input class="fi" id="tm-email" type="email" placeholder="name@example.com" autocomplete="off"></div>
+              <div class="fg"><label class="fl">Name <span style="font-weight:400;color:var(--muted);">(optional)</span></label><input class="fi" id="tm-name" type="text" placeholder="First Last" autocomplete="off"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Access level</label>
+                <select class="fi" id="tm-role" onchange="tmRoleHint()">
+                  <option value="staff">Staff — day-to-day work (leads, clients, projects, replies)</option>
+                  <option value="admin">Admin — all staff access, plus create/delete client logins</option>
+                  <option value="readonly">Read only — can see everything, can't change anything</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);padding:4px 0 12px;line-height:1.6;" id="tm-role-hint"></div>
+            <button class="sbtn" id="tm-invite-btn" onclick="tmInvite()">Send invite →</button>
+            <div class="result-box" id="tm-result"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:0;">
+          <div class="ch">
+            <div class="ct">👥 Who has access</div>
+            <button class="sbtn sec" onclick="tmLoad()" style="font-size:12px;padding:7px 14px;">↻ Refresh</button>
+          </div>
+          <div class="cb" id="tm-list"><p style="font-size:13px;color:var(--muted);">Loading your team…</p></div>
         </div>
       </div>
 
@@ -1413,6 +1449,7 @@ function go(page) {
   if (page !== "overview" && page !== "leads") populateSelects(page);
   if (page === "leads") loadLeads();
   if (page === "hub") loadHub();
+  if (page === "team") { tmLoad(); tmRoleHint(); }
   if (page === "messages") loadTemplates();
   if (page === "prospects") loadProspects();
   if (page === "reports") loadReports();
@@ -4682,6 +4719,153 @@ async function focusAdvanceStageOnSelected() {
   if (document.readyState !== 'loading') wire();
   else document.addEventListener('DOMContentLoaded', wire);
 })();
+</script>
+
+<!-- ── TEAM MANAGEMENT ── -->
+<script>
+// Owner-only. Calls the team_* routes on clever-api, which are gated at 'owner'
+// server-side, so even if a non-owner reached this screen the calls would 401.
+var TM_ROLE_LABEL = { owner:'Owner', admin:'Admin', staff:'Staff', readonly:'Read only' };
+var TM_ROLE_HINT = {
+  staff:    'Staff can run the day to day — leads, clients, projects, messages. They cannot create or delete client logins, or manage the team.',
+  admin:    'Admin can do everything staff can, plus invite clients and create or delete client logins. They cannot manage the team.',
+  readonly: 'Read only sees every screen but cannot change anything. Good for an accountant or a silent partner.'
+};
+
+function tmRoleHint() {
+  var r = document.getElementById('tm-role');
+  if (!r) return;
+  var el = document.getElementById('tm-role-hint');
+  if (el) el.textContent = TM_ROLE_HINT[r.value] || '';
+}
+
+// Thin wrapper over the edge function carrying the owner's JWT, same shape as api()
+async function tmCall(payload) {
+  var jwt = await adminJwt();
+  if (!jwt) { toast('Please sign in again.'); showLogin(); return null; }
+  try {
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify(payload)
+    });
+    if (r.status === 401) { toast('Only an owner can manage the team.'); return { error: 'not_owner' }; }
+    var j = {}; try { j = await r.json(); } catch (e) {}
+    return j;
+  } catch (e) {
+    return { error: String(e) };
+  }
+}
+
+function tmInitials(email) {
+  var s = (email || '?').replace(/@.*/, '');
+  return ((s[0] || '?') + (s[1] || '')).toUpperCase();
+}
+
+async function tmLoad() {
+  var list = document.getElementById('tm-list');
+  if (!list) return;
+  list.innerHTML = '<p style="font-size:13px;color:var(--muted);">Loading your team…</p>';
+  var res = await tmCall({ type: 'team_list' });
+  if (!res || res.error) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--red);">Could not load your team' + (res && res.error && res.error !== 'not_owner' ? ': ' + escHtml(res.error) : '') + '.</p>';
+    return;
+  }
+  var members = res.data || [];
+  if (!members.length) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--muted);">No team members yet. Invite your first above.</p>';
+    return;
+  }
+  list.innerHTML = members.map(tmRenderMember).join('');
+}
+
+function tmRenderMember(m) {
+  var isOwner = m.role === 'owner';
+  var roleColors = {
+    owner:    'background:var(--pxxxl);color:var(--p);',
+    admin:    'background:#f0fdf0;color:#1f9d57;',
+    staff:    'background:rgba(91,63,160,0.06);color:var(--muted);',
+    readonly: 'background:#fdf3e3;color:#d68a12;'
+  };
+  var pill = '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:3px 10px;border-radius:100px;' + (roleColors[m.role] || roleColors.staff) + '">' + (TM_ROLE_LABEL[m.role] || m.role) + '</span>';
+
+  var controls = isOwner
+    ? '<span style="font-size:12px;color:var(--muted);padding:0 6px;">You</span>'
+    : '<select onchange="tmSetRole(\'' + m.id + '\',this.value,this)" style="font-size:12px;padding:6px 9px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;">' +
+        ['admin','staff','readonly'].map(function(r){
+          return '<option value="' + r + '"' + (m.role === r ? ' selected' : '') + '>' + TM_ROLE_LABEL[r] + '</option>';
+        }).join('') +
+      '</select>' +
+      '<button onclick="tmAskRemove(\'' + m.id + '\',\'' + String(m.email || 'this person').replace(/'/g,"") + '\')" style="font-size:12px;padding:6px 12px;border:1px solid rgba(224,85,85,0.25);color:var(--red);background:#fff;border-radius:8px;cursor:pointer;">Revoke</button>';
+
+  var created = m.created_at ? new Date(m.created_at).toLocaleDateString() : '';
+  return '' +
+    '<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(91,63,160,0.06);flex-wrap:wrap;">' +
+      '<div style="width:38px;height:38px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">' + tmInitials(m.email) + '</div>' +
+      '<div style="flex:1;min-width:140px;">' +
+        '<div style="font-size:14px;font-weight:600;">' + escHtml(m.email || '(invite pending)') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:1px;">' + (created ? 'Added ' + created : '') + '</div>' +
+      '</div>' +
+      pill +
+      '<div style="display:flex;align-items:center;gap:8px;">' + controls + '</div>' +
+    '</div>';
+}
+
+async function tmInvite() {
+  var email = (document.getElementById('tm-email').value || '').trim();
+  var name  = (document.getElementById('tm-name').value || '').trim();
+  var role  = document.getElementById('tm-role').value;
+  var out   = document.getElementById('tm-result');
+  if (!email) { toast('Enter an email first.'); return; }
+
+  var btn = document.getElementById('tm-invite-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  var res = await tmCall({ type: 'team_invite', email: email, name: name, role: role });
+  btn.disabled = false; btn.textContent = 'Send invite →';
+
+  if (!res || res.error) {
+    out.style.display = 'block';
+    out.style.background = '#fdecec'; out.style.borderColor = 'rgba(224,85,85,0.2)';
+    out.innerHTML = '<span style="color:var(--red);">Could not invite: ' + escHtml((res && res.error) || 'unknown error') + '</span>';
+    return;
+  }
+  out.style.display = 'block';
+  out.style.background = '#f0fdf0'; out.style.borderColor = 'rgba(106,191,105,0.2)';
+  out.innerHTML = res.invited
+    ? '✓ Invite sent to <strong>' + escHtml(email) + '</strong> as ' + (TM_ROLE_LABEL[role] || role) + '. They\'ll set their own password, then land with that access.'
+    : '✓ <strong>' + escHtml(email) + '</strong> already had a login — added as ' + (TM_ROLE_LABEL[role] || role) + '.';
+  toast(res.invited ? 'Invite sent' : 'Member added');
+  document.getElementById('tm-email').value = '';
+  document.getElementById('tm-name').value = '';
+  tmLoad();
+}
+
+async function tmSetRole(id, role, el) {
+  if (el) el.disabled = true;
+  var res = await tmCall({ type: 'team_set_role', id: id, role: role });
+  if (!res || res.error) {
+    toast('Could not update: ' + ((res && res.error) || 'error'));
+  } else {
+    toast('Access updated to ' + (TM_ROLE_LABEL[role] || role));
+  }
+  tmLoad();
+}
+
+function tmAskRemove(id, email) {
+  if (!confirm('Revoke ' + email + "'s access? They lose access to the admin panel immediately. You can re-invite them later.")) return;
+  var purge = confirm('Also delete their login entirely?\n\nOK = delete the login too (frees the email to reuse).\nCancel = just remove access, keep the login.');
+  tmRemove(id, purge);
+}
+
+async function tmRemove(id, purgeLogin) {
+  var res = await tmCall({ type: 'team_remove', id: id, purgeLogin: !!purgeLogin });
+  if (!res || res.error) {
+    toast('Could not revoke: ' + ((res && res.error) || 'error'));
+  } else {
+    toast(purgeLogin ? 'Access revoked and login deleted' : 'Access revoked');
+  }
+  tmLoad();
+}
 </script>
 </body>
 </html>
