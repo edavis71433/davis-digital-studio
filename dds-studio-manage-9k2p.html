@@ -3625,7 +3625,7 @@ async function loadAdvanceStageProjects() {
         body: JSON.stringify({
           type: "admin_db",
           method: "GET",
-          path: "projects?select=id,name,stage,ball_in_court,progress,contacts(name)&order=created_at.desc"
+          path: "projects?select=id,name,stage,ball_in_court,progress,contact_id&order=created_at.desc"
         })
       });
     } finally { clearTimeout(timer); }
@@ -3644,8 +3644,7 @@ async function loadAdvanceStageProjects() {
       return;
     }
     sel.innerHTML = rows.map(function (p) {
-      const who = (p.contacts && p.contacts.name) ? p.contacts.name : "-";
-      const label = who + " - " + p.name + "  (" + p.stage + ", " + p.progress + "%)";
+      const label = p.name + "  (" + p.stage + ", " + p.progress + "%)";
       return '<option value="' + p.id +
              '" data-stage="' + (p.stage || 'kickoff') +
              '" data-ball="' + (p.ball_in_court || 'agency') +
