@@ -1306,6 +1306,7 @@ function showAdminApp() {
   document.getElementById("adminWrap").style.display = "block";
   loadOverview();
   document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
+  try { if (typeof loadAdvanceStageProjects === 'function') loadAdvanceStageProjects(); } catch (e) {}
 }
 
 function showLogin() {
@@ -3604,16 +3605,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <!-- Advance Project Stage widget -->
 <script>
-// Load the agency's projects (with the contact name) into the picker.
-// Uses the same session-JWT path as the rest of the panel, via the admin_db
-// proxy already in your Edge Function — no service key in the browser.
+// ── Advance Project Stage widget ──
+// Loads projects using the logged-in admin session (adminJwt -> x-dds-user-jwt).
+// Called by showAdminApp() after login, and lazily when the picker is focused.
 async function loadAdvanceStageProjects() {
   const sel = document.getElementById('as-project');
   if (!sel) return;
   try {
     const jwt = await adminJwt();
     if (!jwt) { sel.innerHTML = '<option value="">Sign in to load projects</option>'; return; }
-    // Pull projects joined to their contact's name. PostgREST embed syntax.
     const res = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
@@ -3626,48 +3626,39 @@ async function loadAdvanceStageProjects() {
     let jr = {}; try { jr = await res.json(); } catch (e) {}
     const rows = (jr && jr.data) || [];
     if (!Array.isArray(rows) || !rows.length) {
-      sel.innerHTML = '<option value="">No projects yet — create one first</option>';
+      sel.innerHTML = '<option value="">No projects yet - create one first</option>';
       return;
     }
     sel.innerHTML = rows.map(function (p) {
-      const who = (p.contacts && p.contacts.name) ? p.contacts.name : "—";
-      const label = who + " · " + p.name + "  (" + p.stage + ", " + p.progress + "%)";
-      // stash current values on the option so we can prefill the form
+      const who = (p.contacts && p.contacts.name) ? p.contacts.name : "-";
+      const label = who + " - " + p.name + "  (" + p.stage + ", " + p.progress + "%)";
       return '<option value="' + p.id +
              '" data-stage="' + (p.stage || 'kickoff') +
              '" data-ball="' + (p.ball_in_court || 'agency') +
              '" data-progress="' + (p.progress || 0) + '">' + label + '</option>';
     }).join("");
-    // Prefill the controls from the first project.
     syncAdvanceStageForm();
   } catch (e) {
     sel.innerHTML = '<option value="">Could not load projects</option>';
   }
 }
 
-// When a project is picked, prefill stage/ball/progress to its current values.
 function syncAdvanceStageForm() {
   const sel = document.getElementById('as-project');
   const opt = sel && sel.options[sel.selectedIndex];
   if (!opt || !opt.value) return;
-  const stage = opt.getAttribute('data-stage') || 'kickoff';
-  const ball = opt.getAttribute('data-ball') || 'agency';
+  document.getElementById('as-stage').value = opt.getAttribute('data-stage') || 'kickoff';
+  document.getElementById('as-ball').value = opt.getAttribute('data-ball') || 'agency';
   const prog = opt.getAttribute('data-progress') || '0';
-  document.getElementById('as-stage').value = stage;
-  document.getElementById('as-ball').value = ball;
   document.getElementById('as-progress').value = prog;
   document.getElementById('as-progress-val').textContent = prog;
 }
 
-// Fire the advance. Calls the advance_stage route -> emit() -> trigger updates
-// the project row -> client feed updates (event is client_visible).
 async function advanceStage() {
   const btn = document.getElementById('as-btn');
   const out = document.getElementById('as-result');
   const projectId = document.getElementById('as-project').value;
-  const contactOpt = document.getElementById('as-project').options[document.getElementById('as-project').selectedIndex];
   if (!projectId) { toast("Pick a project first."); return; }
-
   const payload = {
     type: "advance_stage",
     projectId: projectId,
@@ -3676,8 +3667,7 @@ async function advanceStage() {
     progress: parseInt(document.getElementById('as-progress').value, 10),
     note: document.getElementById('as-note').value.trim() || null
   };
-
-  btn.disabled = true; btn.textContent = "Advancing…"; out.textContent = "";
+  btn.disabled = true; btn.textContent = "Advancing..."; out.textContent = "";
   try {
     const jwt = await adminJwt();
     if (!jwt) { toast("Please sign in again."); btn.disabled = false; btn.textContent = "Advance stage"; return; }
@@ -3688,11 +3678,11 @@ async function advanceStage() {
     });
     let jr = {}; try { jr = await res.json(); } catch (e) {}
     if (res.ok && jr.ok) {
-      out.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Advanced</span> to <strong>' +
-        payload.toStage + '</strong>, ball in <strong>' + payload.ballInCourt + '</strong>\'s court, ' +
+      out.innerHTML = '<span style="color:var(--green);font-weight:600;">Advanced</span> to <strong>' +
+        payload.toStage + '</strong>, ball in <strong>' + payload.ballInCourt + '</strong> court, ' +
         payload.progress + '% complete.';
-      toast("✓ Project advanced to " + payload.toStage + ".");
-      loadAdvanceStageProjects(); // refresh picker so it reflects the new state
+      toast("Project advanced to " + payload.toStage + ".");
+      loadAdvanceStageProjects();
     } else {
       const err = jr.error ? (typeof jr.error === 'string' ? jr.error : JSON.stringify(jr.error)) : ("HTTP " + res.status);
       out.innerHTML = '<span style="color:var(--red);font-weight:600;">Could not advance:</span> ' + err;
@@ -3705,13 +3695,20 @@ async function advanceStage() {
   }
 }
 
-// Wire the picker + load on first view.
-document.addEventListener('DOMContentLoaded', function () {
-  const sel = document.getElementById('as-project');
-  if (sel) sel.addEventListener('change', syncAdvanceStageForm);
-  // Load now; harmless to also call again when the tab opens.
-  loadAdvanceStageProjects();
-});
+// Wire change + lazy focus-load. No DOMContentLoaded auto-load (that runs before
+// login). showAdminApp() triggers the first load once a session exists.
+(function () {
+  function wire() {
+    const sel = document.getElementById('as-project');
+    if (!sel) return;
+    sel.addEventListener('change', syncAdvanceStageForm);
+    sel.addEventListener('focus', function () {
+      if (sel.options.length && /Sign in|Loading|Could not/.test(sel.options[0].text)) loadAdvanceStageProjects();
+    });
+  }
+  if (document.readyState !== 'loading') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
+})();
 </script>
 </body>
 </html>
