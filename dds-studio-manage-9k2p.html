@@ -1468,7 +1468,7 @@ async function loadReports(){
   body.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Crunching the numbers...</p>';
   var jwt = await adminJwt(); if (!jwt) { body.innerHTML='<p style="font-size:13px;color:var(--muted);padding:14px;">Sign in again.</p>'; return; }
   function q(path){
-    return fetch(SB_URL+"/functions/v1/clever-api",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},body:JSON.stringify({type:"admin_db",method:"GET",path:path})}).then(function(r){return r.json();}).then(function(j){return (j&&j.data)||[];}).catch(function(){return [];});
+    return fetch(SB_URL+"/functions/v1/clever-api",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},body:JSON.stringify({type:"admin_query",path:path})}).then(function(r){return r.json();}).then(function(j){return (j&&j.data)||[];}).catch(function(){return [];});
   }
   var res = await Promise.all([
     q("audit_leads?select=pipeline_stage,status,created_at"),
@@ -2830,7 +2830,7 @@ async function saveHubNotes(clientId, email){
     var cr = await fetch(SB_URL + "/functions/v1/clever-api", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
-      body: JSON.stringify({ type:"admin_db", method:"GET", path:"contacts?select=id&email=eq."+encodeURIComponent(email)+"&limit=1" })
+      body: JSON.stringify({ type:"admin_query", path:"contacts?select=id&email=eq."+encodeURIComponent(email)+"&limit=1" })
     });
     var cj = await cr.json();
     var cid = (cj && cj.data && cj.data[0]) ? cj.data[0].id : null;
@@ -2838,7 +2838,7 @@ async function saveHubNotes(clientId, email){
     await fetch(SB_URL + "/functions/v1/clever-api", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
-      body: JSON.stringify({ type:"admin_db", method:"PATCH", path:"contacts?id=eq."+cid, payload:{ owner_notes: ta.value } })
+      body: JSON.stringify({ type:"admin_write", table:"contacts", op:"update", match:{ id: cid }, payload:{ owner_notes: ta.value } })
     });
     if(msg){ msg.textContent='Saved \u2713'; setTimeout(function(){ msg.textContent=''; }, 2500); }
   } catch(e){ if(msg) msg.textContent='Could not save.'; }
@@ -2852,7 +2852,7 @@ async function prefillHubNotes(email, clientId){
     var cr = await fetch(SB_URL + "/functions/v1/clever-api", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
-      body: JSON.stringify({ type:"admin_db", method:"GET", path:"contacts?select=owner_notes&email=eq."+encodeURIComponent(email)+"&limit=1" })
+      body: JSON.stringify({ type:"admin_query", path:"contacts?select=owner_notes&email=eq."+encodeURIComponent(email)+"&limit=1" })
     });
     var cj = await cr.json();
     var notes = (cj && cj.data && cj.data[0]) ? (cj.data[0].owner_notes||'') : '';
@@ -2909,12 +2909,47 @@ async function setContentReceived(id, received) {
 
 // ── API HELPER ──
 async function api(path, method, body) {
-  // Routes through the Edge Function so the browser never holds the service-role
-  // key. The function verifies the admin's session JWT (sent below) against the
-  // `admins` allowlist before using the service role server-side.
+  // Part 2c carve-up: this helper now translates the old PostgREST-style calls
+  // into the narrow, server-enforced endpoints:
+  //   GET    -> admin_query (read-only; can never mutate server-side)
+  //   POST   -> admin_write op:insert
+  //   PATCH  -> admin_write op:update  (match parsed from ?col=eq.val)
+  //   DELETE -> admin_write op:delete  (match parsed from ?col=eq.val)
+  // Every existing call site keeps its signature; only this function changed.
+  // The per-table method rules are enforced in the edge function regardless of
+  // what the browser sends, which is where the real security lives.
+  var m = (method || "GET").toUpperCase();
   try {
     var jwt = await adminJwt();
     if (!jwt) { console.error("api error: not signed in"); showLogin(); return null; }
+
+    var reqBody;
+    if (m === "GET") {
+      reqBody = { type: "admin_query", path: path };
+    } else {
+      // Split "table?filter" into table + an eq-only match object.
+      var qIdx = path.indexOf("?");
+      var table = (qIdx === -1 ? path : path.slice(0, qIdx)).split("/")[0];
+      var match = null;
+      if (qIdx !== -1) {
+        match = {};
+        var qs = path.slice(qIdx + 1);
+        qs.split("&").forEach(function(pair){
+          var eq = pair.indexOf("=");
+          if (eq === -1) return;
+          var col = pair.slice(0, eq);
+          var val = pair.slice(eq + 1);
+          // Only translate simple "col=eq.value" filters (all our writes use these).
+          if (val.indexOf("eq.") === 0) {
+            match[col] = decodeURIComponent(val.slice(3));
+          }
+        });
+        if (!Object.keys(match).length) match = null;
+      }
+      var op = m === "POST" ? "insert" : m === "PATCH" ? "update" : "delete";
+      reqBody = { type: "admin_write", table: table, op: op, payload: (body || null), match: match };
+    }
+
     var r = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
       headers: {
@@ -2922,7 +2957,7 @@ async function api(path, method, body) {
         "Authorization": "Bearer " + SB_KEY,
         "x-dds-user-jwt": jwt
       },
-      body: JSON.stringify({ type: "admin_db", path: path, method: method || "GET", payload: body || null })
+      body: JSON.stringify(reqBody)
     });
     if (r.status === 401) { console.error("api error: unauthorized"); showLogin(); return null; }
     var j = await r.json();
@@ -2945,7 +2980,7 @@ async function loadWhoNeedsMe(){
     var res = await fetch(SB_URL + "/functions/v1/clever-api", {
       method:"POST",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
-      body: JSON.stringify({ type:"admin_db", method:"GET", path:"projects?select=id,name,stage,ball_in_court,progress,updated_at,contacts(name)&stage=neq.complete&order=updated_at.asc" })
+      body: JSON.stringify({ type:"admin_query", path:"projects?select=id,name,stage,ball_in_court,progress,updated_at,contacts(name)&stage=neq.complete&order=updated_at.asc" })
     });
     var jr = await res.json();
     var rows = (jr && jr.data) || [];
@@ -3481,23 +3516,24 @@ async function deleteClient(cid, email, name) {
 
   toast("Deleting "+who+"...");
 
-  // 1) Remove child rows first so nothing is orphaned. Each is best-effort.
-  //    All of these tables key off client_id.
-  var childTables = [
-    "file_comments", "files", "messages", "approvals", "invoices",
-    "timeline", "activity_log", "notifications", "client_onboarding",
-    "intake_forms", "client_requests"
-  ];
-  for (var t of childTables) {
-    try { await api(t + "?client_id=eq." + cid, "DELETE"); }
-    catch (e) { console.error("delete from " + t + " failed:", e); }
-  }
-
-  // 2) Remove the client record itself.
+  // 1+2) Remove all child rows AND the client record in one owner-gated call.
+  //    The cascade runs server-side (delete_client_cascade), so the frontend
+  //    no longer needs DELETE access to all those child tables.
   try {
-    await api("clients?id=eq." + cid, "DELETE");
+    var jwtDel = await adminJwt();
+    if (!jwtDel) { toast("Please sign in again."); showLogin(); return; }
+    var dr = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwtDel },
+      body: JSON.stringify({ type: "delete_client_cascade", clientId: cid })
+    });
+    var dj = {}; try { dj = await dr.json(); } catch (e) {}
+    if (!(dr.ok && dj.ok)) {
+      toast("Could not delete client record: " + (dj.error || ("HTTP " + dr.status)));
+      return;
+    }
   } catch (e) {
-    toast("Could not delete client record: " + (e.message || e));
+    toast("Could not delete client: " + (e.message || e));
     return;
   }
 
@@ -3572,7 +3608,7 @@ async function inviteClient() {
       method: "POST",
       headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
       body: JSON.stringify({
-        type: "admin_db", method: "POST", path: "contacts",
+        type: "admin_write", table: "contacts", op: "insert",
         payload: { name: name, email: cemail.toLowerCase(), stage: "active", source: "created", auth_user_id: authUid }
       })
     });
@@ -3583,7 +3619,7 @@ async function inviteClient() {
         method: "POST",
         headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
         body: JSON.stringify({
-          type: "admin_db", method: "POST", path: "projects",
+          type: "admin_write", table: "projects", op: "insert",
           payload: { contact_id: newContactId, name: proj || (name + " — Project"), stage: "kickoff", ball_in_court: "agency", progress: 0 }
         })
       });
@@ -4585,8 +4621,7 @@ async function loadAdvanceStageProjects() {
         signal: ctrl.signal,
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
         body: JSON.stringify({
-          type: "admin_db",
-          method: "GET",
+          type: "admin_query",
           path: "projects?select=id,name,stage,ball_in_court,progress,contact_id&order=created_at.desc"
         })
       });
@@ -4682,7 +4717,7 @@ async function loadContactsMap() {
     const res = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
-      body: JSON.stringify({ type: "admin_db", method: "GET", path: "contacts?select=id,email" })
+      body: JSON.stringify({ type: "admin_query", path: "contacts?select=id,email" })
     });
     const jr = await res.json();
     const rows = (jr && jr.data) || [];
