@@ -2282,7 +2282,36 @@ async function sendMsg() {
   await notify("eric_message", text, "", ctx);
   document.getElementById("msgText").value = "";
   toast("✓ Message sent + client notified");
+  // Also surface this message in the client's project feed (best-effort).
+  try { await emitClientMessageToFeed(ctx, text); } catch(e){}
   await loadMessages(ctx);
+}
+
+// Drops a client_visible "message" event into the spine feed for this client,
+// matched to their contact by email. Best-effort; never blocks messaging.
+async function emitClientMessageToFeed(client, text) {
+  try {
+    const email = (client.contact_email || client.email || "").toLowerCase();
+    if (!email) return;
+    if (!window.__ddsContactsByEmail || !Object.keys(window.__ddsContactsByEmail).length) {
+      if (typeof loadContactsMap === "function") await loadContactsMap();
+    }
+    const contactId = (window.__ddsContactsByEmail || {})[email];
+    if (!contactId) return;
+    const jwt = await adminJwt(); if (!jwt) return;
+    await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({
+        type: "emit_event",
+        eventType: "message.sent",
+        actor: "admin",
+        contact: contactId,
+        payload: { preview: text.slice(0, 160) },
+        clientVisible: true
+      })
+    });
+  } catch(e){}
 }
 
 // ── FILES ──
@@ -2344,6 +2373,7 @@ async function addApproval() {
 
 // ── TIMELINE ──
 async function loadTimeline(client) {
+  try { window.__ddsSelectedClientEmail = (client.contact_email || client.email || "").toLowerCase(); if (typeof focusAdvanceStageOnSelected === "function") focusAdvanceStageOnSelected(); } catch(e){}
   var data = await api("timeline?select=*&client_id=eq."+client.id+"&order=sort_order");
   var el = document.getElementById("tlBody");
   if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No timeline items.</p>"; return; }
@@ -3646,6 +3676,7 @@ async function loadAdvanceStageProjects() {
     sel.innerHTML = rows.map(function (p) {
       const label = p.name + "  (" + p.stage + ", " + p.progress + "%)";
       return '<option value="' + p.id +
+             '" data-contact="' + (p.contact_id || '') +
              '" data-stage="' + (p.stage || 'kickoff') +
              '" data-ball="' + (p.ball_in_court || 'agency') +
              '" data-progress="' + (p.progress || 0) + '">' + label + '</option>';
@@ -3706,6 +3737,41 @@ async function advanceStage() {
     out.innerHTML = '<span style="color:var(--red);font-weight:600;">Error:</span> ' + String(e);
   } finally {
     btn.disabled = false; btn.textContent = "Advance stage";
+  }
+}
+
+
+// STEP 2: focus the Advance widget on the client selected in the Timeline tab.
+// Matches the selected client's email to a project's contact, then preselects it.
+window.__ddsContactsByEmail = window.__ddsContactsByEmail || {};
+async function loadContactsMap() {
+  try {
+    const jwt = await adminJwt(); if (!jwt) return;
+    const res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({ type: "admin_db", method: "GET", path: "contacts?select=id,email" })
+    });
+    const jr = await res.json();
+    const rows = (jr && jr.data) || [];
+    const map = {};
+    (Array.isArray(rows) ? rows : []).forEach(function(c){ if (c.email) map[String(c.email).toLowerCase()] = c.id; });
+    window.__ddsContactsByEmail = map;
+  } catch(e){}
+}
+async function focusAdvanceStageOnSelected() {
+  const sel = document.getElementById('as-project');
+  if (!sel) return;
+  const email = window.__ddsSelectedClientEmail || "";
+  if (!email) return;
+  // Ensure the picker is loaded and the contacts map exists.
+  if (!sel.options.length || /Loading|Sign in|Not signed/.test(sel.options[0].text)) { await loadAdvanceStageProjects(); }
+  if (!Object.keys(window.__ddsContactsByEmail).length) { await loadContactsMap(); }
+  const contactId = window.__ddsContactsByEmail[email];
+  if (!contactId) return;
+  // Find the option whose data-contact matches and select it.
+  for (var i=0;i<sel.options.length;i++){
+    if (sel.options[i].getAttribute('data-contact') === contactId) { sel.selectedIndex = i; syncAdvanceStageForm(); break; }
   }
 }
 
