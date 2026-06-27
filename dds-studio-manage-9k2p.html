@@ -1905,6 +1905,37 @@ async function openHubClient(id) {
   html += statBox(leads.length,"Tool runs");
   html += '</div>';
 
+  // ── NOTES (saved to the matching contact's owner_notes) ──
+  html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:22px 0 8px;">Private notes</div>';
+  html += '<textarea id="hubNotes-'+c.id+'" placeholder="Jot anything about this client \u2014 only you see this. e.g. prefers email, wants to start in August, referred by Maurice." style="width:100%;min-height:70px;font-size:13px;padding:11px 13px;border:1px solid rgba(91,63,160,0.18);border-radius:10px;resize:vertical;font-family:inherit;box-sizing:border-box;"></textarea>';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-top:7px;"><button onclick="saveHubNotes(\''+c.id+'\',\''+((c.contact_email||c.email||'').toLowerCase())+'\')" style="font-size:12px;font-weight:600;padding:7px 16px;border-radius:8px;border:none;background:var(--p);color:#fff;cursor:pointer;">Save notes</button><span id="hubNotesMsg-'+c.id+'" style="font-size:11px;color:var(--muted);"></span></div>';
+
+  // ── HISTORY (one merged timeline of everything that happened) ──
+  (function(){
+    var ev = [];
+    msgs.forEach(function(m){ ev.push({ t:m.created_at, icon:'\ud83d\udcac', text:(m.from_who==='eric'?'You':'Client')+': '+String(m.text||'').slice(0,80) }); });
+    files.forEach(function(f){ ev.push({ t:f.created_at, icon:'\ud83d\udcce', text:(f.from_who==='eric'?'You shared':'Client uploaded')+' '+(f.name||'a file') }); });
+    invs.forEach(function(i){ ev.push({ t:i.created_at, icon:'\ud83d\udcb5', text:'Invoice '+(i.name||'')+' \u00b7 '+(i.status||'') }); });
+    apprs.forEach(function(a){ ev.push({ t:a.created_at, icon:'\u2713', text:'Approval: '+(a.title||'')+' \u00b7 '+(a.status||'') }); });
+    (activity||[]).forEach(function(x){ ev.push({ t:x.created_at, icon:'\u2022', text:(x.action||'activity')+(x.detail?(' \u2014 '+x.detail):'') }); });
+    ev = ev.filter(function(e){ return e.t; }).sort(function(a,b){ return new Date(b.t)-new Date(a.t); }).slice(0,40);
+    html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:24px 0 10px;">History</div>';
+    if (!ev.length) { html += '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No activity yet.</div>'; }
+    else {
+      html += '<div style="border-left:2px solid rgba(91,63,160,0.12);margin-left:6px;padding-left:14px;">';
+      ev.forEach(function(e){
+        var d = new Date(e.t);
+        var ds = d.toLocaleDateString([], {month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        html += '<div style="position:relative;padding:7px 0;">'+
+          '<span style="position:absolute;left:-21px;top:9px;width:9px;height:9px;background:#fff;border:2px solid var(--p);border-radius:50%;"></span>'+
+          '<div style="font-size:12.5px;color:var(--ink);line-height:1.4;">'+e.icon+' '+e.text+'</div>'+
+          '<div style="font-size:10.5px;color:var(--muted);margin-top:1px;">'+ds+'</div>'+
+        '</div>';
+      });
+      html += '</div>';
+    }
+  })();
+
   // In-record actions: open the working form for this client, pre-selected.
   // Messaging is handled inline below, so it's not duplicated here.
   html += '<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 8px;">Actions for this client</div>';
@@ -2130,6 +2161,7 @@ async function openHubClient(id) {
   html += '</div>';
 
   detail.innerHTML = html;
+  try { prefillHubNotes((c.contact_email||c.email||"").toLowerCase(), c.id); } catch(e){}
 }
 
 // Jump to a working tab with this client pre-selected
@@ -2164,6 +2196,49 @@ async function hubSendMessage(clientId) {
 }
 
 // Manually flip active/inactive (writes project_status)
+
+// Save private notes to the matching contact's owner_notes (by email).
+async function saveHubNotes(clientId, email){
+  var ta = document.getElementById('hubNotes-'+clientId);
+  var msg = document.getElementById('hubNotesMsg-'+clientId);
+  if (!ta || !email) { if(msg) msg.textContent='No email on file to attach notes.'; return; }
+  try {
+    var jwt = await adminJwt(); if (!jwt) { if(msg) msg.textContent='Sign in again.'; return; }
+    // find the contact id by email, then patch owner_notes
+    var cr = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type:"admin_db", method:"GET", path:"contacts?select=id&email=eq."+encodeURIComponent(email)+"&limit=1" })
+    });
+    var cj = await cr.json();
+    var cid = (cj && cj.data && cj.data[0]) ? cj.data[0].id : null;
+    if (!cid) { if(msg) msg.textContent='No contact record yet for this email.'; return; }
+    await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type:"admin_db", method:"PATCH", path:"contacts?id=eq."+cid, payload:{ owner_notes: ta.value } })
+    });
+    if(msg){ msg.textContent='Saved \u2713'; setTimeout(function(){ msg.textContent=''; }, 2500); }
+  } catch(e){ if(msg) msg.textContent='Could not save.'; }
+}
+
+// After the hub detail renders, prefill the notes box from the contact record.
+async function prefillHubNotes(email, clientId){
+  try {
+    if (!email) return;
+    var jwt = await adminJwt(); if (!jwt) return;
+    var cr = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type:"admin_db", method:"GET", path:"contacts?select=owner_notes&email=eq."+encodeURIComponent(email)+"&limit=1" })
+    });
+    var cj = await cr.json();
+    var notes = (cj && cj.data && cj.data[0]) ? (cj.data[0].owner_notes||'') : '';
+    var ta = document.getElementById('hubNotes-'+clientId);
+    if (ta && notes) ta.value = notes;
+  } catch(e){}
+}
+
 async function toggleHubStatus(id, currentlyActive) {
   var newStatus = currentlyActive ? "Inactive" : "In Progress";
   await api("clients?id=eq."+id, "PATCH", {project_status:newStatus});
