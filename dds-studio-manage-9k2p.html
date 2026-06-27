@@ -1780,6 +1780,22 @@ async function openHubClient(id) {
   html += '</select>';
   html += '<button onclick="resetClientPassword(\''+c.id+'\',\''+(c.email||'').replace(/'/g,"\\'")+'\',\''+(c.name||'').replace(/'/g,"\\'")+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid rgba(91,63,160,0.25);background:#fff;color:var(--p);cursor:pointer;">🔑 Set / reset password</button>';
   html += '<button onclick="deleteClient(\''+c.id+'\',\''+(c.email||'').replace(/'/g,"\\'")+'\',\''+(c.name||'').replace(/'/g,"\\'")+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid rgba(224,85,85,0.35);background:#fff;color:var(--red);cursor:pointer;">🗑 Delete client</button>';
+  html += '</div>';
+
+  // ── Content collection (drives the automated nudges) ──
+  // Set a due date and the scheduler will gently nudge the client as it approaches
+  // and if it passes. Mark received to stop the nudges. Launching also stops them.
+  var dueVal = c.content_due_at ? new Date(c.content_due_at).toISOString().slice(0,10) : '';
+  var received = !!c.content_received_at;
+  html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed rgba(91,63,160,0.12);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
+  html += '<span style="font-size:12px;color:var(--muted);">📥 Content due:</span>';
+  html += '<input type="date" id="hubDue-'+c.id+'" value="'+dueVal+'" onchange="setContentDue(\''+c.id+'\',this.value)" style="font-size:12px;padding:6px 9px;border-radius:8px;border:1px solid rgba(91,63,160,0.18);background:#fff;color:var(--ink);">';
+  if (received) {
+    html += '<span style="font-size:12px;color:#1d8a5a;">✓ Content received</span>';
+    html += '<button onclick="setContentReceived(\''+c.id+'\',false)" style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid rgba(91,63,160,0.18);background:#fff;color:var(--muted);cursor:pointer;">Undo</button>';
+  } else {
+    html += '<button onclick="setContentReceived(\''+c.id+'\',true)" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid rgba(29,138,90,0.35);background:#fff;color:#1d8a5a;cursor:pointer;">✓ Mark content received</button>';
+  }
   html += '</div></div>';
 
   // Tool runs / inquiries
@@ -1950,6 +1966,27 @@ async function setMaintenancePlan(id, plan) {
   toast(plan ? ("✓ Plan set: "+plan) : "✓ Maintenance plan cleared");
   var c = hubClients.find(function(x){ return x.id === id; });
   if (c) c.maintenance_plan = plan || null;
+}
+
+// Set the content due date. The scheduled job nudges the client as this approaches
+// and if it passes, until you mark content received or the project launches.
+async function setContentDue(id, dateStr) {
+  var iso = dateStr ? new Date(dateStr + "T12:00:00").toISOString() : null;
+  await api("clients?id=eq."+id, "PATCH", {content_due_at: iso});
+  toast(iso ? "✓ Content due date set" : "✓ Content due date cleared");
+  var c = hubClients.find(function(x){ return x.id === id; });
+  if (c) c.content_due_at = iso;
+}
+
+// Mark content received (stops nudges) or undo it.
+async function setContentReceived(id, received) {
+  var iso = received ? new Date().toISOString() : null;
+  await api("clients?id=eq."+id, "PATCH", {content_received_at: iso});
+  toast(received ? "✓ Content marked received — nudges stopped" : "✓ Reverted — nudges may resume");
+  var c = hubClients.find(function(x){ return x.id === id; });
+  if (c) c.content_received_at = iso;
+  await loadHub();
+  openHubClient(id);
 }
 
 // ── API HELPER ──
@@ -2245,8 +2282,9 @@ async function markProjectComplete() {
   out.textContent = "Working…";
 
   try {
-    // 1. Set progress to 100 and flag complete
-    await api("clients?id=eq."+ctx.id,"PATCH",{ progress:100, status:"complete", completed_at:new Date().toISOString() });
+    // 1. Set progress to 100 and flag complete. Also stamp survey_sent_at so the
+    //    scheduled job knows the survey already went out and never re-sends it.
+    await api("clients?id=eq."+ctx.id,"PATCH",{ progress:100, status:"complete", completed_at:new Date().toISOString(), survey_sent_at:new Date().toISOString() });
     ctx.progress = 100;
 
     // 2. Log it

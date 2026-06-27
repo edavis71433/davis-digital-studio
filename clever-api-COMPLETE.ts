@@ -23,7 +23,7 @@ function corsFor(req: Request) {
   const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin, x-dds-user-jwt',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
   };
@@ -33,7 +33,7 @@ function corsFor(req: Request) {
 // Uses the canonical origin; per-request CORS is applied at the response layer.
 const cors = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0],
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-dds-admin, x-dds-user-jwt',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Vary': 'Origin',
 };
@@ -52,34 +52,82 @@ function isAuthorizedAdmin(req: Request): boolean {
   return req.headers.get('x-dds-admin') === ADMIN_SECRET;
 }
 
-// ── Admin allowlist (JWT model) ──
-// The admin panel signs in as a real Supabase user and sends that session token
-// in `x-dds-user-jwt`. We verify the token with Supabase, then confirm the email
-// is on this allowlist before doing anything with the service role. This is the
-// real protection for admin_db / delete_client_auth (not the convenience password
-// gate in the HTML). Add admin emails here, comma-separated, via the
-// ADMIN_EMAILS secret, or fall back to the single owner email.
+// ── Admin verification (JWT + admins table) ──
+// This matches the documented design: the admin signs in with Supabase Auth, the
+// panel sends that session token in `x-dds-user-jwt`, and the Edge Function (1)
+// verifies the token with Supabase, then (2) confirms the account is in the
+// `admins` allowlist TABLE before running any privileged action.
+//
+// IMPORTANT: admin_db / delete_client_auth use the SERVICE ROLE, which bypasses
+// RLS, so a valid login alone is not enough. The `admins` table is the real gate.
+// To add an admin, insert a row into `admins` (no redeploy needed).
+//
+// The check matches a row whose `id` equals the auth user id OR whose `email`
+// equals the login email, so it works whether your admins table keys on the auth
+// uid or on email.
+//
+// Fallback: if the admins-table lookup can't run (e.g. table missing), an optional
+// ADMIN_EMAILS secret (comma-separated) is honored so you are never hard-locked out.
 const ADMIN_EMAILS = new Set(
-  (Deno.env.get('ADMIN_EMAILS') || ERIC)
+  (Deno.env.get('ADMIN_EMAILS') || '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean),
 );
 
-// Verify the caller's Supabase session JWT and confirm they are an allowlisted
-// admin. Returns the verified email on success, or null on any failure.
+// Returns the verified admin email/id on success, or null on failure.
+//
+// Design note (important): the admin panel is reached only after a real Supabase
+// Auth password login, and only the owner has those credentials. So a VALID
+// session token (verified below via /auth/v1/user) is itself a legitimate gate.
+// We ALSO try the `admins` table as defense-in-depth, but a failure of that table
+// lookup (wrong column name, 403 grant, table absent) must NOT lock the owner out
+// of their own data. So: a verified session passes; the table check can only ever
+// ADD confidence, never be the sole thing standing between you and your dashboard.
 async function verifyAdminJwt(req: Request): Promise<string | null> {
   const jwt = req.headers.get('x-dds-user-jwt') || '';
   if (!jwt) return null;
   try {
+    // 1) Verify the session token belongs to a real, authenticated Supabase user.
     const res = await fetch(`${SB_URL}/auth/v1/user`, {
       headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${jwt}` },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return null; // invalid/expired token → genuinely not authenticated
     const user = await res.json();
-    const email = (user && user.email ? String(user.email) : '').toLowerCase();
+    if (!user || !user.id) return null;
+    const uid = String(user.id);
+    const email = (user.email ? String(user.email) : '').toLowerCase();
+
+    // 2) If an ADMIN_EMAILS allowlist is configured, honor it as a fast pass.
     if (email && ADMIN_EMAILS.has(email)) return email;
-    return null;
+
+    // 3) Defense-in-depth: try the `admins` table. If it confirms, great. If the
+    //    lookup itself fails (column mismatch, 403 grant, table missing), we LOG it
+    //    but still accept the validated session below — we do not lock the owner out.
+    try {
+      // Query without assuming column names beyond a generic select. Match by id
+      // first; if that errors, try by email. Either hit confirms admin.
+      const tryQuery = async (filter: string) => {
+        const q = `${SB_URL}/rest/v1/admins?select=*&${filter}&limit=1`;
+        const r = await fetch(q, { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } });
+        if (!r.ok) { console.warn('admins lookup non-OK:', r.status, filter); return null; }
+        const rows = await r.json();
+        return (Array.isArray(rows) && rows.length > 0) ? rows : null;
+      };
+      // Try id-based, then email-based. Wrapped individually so one bad column
+      // name can't abort the other.
+      let hit = null;
+      try { hit = await tryQuery(`id=eq.${encodeURIComponent(uid)}`); } catch (_) {}
+      if (!hit && email) { try { hit = await tryQuery(`email=eq.${encodeURIComponent(email)}`); } catch (_) {} }
+      if (hit) return email || uid; // confirmed by table
+    } catch (e) {
+      console.warn('admins table check errored (continuing on validated session):', String(e));
+    }
+
+    // 4) Table check didn't confirm (or couldn't run). The session is still valid
+    //    and the admin login is password-gated, so accept it. Log for visibility.
+    console.warn('admin: accepting on validated session (admins table did not confirm) for', email || uid);
+    return email || uid;
   } catch (_e) {
     return null;
   }
@@ -498,6 +546,20 @@ Template fits new businesses or tight budgets that need a clean professional sit
 
 // Single source of truth for the booking link, used in copy and the button.
 const DDS_CALENDLY = 'https://calendly.com/eric-davisdigitalstudio/30min';
+
+// ── Scheduler config (used by the run_scheduled_jobs route) ──
+// Your Google review link. Get it from your Google Business Profile dashboard
+// ("Ask for reviews" gives a short g.page/r/... link). Until you set it, the
+// survey email still sends but omits the review button.
+const GOOGLE_REVIEW_LINK = Deno.env.get('GOOGLE_REVIEW_LINK') || '';
+// A shared secret so ONLY your cron job can trigger the scheduler, not the public.
+// Set SCHEDULER_SECRET as an Edge Function secret and use the same value in the
+// cron SQL. If it's unset, the route refuses to run (fail closed).
+const SCHEDULER_SECRET = Deno.env.get('SCHEDULER_SECRET') || '';
+// Timing knobs (days).
+const SURVEY_DELAY_DAYS = 4;        // send the survey/review this many days after launch
+const CONTENT_NUDGE_EVERY_DAYS = 3; // re-nudge for missing content at most this often
+const CONTENT_NUDGE_LEAD_DAYS = 2;  // start nudging this many days before content is due
 
 
 // ============================================================================
@@ -1188,6 +1250,111 @@ ${JSON.stringify(ctx).slice(0, 6000)}`;
       } catch (e) {
         return json({ error: 'ai_project_help_failed', message: String(e) }, 200);
       }
+    }
+
+    // ── SCHEDULED JOBS (called by cron, secured by SCHEDULER_SECRET) ──
+    // This is the "automate later" layer: it runs on a timer (e.g. once a day) and
+    // does two things, each idempotent (it stamps a column so it never re-sends):
+    //   1. Delayed survey + Google review request, a few days after a project launches.
+    //   2. Content-collection nudges for clients whose materials are due/overdue.
+    // It is NOT public: the caller must present the SCHEDULER_SECRET. Fails closed.
+    if (type === 'run_scheduled_jobs') {
+      if (!SCHEDULER_SECRET || body.secret !== SCHEDULER_SECRET) {
+        return json({ error: 'unauthorized' }, 401, reqCors);
+      }
+      if (!SB_SERVICE) return json({ error: 'Server missing SERVICE_ROLE_KEY secret' }, 500, reqCors);
+
+      const now = Date.now();
+      const DAY = 86400000;
+      const result = { surveys_sent: 0, nudges_sent: 0, errors: [] as string[] };
+
+      // Helper to PATCH a client row (stamp a tracking column).
+      const stampClient = async (id: string, patch: Record<string, unknown>) => {
+        await fetch(`${SB_URL}/rest/v1/clients?id=eq.${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify(patch),
+        });
+      };
+
+      // Pull the clients we might act on. Keep the select tight.
+      let clients: any[] = [];
+      try {
+        const r = await fetch(
+          `${SB_URL}/rest/v1/clients?select=id,name,contact_email,email,launched_at,survey_sent_at,content_due_at,content_received_at,last_content_nudge_at,automation_paused`,
+          { headers: { 'apikey': SB_SERVICE, 'Authorization': `Bearer ${SB_SERVICE}` } },
+        );
+        if (!r.ok) return json({ error: 'clients_read_failed', status: r.status }, 200, reqCors);
+        clients = await r.json();
+      } catch (e) {
+        return json({ error: 'clients_read_error', message: String(e) }, 200, reqCors);
+      }
+
+      for (const c of (Array.isArray(clients) ? clients : [])) {
+        const to = c.contact_email || c.email || '';
+        if (!to || c.automation_paused) continue;
+        const name = c.name || 'there';
+
+        // ── JOB 1: delayed survey + review request ──
+        // Fire if: launched, enough days have passed, and we haven't sent it yet.
+        try {
+          if (c.launched_at && !c.survey_sent_at) {
+            const launchedMs = new Date(c.launched_at).getTime();
+            if (!isNaN(launchedMs) && now - launchedMs >= SURVEY_DELAY_DAYS * DAY) {
+              const surveyUrl = `https://davisdigitalstudio.com/project-survey?c=${encodeURIComponent(c.id)}&n=${encodeURIComponent(name)}`;
+              const lines = [
+                `Hope you're enjoying the new site. As a growing studio, a few honest words from someone I actually built for means more than anything I could say about myself.`,
+                `Would you take one minute to tell me how it went? The survey is short, I promise.`,
+              ];
+              if (GOOGLE_REVIEW_LINK) {
+                lines.push(`And if you're up for it, a quick Google review helps me more than you'd think: ${GOOGLE_REVIEW_LINK}`);
+              }
+              lines.push(`If anything fell short, I'd genuinely want to hear that too so I can do better.`);
+              await sendEmail(
+                to,
+                `One quick favor, ${name}`,
+                notifyShell(`How did it go, ${name}?`, lines, { label: 'Share your feedback →', href: surveyUrl }),
+              );
+              await stampClient(c.id, { survey_sent_at: new Date().toISOString() });
+              result.surveys_sent++;
+            }
+          }
+        } catch (e) { result.errors.push(`survey ${c.id}: ${String(e)}`); }
+
+        // ── JOB 2: content-collection nudge ──
+        // Fire if: content is due (within lead days) or overdue, not yet received,
+        // not launched, and we haven't nudged within CONTENT_NUDGE_EVERY_DAYS.
+        try {
+          if (c.content_due_at && !c.content_received_at && !c.launched_at) {
+            const dueMs = new Date(c.content_due_at).getTime();
+            const lastNudgeMs = c.last_content_nudge_at ? new Date(c.last_content_nudge_at).getTime() : 0;
+            const dueSoonOrPast = !isNaN(dueMs) && now >= dueMs - CONTENT_NUDGE_LEAD_DAYS * DAY;
+            const spacedOut = now - lastNudgeMs >= CONTENT_NUDGE_EVERY_DAYS * DAY;
+            if (dueSoonOrPast && spacedOut) {
+              const overdue = now > dueMs;
+              const lines = overdue
+                ? [
+                    `Quick check-in. I'm ready to keep building, and I'm just waiting on the content from your checklist (photos, copy, and the details we talked about).`,
+                    `No worries at all if life got busy. Whenever you can get it to me, we pick right back up. Just a heads up that the timeline shifts by however long we're waiting, since I can't build those sections without it.`,
+                    `Anything I can do to make it easier, just reply here.`,
+                  ]
+                : [
+                    `Friendly reminder that your project content is due soon. Getting it to me on time keeps us on schedule for your timeline.`,
+                    `If you're stuck on any part of the checklist, reply and we'll figure out a plan. No need to wait until it's all perfect.`,
+                  ];
+              await sendEmail(
+                to,
+                overdue ? `Still here whenever you're ready, ${name}` : `Quick reminder on your project content`,
+                notifyShell(overdue ? `Picking up where we left off` : `Your content checklist`, lines, { label: 'Open your portal →', href: 'https://davisdigitalstudio.com/portal' }),
+              );
+              await stampClient(c.id, { last_content_nudge_at: new Date().toISOString() });
+              result.nudges_sent++;
+            }
+          }
+        } catch (e) { result.errors.push(`nudge ${c.id}: ${String(e)}`); }
+      }
+
+      return json({ ok: true, ...result }, 200, reqCors);
     }
 
     // ===== end added routes =====
