@@ -3605,28 +3605,42 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <!-- Advance Project Stage widget -->
 <script>
-// ── Advance Project Stage widget ──
-// Loads projects using the logged-in admin session (adminJwt -> x-dds-user-jwt).
-// Called by showAdminApp() after login, and lazily when the picker is focused.
+// ── Advance Project Stage widget (hardened: surfaces real errors) ──
 async function loadAdvanceStageProjects() {
   const sel = document.getElementById('as-project');
   if (!sel) return;
+  sel.innerHTML = '<option value="">Loading projects...</option>';
   try {
     const jwt = await adminJwt();
-    if (!jwt) { sel.innerHTML = '<option value="">Sign in to load projects</option>'; return; }
-    const res = await fetch(SB_URL + "/functions/v1/clever-api", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
-      body: JSON.stringify({
-        type: "admin_db",
-        method: "GET",
-        path: "projects?select=id,name,stage,ball_in_court,progress,contacts(name)&order=created_at.desc"
-      })
-    });
-    let jr = {}; try { jr = await res.json(); } catch (e) {}
+    if (!jwt) { sel.innerHTML = '<option value="">Not signed in - reload after login</option>'; return; }
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(function () { ctrl.abort(); }, 12000);
+    let res, jr = {};
+    try {
+      res = await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+        body: JSON.stringify({
+          type: "admin_db",
+          method: "GET",
+          path: "projects?select=id,name,stage,ball_in_court,progress,contacts(name)&order=created_at.desc"
+        })
+      });
+    } finally { clearTimeout(timer); }
+
+    try { jr = await res.json(); } catch (e) { jr = {}; }
+
+    // Surface a real error instead of hanging.
+    if (jr && jr.error) {
+      const e = (typeof jr.error === 'string') ? jr.error : JSON.stringify(jr.error);
+      sel.innerHTML = '<option value="">Error: ' + e + '</option>';
+      return;
+    }
     const rows = (jr && jr.data) || [];
     if (!Array.isArray(rows) || !rows.length) {
-      sel.innerHTML = '<option value="">No projects yet - create one first</option>';
+      sel.innerHTML = '<option value="">No projects found</option>';
       return;
     }
     sel.innerHTML = rows.map(function (p) {
@@ -3639,7 +3653,8 @@ async function loadAdvanceStageProjects() {
     }).join("");
     syncAdvanceStageForm();
   } catch (e) {
-    sel.innerHTML = '<option value="">Could not load projects</option>';
+    const sel2 = document.getElementById('as-project');
+    if (sel2) sel2.innerHTML = '<option value="">Load failed: ' + String(e) + '</option>';
   }
 }
 
@@ -3695,15 +3710,13 @@ async function advanceStage() {
   }
 }
 
-// Wire change + lazy focus-load. No DOMContentLoaded auto-load (that runs before
-// login). showAdminApp() triggers the first load once a session exists.
 (function () {
   function wire() {
     const sel = document.getElementById('as-project');
     if (!sel) return;
     sel.addEventListener('change', syncAdvanceStageForm);
     sel.addEventListener('focus', function () {
-      if (sel.options.length && /Sign in|Loading|Could not/.test(sel.options[0].text)) loadAdvanceStageProjects();
+      if (sel.options.length && /Not signed in|Loading|Could not|Error|Load failed/.test(sel.options[0].text)) loadAdvanceStageProjects();
     });
   }
   if (document.readyState !== 'loading') wire();
