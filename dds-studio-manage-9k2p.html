@@ -747,6 +747,62 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <div class="cb-info"><div class="cb-label">Updating timeline for</div><div class="cb-name" id="bname-timeline">—</div></div>
         </div>
         <div class="card"><div class="ch"><div class="ct">📋 Phase Status</div></div><div class="cb" id="tlBody"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
+        <div class="card" id="advanceStageCard" style="margin-top:16px;border:1.5px solid rgba(91,63,160,0.25);">
+          <div class="ch">
+            <div class="ct">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              Advance Project Stage
+            </div>
+          </div>
+          <div class="cb">
+            <p style="font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.5;">
+              Move a project forward. This emits one event, updates the project, and shows
+              the client where things stand and whose turn it is.
+            </p>
+        
+            <!-- Project picker -->
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Project</label>
+            <select id="as-project" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);margin-bottom:14px;">
+              <option value="">Loading projects…</option>
+            </select>
+        
+            <!-- Stage + whose turn -->
+            <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:140px;">
+                <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Next stage</label>
+                <select id="as-stage" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);">
+                  <option value="kickoff">Kickoff</option>
+                  <option value="content">Content collection</option>
+                  <option value="design">Design</option>
+                  <option value="build">Build</option>
+                  <option value="review">Review</option>
+                  <option value="launch">Launch</option>
+                  <option value="complete">Complete</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:140px;">
+                <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Ball in court</label>
+                <select id="as-ball" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);">
+                  <option value="agency">You (agency)</option>
+                  <option value="client">Client</option>
+                </select>
+              </div>
+            </div>
+        
+            <!-- Progress -->
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Progress: <span id="as-progress-val" style="color:var(--p);">35</span>%</label>
+            <input id="as-progress" type="range" min="0" max="100" step="5" value="35" style="width:100%;margin-bottom:14px;accent-color:var(--p);" oninput="document.getElementById('as-progress-val').textContent=this.value;">
+        
+            <!-- Optional note shown to the client -->
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Note to client <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional, shows in their feed)</span></label>
+            <input id="as-note" type="text" placeholder="e.g. Content received, starting design" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);margin-bottom:16px;box-sizing:border-box;">
+        
+            <button class="sbtn" id="as-btn" onclick="advanceStage()">Advance stage</button>
+        
+            <!-- Result line -->
+            <div id="as-result" style="margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5;"></div>
+          </div>
+        </div>
         <div class="card" style="margin-top:0;"><div class="ch"><div class="ct">📈 Progress %</div></div>
           <div class="cb" style="display:flex;gap:12px;align-items:center;">
             <input aria-label="50" class="fi" type="number" id="progressVal" min="0" max="100" placeholder="e.g. 50" style="max-width:120px;">
@@ -3544,6 +3600,117 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 })();
 
+
+<script>
+// Load the agency's projects (with the contact name) into the picker.
+// Uses the same session-JWT path as the rest of the panel, via the admin_db
+// proxy already in your Edge Function — no service key in the browser.
+async function loadAdvanceStageProjects() {
+  const sel = document.getElementById('as-project');
+  if (!sel) return;
+  try {
+    const jwt = await adminJwt();
+    if (!jwt) { sel.innerHTML = '<option value="">Sign in to load projects</option>'; return; }
+    // Pull projects joined to their contact's name. PostgREST embed syntax.
+    const res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify({
+        type: "admin_db",
+        method: "GET",
+        path: "projects?select=id,name,stage,ball_in_court,progress,contacts(name)&order=created_at.desc"
+      })
+    });
+    let jr = {}; try { jr = await res.json(); } catch (e) {}
+    const rows = (jr && jr.data) || [];
+    if (!Array.isArray(rows) || !rows.length) {
+      sel.innerHTML = '<option value="">No projects yet — create one first</option>';
+      return;
+    }
+    sel.innerHTML = rows.map(function (p) {
+      const who = (p.contacts && p.contacts.name) ? p.contacts.name : "—";
+      const label = who + " · " + p.name + "  (" + p.stage + ", " + p.progress + "%)";
+      // stash current values on the option so we can prefill the form
+      return '<option value="' + p.id +
+             '" data-stage="' + (p.stage || 'kickoff') +
+             '" data-ball="' + (p.ball_in_court || 'agency') +
+             '" data-progress="' + (p.progress || 0) + '">' + label + '</option>';
+    }).join("");
+    // Prefill the controls from the first project.
+    syncAdvanceStageForm();
+  } catch (e) {
+    sel.innerHTML = '<option value="">Could not load projects</option>';
+  }
+}
+
+// When a project is picked, prefill stage/ball/progress to its current values.
+function syncAdvanceStageForm() {
+  const sel = document.getElementById('as-project');
+  const opt = sel && sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) return;
+  const stage = opt.getAttribute('data-stage') || 'kickoff';
+  const ball = opt.getAttribute('data-ball') || 'agency';
+  const prog = opt.getAttribute('data-progress') || '0';
+  document.getElementById('as-stage').value = stage;
+  document.getElementById('as-ball').value = ball;
+  document.getElementById('as-progress').value = prog;
+  document.getElementById('as-progress-val').textContent = prog;
+}
+
+// Fire the advance. Calls the advance_stage route -> emit() -> trigger updates
+// the project row -> client feed updates (event is client_visible).
+async function advanceStage() {
+  const btn = document.getElementById('as-btn');
+  const out = document.getElementById('as-result');
+  const projectId = document.getElementById('as-project').value;
+  const contactOpt = document.getElementById('as-project').options[document.getElementById('as-project').selectedIndex];
+  if (!projectId) { toast("Pick a project first."); return; }
+
+  const payload = {
+    type: "advance_stage",
+    projectId: projectId,
+    toStage: document.getElementById('as-stage').value,
+    ballInCourt: document.getElementById('as-ball').value,
+    progress: parseInt(document.getElementById('as-progress').value, 10),
+    note: document.getElementById('as-note').value.trim() || null
+  };
+
+  btn.disabled = true; btn.textContent = "Advancing…"; out.textContent = "";
+  try {
+    const jwt = await adminJwt();
+    if (!jwt) { toast("Please sign in again."); btn.disabled = false; btn.textContent = "Advance stage"; return; }
+    const res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify(payload)
+    });
+    let jr = {}; try { jr = await res.json(); } catch (e) {}
+    if (res.ok && jr.ok) {
+      out.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Advanced</span> to <strong>' +
+        payload.toStage + '</strong>, ball in <strong>' + payload.ballInCourt + '</strong>\'s court, ' +
+        payload.progress + '% complete.';
+      toast("✓ Project advanced to " + payload.toStage + ".");
+      loadAdvanceStageProjects(); // refresh picker so it reflects the new state
+    } else {
+      const err = jr.error ? (typeof jr.error === 'string' ? jr.error : JSON.stringify(jr.error)) : ("HTTP " + res.status);
+      out.innerHTML = '<span style="color:var(--red);font-weight:600;">Could not advance:</span> ' + err;
+      toast("Could not advance: " + err);
+    }
+  } catch (e) {
+    out.innerHTML = '<span style="color:var(--red);font-weight:600;">Error:</span> ' + String(e);
+  } finally {
+    btn.disabled = false; btn.textContent = "Advance stage";
+  }
+}
+
+// Wire the picker + load on first view.
+document.addEventListener('DOMContentLoaded', function () {
+  const sel = document.getElementById('as-project');
+  if (sel) sel.addEventListener('change', syncAdvanceStageForm);
+  // Load now; harmless to also call again when the tab opens.
+  loadAdvanceStageProjects();
+});
+</script>
 </script>
 </body>
 </html>
