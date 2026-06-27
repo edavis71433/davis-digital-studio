@@ -605,6 +605,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <div class="sl">Pipeline</div>
       <button class="sn" onclick="go('leads')" id="sn-leads"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Leads</button>
       <button class="sn" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
+      <button class="sn" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
       <button class="sn" onclick="go('quote')" id="sn-quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Build quote</button>
       <div class="sdiv"></div>
       <div class="sl">Library</div>
@@ -1168,6 +1169,13 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         </div>
       </div>
 
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="pt">Reports</div>
+        <div class="ps">Your pipeline and business at a glance. Updates live from leads, contacts, and projects.</div>
+        <div id="reportsBody" style="margin-top:18px;"></div>
+      </div>
+
       <!-- EMAIL TEMPLATES -->
       <div class="page" id="page-templates">
         <div class="pt">Email Templates</div>
@@ -1386,11 +1394,94 @@ function go(page) {
   if (page === "hub") loadHub();
   if (page === "messages") loadTemplates();
   if (page === "prospects") loadProspects();
+  if (page === "reports") loadReports();
 }
 
 // ── LEADS ──
 var allLeads = [];
 var currentLeadFilter = 'all';
+
+
+// ── REPORTS ───────────────────────────────────────────────────────────────
+async function loadReports(){
+  var body = document.getElementById('reportsBody');
+  if (!body) return;
+  body.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:14px;">Crunching the numbers...</p>';
+  var jwt = await adminJwt(); if (!jwt) { body.innerHTML='<p style="font-size:13px;color:var(--muted);padding:14px;">Sign in again.</p>'; return; }
+  function q(path){
+    return fetch(SB_URL+"/functions/v1/clever-api",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},body:JSON.stringify({type:"admin_db",method:"GET",path:path})}).then(function(r){return r.json();}).then(function(j){return (j&&j.data)||[];}).catch(function(){return [];});
+  }
+  var res = await Promise.all([
+    q("audit_leads?select=pipeline_stage,status,created_at"),
+    q("contacts?select=stage"),
+    q("projects?select=stage,ball_in_court,progress"),
+    q("invoices?select=amount,status")
+  ]);
+  var leads = res[0]||[], contacts = res[1]||[], projects = res[2]||[], invoices = res[3]||[];
+
+  // Pipeline funnel counts
+  var STAGES = [['new','New','#5b3fa0'],['qualified','Qualified','#1a7e49'],['proposal','Proposal','#c4731a'],['won','Won','#6abf69'],['lost','Lost','#999']];
+  var stageCount = {}; STAGES.forEach(function(s){ stageCount[s[0]]=0; });
+  leads.forEach(function(l){
+    var st = l.pipeline_stage || (l.status==='closed'?'won':l.status==='contacted'?'qualified':'new');
+    if (stageCount[st]==null) st='new';
+    stageCount[st]++;
+  });
+  var totalLeads = leads.length;
+  var won = stageCount['won']||0;
+  var lost = stageCount['lost']||0;
+  var closed = won + lost;
+  var convRate = closed>0 ? Math.round((won/closed)*100) : 0;
+  var maxStage = Math.max(1, Math.max.apply(null, STAGES.map(function(s){return stageCount[s[0]];})));
+
+  // Active vs past clients
+  var activeC = contacts.filter(function(c){return c.stage==='active';}).length;
+  var leadC = contacts.filter(function(c){return c.stage==='lead';}).length;
+  // Projects by stage
+  var projActive = projects.filter(function(p){return p.stage!=='complete';}).length;
+  var ballOnYou = projects.filter(function(p){return p.ball_in_court==='agency' && p.stage!=='complete';}).length;
+  // Revenue (sum of paid invoices)
+  var paid = invoices.filter(function(i){return i.status==='paid';}).reduce(function(a,i){return a+(parseFloat(i.amount)||0);},0);
+  var outstanding = invoices.filter(function(i){return i.status!=='paid';}).reduce(function(a,i){return a+(parseFloat(i.amount)||0);},0);
+
+  function statCard(val,label,color){ return '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;"><div style="font-size:28px;font-weight:700;color:'+(color||'var(--p)')+';line-height:1;">'+val+'</div><div style="font-size:12px;color:var(--muted);margin-top:5px;">'+label+'</div></div>'; }
+
+  var html = '';
+  // Top stat cards
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;">';
+  html += statCard(totalLeads,'Total leads');
+  html += statCard(convRate+'%','Win rate (closed deals)','#6abf69');
+  html += statCard(activeC,'Active clients','#1a7e49');
+  html += statCard(ballOnYou,'Projects awaiting you', ballOnYou>0?'#c4731a':'var(--p)');
+  html += statCard('$'+paid.toFixed(0),'Collected','#1a7e49');
+  html += statCard('$'+outstanding.toFixed(0),'Outstanding', outstanding>0?'#c4731a':'var(--muted)');
+  html += '</div>';
+
+  // Pipeline funnel
+  html += '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:20px;margin-bottom:20px;">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:16px;">Lead pipeline</div>';
+  STAGES.forEach(function(s){
+    var n = stageCount[s[0]];
+    var pct = Math.round((n/maxStage)*100);
+    html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">';
+    html += '<div style="width:80px;font-size:12px;color:var(--muted);text-align:right;">'+s[1]+'</div>';
+    html += '<div style="flex:1;background:rgba(91,63,160,0.06);border-radius:6px;height:26px;position:relative;overflow:hidden;">';
+    html += '<div style="width:'+pct+'%;height:100%;background:'+s[2]+';border-radius:6px;min-width:'+(n>0?'28px':'0')+';transition:width .4s;"></div>';
+    html += '<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:'+(n>0?'#fff':'var(--muted)')+';">'+n+'</span>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // Snapshot line
+  html += '<div style="background:#faf9fc;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:16px;font-size:13px;color:var(--ink);line-height:1.7;">';
+  html += '<strong>Snapshot:</strong> You have '+totalLeads+' leads in the pipeline, '+activeC+' active client'+(activeC===1?'':'s')+', and '+projActive+' project'+(projActive===1?'':'s')+' in flight. ';
+  if (ballOnYou>0) html += '<span style="color:#c4731a;">'+ballOnYou+' '+(ballOnYou===1?'project is':'projects are')+' waiting on you.</span> ';
+  if (won>0||lost>0) html += 'Of '+closed+' closed deal'+(closed===1?'':'s')+', you won '+won+' ('+convRate+'%). ';
+  html += '</div>';
+
+  body.innerHTML = html;
+}
+
 
 async function loadLeads() {
   var listEl = document.getElementById('leadsList');
@@ -1957,6 +2048,49 @@ async function openHubClient(id) {
   var contractOk = !!c.contract_acked_at;
   var briefOk = !!intake;
   var launched = (c.progress||0) >= 100 || !!c.launched_at;
+
+  // ── ONBOARDING FLOW: a guided 4-step tracker for new clients ──
+  // Created \u2192 Agreement signed \u2192 Brief submitted \u2192 Kickoff.
+  // Only shows while onboarding isn't complete, so established clients aren't cluttered.
+  (function(){
+    var steps = [
+      { label:'Account created', done:true,        hint:'Portal & login ready' },
+      { label:'Agreement signed', done:contractOk,  hint:'Send the agreement to sign', act:'contracts' },
+      { label:'Project brief',     done:briefOk,    hint:'Have them fill the brief', act:'contracts' },
+      { label:'Kickoff',           done:(contractOk && briefOk), hint:'Advance the project to start', act:'advance' }
+    ];
+    var allDone = steps.every(function(s){ return s.done; });
+    if (allDone) return; // onboarding finished; hide the tracker
+    var nextIdx = steps.findIndex(function(s){ return !s.done; });
+    html += '<div style="margin-top:18px;padding:16px;background:linear-gradient(180deg,#f6f4fc,#fbfaff);border:1px solid rgba(91,63,160,0.16);border-radius:12px;">';
+    html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin-bottom:14px;">Getting started</div>';
+    html += '<div style="display:flex;align-items:flex-start;gap:0;">';
+    steps.forEach(function(s,i){
+      var isNext = (i===nextIdx);
+      var dotBg = s.done ? 'var(--p)' : (isNext ? '#fff' : '#eee');
+      var dotBorder = s.done ? 'var(--p)' : (isNext ? 'var(--p)' : '#ddd');
+      var dotInner = s.done ? '<span style="color:#fff;font-size:11px;">\u2713</span>' : (isNext ? '<span style="color:var(--p);font-size:11px;font-weight:700;">'+(i+1)+'</span>' : '<span style="color:#aaa;font-size:11px;">'+(i+1)+'</span>');
+      html += '<div style="flex:1;text-align:center;position:relative;">';
+      if (i < steps.length-1) {
+        html += '<div style="position:absolute;top:13px;left:50%;width:100%;height:2px;background:'+(s.done?'var(--p)':'#e5e5e5')+';z-index:0;"></div>';
+      }
+      html += '<div style="position:relative;z-index:1;width:28px;height:28px;border-radius:50%;background:'+dotBg+';border:2px solid '+dotBorder+';display:inline-flex;align-items:center;justify-content:center;">'+dotInner+'</div>';
+      html += '<div style="font-size:11px;font-weight:'+(isNext?'700':'500')+';color:'+(s.done?'var(--ink)':(isNext?'var(--p)':'var(--muted)'))+';margin-top:6px;line-height:1.3;">'+s.label+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    // Next-action prompt
+    var nxt = steps[nextIdx];
+    html += '<div style="margin-top:14px;padding:10px 13px;background:#fff;border-radius:9px;border:1px solid rgba(91,63,160,0.12);display:flex;align-items:center;gap:10px;">';
+    html += '<span style="font-size:12px;color:var(--ink);"><strong>Next:</strong> '+nxt.hint+'</span>';
+    if (nxt.act === 'contracts') {
+      html += '<button onclick="hubJumpTo(\'contracts\',\''+c.id+'\')" style="margin-left:auto;font-size:11px;font-weight:600;padding:6px 13px;border-radius:7px;border:none;background:var(--p);color:#fff;cursor:pointer;">Open documents \u2192</button>';
+    } else if (nxt.act === 'advance') {
+      html += '<button onclick="document.getElementById(\'as-project\')&&document.getElementById(\'as-project\').scrollIntoView({behavior:\'smooth\'});go(\'overview\')" style="margin-left:auto;font-size:11px;font-weight:600;padding:6px 13px;border-radius:7px;border:none;background:var(--p);color:#fff;cursor:pointer;">Advance project \u2192</button>';
+    }
+    html += '</div>';
+    html += '</div>';
+  })();
   function statusChip(){
     if ((c.progress||0) >= 100) return ['Live','#1d8a5a','#e9f7f0'];
     if ((c.progress||0) >= 90) return ['Launching','#4435a0','#eef0fd'];
