@@ -663,7 +663,6 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button class="sbtn" onclick="filterLeads('report_card')" id="lf-report_card" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Report Card</button>
           <button class="sbtn" onclick="filterLeads('ai_critique')" id="lf-ai_critique" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">AI Review</button>
           <button class="sbtn" onclick="loadLeads()" style="background:transparent;color:var(--muted);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;margin-left:auto;">↻ Refresh</button>
-          <button class="sbtn" onclick="deleteTestLeads()" style="background:transparent;color:var(--red);font-size:12px;padding:6px 14px;border-radius:100px;border:1px solid rgba(224,85,85,0.25);cursor:pointer;">🧹 Delete test leads</button>
         </div>
         <div id="leadSelectBar" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 14px;background:var(--p-soft,#f1ecf9);border:1px solid rgba(91,63,160,0.2);border-radius:10px;">
           <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--p);cursor:pointer;"><input type="checkbox" id="leadSelectAll" onchange="toggleSelectAllLeads(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--p);"> Select all shown</label>
@@ -2843,12 +2842,10 @@ async function loadOverview() {
   } catch(e){}
   var attEl = document.getElementById("ovAttention");
   if (attEl) {
-    attEl.innerHTML = alerts.length
-      ? `<div style="background:#fdf3e7;border:1px solid #f0b429;border-radius:12px;padding:12px 15px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a6a0a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div style="font-size:13px;color:#9a6a0a;"><span style="font-weight:700;">Needs your attention:</span> ${alerts.join(" · ")}</div>
-        </div>`
-      : "";
+    // The AI Manager briefing now surfaces approvals, messages, invoices,
+    // overdue items and stalled projects in one place, so this separate amber
+    // bar is retired to avoid telling Eric the same things twice.
+    attEl.innerHTML = "";
   }
 
   // Dynamic date subtitle
