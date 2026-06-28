@@ -1,11 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /portal.html
-Disallow: /portal
-Disallow: /checklist.html
-Disallow: /dds-studio-manage-9k2p.html
-Disallow: /dds-studio-audit-2026.html
-Disallow: /email-nurture-sequence.html
-Disallow: /email-signature.html
-
 Sitemap: https://davisdigitalstudio.com/sitemap.xml

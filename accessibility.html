@@ -1,421 +1,79 @@
 <!DOCTYPE html>
-<!-- DDS v3.0 20260621-1655 -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accessibility Statement | Davis Digital Studio</title>
-<meta name="description" content="Davis Digital Studio's commitment to web accessibility and WCAG 2.1 AA compliance. Request accommodations or report an accessibility issue.">
-<link rel="canonical" href="https://davisdigitalstudio.com/accessibility">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
-<meta name="theme-color" content="#5b3fa0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accessibility — Davis Digital Studio</title>
+<meta name="description" content="Accessibility">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
-<script>
-(function(){
-  if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}
-})();
-</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-V4WF04NX7F',{anonymize_ip:true});</script>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
-body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; padding-top: 68px; overflow-x: hidden; max-width: 100vw; }
-:root { --p: #5b3fa0; --pxl: #c4aee8; --pdark: #1e1338; --ink: #1a1523; --muted: #5e5270; --serif: 'DM Serif Display', Georgia, serif; }
-.skip-link { position: absolute; left: -9999px; top: 8px; background: var(--p); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; z-index: 99999; text-decoration: none; }
-.skip-link:focus { left: 8px; }
-*:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
-:focus:not(:focus-visible) { outline: none; }
-.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: #fff; border-bottom: 1px solid rgba(91,63,160,0.10); box-shadow: 0 1px 20px rgba(0,0,0,0.06); }
-.nav-logo { font-family: var(--serif); font-size: 20px; color: #1a1523; text-decoration: none; }
-.nav-logo span { color: #5b3fa0; }
-.nav-back { font-size: 13px; color: var(--muted); text-decoration: none; font-weight: 500; }
-.nav-back:hover { color: var(--p); }
-.hero { background: var(--pdark); padding: 72px 24px 60px; text-align: center; }
-.hero h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 56px); font-weight: 400; color: #fff; letter-spacing: -1px; margin-bottom: 12px; }
-.hero h1 em { font-style: italic; color: var(--pxl); }
-.hero p { font-size: 14px; color: rgba(255,255,255,0.55); }
-.content { max-width: 720px; margin: 0 auto; padding: 64px 24px 80px; }
-.content h2 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--ink); margin: 48px 0 16px; letter-spacing: -0.3px; }
-.content h2:first-child { margin-top: 0; }
-.content p { font-size: 15px; color: var(--muted); line-height: 1.9; margin-bottom: 16px; }
-.content ul { margin: 0 0 16px 20px; }
-.content ul li { font-size: 15px; color: var(--muted); line-height: 1.9; margin-bottom: 8px; }
-.content a { color: var(--p); text-decoration: underline; }
-.content a:hover { opacity: 0.8; }
-.updated { display: inline-block; background: rgba(91,63,160,0.08); color: var(--p); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 100px; margin-bottom: 32px; }
-.conformance-box { background: rgba(91,63,160,0.06); border: 1px solid rgba(91,63,160,0.15); border-radius: 12px; padding: 24px 28px; margin: 32px 0; }
-.conformance-box p { margin: 0; font-size: 15px; color: var(--ink); line-height: 1.8; }
-.conformance-box strong { color: var(--p); }
-.divider { border: none; border-top: 1px solid rgba(91,63,160,0.1); margin: 40px 0; }
-.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
-.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
-.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
-@media (max-width: 900px) { .nav { padding: 0 20px; } .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
-
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
-.bar{width:22px;height:2px;background:#1a1523;border-radius:2px;transition:all 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid rgba(91,63,160,0.1);padding:16px 24px;z-index:9998;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-.nav-mob.open{display:flex;}
-.nav-mob a{font-size:15px;font-weight:500;color:#1a1523;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
-.nav-mob a:last-child{border-bottom:none;}
-.mob-cta{background:#5b3fa0;color:#fff !important;border-radius:100px;text-align:center;padding:12px !important;margin-top:8px;font-weight:600 !important;}
-@media(max-width:900px){
-
-/* ── Footer mobile responsive fix ── */
-@media (max-width: 768px) {
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 28px !important;
-    padding: 32px 20px 20px !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-strip {
-    padding: 28px 20px 0 !important;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 14px !important;
-    padding: 16px 18px !important;
-  }
-  .footer-bottom {
-    padding: 14px 20px !important;
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 10px !important;
-  }
-}
-@media (max-width: 480px) {
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-}
-}
-
-/* NAV-FINAL-V4 */
-
-.skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
-.skip-link:focus{left:8px;}
-*:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
-.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:2px;}
-.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
-.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
-.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
-.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
-.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
-.nav-drop{position:relative;}
-.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-drop:hover>button svg{transform:rotate(180deg);}
-.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
-.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
-.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
-.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
-.nav-mob.open{display:flex;}
-.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
-.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group{margin:2px 0;}
-.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
-.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
-.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
-.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
-.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
-.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
-.nav-mob .mob-cta:hover{background:#4a3280!important;}
-body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}
-
-/* Dropdown gap fix - bridge pseudo-element */
-.nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-
-/* Dropdown bridge - prevents menu closing when moving mouse down */
-.nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
-.nav-drop{padding-bottom:0;}
-@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}}
-</style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","name":"Accessibility Statement | Davis Digital Studio","url":"https://davisdigitalstudio.com/accessibility","isPartOf":{"@type":"WebSite","name":"Davis Digital Studio","url":"https://davisdigitalstudio.com"}}
-</script>
-  <meta property="og:title" content="Accessibility Statement | Davis Digital Studio">
-  <meta property="og:description" content="Davis Digital Studio is committed to making our website accessible to everyone.">
-  <meta property="og:url" content="https://davisdigitalstudio.com/accessibility">
-  <meta property="og:image" content="https://davisdigitalstudio.com/og-image.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@davisdigitalstudio">
-  <meta name="twitter:title" content="Accessibility Statement | Davis Digital Studio">
-  <meta name="twitter:description" content="Davis Digital Studio is committed to making our website accessible to everyone.">
-  <meta name="twitter:image" content="https://davisdigitalstudio.com/og-image.jpg">
-<link rel="stylesheet" href="/enhance.css">
-<link rel="stylesheet" href="/hero-grid.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Services</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
-        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
-        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Ongoing Support</a>
-      </div>
-    </div>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
-        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
-        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
-        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
-      </div>
-    </div>
-    <a href="/work">Work</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
-        <a href="/ai-critique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/></svg> AI Website Review</a>
-        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
-        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
-        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
-        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
-        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
-      </div>
-    </div>
-    <a href="/report-card" class="nav-report">Free Report Card</a>
-    <a href="/portal" style="font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;transition:color 0.15s,background 0.15s;" onmouseover="this.style.color='#5b3fa0';this.style.background='#f7f4fd'" onmouseout="this.style.color='#7a6d8e';this.style.background=''">Client Login</a>
-    <a href="/audit" class="nav-cta">Free Site Score</a>
+<body data-page=""><header class="nav">
+<div class="wrap nav-in">
+  <a href="index.html" class="brand"><svg class="mark" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="16" cy="16" r="15" stroke="#B08D57" stroke-width="1"/>
+<path d="M10 21V11h4.2c3 0 4.8 1.9 4.8 5s-1.8 5-4.8 5H10z" stroke="#1B1525" stroke-width="1.4" fill="none"/>
+<circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
+  <nav class="nav-links">
+    <a href="how-we-work.html">How we work</a>
+    <a href="services.html">Services</a>
+    <a href="industries.html">Industries</a>
+    <a href="about.html">About</a>
+    <a href="tools.html">Free tools</a>
+  </nav>
+  <div class="nav-actions">
+    <a href="portal.html" class="nav-login">Client login</a>
+    <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
-    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-  </button>
-</nav>
-<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="/">Home</a>
-  <a href="/about">About</a>
-  <div class="nav-mob-group" id="mobServices">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Services <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/services">All Services</a>
-      <a href="/web-design">Web Design</a>
-      <a href="/seo-strategy">SEO Strategy</a>
-      <a href="/monthly-retainer">Ongoing Support</a>
-    </div>
-  </div>
-  <div class="nav-mob-group" id="mobIndustries">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
-      <a href="/salon-web-design">Salons &amp; Spas</a>
-      <a href="/retail-web-design">Retail &amp; Boutiques</a>
-      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
-      <a href="/home-services-web-design">Home Services</a>
-    </div>
-  </div>
-  <a href="/work">Work</a>
-  <div class="nav-mob-group" id="mobTools">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/audit#free-audit">Free Site Score</a>
-      <a href="/ai-critique">AI Website Review</a>
-      <a href="/report-card">Digital Report Card</a>
-      <a href="/roi-calculator">ROI Calculator</a>
-      <a href="/speed-test">Speed Test</a>
-      <a href="/local-visibility">Local Visibility</a>
-      <a href="/pricing-estimator">Pricing Estimator</a>
-    </div>
-  </div>
-  <a href="/report-card">Free Report Card</a>
-  <a href="/portal" style="font-size:16px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;">Client Login</a>
-  <a href="/contact" class="mob-cta">Book a free call</a>
+  <button class="burger" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')"><span></span><span></span></button>
 </div>
-
-class="hero" role="banner">
-  <h1>Accessibility <em>Statement</em></h1>
-  <p>Last updated: June 20, 2026</p>
+</header>
+<section class="hero"><div class="wrap" style="max-width:760px">
+  <span class="eyebrow reveal">Commitment</span>
+  <h1 class="reveal mt-m" style="font-size:clamp(32px,5vw,52px)">Accessibility</h1>
+</div></section>
+<section class="pad-sm"><div class="wrap" style="max-width:720px"><div class="reveal"><p class="lead-muted mt-m">Good design works for everyone. This site is built to be usable with a keyboard, readable by screen readers, and respectful of reduced-motion preferences.</p><p class="lead-muted mt-m">If anything here is hard to use, I want to know. Reach out through the contact page and I'll fix it.</p><p class="lead-muted mt-m">This commitment extends to every site I build for clients.</p></div></div></section>
+<footer class="site">
+<div class="wrap">
+  <div class="fwrap">
+    <div>
+      <div class="brand serif">Davis Digital Studio</div>
+      <p>The easiest, most organized way to get a website that actually works. Strategy-led web design and SEO for small businesses across the US.</p>
+      <p style="margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:rgba(255,255,255,.4)">Los Angeles &middot; working with businesses nationwide</p>
+    </div>
+    <div class="fcol">
+      <h5>Studio</h5>
+      <a href="how-we-work.html">How we work</a>
+      <a href="services.html">Services</a>
+      <a href="industries.html">Industries</a>
+      <a href="about.html">About</a>
+      <a href="work.html">Case studies</a>
+    </div>
+    <div class="fcol">
+      <h5>Start</h5>
+      <a href="tools.html">Free site review</a>
+      <a href="contact.html">Book a free call</a>
+      <a href="portal.html">Client login</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+  <div class="fbase">
+    <span>&copy; 2026 Davis Digital Studio &middot; Eric Davis</span>
+    <span style="display:flex;gap:18px">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="accessibility.html">Accessibility</a>
+    </span>
+  </div>
 </div>
-
-<main id="main-content">
-<div class="content">
-  <span class="updated">Effective June 20, 2026</span>
-
-  <div class="conformance-box">
-    <p>Davis Digital Studio is committed to ensuring digital accessibility for people with disabilities. We are actively working to increase the accessibility of this website in accordance with <strong>WCAG 2.1 Level AA</strong> guidelines.</p>
-  </div>
-
-  <h2>Our Commitment</h2>
-  <p>We believe the web should work for everyone. This site is built with the following accessibility practices in mind:</p>
-  <ul>
-    <li>Semantic HTML structure with proper heading hierarchy</li>
-    <li>Keyboard navigation support across all interactive elements</li>
-    <li>Skip-to-main-content link on every page</li>
-    <li>Visible focus indicators for keyboard users</li>
-    <li>Sufficient color contrast ratios for body text (targeting 4.5:1 minimum)</li>
-    <li>ARIA labels on navigation landmarks and interactive components</li>
-    <li>Responsive design that works at up to 400% zoom without horizontal scrolling</li>
-    <li>No auto-playing audio or video</li>
-    <li>Cookie and consent controls that are keyboard-accessible</li>
-  </ul>
-
-  <h2>Known Limitations</h2>
-  <p>We are a small, actively maintained site and are continuously improving. Current known gaps we are working to address include:</p>
-  <ul>
-    <li>Some decorative images may be missing descriptive alt text</li>
-    <li>Third-party embeds (Calendly, Stripe checkout) are governed by their own accessibility practices</li>
-  </ul>
-  <p>We conduct periodic accessibility reviews and aim to resolve reported issues within 5 business days.</p>
-
-  <h2>Assistive Technology Support</h2>
-  <p>This site has been designed to be compatible with the following assistive technologies:</p>
-  <ul>
-    <li>Screen readers including NVDA, JAWS, and VoiceOver</li>
-    <li>Keyboard-only navigation</li>
-    <li>Browser zoom up to 400%</li>
-    <li>High contrast mode on Windows and macOS</li>
-  </ul>
-
-  <h2>Request an Accommodation</h2>
-  <p>If you need information from this website in a different format, or encounter a barrier to access, please contact us. We'll respond within 2 business days and work to provide the content or service you need through an accessible alternative.</p>
-  <p>
-    <strong>Eric Davis</strong><br>
-    Davis Digital Studio<br>
-    <a href="mailto:eric@davisdigitalstudio.com">eric@davisdigitalstudio.com</a>
-  </p>
-
-  <h2>Report an Accessibility Issue</h2>
-  <p>If you find a page or feature that doesn't work with your assistive technology, please let us know:</p>
-  <ul>
-    <li>What page or feature you were trying to use</li>
-    <li>What assistive technology you were using (e.g., screen reader name and version)</li>
-    <li>What happened and what you expected to happen</li>
-  </ul>
-  <p>Contact us at <a href="mailto:eric@davisdigitalstudio.com">eric@davisdigitalstudio.com</a> and we'll prioritize a fix.</p>
-
-  <h2>Standards Reference</h2>
-  <p>This site targets conformance with the <a href="https://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener noreferrer">Web Content Accessibility Guidelines (WCAG) 2.1, Level AA</a>, published by the World Wide Web Consortium (W3C).</p>
-
-  <hr class="divider">
-  <p style="font-size:13px;color:var(--muted);">This statement applies to davisdigitalstudio.com and all pages operated by Davis Digital Studio.</p>
-</div>
-</main>
-
-<footer class="site-footer" role="contentinfo" style="background:#1e1338;">
-  <div class="footer-main-grid" style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;">
-    <div class="footer-brand-col">
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div style="display:flex;gap:12px;">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Services</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
-        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-        <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
-        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-        <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
-        <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/salon-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/retail-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/home-services-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);">&#169; <span id="footer-year">2026</span> Davis Digital Studio &middot; Eric Davis</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-      <a href="/portal-terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Portal Terms</a>
-      <a href="/ai-disclaimer" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">AI Disclaimer</a>
-      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-    </div>
-  </div>
 </footer>
-<script>var fy=document.getElementById('footer-year');if(fy)fy.textContent=new Date().getFullYear();</script>
-
-<!-- Cookie Consent Banner -->
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
-  <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
-    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
-  </div>
-</div>
 <script>
-(function(){
-  var consent=localStorage.getItem('cookie_consent');
-  if(!consent){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}
-  if(consent==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}
-})();
-function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
-function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-V4WF04NX7F']=true;document.getElementById('cookieBanner').style.display='none';}
+// Opt into animation only when JS runs; content is visible by default otherwise.
+document.documentElement.classList.add('js-anim');
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+const els=document.querySelectorAll('.reveal');
+els.forEach(el=>io.observe(el));
+// safety net: if anything is still hidden after load, show it
+window.addEventListener('load',()=>setTimeout(()=>els.forEach(el=>el.classList.add('in')),1200));
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
-<script>
-/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
-function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
-</script>
-  <script src="/concierge.js" defer></script>
-<script src="/enhance.js" defer></script>
-</body>
-</html>
+</body></html>

@@ -1,1225 +1,165 @@
 <!DOCTYPE html>
-<!-- DDS v3.8 20260621-1700 -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Web Design, SEO &amp; Custom Web Apps | Davis Digital Studio</title>
-<meta name="description" content="Web design, SEO strategy, and custom platform builds for small businesses. Websites from $1,500, plus client portals, dashboards, and web apps for businesses that need real software, not just pages.">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<meta name="theme-color" content="#5b3fa0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Services & Pricing — Davis Digital Studio</title>
+<meta name="description" content="Strategy-led web design and SEO for small businesses. Three website options from $1,500, ongoing care, and occasional custom builds. Same organized experience every time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
-<style>
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
-body { font-family: 'DM Sans', sans-serif; background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; overflow-x: hidden; max-width: 100vw; }
-:root {
-  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
-  --pdark: #1e1338; --ink: #1a1523; --muted: #5e5270;
-  --cream: #faf8f5; --warm: #f5f0e8;
-  --serif: 'DM Serif Display', Georgia, serif;
-}
-a { color: inherit; }
-.label { font-size: 10px; color: var(--p); letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: block; }
-.btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--p); color: #fff; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
-.btn-p:hover { opacity: 0.88; transform: translateY(-2px); }
-.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--p); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 100px; border: 1.5px solid var(--pxl); text-decoration: none; transition: background 0.15s; }
-.btn-ghost:hover { background: var(--pxxxl); }
-.btn-white { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: transform 0.15s; }
-.btn-white:hover { transform: translateY(-2px); }
-.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.site-footer { padding: 28px 52px; background: var(--pdark); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-.site-footer p { font-size: 12px; color: rgba(255,255,255,0.35); }
-.site-footer .footer-links a { font-size: 12px; color: rgba(255,255,255,0.35); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
-.site-footer .footer-links a:hover { color: rgba(255,255,255,0.8); }
-@media (max-width: 900px) { .site-footer { padding: 20px 24px; flex-direction: column; text-align: center; } .site-footer .footer-links a { margin-left: 12px; } }
-
-
-
-
-
-.page-hero { background:#0f0820; padding:80px 52px 100px; position:relative; overflow:hidden; }
-.page-hero::before { content:''; position:absolute; top:-80px; right:-60px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(91,63,160,0.4) 0%, transparent 65%); pointer-events:none; }
-.page-hero-inner { max-width:800px; position:relative; z-index:1; }
-.page-hero .label { color:var(--pxl); }
-.page-hero h1 { font-family:var(--serif); font-size:clamp(36px,5vw,64px); font-weight:400; color:#fff; line-height:1.05; letter-spacing:-1.5px; margin-bottom:20px; }
-.page-hero h1 em { font-style:italic; color:var(--pxl); }
-.page-hero p { font-size:17px; color:rgba(255,255,255,0.5); line-height:1.8; max-width:520px; }
-
-/* SERVICES */
-.services-main { padding: 100px 52px; background: #fff; }
-.services-inner { max-width: 1100px; margin: 0 auto; }
-.svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
-.svc-card {
-  border-radius: 20px;
-  border: 1px solid rgba(91,63,160,0.1);
-  padding: 32px 28px;
-  background: #fff;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.svc-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(91,63,160,0.12); border-color: var(--pxl); }
-.svc-card.featured {
-  background: linear-gradient(180deg,#1e1338 0%,#2d1f4e 100%);
-  border-color: var(--p);
-  color: #fff;
-  transform: scale(1.02);
-  box-shadow: 0 20px 50px rgba(91,63,160,0.20);
-}
-.svc-card.featured:hover { transform: scale(1.02) translateY(-4px); }
-.svc-card.featured::before {
-  content: 'RECOMMENDED';
-  position: absolute;
-  top: 18px; right: 20px;
-  background: #c4894a;
-  color: #1a0f0a;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  padding: 5px 12px;
-  border-radius: 100px;
-}
-.svc-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--pxxl); color: var(--p); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px; }
-.svc-card.featured .svc-icon { background: rgba(196,174,232,0.15); color: var(--pxl); }
-.svc-card h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; margin-bottom: 10px; letter-spacing: -0.5px; }
-.svc-card.featured h3 { color: #fff; }
-.svc-card p { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 20px; }
-.svc-card.featured p { color: rgba(255,255,255,0.7); }
-.svc-card .svc-price-block { margin-bottom: 20px; }
-.svc-price { font-family: var(--serif); font-size: 36px; font-weight: 600; color: var(--ink); line-height: 1; letter-spacing: -1px; }
-.svc-card.featured .svc-price { color: #fff; }
-.svc-price-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.svc-card.featured .svc-price-note { color: rgba(255,255,255,0.5); }
-.svc-includes { list-style: none; flex: 1; margin-bottom: 20px; padding-top: 18px; border-top: 1px solid rgba(91,63,160,0.10); }
-.svc-card.featured .svc-includes { border-top-color: rgba(255,255,255,0.10); }
-.svc-includes li { font-size: 13px; color: var(--ink); padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
-.svc-includes li::before { content: '→'; color: var(--p); flex-shrink: 0; margin-top: 1px; font-weight: 600; }
-.svc-card.featured .svc-includes li { color: rgba(255,255,255,0.78); }
-.svc-card.featured .svc-includes li::before { color: var(--pxl); }
-.svc-updates { font-size: 12px; color: var(--muted); padding-top: 14px; border-top: 1px solid rgba(91,63,160,0.10); margin-bottom: 16px; }
-.svc-updates strong { color: var(--ink); font-weight: 600; }
-.svc-card.featured .svc-updates { color: rgba(255,255,255,0.5); border-top-color: rgba(255,255,255,0.10); }
-.svc-card.featured .svc-updates strong { color: #fff; }
-.svc-card .btn-ghost, .svc-card .btn-white { width: 100%; justify-content: center; text-align: center; }
-.svc-card.featured .btn-white { background: #fff; color: var(--ink); }
-.svc-card.featured .btn-white:hover { background: var(--pxl); color: var(--ink); }
-
-/* ADD-ONS */
-.addons { padding: 80px 52px; background: var(--pxxxl); }
-.addons-inner { max-width: 1100px; margin: 0 auto; }
-.addons-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.addon-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid rgba(91,63,160,0.08); }
-.addon-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.addon-card p { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
-.addon-price { font-family: var(--serif); font-size: 20px; color: var(--p); }
-
-/* COMPARE */
-.compare { padding: 80px 52px; background: #fff; }
-.compare-inner { max-width: 800px; margin: 0 auto; }
-.compare-table { width: 100%; border-collapse: collapse; }
-.compare-table th, .compare-table td { padding: 14px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid rgba(91,63,160,0.08); }
-.compare-table th { font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-.compare-table th:not(:first-child) { text-align: center; }
-.compare-table td:not(:first-child) { text-align: center; }
-.compare-table .check { color: #6abf69; font-size: 18px; }
-.compare-table .cross { color: #e0d5f0; font-size: 18px; }
-.compare-table tr:hover td { background: var(--pxxxl); }
-.col-highlight { background: var(--pxxxl) !important; font-weight: 500; color: var(--p) !important; }
-
-/* CTA */
-.cta-band { padding:100px 52px; background:var(--p); text-align:center; position:relative; overflow:hidden; }
-.cta-band::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events:none; }
-.cta-band h2 { font-family:var(--serif); font-size:clamp(28px,4vw,48px); font-weight:400; color:#fff; letter-spacing:-1px; margin-bottom:14px; position:relative; }
-.cta-band h2 em { font-style:italic; color:var(--pxl); }
-.cta-band p { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:32px; position:relative; }
-
-.section-header { text-align:center; margin-bottom:56px; }
-.section-header h2 { font-family:var(--serif); font-size:clamp(28px,3.5vw,44px); font-weight:400; letter-spacing:-0.8px; }
-.section-header h2 em { font-style:italic; color:var(--p); }
-.section-header p { font-size:16px; color:var(--muted); margin-top:14px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7; }
-
-@media (max-width: 900px) {
-  .page-hero { padding:60px 24px 72px; }
-  .services-main { padding:60px 24px; }
-  .svc-grid { grid-template-columns: 1fr; }
-  .platform-grid { grid-template-columns: 1fr !important; }
-  .svc-card { display: flex; flex-direction: column; }
-  .svc-card.featured { grid-column: span 1; transform: none; padding: 28px 20px; }
-  .svc-card.featured:hover { transform: translateY(-4px); }
-  .addons { padding:60px 24px; }
-  .addons-grid { grid-template-columns: 1fr; }
-  .compare { padding:60px 24px; }
-  .cta-band { padding:64px 24px; }
-}
-
-
-/* LIVE SCORE WIDGET */
-.score-widget {
-  position: fixed;
-  bottom: 88px;
-  right: 20px;
-  z-index: 8999;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  pointer-events: none;
-  max-width: 280px;
-}
-.score-widget.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.score-widget.hide {
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-}
-.sw-card {
-  background: #1e1338;
-  border: 1px solid rgba(196,174,232,0.25);
-  border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
-  position: relative;
-}
-.sw-close {
-  position: absolute;
-  top: 10px; right: 12px;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.3);
-  font-size: 16px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px 6px;
-  transition: color 0.15s;
-}
-.sw-close:hover { color: rgba(255,255,255,0.8); }
-.sw-pulse {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.sw-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #f0b429;
-  animation: sw-pulse 1.8s ease-in-out infinite;
-  flex-shrink: 0;
-}
-@keyframes sw-pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-.sw-pulse-text {
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-.sw-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.4;
-  margin-bottom: 6px;
-}
-.sw-sub {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  line-height: 1.5;
-  margin-bottom: 14px;
-}
-.sw-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--p);
-  border-radius: 100px;
-  padding: 9px 16px;
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
-.sw-cta:hover { opacity: 0.88; }
-.sw-cta-text {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-}
-.sw-cta-arrow {
-  font-size: 14px;
-  color: var(--pxl);
-}
-
-
-/* Performance: reduce paint on scroll */
-.hero, .numbers-band, .rc-band, .cta-band { will-change: auto; }
-/* Smooth font rendering on all devices */
-* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-/* Prevent layout shift from fonts */
-html { font-display: swap; }
-/* Better tap targets on mobile */
-@media (max-width: 900px) {
-  a, button { min-height: 44px; }
-  .nav-mob a { min-height: 48px; display: flex; align-items: center; }
-}
-
-
-/* Footer mobile fix */
-@media (max-width: 900px) {
-  .site-footer {
-    padding: 28px 20px;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 16px;
-  }
-  .site-footer > div:first-child {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-  .site-footer .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px 16px;
-  }
-  .site-footer .footer-links a {
-    margin-left: 0 !important;
-  }
-  /* Hide float CTA on mobile so it doesn't overlap footer */
-  .float-cta { display: none; }
-}
-
-
-/* ── Accessibility: focus styles ── */
-*:focus-visible {
-  outline: 2px solid var(--p);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-a:focus-visible, button:focus-visible {
-  outline: 2px solid var(--p);
-  outline-offset: 3px;
-}
-/* Skip to content */
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 6px;
-  background: var(--p);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  z-index: 99999;
-  text-decoration: none;
-}
-.skip-link:focus {
-  left: 6px;
-}
-/* Fix small text contrast, boost muted color slightly */
-:root { --muted: #6b5f7e; }
-
-/* ── 480px breakpoints for pages missing them ── */
-@media (max-width: 480px) {
-  .hero h1 { font-size: 28px !important; }
-  .section-header h2 { font-size: 24px !important; }
-  .page-hero h1 { font-size: 28px !important; }
-  .num-val { font-size: 32px !important; }
-  .card-body { padding: 16px !important; }
-  .price-card { padding: 28px 20px !important; }
-}
-
-
-/* EXIT INTENT */
-.exit-overlay { display:none;position:fixed;inset:0;background:rgba(15,8,32,0.7);z-index:99999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px); }
-.exit-overlay.show { display:flex; }
-.exit-card { background:#fff;border-radius:24px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;animation:slideIn 0.3s ease; }
-.exit-card .exit-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer; }
-.exit-card h3 { font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-0.5px; }
-.exit-card h3 em { font-style:italic;color:var(--p); }
-.exit-card p { font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
-.exit-card .exit-cta { display:block;background:var(--p);color:#fff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:opacity 0.15s; }
-.exit-card .exit-cta:hover { opacity:0.88; }
-.exit-card .exit-skip { display:block;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;background:none;border:none;font-family:"DM Sans",sans-serif; }
-
-/* SOCIAL PROOF TICKER */
-/* Accessibility */
-:focus-visible { outline: 2px solid #5b3fa0; outline-offset: 3px; }
-:focus:not(:focus-visible) { outline: none; }
-.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
-/* Better contrast on muted text */
-.hero-sub { color: rgba(255,255,255,0.65) !important; }
-/* Tap targets */
-@media (max-width:900px) {
-  .nav-mob a { min-height:48px; }
-  button, a { min-height:44px; }
-  .faq-q { min-height:48px; padding:14px 0; }
-}
-/* Prevent horizontal scroll everywhere */
-html, body { overflow-x: hidden; max-width: 100vw; }
-
-
-/* ── Footer mobile responsive fix ── */
-@media (max-width: 768px) {
-  .portal-feature-block {
-    grid-template-columns: 1fr !important;
-    gap: 24px !important;
-  }
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 28px !important;
-    padding: 32px 20px 20px !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-strip {
-    padding: 28px 20px 0 !important;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 14px !important;
-    padding: 16px 18px !important;
-  }
-  .footer-bottom {
-    padding: 14px 20px !important;
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 10px !important;
-  }
-}
-@media (max-width: 480px) {
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* NAV-FINAL-V4 */
-
-.skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
-.skip-link:focus{left:8px;}
-*:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
-.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:2px;}
-.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
-.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
-.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
-.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
-.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
-.nav-drop{position:relative;}
-.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-drop:hover>button svg{transform:rotate(180deg);}
-.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
-.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
-.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
-.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
-.nav-mob.open{display:flex;}
-.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
-.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group{margin:2px 0;}
-.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
-.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
-.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
-.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
-.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
-.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
-.nav-mob .mob-cta:hover{background:#4a3280!important;}
-body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
-
-/* Dropdown gap fix - bridge pseudo-element */
-.nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-
-
-/* Dropdown bridge - prevents menu closing when moving mouse down */
-.nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
-.nav-drop{padding-bottom:0;}
-
-</style>
-
-  <!-- Open Graph -->
-  <meta property="og:locale" content="en_US">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Davis Digital Studio">
-  <meta property="og:title" content="Web Design, SEO & Custom Web Apps | Davis Digital Studio">
-  <meta property="og:description" content="Web design and SEO for small businesses from $1,500, plus custom platforms, client portals, and web apps. Remote-friendly, serving businesses across the US.">
-  <meta property="og:url" content="https://davisdigitalstudio.com/services">
-  <meta property="og:image" content="https://davisdigitalstudio.com/og-image.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <!-- Twitter Card -->
-  <meta name="twitter:site" content="@davisdigitalstudio">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Web Design & SEO Services for Small Businesses | Davis Digital Studio">
-  <meta name="twitter:description" content="Web design and SEO for small businesses from $1,500, plus custom platforms, client portals, and web apps. Remote-friendly, serving businesses across the US.">
-  <meta name="twitter:image" content="https://davisdigitalstudio.com/og-image.jpg">
-  <!-- Canonical -->
-  <link rel="canonical" href="https://davisdigitalstudio.com/services">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Web Design & SEO Services",
-    "provider": { "@type": "Organization", "name": "Davis Digital Studio" },
-    "areaServed": "United States",
-    "description": "Website redesign, local SEO strategy, and monthly retainers for small businesses nationwide.",
-    "offers": [
-      { "@type": "Offer", "name": "Template Build", "price": "1500", "priceCurrency": "USD", "description": "Polished template build on the platform that fits your business." },
-      { "@type": "Offer", "name": "Custom + Photography", "price": "3800", "priceCurrency": "USD", "description": "Bespoke custom design with art-directed photography." },
-      { "@type": "Offer", "name": "Custom HTML", "price": "6500", "priceCurrency": "USD", "description": "Hand-coded site, no template limits, fastest and most unique." },
-      { "@type": "Offer", "name": "Custom Platform & Web App", "price": "12000", "priceCurrency": "USD", "description": "Custom client portals, dashboards, booking systems, member logins, and database-backed web applications built from the ground up." }
-    ]
-  }
-</script>
-  <!-- Google Analytics 4 -->
-  <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})();</script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
-  
-
-  <link rel="manifest" href="/manifest.json">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="DavisDigital">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
-  {"@type":"ListItem","position":1,"name":"Home","item":"https://davisdigitalstudio.com/"},
-  {"@type":"ListItem","position":2,"name":"Services","item":"https://davisdigitalstudio.com/services"}
-]}
-</script>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-  {"@type":"Question","name":"How much does a website cost?","acceptedAnswer":{"@type":"Answer","text":"Websites are $1,500 for a Template build on the platform that fits your business, $3,800 for Custom + Photography with art-directed shots, and $6,500 for a fully hand-coded Custom HTML build. For businesses that need a custom platform or web app, such as a client portal, dashboard, booking system, or member login, custom platform builds start at $12,000 and are quoted after a scoping call. Every project includes a free discovery call to confirm scope and pricing."}},
-  {"@type":"Question","name":"How long does a website take to build?","acceptedAnswer":{"@type":"Answer","text":"Template builds take 2-4 weeks. Custom + Photography projects take 4-6 weeks. Custom HTML builds take 6-10 weeks depending on scope. Rush delivery is available at a 25% surcharge."}},
-  {"@type":"Question","name":"Where do you work with clients?","acceptedAnswer":{"@type":"Answer","text":"Yes. Davis Digital Studio is fully remote and works with small businesses across the United States. All projects are managed online."}},
-  {"@type":"Question","name":"What happens after the site launches?","acceptedAnswer":{"@type":"Answer","text":"Every project includes a 30-day post-launch support window. Ongoing support is available as DIY at $0/mo, Managed at $400/mo, or HTML Managed at $850/mo (required for Custom HTML builds). 3-month minimum either way."}}
-]}
-</script>
-<link rel="stylesheet" href="/enhance.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/about">About Us</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Solutions</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
-        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
-        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Ongoing Support</a>
-      </div>
-    </div>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
-        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
-        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
-        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
-      </div>
-    </div>
-    <a href="/work">Case Studies</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
-        <a href="/ai-critique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/></svg> AI Website Review</a>
-        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
-        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
-        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
-        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
-        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
-      </div>
-    </div>
-    <a href="/report-card" class="nav-report">Free Report Card</a>
-    <a href="/portal" style="font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;transition:color 0.15s,background 0.15s;" onmouseover="this.style.color='#5b3fa0';this.style.background='#f7f4fd'" onmouseout="this.style.color='#7a6d8e';this.style.background=''">Client Login</a>
-    <a href="/audit" class="nav-cta">Free Site Score</a>
+<body data-page="services"><header class="nav">
+<div class="wrap nav-in">
+  <a href="index.html" class="brand"><svg class="mark" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="16" cy="16" r="15" stroke="#B08D57" stroke-width="1"/>
+<path d="M10 21V11h4.2c3 0 4.8 1.9 4.8 5s-1.8 5-4.8 5H10z" stroke="#1B1525" stroke-width="1.4" fill="none"/>
+<circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
+  <nav class="nav-links">
+    <a href="how-we-work.html">How we work</a>
+    <a href="services.html" class="active">Services</a>
+    <a href="industries.html">Industries</a>
+    <a href="about.html">About</a>
+    <a href="tools.html">Free tools</a>
+  </nav>
+  <div class="nav-actions">
+    <a href="portal.html" class="nav-login">Client login</a>
+    <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
-    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-  </button>
-</nav>
-<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="/">Home</a>
-  <a href="/about">About Us</a>
-  <div class="nav-mob-group" id="mobServices">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/services">All Solutions</a>
-      <a href="/web-design">Web Design</a>
-      <a href="/seo-strategy">SEO Strategy</a>
-      <a href="/monthly-retainer">Ongoing Support</a>
-    </div>
-  </div>
-  <div class="nav-mob-group" id="mobIndustries">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
-      <a href="/salon-web-design">Salons &amp; Spas</a>
-      <a href="/retail-web-design">Retail &amp; Boutiques</a>
-      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
-      <a href="/home-services-web-design">Home Services</a>
-    </div>
-  </div>
-  <a href="/work">Case Studies</a>
-  <div class="nav-mob-group" id="mobTools">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/audit#free-audit">Free Site Score</a>
-      <a href="/ai-critique">AI Website Review</a>
-      <a href="/report-card">Digital Report Card</a>
-      <a href="/roi-calculator">ROI Calculator</a>
-      <a href="/speed-test">Speed Test</a>
-      <a href="/local-visibility">Local Visibility</a>
-      <a href="/pricing-estimator">Pricing Estimator</a>
-    </div>
-  </div>
-  <a href="/report-card">Free Report Card</a>
-  <a href="/portal" style="font-size:16px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;">Client Login</a>
-  <a href="/contact" class="mob-cta">Book a free call</a>
+  <button class="burger" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')"><span></span><span></span></button>
 </div>
-
-<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;overflow:hidden;">Skip to content</a>
-<main id="main-content">
-
-
-<!-- BREADCRUMBS -->
-<nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
-  <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);opacity:0.5;flex-shrink:0;" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-    <a href="/" style="color:var(--muted);text-decoration:none;">Home</a>
-        <span style="color:var(--muted);opacity:0.4;">/</span>
-        <span style="color:var(--p);font-weight:600;">Services</span>
-  </div>
-</nav>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
-          {"@type":"ListItem","position":1,"name":"Home","item":"https://davisdigitalstudio.com/"},
-          {"@type":"ListItem","position":2,"name":"Services"}
-        ]}
-</script>
-<section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
-  <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
-  <div aria-hidden="true" style="position:absolute;bottom:-100px;right:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
-
-  <div style="max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;position:relative;z-index:1;">
-
-    <!-- LEFT: Text content -->
-    <div>
-      <div style="display:inline-flex;align-items:center;gap:9px;background:rgba(106,191,105,0.08);border:1px solid rgba(106,191,105,0.18);border-radius:100px;padding:7px 15px;margin-bottom:24px;font-size:13px;font-weight:500;color:#1a7e49;">
-        <span style="width:8px;height:8px;border-radius:50%;background:#6abf69;display:inline-block;box-shadow:0 0 0 3px rgba(106,191,105,0.18);"></span>
-        Available for new projects · Nationwide / Remote
-      </div>
-      <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:14px;">Services</div>
-      <h1 style="font-family:var(--serif);font-size:clamp(42px,6vw,68px);font-weight:400;line-height:1;letter-spacing:-2px;color:var(--ink);margin-bottom:22px;">The goal isn't a better website. It's a better <em style="color:var(--p);font-style:italic;">business.</em></h1>
-      <p style="font-size:17px;line-height:1.6;color:var(--muted);margin-bottom:0;max-width:520px;">More calls. More bookings. More leads. More customers finding you when they're ready to buy. Everything here is designed around solving business problems, not selling services you don't need.</p>
-    </div>
-
-    <!-- RIGHT: Pricing snapshot card -->
-    <div style="display:flex;justify-content:center;align-items:center;">
-      <div style="background:#fff;border-radius:24px;padding:28px;box-shadow:0 32px 80px rgba(91,63,160,0.18),0 4px 16px rgba(91,63,160,0.06);border:1px solid rgba(91,63,160,0.08);position:relative;width:100%;max-width:380px;transform:rotate(0.5deg);">
-        <div style="position:absolute;top:-14px;right:24px;background:var(--pdark);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:6px 14px;border-radius:100px;text-transform:uppercase;">3 Tiers</div>
-
-        <div style="margin-bottom:18px;">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Project tiers</div>
-          <div style="font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);margin-top:3px;">Built to fit your stage.</div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid #c4aee8;">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Template</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Polished template, self-managed</div>
-            </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$1,500</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid var(--p);">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Custom + Photography</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Bespoke design, shot list incl.</div>
-            </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$3,800</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid #1e1338;">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Custom HTML</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Hand-coded, no template limits</div>
-            </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$6,500</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#f7f4fd;border-radius:10px;border-left:3px solid #5b3fa0;">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--ink);">Custom Platform</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Portals, dashboards &amp; web apps</div>
-            </div>
-            <div style="font-family:var(--serif);font-size:16px;color:var(--p);font-weight:600;">$12k+</div>
-          </div>
-        </div>
-
-        <div style="margin-top:16px;padding:11px 14px;background:linear-gradient(135deg,#1e1338,#5b3fa0);border-radius:10px;color:#fff;text-align:center;">
-          <div style="font-size:11px;letter-spacing:1px;color:var(--pxl);">Discovery call</div>
-          <div style="font-size:14px;font-weight:600;margin-top:2px;">Always free →</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+</header>
+<section class="hero">
+<div class="wrap" style="max-width:820px">
+  <span class="eyebrow reveal">Services &amp; pricing</span>
+  <h1 class="reveal mt-m">Whatever you need built, the <em>experience</em> is the same.</h1>
+  <p class="lede reveal">Organized, transparent, and handled directly by me. What changes between options is the website itself &mdash; not how well you're taken care of.</p>
+</div>
 </section>
 
-<section class="services-main">
-  <div class="services-inner">
-    <div class="section-header reveal">
-      <span class="label">Packages</span>
-      <h2>Priced for <em>real businesses.</em></h2>
-      <p>Transparent pricing, no surprises. Every engagement includes strategy, not just execution. Payment plans available. 50% upfront, 50% at launch.</p>
+<section class="pad-sm">
+<div class="wrap">
+  <div class="svc-grid">
+    <div class="svc reveal">
+      <span class="tier">Essentials</span>
+      <h3 class="serif">Get online, the right way</h3>
+      <div class="price">$1,500 <small>from</small></div>
+      <p>A clean, professional website that fits your business and gets you online properly. Strategy-led and organized from day one.</p>
+      <ul>
+        <li>Strategy-first planning</li>
+        <li>Professional, mobile-ready design</li>
+        <li>Built for search from the start</li>
+        <li>Your project in one organized place</li>
+      </ul>
+      <a href="contact.html" class="btn btn-ghost">Start here &rarr;</a>
     </div>
 
-    <!-- THE ENGINE - IN EVERY BUILD -->
-    <div class="reveal" style="background:linear-gradient(145deg,#1e1338 0%,#2d1f4e 100%);border-radius:18px;padding:24px 28px;margin-bottom:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;align-items:center;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#c4894a;text-transform:uppercase;margin-bottom:6px;">The engine · in every build</div>
-        <div style="font-family:var(--serif);font-size:18px;color:#fff;line-height:1.2;">The part that makes the <em style="color:var(--pxl);font-style:italic;">phone ring.</em></div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Found</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Google Business Profile</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Ranks</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Meta tags, titles & sitemap</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Local</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.85);">On-page + local SEO</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:4px;">Mobile</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.85);">Fast & indexable on phones</div>
-      </div>
+    <div class="svc reveal" style="border-color:var(--brass)">
+      <span class="tier">Custom + Photography</span>
+      <h3 class="serif">Look as good as you are</h3>
+      <div class="price">$3,800 <small>from</small></div>
+      <p>A custom design with art-directed photography, so your business looks exactly as good as it actually is.</p>
+      <ul>
+        <li>Everything in Essentials</li>
+        <li>Custom design, built around you</li>
+        <li>Art-directed photography</li>
+        <li>Deeper SEO &amp; local visibility setup</li>
+      </ul>
+      <a href="contact.html" class="btn btn-primary">Book a free call &rarr;</a>
     </div>
 
-    <!-- CLIENT PORTAL - ADD-ON -->
-    <div class="reveal portal-feature-block" style="background:#faf8f5;border:1px solid rgba(91,63,160,0.14);border-radius:18px;padding:26px 28px;margin-bottom:24px;display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:center;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--p);text-transform:uppercase;margin-bottom:8px;">Available as an add-on</div>
-        <div style="font-family:var(--serif);font-size:21px;color:var(--ink);line-height:1.25;margin-bottom:12px;">Your own project portal.</div>
-        <p style="font-size:14px;line-height:1.65;color:var(--muted);margin-bottom:14px;">A private login where you and I work together through your build: track progress, approve work in one click, share files, message me, view invoices, and sign your agreement, all in one secure place. It's the kind of setup agencies rent for hundreds a month. Add it to any website project, or buy it on its own.</p>
-        <p style="font-size:13px;line-height:1.6;color:var(--ink);margin-bottom:14px;background:#ede8f7;border-radius:10px;padding:12px 14px;">Want a portal or app built for <strong>your own customers</strong>, with bookings, ticketing, logins, and a backend? That's a custom build, not this. See the <a href="#custom-platform" style="color:var(--p);font-weight:600;text-decoration:underline;">Custom Platform tier</a> below.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <span style="font-size:12px;font-weight:600;color:var(--p);background:#ede8f7;padding:5px 12px;border-radius:100px;">Live progress</span>
-          <span style="font-size:12px;font-weight:600;color:var(--p);background:#ede8f7;padding:5px 12px;border-radius:100px;">One-click approvals</span>
-          <span style="font-size:12px;font-weight:600;color:var(--p);background:#ede8f7;padding:5px 12px;border-radius:100px;">Files &amp; messages</span>
-          <span style="font-size:12px;font-weight:600;color:var(--p);background:#ede8f7;padding:5px 12px;border-radius:100px;">Invoices &amp; e-sign</span>
-        </div>
-      </div>
-      <div style="border-radius:12px;overflow:hidden;box-shadow:0 16px 40px rgba(26,21,53,0.16);border:1px solid rgba(91,63,160,0.1);">
-        <img src="/portal-preview.png" alt="Davis Digital Studio client portal showing project progress, approvals, files, and messages" loading="lazy" width="1440" height="820" style="width:100%;height:auto;display:block;">
-      </div>
-    </div>
-
-    <div class="svc-grid">
-
-      <!-- TEMPLATE -->
-      <div class="svc-card reveal" style="transition-delay:0s">
-        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-5-5-10-5-10z"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M7 17l-2 3M17 17l2 3"/></svg></div>
-        <h3>Template</h3>
-        <p>Get online fast with a polished template build. Best for new businesses that need a clean, professional presence right away.</p>
-        <div class="svc-price-block">
-          <div class="svc-price">$1,500</div>
-          <div class="svc-price-note">one-time · design + setup</div>
-        </div>
-        <ul class="svc-includes">
-          <li>Template build on the platform that fits your business</li>
-          <li>Your branding applied: colors, fonts, logo</li>
-          <li>Up to 5 pages, mobile-optimized</li>
-          <li>Contact form and basic SEO setup</li>
-          <li>Google Analytics installation</li>
-          <li>1 revision round</li>
-          <li>Launch walkthrough video</li>
-        </ul>
-        <div class="svc-updates">Who updates it: <strong>You, anytime. No code.</strong></div>
-        <a href="/contact" class="btn-ghost" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'template_package'});}">Get started &rarr;</a>
-      </div>
-
-      <!-- CUSTOM + PHOTOGRAPHY (RECOMMENDED) -->
-      <div class="svc-card featured reveal" style="transition-delay:0.1s">
-        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l4-4 4 4 4-5 4-3"/><path d="M3 7h18"/></svg></div>
-        <h3>Custom + Photography</h3>
-        <p>A bespoke design with art-directed photography, built to rank and convert. For businesses ready to compete online.</p>
-        <div class="svc-price-block">
-          <div class="svc-price">$3,800</div>
-          <div class="svc-price-note">one-time · design + setup</div>
-        </div>
-        <ul class="svc-includes">
-          <li>Bespoke design + custom typography</li>
-          <li>Art-directed photography (shot list included)</li>
-          <li>Mobile-first, performance-optimized</li>
-          <li>On-page SEO implementation</li>
-          <li>Google Analytics 4 and Search Console setup</li>
-          <li>Google Business Profile setup</li>
-          <li>2 revision rounds</li>
-          <li>30-day post-launch support</li>
-        </ul>
-        <div class="svc-updates">Who updates it: <strong>You, anytime. No code.</strong></div>
-        <a href="/contact" class="btn-white" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'custom_package'});}">Get started &rarr;</a>
-      </div>
-
-      <!-- CUSTOM HTML -->
-      <div class="svc-card reveal" style="transition-delay:0.2s">
-        <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-        <h3>Custom HTML</h3>
-        <p>The hand-coded version. No template limits, fastest performance, completely unique. For businesses that want the best.</p>
-        <div class="svc-price-block">
-          <div class="svc-price">$6,500</div>
-          <div class="svc-price-note">one-time · design + build</div>
-        </div>
-        <ul class="svc-includes">
-          <li>Custom HTML, CSS, and JavaScript</li>
-          <li>No template limits, fastest and most unique</li>
-          <li>Mobile-first, performance-optimized</li>
-          <li>On-page SEO implementation</li>
-          <li>Google Analytics 4 and Search Console setup</li>
-          <li>Google Business Profile setup</li>
-          <li>2 revision rounds</li>
-          <li>30-day post-launch support</li>
-        </ul>
-        <div class="svc-updates">Who updates it: <strong>I do. It's hand-coded.</strong></div>
-        <a href="/contact" class="btn-ghost" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'html_package'});}">Get started &rarr;</a>
-      </div>
-
-    </div>
-
-    <!-- CUSTOM PLATFORM / WEB APP (HIGH-TICKET SPOTLIGHT) -->
-    <div id="custom-platform" class="platform-tier reveal" style="scroll-margin-top:90px;margin-top:32px;background:var(--pdark);border-radius:24px;padding:48px 44px;color:#fff;position:relative;overflow:hidden;">
-      <div style="position:absolute;top:-80px;right:-60px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.45) 0%,transparent 65%);pointer-events:none;"></div>
-      <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:center;" class="platform-grid">
-        <div>
-          <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:14px;">Beyond a website</div>
-          <h3 style="font-family:var(--serif);font-size:30px;line-height:1.15;color:#fff;margin-bottom:16px;">Custom Platform &amp; Web App builds</h3>
-          <p style="font-size:15px;line-height:1.7;color:rgba(255,255,255,0.78);margin-bottom:20px;max-width:520px;">Some businesses need more than pages. They need a login, a dashboard, a booking or ticketing system, a member area, or custom forms that actually do something. I build those too. The client portal, admin panel, and tools you see across this very site? I designed and built them from the ground up. That is the portfolio piece. If you need software for your customers, not just a website, this is the tier.</p>
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:10px;">What's included</div>
-          <ul class="svc-includes" style="margin-bottom:18px;">
-            <li style="color:rgba(255,255,255,0.85);">Everything in the Custom HTML website tier</li>
-            <li style="color:rgba(255,255,255,0.85);">Custom portal, dashboard, or member login for your customers</li>
-            <li style="color:rgba(255,255,255,0.85);">Booking, scheduling, ticketing, or preorder flows</li>
-            <li style="color:rgba(255,255,255,0.85);">Custom forms (intake, preferences, requests)</li>
-            <li style="color:rgba(255,255,255,0.85);">Secure checkout powered by Stripe</li>
-            <li style="color:rgba(255,255,255,0.85);">Database backend with secure logins (Supabase)</li>
-            <li style="color:rgba(255,255,255,0.85);">Automated email confirmations &amp; notifications</li>
-            <li style="color:rgba(255,255,255,0.85);">A scoping session to define exactly what gets built</li>
-            <li style="color:rgba(255,255,255,0.85);">Training so you can run your own admin panel</li>
-            <li style="color:rgba(255,255,255,0.85);">30-day post-launch support, built directly by me</li>
-          </ul>
-          <p style="font-size:12px;line-height:1.6;color:rgba(255,255,255,0.5);max-width:520px;margin-bottom:0;">Built for small businesses that need real functionality, not enterprise systems. Payments are handled securely through Stripe, so card data never touches your site. If a project needs more than a focused small-business build, I'll tell you honestly and help you find the right fit.</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:32px 28px;text-align:center;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--pxl);text-transform:uppercase;margin-bottom:10px;">Project-based</div>
-          <div style="font-family:var(--serif);font-size:34px;color:#fff;font-weight:600;line-height:1;">From $12,000</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:8px;margin-bottom:24px;">Scoped per project · quoted after discovery</div>
-          <a href="/contact" class="btn-white" style="width:100%;justify-content:center;" onclick="if(typeof gtag==='function'){gtag('event','begin_checkout',{event_category:'ecommerce',event_label:'platform_package'});}">Book a scoping call &rarr;</a>
-          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:14px;line-height:1.5;">This site itself is the live demo. Ask for a walkthrough of the portal and admin panel on our call.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAINTENANCE PLANS -->
-    <div class="section-header reveal" style="margin-top:72px;">
-      <span class="label">Ongoing Support</span>
-      <h2>Keep it <em>running.</em></h2>
-      <p>Every site needs upkeep. 3-month minimum either way. Pick how hands-on you want to be.</p>
-    </div>
-
-    <div class="addons-grid" style="margin-top:0;">
-      <div class="addon-card reveal">
-        <h4>DIY</h4>
-        <p>You manage updates yourself on the platform. Includes a launch walkthrough so your team can take it from here.</p>
-        <div class="addon-price">$0/mo</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Template & Custom + Photography tiers</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.1s">
-        <h4>Managed</h4>
-        <p>I handle updates, seasonal content, SEO monitoring, and a monthly performance report. You focus on running the business.</p>
-        <div class="addon-price">$400/mo</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Template & Custom + Photography tiers</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.2s">
-        <h4>HTML Managed</h4>
-        <p>Required for Custom HTML builds since the site is hand-coded. I handle every update, content change, and SEO improvement.</p>
-        <div class="addon-price">$850/mo</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Required for Custom HTML tier</div>
-      </div>
+    <div class="svc reveal">
+      <span class="tier">Fully Custom</span>
+      <h3 class="serif">Something truly your own</h3>
+      <div class="price">$6,500 <small>from</small></div>
+      <p>A hand-built, one-of-a-kind site for businesses that want something nobody else has.</p>
+      <ul>
+        <li>Hand-coded, bespoke build</li>
+        <li>Distinctive visual identity</li>
+        <li>Advanced features &amp; interactions</li>
+        <li>Full strategy &amp; SEO foundation</li>
+      </ul>
+      <a href="contact.html" class="btn btn-ghost">Let's talk &rarr;</a>
     </div>
   </div>
+  <p class="hint mt-l center" style="max-width:60ch;margin-inline:auto;font-size:14.5px">Every option includes the same experience: your project in one organized place, direct work with me, and clear, transparent pricing throughout.</p>
+</div>
 </section>
 
-<section class="addons">
-  <div class="addons-inner">
-    <div class="section-header reveal">
-      <span class="label">Add-ons</span>
-      <h2>Build it <em>your way.</em></h2>
-      <p>Layer these onto any package. Pricing is per engagement.</p>
-    </div>
-    <div class="addons-grid">
-      <div class="addon-card reveal">
-        <h4>Brand Identity</h4>
-        <p>Logo, color palette, typography system, and brand guidelines that carry across your site and all marketing materials.</p>
-        <div class="addon-price">From $500</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.1s">
-        <h4>Copywriting</h4>
-        <p>Professional website copy written for clarity and conversion. Includes SEO keyword integration throughout.</p>
-        <div class="addon-price">From $400/page</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.2s">
-        <h4>Google Ads Setup</h4>
-        <p>Campaign structure, keyword targeting, and ad copy for your first paid search campaign. Built to drive local traffic.</p>
-        <div class="addon-price">From $600</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.3s">
-        <h4>SEO Strategy</h4>
-        <p>A data-driven roadmap built with SEMrush. Keyword research, competitive analysis, and a 6-month content plan.</p>
-        <div class="addon-price">From $800</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Included in Custom + Photography and Custom HTML packages</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.4s">
-        <h4>Custom Widget or Feature</h4>
-        <p>Interactive tools, calculators, quiz flows, booking integrations, or anything else your site needs to stand out.</p>
-        <div class="addon-price">From $300</div>
-      </div>
-      <div class="addon-card reveal" style="transition-delay:0.5s">
-        <h4>Rush Delivery</h4>
-        <p>Need it faster than the standard timeline? Rush projects are prioritized and completed in half the normal time.</p>
-        <div class="addon-price">+25% of project total</div>
-      </div>
-    </div>
+<!-- ongoing care -->
+<section class="pad panel-warm">
+<div class="wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+  <div class="reveal">
+    <span class="eyebrow">Ongoing care</span>
+    <h2 class="kicker mt-s">The businesses that win online don't launch and disappear.</h2>
   </div>
-</section>
-
-<section class="compare">
-  <div class="compare-inner">
-    <div class="section-header reveal">
-      <span class="label">How we compare</span>
-      <h2>You're not choosing <em>between options.</em></h2>
-      <p>You're choosing between a generic template and something built for your specific business.</p>
-    </div>
-    <table class="compare-table reveal">
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th>DIY Builder</th>
-          <th class="col-highlight">Davis Digital</th>
-          <th>Agency</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Strategy-first approach</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="check">✓</td></tr>
-        <tr><td>SEO implementation</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="check">✓</td></tr>
-        <tr><td>Single point of contact</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
-        <tr><td>Real business experience</td><td class="cross">✕</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
-        <tr><td>Transparent pricing</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
-        <tr><td>Human-scale investment</td><td class="check">✓</td><td class="col-highlight check">✓</td><td class="cross">✕</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="cta-band">
-  <h2>Not sure what<br>you <em>need?</em></h2>
-  <p>Most business owners shouldn't have to know the difference between technical SEO, schema markup, or conversion optimization. That's my job. Let's figure out what's actually holding your business back, and what doesn't make sense to spend on.</p>
-  <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" class="btn-white">Book a free discovery call &rarr;</a>
-</section>
-
-</main>
-
-<!-- EXIT INTENT POPUP -->
-<div class="exit-overlay" id="exitOverlay">
-  <div class="exit-card">
-    <button class="exit-close" onclick="closeExit()">×</button>
-    <div style="font-size:36px;margin-bottom:12px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
-    <h3>Before you go. <em>it's free.</em></h3>
-    <p>Get a plain-English read on what's working on your site and what's quietly costing you business. A real AI review of your actual pages. No signup, takes about 30 seconds.</p>
-    <a href="/ai-critique" class="exit-cta">Review my site free →</a>
-    <button class="exit-skip" onclick="closeExit()">No thanks, I'll figure it out myself</button>
+  <div class="reveal">
+    <p class="lead-muted">A great site starts falling behind within months &mdash; Google notices, and so do your customers. Ongoing care keeps yours working as hard as you do: I monitor, improve, and report in plain English. And your project space stays open, so you're never starting from scratch when you need me.</p>
+    <p class="mt-m" style="font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--brass-deep)">FROM $400 / MONTH &middot; SIMPLE, CANCEL ANYTIME AFTER THE FIRST 3 MONTHS</p>
+    <a href="contact.html" class="textlink mt-m" style="display:inline-block">Ask about ongoing care &rarr;</a>
   </div>
 </div>
-
-
-<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#1e1338 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
-  <div aria-hidden="true" style="position:absolute;top:-100px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
-  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;">
-    <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c4aee8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-    </div>
-    <div style="flex:1;min-width:260px;color:#fff;text-align:left;">
-      <h3 style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;line-height:1.2;letter-spacing:-0.5px;color:#fff;">Ready to grow your business online?</h3>
-      <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;line-height:1.6;">Let's build a website that works as hard as you do.</p>
-    </div>
-    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Book a free call &rarr;</a>
-  </div>
 </section>
 
-<footer class="site-footer" role="contentinfo">
-    <!-- TRUST STRIP -->
-  <div class="footer-trust-strip" style="max-width:1100px;margin:0 auto;padding:32px 52px 0;">
-    <div class="footer-trust-inner" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Eric Davis</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design & SEO Strategist</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Background</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Enterprise digital team</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Domain Name Manager &amp; Content Producer · 9+ years</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Education</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">M.S. Business Analytics</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">CSUN · Dean's Scholar</div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Scale</div>
-        <div style="font-size:13px;color:#fff;font-weight:500;line-height:1.4;">Enterprise scale</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Enterprise governance experience</div>
-      </div>
+<!-- demoted custom-software capability: ONE honest paragraph -->
+<section class="pad-sm">
+<div class="wrap" style="max-width:720px">
+  <div class="reveal" style="border-left:1px solid var(--brass);padding-left:28px">
+    <h3 class="serif" style="font-size:22px;margin-bottom:10px">Need more than a website?</h3>
+    <p class="lead-muted">A booking system, a member login, a custom tool? I occasionally build custom software for businesses that need it &mdash; the same capability behind the systems that run this studio. If that's you, just ask me on our call.</p>
+  </div>
+</div>
+</section>
+<section class="pad panel-dark">
+<div class="wrap center">
+  <span class="eyebrow" style="color:var(--brass);justify-content:center">Let's talk</span>
+  <h2 class="kicker mt-s" style="margin-inline:auto;color:var(--paper)">Not sure which option fits?</h2>
+  <p class="lead-muted mt-m" style="margin-inline:auto;color:rgba(255,255,255,.6)">Tell me about your business and I'll point you to the right starting place &mdash; even if it's not the most expensive one.</p>
+  <div class="hero-cta mt-l" style="justify-content:center">
+    <a href="contact.html" class="btn btn-light">Book a free call <span class="arr">&rarr;</span></a>
+    <a href="tools.html" class="btn btn-ghost" style="color:var(--paper);border-color:rgba(255,255,255,.3)">See what your site needs</a>
+  </div>
+</div>
+</section><footer class="site">
+<div class="wrap">
+  <div class="fwrap">
+    <div>
+      <div class="brand serif">Davis Digital Studio</div>
+      <p>The easiest, most organized way to get a website that actually works. Strategy-led web design and SEO for small businesses across the US.</p>
+      <p style="margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:rgba(255,255,255,.4)">Los Angeles &middot; working with businesses nationwide</p>
+    </div>
+    <div class="fcol">
+      <h5>Studio</h5>
+      <a href="how-we-work.html">How we work</a>
+      <a href="services.html">Services</a>
+      <a href="industries.html">Industries</a>
+      <a href="about.html">About</a>
+      <a href="work.html">Case studies</a>
+    </div>
+    <div class="fcol">
+      <h5>Start</h5>
+      <a href="tools.html">Free site review</a>
+      <a href="contact.html">Book a free call</a>
+      <a href="portal.html">Client login</a>
+      <a href="contact.html">Contact</a>
     </div>
   </div>
-
-  <div class="footer-main-grid" style="max-width:1100px;margin:0 auto;padding:40px 52px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:40px;">
-    <div class="footer-brand-col">
-      <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div style="display:flex;gap:12px;">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Solutions</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-        <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Ongoing Support</a>
-        <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Book a Free Call</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-        <a href="/salon-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-        <a href="/retail-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-        <a href="/home-services-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/tools" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Free Tools</a>
-        <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-        <a href="/audit#free-audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Site Score</a>
-        <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Company</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <a href="/work" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Case Studies</a>
-        <a href="/about" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">About Us</a>
-        <a href="/contact" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Contact</a>
-      </div>
-    </div>
+  <div class="fbase">
+    <span>&copy; 2026 Davis Digital Studio &middot; Eric Davis</span>
+    <span style="display:flex;gap:18px">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="accessibility.html">Accessibility</a>
+    </span>
   </div>
-  <div class="footer-bottom" style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric Davis</p>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-      <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-      <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-      <a href="/portal-terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Portal Terms</a>
-      <a href="/ai-disclaimer" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">AI Disclaimer</a>
-      <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-    </div>
-  </div>
+</div>
 </footer>
 <script>
-
-var _pb = document.createElement('div');
-_pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gradient(to right,#5b3fa0,#c4aee8);z-index:99999;width:0;pointer-events:none;transition:width 0.08s;';
-document.body.appendChild(_pb);
-window.addEventListener('scroll', function() {
-  var h = document.documentElement.scrollHeight - window.innerHeight;
-  if (h > 0) _pb.style.width = (window.scrollY / h * 100) + '%';
-});
-
-
-var _ro = new IntersectionObserver(function(entries) {
-  entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); _ro.unobserve(e.target); } });
-}, { threshold: 0.04, rootMargin: '0px 0px -20px 0px' });
-document.querySelectorAll('.reveal').forEach(function(el) {
-  var rect = el.getBoundingClientRect();
-  if (rect.top < window.innerHeight && rect.bottom > 0) {
-    el.classList.add('visible');
-  } else {
-    _ro.observe(el);
-  }
-});
-
-
-(function() {
-  var ham = document.getElementById('navHam');
-  var mob = document.getElementById('navMob');
-  if (!ham || !mob) return;
-  ham.addEventListener('click', function() {
-    var open = mob.classList.toggle('open');
-    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
-    ham.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-  });
-  mob.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      mob.classList.remove('open');
-      ham.setAttribute('aria-expanded', 'false');
-      ham.setAttribute('aria-label', 'Open menu');
-    });
-  });
-})();
-
-
-
-// ── Live Score Widget ──
-(function() {
-  // Only show once per session
-  if (sessionStorage.getItem('sw_dismissed')) return;
-
-  var widget = document.createElement('div');
-  widget.className = 'score-widget';
-  widget.innerHTML = `
-    <div class="sw-card">
-      <button class="sw-close" id="swClose" aria-label="Close">×</button>
-      <div class="sw-pulse">
-        <div class="sw-dot"></div>
-        <span class="sw-pulse-text">Free check available</span>
-      </div>
-      <div class="sw-title">Is your site hurting your business?</div>
-      <div class="sw-sub">Get 5 personalized findings for your website, free, instant, no signup required.</div>
-      <a href="/audit#free-audit" class="sw-cta">
-        <span class="sw-cta-text">Get your free score →</span>
-      </a>
-    </div>
-  `;
-  document.body.appendChild(widget);
-
-  // Show after 30 seconds
-  var showTimer = setTimeout(function() {
-    widget.classList.add('show');
-  }, 30000);
-
-  // Close button
-  document.getElementById('swClose').addEventListener('click', function() {
-    widget.classList.remove('show');
-    widget.classList.add('hide');
-    sessionStorage.setItem('sw_dismissed', '1');
-    clearTimeout(showTimer);
-  });
-
-  // Auto-dismiss after 15 seconds of showing
-  setTimeout(function() {
-    if (widget.classList.contains('show')) {
-      widget.classList.remove('show');
-      widget.classList.add('hide');
-    }
-  }, 46000);
-})();
-
-
-// ── PWA Service Worker ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(function(){});
-}
-
-// ── Exit Intent ──
-var _exitShown = false;
-function closeExit() {
-  document.getElementById('exitOverlay').classList.remove('show');
-  sessionStorage.setItem('exit_shown','1');
-}
-if (!sessionStorage.getItem('exit_shown')) {
-  document.addEventListener('mouseleave', function(e) {
-    if (e.clientY < 10 && !_exitShown) {
-      _exitShown = true;
-      setTimeout(function() { document.getElementById('exitOverlay').classList.add('show'); }, 200);
-    }
-  });
-  // Mobile: show on back button / after 45s inactivity
-  var _idleTimer;
-  function resetIdle() { clearTimeout(_idleTimer); _idleTimer = setTimeout(function() { if (!_exitShown) { _exitShown=true; document.getElementById('exitOverlay').classList.add('show'); } }, 45000); }
-  ['touchstart','scroll','click'].forEach(function(e) { document.addEventListener(e, resetIdle, {passive:true}); });
-  resetIdle();
-}
-
-
-
+// Opt into animation only when JS runs; content is visible by default otherwise.
+document.documentElement.classList.add('js-anim');
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+const els=document.querySelectorAll('.reveal');
+els.forEach(el=>io.observe(el));
+// safety net: if anything is still hidden after load, show it
+window.addEventListener('load',()=>setTimeout(()=>els.forEach(el=>el.classList.add('in')),1200));
 </script>
-
-<script>var y=document.getElementById("footer-year");if(y)y.textContent=new Date().getFullYear();</script>
-
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-  <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
-  <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Got it</button>
-    <button onclick="declineCookies()" style="background:transparent;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.2);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
-  </div>
-</div>
-<script>
-(function(){var consent=localStorage.getItem('cookie_consent');if(!consent){setTimeout(function(){var b=document.getElementById('cookieBanner');if(b)b.style.display='flex';},2000);}if(consent==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})();
-function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookieBanner').style.display='none';}
-function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-V4WF04NX7F']=true;document.getElementById('cookieBanner').style.display='none';}
-</script>
-<script>
-/* Mobile nav dropdown toggle — restores Services/Industries/Free Tools expand on mobile */
-function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
-</script>
-  <script src="/concierge.js" defer></script>
-<script src="/enhance.js" defer></script>
-</body>
-</html>
+</body></html>

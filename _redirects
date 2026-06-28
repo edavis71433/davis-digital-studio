@@ -1,46 +1,6 @@
-# Force non-www canonical (www -> non-www, 301)
-https://www.davisdigitalstudio.com/*  https://davisdigitalstudio.com/:splat  301!
-
-/about                  /about.html                     200
-/services               /services.html                  200
-/work                   /work.html                      200
-/contact                /contact.html                   200
-/audit                  /audit.html                     200
-/report-card            /report-card.html               200
-/terms                  /terms.html                     200
-/privacy                /privacy.html                   200
-/accessibility          /accessibility.html             200
-/roi-calculator         /roi-calculator.html            200
-/restaurant-web-design  /restaurant-web-design.html     200
-/free-audit             /audit.html                     302
-/report                 /report-card.html               302
-/portal                 /portal.html                    200
-/set-password           /set-password.html              200
-/speed-test             /speed-test.html                200
-/local-visibility       /local-visibility.html          200
-/pricing-estimator      /pricing-estimator.html         200
-
-/roi                    /roi-calculator                 301
-/tools                  /tools.html                     200
-/ai-critique            /ai-critique.html               200
-/review                 /ai-critique                    301
-/ai-review              /ai-critique                    301
-/portal-terms           /portal-terms.html              200
-/ai-disclaimer          /ai-disclaimer.html             200
-/contact-disclaimer     /contact-disclaimer.html        200
-
-# Block source-code artifacts from ever being served as text
-/*.ts                   /404.html                       404!
-/*.py                   /404.html                       404!
-/function-test.html     /404.html                       404!
-
-# Block internal working docs (in case any copy lingers in the deploy)
-/_internal/*              /404.html                       404!
-/DEEP-DIVE-FINDINGS.md     /404.html                     404!
-/DEPLOY-MANIFEST.txt      /404.html                       404!
-/qa-report.md             /404.html                       404!
-/site_copy.json           /404.html                       404!
-/supabase-email-templates.md  /404.html                   404!
-/email-nurture-sequence.html  /404.html                   404!
-
-/*                      /404.html                       404
+/report-card    /tools    301
+/audit          /tools    301
+/ai-critique    /tools    301
+/roi-calculator /tools    301
+/pricing-estimator /tools 301
+/start          /contact  301
