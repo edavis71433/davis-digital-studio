@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS admin v5.1 premium-polish 20260628 -->
+<!-- DDS admin v5.2 auto-login-provisioning 20260628 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -5391,6 +5391,15 @@ async function saveNewPartnership(btn){
   const client_id = gpQ('#np_client',bg).value;
   const contact_id = gpQ('#np_contact',bg).value;
   if(!client_id && !contact_id){ gpToast('Pick a client or contact','err'); return; }
+  // Resolve the contact email now, while the form is still open, so we can give
+  // them a working login the moment the partnership exists.
+  let contactEmail = '';
+  const contactOpt = gpQ('#np_contact',bg) && gpQ('#np_contact',bg).selectedOptions[0];
+  if (contactOpt && contactOpt.dataset && contactOpt.dataset.email) contactEmail = contactOpt.dataset.email.trim();
+  if (!contactEmail) {
+    const clientOpt = gpQ('#np_client',bg) && gpQ('#np_client',bg).selectedOptions[0];
+    if (clientOpt && clientOpt.dataset && clientOpt.dataset.email) contactEmail = clientOpt.dataset.email.trim();
+  }
   const payload = {
     client_id: client_id||undefined,
     contact_id: contact_id||undefined,
@@ -5404,10 +5413,84 @@ async function saveNewPartnership(btn){
   btn.disabled=true; btn.textContent='Creating…';
   try {
     const r = await gpApi('partnership_upsert', payload);
-    bg.remove(); gpToast('Partnership created');
     const id = r.data && r.data.id;
+    // Make the contact email a working login automatically, if it isn't one yet.
+    // A partnership without a usable login is the #1 reason the client portal
+    // shows "You're all set up" instead of the partnership. We provision it here
+    // so creating a partnership is a single step.
+    if (contactEmail) {
+      btn.textContent='Setting up login…';
+      const setup = await ensurePartnerLogin(contactEmail);
+      bg.remove();
+      if (setup.created) {
+        gpToast('Partnership created · login ready');
+        showPartnerLoginInfo(contactEmail, setup.password);
+      } else if (setup.existed) {
+        gpToast('Partnership created · they already have a login');
+      } else {
+        gpToast('Partnership created · could not set up login automatically');
+      }
+    } else {
+      bg.remove();
+      gpToast('Partnership created · add a contact email to enable their login');
+    }
     if(id) openDetail(id); else gpGo('partnerships');
   } catch(e){ btn.disabled=false; btn.textContent='Create partnership'; gpToast('Could not create: '+e.message,'err'); }
+}
+
+// Ensure an auth login exists for this email. Returns {created, existed, password}.
+// Uses the same service-role route the New Client flow uses.
+async function ensurePartnerLogin(email){
+  const out = { created:false, existed:false, password:'' };
+  try {
+    const jwt = await adminJwt(); if(!jwt) return out;
+    // Generate a readable temporary password the client can change later.
+    const pass = 'dds-' + Math.random().toString(36).slice(2,8) + Math.random().toString(36).slice(2,6);
+    const res = await fetch(SB_URL + '/functions/v1/clever-api', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GP_KEY,'x-dds-user-jwt':jwt},
+      body: JSON.stringify({ type:'create_client_auth', email: email, password: pass })
+    });
+    let j = {}; try{ j = await res.json(); }catch(_){}
+    if (res.ok && !j.error) { out.created = true; out.password = pass; return out; }
+    // If the login already exists, Supabase returns an error mentioning it.
+    const msg = (j.error||'').toLowerCase();
+    if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) { out.existed = true; return out; }
+    return out;
+  } catch(e){ return out; }
+}
+
+// Show the temporary login so Eric can pass it to the client (or send a reset).
+function showPartnerLoginInfo(email, password){
+  const bg = modal('Login is ready', 'Share these with your client, or have them use "Forgot password" at the portal to set their own.', `
+    <div class="field"><label>Portal email</label><input class="in" readonly value="${gpEsc(email)}" onclick="this.select()"></div>
+    <div class="field"><label>Temporary password</label><input class="in" readonly value="${gpEsc(password)}" onclick="this.select()"></div>
+    <div class="sub muted" style="font-size:12px;margin-top:2px">They sign in at davisdigitalstudio.com/portal. They can change this password anytime from "Forgot password".</div>
+  `, [
+    { label:'Done', cls:'btn-primary', on:(b)=>b.closest('.modal-bg').remove() },
+  ]);
+}
+
+// Set-up-login modal: confirm/enter the email, then provision the login. Works
+// for partnerships created before auto-provisioning existed, and lets you fix a
+// wrong contact email on the spot.
+function openSetupLoginModal(prefillEmail){
+  const bg = modal('Set up portal login', 'This creates the login the client uses to sign in. The email must match what they will sign in with.', `
+    <div class="field"><label>Client email</label><input class="in" id="sl_email" type="email" value="${gpEsc(prefillEmail||'')}" placeholder="them@theirbusiness.com"></div>
+    <div class="sub muted" style="font-size:12px;margin-top:2px">A temporary password is generated. They can change it anytime via "Forgot password" at the portal.</div>
+  `, [
+    { label:'Cancel', cls:'', on:(b)=>b.closest('.modal-bg').remove() },
+    { label:'Create login', cls:'btn-primary', on: async (b)=>{
+      const email = (gpQ('#sl_email',bg).value||'').trim();
+      if(!email || email.indexOf('@')<1){ gpToast('Enter a valid email','err'); return; }
+      b.disabled=true; b.textContent='Creating…';
+      const r = await ensurePartnerLogin(email);
+      bg.remove();
+      if(r.created){ showPartnerLoginInfo(email, r.password); }
+      else if(r.existed){ gpToast('That email already has a login'); }
+      else { gpToast('Could not create login. Try the New Client invite flow.','err'); }
+    }},
+  ]);
 }
 
 /* ════════ REMINDERS ════════ */
@@ -5513,6 +5596,7 @@ function drawDetail(){
   </div>
   <div class="ph-actions">
     <span class="chip"><span class="chip-dot ${HEALTH_DOT[p.health]||''}"></span>${gpEsc(p.health||'green')}</span>
+    <button class="btn btn-sm" id="setupLogin">Set up login</button>
     ${p.client_id?`<button class="btn btn-sm" id="toHub">Full client record</button>`:''}
     <button class="btn btn-sm" id="editP">Edit</button>
   </div>`;
@@ -5520,6 +5604,10 @@ function drawDetail(){
   gpQ('#backLink').addEventListener('click',()=>gpGo('partnerships'));
   gpQ('#editP').addEventListener('click',()=>openEditPartnership(p));
   var toHubBtn = gpQ('#toHub'); if(toHubBtn){ toHubBtn.addEventListener('click',function(){ growthToHub(p.client_id); }); }
+  var loginBtn = gpQ('#setupLogin'); if(loginBtn){ loginBtn.addEventListener('click', function(){
+    var email = (p.contact_email||p.client_contact_email||'').trim();
+    openSetupLoginModal(email);
+  }); }
 
   // tabs
   const tabs = el('div',{class:'dtabs'});
