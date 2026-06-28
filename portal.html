@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS portal v6.0 full-restore + growth-merge 20260628 -->
+<!-- DDS portal v7.1 growth-priorities 20260628 -->
 <!-- DDS portal v7.0 growth-priorities-redesign 20260628 -->
 <html lang="en">
 <head>
@@ -2790,7 +2790,9 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
 
     // If the partnership data already loaded, reveal now (handles the race where
     // loadGrowth finished before this rebuild ran).
-    if (window.GP_WS) { revealGrowthNav(); }
+    // Start the reveal poll. It self-guards on GP_WS, so it's safe to call before
+    // the partnership data has loaded — it'll reveal the moment GP_WS is set.
+    if (typeof revealGrowthNav === 'function') { revealGrowthNav(); }
   }
 
   /* ============================================================
@@ -2855,17 +2857,28 @@ async function gpApi(type, payload){
 // Reveal the Growth nav reliably, regardless of whether consolidateNav (which
 // rebuilds the sidebar) has run yet. Retries briefly until the nav items exist.
 function revealGrowthNav(){
-  if (!window.GP_WS) return;
+  // Reveal the Growth nav and KEEP it revealed. Because consolidateNav() rebuilds
+  // the sidebar (re-hiding the moved button), and loadGrowth() is async, the two
+  // can race in either order. This poll runs until BOTH conditions hold: GP_WS is
+  // set AND the nav items exist and are visible. It then stops. If a later rebuild
+  // re-hides them, the next call re-reveals. Cheap and bulletproof.
+  if (window.__gpRevealIv) return; // already polling
   var tries = 0;
-  function show(){
-    var els = document.querySelectorAll('.growth-only');
-    if (els.length){ els.forEach(function(n){ n.style.display=''; }); return true; }
-    return false;
-  }
-  if (show()) return;
-  var iv = setInterval(function(){
+  window.__gpRevealIv = setInterval(function(){
     tries++;
-    if (show() || tries > 40){ clearInterval(iv); }
+    if (window.GP_WS) {
+      var els = document.querySelectorAll('.growth-only');
+      if (els.length) {
+        els.forEach(function(n){ if (n.style.display === 'none') n.style.display = ''; });
+      }
+      // Once data is loaded AND items are visible, we're done.
+      var first = document.querySelector('.growth-only');
+      if (first && first.style.display !== 'none') {
+        clearInterval(window.__gpRevealIv); window.__gpRevealIv = null;
+      }
+    }
+    // Hard safety: stop after ~30s no matter what, so we never poll forever.
+    if (tries > 200) { clearInterval(window.__gpRevealIv); window.__gpRevealIv = null; }
   }, 150);
 }
 
