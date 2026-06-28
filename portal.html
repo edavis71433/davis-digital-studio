@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- DDS portal v6.0 full-restore + growth-merge 20260628 -->
-<!-- DDS v3.7 20260626-plain-client -->
+<!-- DDS portal v7.0 growth-priorities-redesign 20260628 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -637,6 +637,69 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .ai-send:disabled{ background:var(--line-strong); cursor:not-allowed; }
 .ai-disclaim{ font-size:10.5px; color:var(--muted); text-align:center; padding:0 16px 10px; background:var(--surface); }
 
+/* ===== GROWTH — Your Priorities ===== */
+#gp_priorities_body, #gp_history_body { max-width: 760px; }
+.gp-hero { margin-bottom: 26px; }
+.gp-hero-title { font-family: var(--serif); font-size: 30px; font-weight: 400; color: var(--ink); line-height: 1.1; }
+.gp-hero-sub { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.55; max-width: 56ch; }
+.gp-sec { margin-bottom: 30px; }
+.gp-sec-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.gp-sec-emoji { font-size: 22px; line-height: 1.2; flex-shrink: 0; }
+.gp-sec-title { font-size: 18px; font-weight: 650; color: var(--ink); }
+.gp-sec-sub { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+.gp-rec { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(27,21,37,.04); }
+.gp-rec-cat { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--brass,#B08D57); margin-bottom: 6px; }
+.gp-rec-title { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--ink); line-height: 1.2; }
+.gp-rec-detail { font-size: 14.5px; color: #4a4356; margin-top: 8px; line-height: 1.6; }
+.gp-rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+@media (max-width: 600px) { .gp-rec-grid { grid-template-columns: 1fr; } }
+.gp-q { font-size: 12px; font-weight: 700; color: var(--p); margin-bottom: 3px; }
+.gp-a { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.gp-rec-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.gp-pill { font-size: 11.5px; font-weight: 600; padding: 4px 11px; border-radius: 100px; background: var(--paper-2,#F4F0E9); color: var(--ink); }
+.gp-pill-impact { background: #E6F0E9; color: #2f6248; }
+.gp-pill-effort { background: #F4ECDE; color: #8A6B3C; }
+.gp-pill-eric { background: var(--p-mist,#EDE8F7); color: var(--p); }
+.gp-rec-actions { display: flex; gap: 10px; margin-top: 16px; }
+.gp-btn { font-family: var(--sans); font-size: 14px; font-weight: 600; border-radius: 100px; padding: 11px 20px; cursor: pointer; border: none; transition: .15s; }
+.gp-btn-yes { background: var(--p); color: #fff; }
+.gp-btn-yes:hover { background: var(--p-deep,#2A1B4A); }
+.gp-btn-no { background: transparent; color: var(--muted); border: 1px solid var(--hair,#E7E1D6); }
+.gp-btn-no:hover { border-color: var(--muted); color: var(--ink); }
+.gp-done-wrap { display: flex; flex-direction: column; gap: 2px; }
+.gp-done { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 12px; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+.gp-done-tick { width: 22px; height: 22px; border-radius: 50%; background: #E6F0E9; color: #2f6248; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.gp-health { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; padding: 8px 18px; }
+.gp-health-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--paper-2,#F4F0E9); }
+.gp-health-row:last-child { border-bottom: none; }
+.gp-health-name { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.gp-health-desc { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.gp-health-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.gp-health-word { font-size: 13px; font-weight: 700; min-width: 76px; text-align: right; }
+.gp-health-bar { width: 90px; height: 7px; border-radius: 4px; background: var(--paper-2,#F4F0E9); overflow: hidden; }
+.gp-health-fill { height: 100%; border-radius: 4px; }
+.gp-health-note { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+.gp-focus-review { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+.gp-focus-h { font-family: var(--serif); font-size: 18px; color: var(--ink); }
+.gp-focus-p { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.55; }
+.gp-focus-list { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; padding: 6px 18px; }
+.gp-focus-item { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--paper-2,#F4F0E9); }
+.gp-focus-item:last-child { border-bottom: none; }
+.gp-focus-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--p); flex-shrink: 0; }
+.gp-focus-it { font-size: 14px; font-weight: 600; color: var(--ink); }
+.gp-focus-id { font-size: 12px; color: var(--muted); }
+.gp-link { background: none; border: none; color: var(--p); font-family: var(--sans); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 8px 0; }
+.gp-ask { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; padding: 16px; }
+.gp-input { width: 100%; padding: 11px 14px; border: 1px solid var(--hair,#E7E1D6); border-radius: 10px; font-size: 14px; font-family: var(--sans); outline: none; margin-bottom: 10px; box-sizing: border-box; resize: vertical; }
+.gp-input:focus { border-color: var(--p); }
+.gp-reqs { margin-top: 12px; }
+.gp-req { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--paper-2,#F4F0E9); }
+.gp-req-t { font-size: 14px; font-weight: 600; color: var(--ink); }
+.gp-empty { font-size: 14px; color: var(--muted); padding: 18px; background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 16px; line-height: 1.55; }
+.gp-allgood { text-align: center; padding: 36px 24px; background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 18px; margin-bottom: 24px; }
+.gp-allgood-ico { width: 44px; height: 44px; border-radius: 50%; background: #E6F0E9; color: #2f6248; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.gp-allgood-t { font-family: var(--serif); font-size: 20px; color: var(--ink); }
+.gp-allgood-d { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 46ch; margin-inline: auto; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -748,11 +811,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
         <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Billing</button>
 
         <div class="sidebar-divider growth-only" style="display:none"></div>
-        <div class="sidebar-label growth-only" style="display:none">Your partnership</div>
-        <button class="nav-item growth-only" style="display:none" onclick="nav('gp_home')" id="nav-gp_home"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg></span>This month<span class="nav-badge" id="badge-gp" style="display:none"></span></button>
-        <button class="nav-item growth-only" style="display:none" onclick="nav('gp_progress')" id="nav-gp_progress"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg></span>Progress</button>
-        <button class="nav-item growth-only" style="display:none" onclick="nav('gp_website')" id="nav-gp_website"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></span>Website health</button>
-        <button class="nav-item growth-only" style="display:none" onclick="nav('gp_requests')" id="nav-gp_requests"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>Requests</button>
+        <div class="sidebar-label growth-only" style="display:none">Grow your business</div>
+        <button class="nav-item growth-only" style="display:none" onclick="nav('gp_priorities')" id="nav-gp_priorities"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>Growth<span class="nav-badge" id="badge-gp" style="display:none"></span></button>
 
         <div class="sidebar-divider"></div>
         <div class="sidebar-label">Your work</div>
@@ -1166,10 +1226,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       </div>
 
       <!-- QUICK LINKS -->
-      <div class="page-view" id="page-gp_home"><div id="gp_home_body"></div></div>
-      <div class="page-view" id="page-gp_progress"><div id="gp_progress_body"></div></div>
-      <div class="page-view" id="page-gp_website"><div id="gp_website_body"></div></div>
-      <div class="page-view" id="page-gp_requests"><div id="gp_requests_body"></div></div>
+      <div class="page-view" id="page-gp_priorities"><div id="gp_priorities_body"></div></div>
+      <div class="page-view" id="page-gp_history"><div id="gp_history_body"></div></div>
 
       <div class="page-view" id="page-links">
         <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Quick Links</h2>
@@ -2690,7 +2748,7 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
 
     // Find existing nav buttons by id (keep the real onclick=nav(...) handlers).
     function btn(id){ return document.getElementById("nav-"+id); }
-    var ids = ["dashboard","timeline","files","approvals","messages","invoices","services","feedback","onboarding","guide","contract","links","gp_home","gp_progress","gp_website","gp_requests"];
+    var ids = ["dashboard","timeline","files","approvals","messages","invoices","services","feedback","onboarding","guide","contract","links","gp_priorities","gp_history"];
     var map = {}; ids.forEach(function(id){ map[id]=btn(id); });
 
     // Wipe the sidebar's current children, then rebuild grouped.
@@ -2727,8 +2785,8 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
     // Partnership group — appended last, hidden until loadGrowth() finds an
     // active partnership and reveals .growth-only elements.
     var gpDiv = document.createElement("div"); gpDiv.className="sidebar-divider growth-only"; gpDiv.style.display="none"; sidebar.appendChild(gpDiv);
-    var gpLabel = document.createElement("div"); gpLabel.className="sidebar-label growth-only"; gpLabel.style.display="none"; gpLabel.textContent="Your partnership"; sidebar.appendChild(gpLabel);
-    ["gp_home","gp_progress","gp_website","gp_requests"].forEach(function(id){ if(map[id]){ map[id].classList.add("growth-only"); map[id].style.display="none"; sidebar.appendChild(map[id]); } });
+    var gpLabel = document.createElement("div"); gpLabel.className="sidebar-label growth-only"; gpLabel.style.display="none"; gpLabel.textContent="Grow your business"; sidebar.appendChild(gpLabel);
+    ["gp_priorities"].forEach(function(id){ if(map[id]){ map[id].classList.add("growth-only"); map[id].style.display="none"; sidebar.appendChild(map[id]); } });
 
     // If the partnership data already loaded, reveal now (handles the race where
     // loadGrowth finished before this rebuild ran).
@@ -2822,164 +2880,219 @@ async function loadGrowth(){
     var pending = (ws.recommendations||[]).filter(function(x){ return x.status==='shared'; }).length;
     var badge = document.getElementById('badge-gp');
     if(badge){ if(pending>0){ badge.textContent=String(pending); badge.style.display='inline-flex'; } else { badge.style.display='none'; } }
-    // render all four views
-    gpRenderHome(); gpRenderProgress(); gpRenderWebsite(); gpRenderRequests();
+    // render the single Growth page
+    gpRenderPriorities(); gpRenderHistory();
   } catch(e){ console.error('loadGrowth:', e); }
 }
 
-function gpRenderHome(){
-  var ws = GP_WS; if(!ws) return;
+/* ============================================================================
+   GROWTH — "Your Priorities" (redesigned from first principles)
+   One page that answers a single question: what should I do next to grow my
+   business? Built for an owner who knows nothing about SEO or websites.
+   Sections, in order:
+     Top Priorities · Quick Wins · Website Health · Opportunities ·
+     Completed Wins · This Month's Focus
+   Every recommendation answers, in plain English: why it matters, what happens
+   if ignored, how much impact, how hard, whether Eric handles it, and the one
+   action to take (approve / not now).
+   ============================================================================ */
+
+// Plain-English helpers for the technical fields.
+function gpImpactWord(v){ return v==='high'?'Big impact':v==='medium'?'Solid impact':v==='low'?'Small boost':'Solid impact'; }
+function gpEffortWord(v){ return v==='low'?'Easy for Eric':v==='high'?'Takes Eric some time':'A bit of work for Eric'; }
+function gpIgnoreLine(r){
+  // What happens if you ignore it — derived from category + the rec itself.
+  var c=(r.category||'').toLowerCase();
+  var t=(r.title||'').toLowerCase();
+  if(c==='local') return 'Fewer nearby customers find you when they search.';
+  if(c==='demand') return 'You miss customers who are ready to buy right now.';
+  if(c==='technical') return 'Your site keeps losing visitors and Google ranking.';
+  if(c==='content'){
+    if(t.indexOf('photo')>-1) return 'New customers can\u2019t picture what they\u2019re getting, so they hesitate.';
+    if(t.indexOf('newsletter')>-1||t.indexOf('email')>-1) return 'Regulars drift away without a reason to come back.';
+    return 'Visitors leave your site unsure what you offer.';
+  }
+  return 'You leave easy growth on the table.';
+}
+function gpCatLabel(c){ c=(c||'').toLowerCase(); return c==='local'?'Getting found locally':c==='content'?'Your website content':c==='demand'?'Winning ready buyers':c==='technical'?'Site performance':'Growth idea'; }
+
+// One recommendation card. `mode` = 'action' (needs approve/not now) or 'plain'.
+function gpRecCard(r){
+  var impact = gpImpactWord(r.impact);
+  var effort = gpEffortWord(r.effort);
+  var pillImpact = '<span class="gp-pill gp-pill-impact">'+impact+'</span>';
+  var pillEffort = '<span class="gp-pill gp-pill-effort">'+effort+'</span>';
+  var pillEric  = '<span class="gp-pill gp-pill-eric">Eric handles this</span>';
+  return ''
+  +'<div class="gp-rec">'
+    +'<div class="gp-rec-cat">'+esc(gpCatLabel(r.category))+'</div>'
+    +'<div class="gp-rec-title">'+esc(r.title||'')+'</div>'
+    +(r.detail?'<div class="gp-rec-detail">'+esc(r.detail)+'</div>':'')
+    +'<div class="gp-rec-grid">'
+      +(r.why?'<div class="gp-qa"><div class="gp-q">Why this matters</div><div class="gp-a">'+esc(r.why)+'</div></div>':'')
+      +'<div class="gp-qa"><div class="gp-q">If you do nothing</div><div class="gp-a">'+esc(gpIgnoreLine(r))+'</div></div>'
+    +'</div>'
+    +'<div class="gp-rec-meta">'+pillImpact+pillEffort+pillEric+'</div>'
+    +'<div class="gp-rec-actions">'
+      +'<button class="gp-btn gp-btn-yes" onclick="gpRespondRec(\''+esc(r.id)+'\',\'accepted\')">Yes, let\u2019s do it</button>'
+      +'<button class="gp-btn gp-btn-no" onclick="gpRespondRec(\''+esc(r.id)+'\',\'declined\')">Not now</button>'
+    +'</div>'
+  +'</div>';
+}
+
+// Section wrapper with an emoji + title + one-line subtitle.
+function gpSection(emoji, title, sub, inner){
+  if(!inner) return '';
+  return '<section class="gp-sec"><div class="gp-sec-head"><span class="gp-sec-emoji">'+emoji+'</span><div><div class="gp-sec-title">'+esc(title)+'</div>'+(sub?'<div class="gp-sec-sub">'+esc(sub)+'</div>':'')+'</div></div>'+inner+'</section>';
+}
+
+function gpRenderPriorities(){
+  var ws = GP_WS; if(!ws){ return; }
   var p = ws.partnership;
+  var recs = (ws.recommendations||[]);
+  var shared = recs.filter(function(r){ return r.status==='shared'; });
+
+  // Classify shared recs into the owner's buckets.
+  var quickWins = shared.filter(function(r){ return (r.effort==='low') && (r.impact==='high'||r.impact==='medium'); });
+  var quickIds = {}; quickWins.forEach(function(r){ quickIds[r.id]=1; });
+  var top = shared.filter(function(r){ return !quickIds[r.id] && (r.priority==='urgent' || r.impact==='high'); });
+  var topIds = {}; top.forEach(function(r){ topIds[r.id]=1; });
+  var opportunities = shared.filter(function(r){ return !quickIds[r.id] && !topIds[r.id]; });
+  var completed = recs.filter(function(r){ return r.status==='accepted'; });
+
+  // ---- HERO ----
+  var sharedCount = shared.length;
+  var lead = sharedCount===0
+    ? 'You\u2019re all caught up. Eric is watching your site and will flag the next worthwhile move here.'
+    : 'Eric reviewed your website and found '+sharedCount+(sharedCount===1?' thing':' things')+' worth doing. Here\u2019s what matters most, in order.';
+  var hero = '<div class="gp-hero">'
+    +'<h2 class="gp-hero-title">Your priorities</h2>'
+    +'<p class="gp-hero-sub">'+lead+'</p>'
+    +'</div>';
+
+  // ---- TOP PRIORITIES ----
+  var topHtml = top.length ? top.map(gpRecCard).join('') : '';
+  var topSec = gpSection('\uD83D\uDD25','Top priorities','The few things that move the needle most.', topHtml);
+
+  // ---- QUICK WINS ----
+  var qwHtml = quickWins.length ? quickWins.map(gpRecCard).join('') : '';
+  var qwSec = gpSection('\u26A1','Quick wins','Small changes, big payoff. Easy yeses.', qwHtml);
+
+  // ---- WEBSITE HEALTH ----
+  var healthSec = gpHealthSection(ws.site_health);
+
+  // ---- OPPORTUNITIES ----
+  var oppHtml = opportunities.length ? opportunities.map(gpRecCard).join('') : '';
+  var oppSec = gpSection('\uD83C\uDFAF','Opportunities','Ideas for the longer game, when you\u2019re ready.', oppHtml);
+
+  // ---- COMPLETED WINS ----
+  var compSec = '';
+  if(completed.length){
+    var inner = '<div class="gp-done-wrap">'+completed.map(function(r){
+      return '<div class="gp-done"><span class="gp-done-tick">\u2713</span><span>'+esc(r.title||'')+'</span></div>';
+    }).join('')+'</div>';
+    compSec = gpSection('\u2705','Completed wins','Everything already improved on your site.', inner);
+  }
+
+  // ---- THIS MONTH'S FOCUS ----
+  var planned = (ws.content||[]).filter(function(c){ return c.status!=='published'; });
   var review = (ws.reviews||[])[0]||null;
-  var sharedRecs = (ws.recommendations||[]).filter(function(r){return r.status==='shared';});
-  var planned = (ws.content||[]).filter(function(c){return c.status!=='published';}).slice(0,3);
-  var site = p.primary_site ? p.primary_site.replace(/^https?:\/\//,'').replace(/\/$/,'') : '';
-  var needs = sharedRecs.length ? (
-    '<div class="card" style="border-color:#ECD9B0;background:linear-gradient(180deg,#F7EEDD,#fff);margin-bottom:16px"><div class="card-body" style="display:flex;gap:12px;align-items:flex-start">'
-    +'<div style="width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #E7D3A8;display:flex;align-items:center;justify-content:center;color:#9a6516;font-weight:700;flex-shrink:0">!</div>'
-    +'<div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+sharedRecs.length+(sharedRecs.length===1?' thing needs':' things need')+' your okay</div>'
-    +'<div style="font-size:13px;color:var(--muted);margin-top:2px">Eric found '+(sharedRecs.length===1?'something':'a few things')+' worth doing for your business. <a onclick="nav(\'gp_website\')" style="color:var(--p);cursor:pointer;font-weight:600">Review '+(sharedRecs.length===1?'it':'them')+' &rarr;</a></div></div></div></div>'
-  ) : '';
-  var health = gpHealthTiles(ws.health);
-  var reviewCard = review ? (
-    '<div class="card" style="margin-bottom:16px"><div class="card-body">'
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Your '+esc(gpPeriodLabel(review.period))+' review</div>'
-    +'<div style="font-family:var(--serif);font-size:21px;font-weight:400;color:var(--ink)">'+esc(review.headline||gpPeriodLabel(review.period))+'</div>'
-    +(review.intro?'<p style="font-size:14px;color:var(--muted);margin-top:8px;line-height:1.6">'+esc(review.intro)+'</p>':'')
-    +'<button onclick="nav(\'gp_progress\')" style="margin-top:14px;background:transparent;border:1px solid rgba(91,63,160,0.2);color:var(--p);padding:9px 16px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)">Read the full review &rarr;</button>'
-    +'</div></div>'
-  ) : (
-    '<div class="card" style="margin-bottom:16px"><div class="card-body" style="text-align:center;padding:40px 24px">'
-    +'<div style="font-size:22px;color:var(--p);opacity:.4;margin-bottom:8px">&#9671;</div>'
-    +'<div style="font-size:15px;font-weight:600;color:var(--ink)">Your first review is coming</div>'
-    +'<div style="font-size:13px;color:var(--muted);margin-top:6px;max-width:42ch;margin-inline:auto;line-height:1.6">Each month Eric writes up what got done, what it changed for your business, and what is next, in plain English.</div></div></div>'
-  );
-  var plannedCard = planned.length ? (
-    '<div class="card"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">What is planned next</div>'
-    +planned.map(function(c){ return '<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06)"><div style="width:30px;height:30px;border-radius:8px;background:var(--p-mist,#EDE8F7);display:flex;align-items:center;justify-content:center;color:var(--p);flex-shrink:0">'+(c.kind==='blog'?'&#9998;':'&#9670;')+'</div><div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(c.title)+'</div><div style="font-size:12px;color:var(--muted)">'+esc(c.kind||'Update')+(c.scheduled_for?' &middot; '+esc(gpShortDate(c.scheduled_for)):'')+'</div></div></div>'; }).join('')
-    +'</div></div>'
-  ) : '';
-  var hero = '<div style="margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap">'
-    +'<div><h2 style="font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.15">Welcome back'+(p.client_name?', '+esc(p.client_name):'')+'</h2>'
-    +'<p style="font-size:14px;color:var(--muted);margin-top:5px">Here is how your website is working for you'+(site?' &middot; '+esc(site):'')+'.</p></div>'
-    +'<div style="text-align:right"><span style="display:inline-flex;align-items:center;gap:6px;background:var(--p-mist,#EDE8F7);color:var(--p);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px"><span style="width:6px;height:6px;border-radius:50%;background:var(--p)"></span>'+esc(p.plan_label||GP_SEG[p.segment]||'Partnership')+'</span>'
-    +(p.started_at||p.launched_at?'<div style="font-size:11.5px;color:var(--muted);margin-top:6px">Partners since '+esc(gpMonthYear(p.started_at||p.launched_at))+'</div>':'')+'</div></div></div>';
-  document.getElementById('gp_home_body').innerHTML = hero + needs + health + reviewCard + plannedCard;
+  var focusInner = '';
+  if(review || planned.length){
+    if(review){
+      focusInner += '<div class="gp-focus-review"><div class="gp-focus-h">'+esc(review.headline||gpPeriodLabel(review.period))+'</div>'
+        +(review.intro?'<div class="gp-focus-p">'+esc(review.intro)+'</div>':'')
+        +'<button class="gp-link" onclick="nav(\'gp_history\')">Read the full update \u2192</button></div>';
+    }
+    if(planned.length){
+      focusInner += '<div class="gp-focus-list">'+planned.slice(0,4).map(function(c){
+        return '<div class="gp-focus-item"><span class="gp-focus-dot"></span><div><div class="gp-focus-it">'+esc(c.title)+'</div><div class="gp-focus-id">'+esc(c.kind||'Update')+(c.scheduled_for?' \u00B7 '+esc(gpShortDate(c.scheduled_for)):'')+'</div></div></div>';
+      }).join('')+'</div>';
+    }
+  } else {
+    focusInner = '<div class="gp-empty">Eric will note here what you\u2019re working on together each month.</div>';
+  }
+  var focusSec = gpSection('\uD83D\uDCC5','This month\u2019s focus','What you and Eric are working on right now.', focusInner);
+
+  // ---- ASK ERIC (always available) ----
+  var askSec = '<section class="gp-sec"><div class="gp-sec-head"><span class="gp-sec-emoji">\uD83D\uDCAC</span><div><div class="gp-sec-title">Need something?</div><div class="gp-sec-sub">Ask Eric for anything, anytime.</div></div></div>'
+    +'<div class="gp-ask"><input id="gpReqTitle" class="gp-input" placeholder="What do you need? (e.g. Update our holiday hours)">'
+    +'<textarea id="gpReqDetail" class="gp-input" rows="2" placeholder="Any details that help (optional)"></textarea>'
+    +'<button class="gp-btn gp-btn-yes" onclick="gpSubmitRequest()">Send to Eric</button></div>';
+  // existing requests, if any
+  var reqs = ws.requests||[];
+  if(reqs.length){
+    askSec += '<div class="gp-reqs">'+reqs.map(function(rq){ var st=(rq.status||'open').replace('_',' '); return '<div class="gp-req"><div class="gp-req-t">'+esc(rq.title||'')+'</div><span class="gp-pill">'+esc(st)+'</span></div>'; }).join('')+'</div>';
+  }
+  askSec += '</section>';
+
+  // ---- empty fallback: no recs at all yet ----
+  var anyRecs = top.length||quickWins.length||opportunities.length;
+  var emptyTop = (!anyRecs) ? '<div class="gp-allgood"><div class="gp-allgood-ico">\u2713</div><div class="gp-allgood-t">Nothing needs you right now</div><div class="gp-allgood-d">Eric is keeping an eye on your website. The moment something is worth doing, it\u2019ll appear here, in plain English, with a simple yes or no.</div></div>' : '';
+
+  document.getElementById('gp_priorities_body').innerHTML =
+    hero + emptyTop + topSec + qwSec + healthSec + oppSec + compSec + focusSec + askSec;
 }
 
-function gpHealthTiles(health){
-  if(!health||!health.length) return '';
-  var latest=health[0], prev=health[1]||{};
-  var fmt=function(n){ return (typeof n==='number')? n.toLocaleString('en-US'): n; };
-  var defs=[['calls','Phone calls'],['forms','Enquiries'],['bookings','Bookings'],['visits','Visitors']];
-  var present=defs.filter(function(d){ return latest[d[0]]!=null; });
-  if(!present.length) return '';
-  var tiles=present.map(function(d,i){
-    var k=d[0],label=d[1],now=latest[k],was=prev[k],delta='';
-    if(was!=null&&was!==0){ var pct=Math.round(((now-was)/was)*100); if(pct!==0){ var up=pct>0; delta='<div style="font-size:11px;font-weight:500;margin-top:6px;color:'+(up?'#3F7D5B':'var(--muted)')+'">'+(up?'&uarr;':'&darr;')+' '+Math.abs(pct)+'% vs last month</div>'; } else { delta='<div style="font-size:11px;color:var(--muted);margin-top:6px">No change</div>'; } }
-    var lead=i===0;
-    return '<div style="background:'+(lead?'var(--p-mist,#EDE8F7)':'var(--cream,#F4F0E9)')+';border-radius:12px;padding:16px;border:1px solid '+(lead?'#DFD3F0':'transparent')+'"><div style="font-family:var(--serif);font-size:27px;font-weight:400;line-height:1;color:'+(lead?'var(--p-deep,#2A1B4A)':'var(--ink)')+'">'+esc(String(fmt(now)))+'</div><div style="font-size:12px;color:var(--muted);margin-top:6px">'+esc(label)+'</div>'+delta+'</div>';
-  }).join('');
-  return '<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink)">How your site is doing</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px">'+esc(gpPeriodLabel(latest.period))+(prev.period?', compared with '+esc(gpPeriodLabel(prev.period)):'')+'</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">'+tiles+'</div></div></div>';
+// Website Health — plain words, no scary numbers leading.
+function gpHealthSection(sh){
+  if(!sh) return '';
+  var rows = [
+    ['Speed', sh.performance, 'How fast your site loads'],
+    ['Showing up on Google', sh.visibility, 'How easily people find you'],
+    ['Easy to use for everyone', sh.accessibility, 'Works for all visitors'],
+    ['Safe and secure', sh.security, 'Protected and trustworthy'],
+    ['Listed on Google', sh.local != null ? sh.local : sh.indexing, 'Found in local search']
+  ].filter(function(x){ return x[1]!=null; });
+  if(!rows.length) return '';
+  function word(v){ return v>=80?'Great':v>=60?'Good':v>=40?'Needs work':'Poor'; }
+  function col(v){ return v>=80?'#3F7D5B':v>=60?'#3F7D5B':v>=40?'#B5781D':'#A8443A'; }
+  var inner = '<div class="gp-health">'+rows.map(function(r){
+    return '<div class="gp-health-row"><div><div class="gp-health-name">'+esc(r[0])+'</div><div class="gp-health-desc">'+esc(r[2])+'</div></div>'
+      +'<div class="gp-health-right"><span class="gp-health-word" style="color:'+col(r[1])+'">'+word(r[1])+'</span>'
+      +'<div class="gp-health-bar"><div class="gp-health-fill" style="width:'+Math.max(6,Math.min(100,r[1]))+'%;background:'+col(r[1])+'"></div></div></div></div>';
+  }).join('')+'</div>'
+  +'<div class="gp-health-note">Eric watches all of this for you. Anything that needs fixing becomes a priority above, in plain English.</div>';
+  return gpSection('\uD83D\uDCCA','Website health','A quick read on how your site is doing. Eric handles the rest.', inner);
 }
 
-function gpRenderProgress(){
-  var ws=GP_WS; if(!ws) return;
-  var reviews=ws.reviews||[], work=ws.work_log||[], goals=ws.goals||[];
-  var out='<h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px">Progress</h2><p style="font-size:13px;color:var(--muted);margin-bottom:24px">Everything we are doing to grow your business, month by month.</p>';
-  // latest review, full
-  var review=reviews[0]||null;
-  if(review){
-    var rows=[['What got better',review.improved],['What I did',review.work_done],['What I found',review.found],['What we should do next',review.next_up],['How it is paying off',review.payoff]].filter(function(x){return x[1];});
-    out+='<div class="card" style="margin-bottom:16px"><div class="card-body">'
-      +'<div style="font-size:12px;color:var(--muted)">'+esc(gpPeriodLabel(review.period))+'</div>'
-      +'<div style="font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-top:2px">'+esc(review.headline||'')+'</div>'
-      +(review.intro?'<p style="font-size:14px;color:var(--muted);margin-top:8px;line-height:1.6">'+esc(review.intro)+'</p>':'')
-      +rows.map(function(r){ return '<div style="border-top:1px solid rgba(91,63,160,0.08);padding-top:14px;margin-top:14px"><div style="font-size:13px;font-weight:700;color:var(--ink)">'+esc(r[0])+'</div><div style="font-size:14px;color:var(--muted);margin-top:4px;line-height:1.6">'+esc(r[1])+'</div></div>'; }).join('')
-      +'</div></div>';
+// Full history page (monthly reviews + complete work log) — kept off the main
+// page so Priorities stays focused.
+function gpRenderHistory(){
+  var ws = GP_WS; if(!ws) return;
+  var reviews = ws.reviews||[], work = ws.work_log||[];
+  var out = '<button class="gp-link" onclick="nav(\'gp_priorities\')">\u2190 Back to priorities</button>'
+    +'<h2 class="gp-hero-title" style="margin-top:10px">Your full history</h2>'
+    +'<p class="gp-hero-sub">Every monthly update and everything Eric has done, in one place.</p>';
+  if(reviews.length){
+    out += reviews.map(function(rv){
+      var rows=[['What got better',rv.improved],['What Eric did',rv.work_done],['What Eric found',rv.found],['What\u2019s next',rv.next_up],['How it\u2019s paying off',rv.payoff]].filter(function(x){return x[1];});
+      return '<div class="gp-rec" style="margin-top:14px"><div class="gp-rec-cat">'+esc(gpPeriodLabel(rv.period))+'</div><div class="gp-rec-title">'+esc(rv.headline||'')+'</div>'
+        +(rv.intro?'<div class="gp-rec-detail">'+esc(rv.intro)+'</div>':'')
+        +rows.map(function(r){ return '<div class="gp-qa" style="margin-top:10px"><div class="gp-q">'+esc(r[0])+'</div><div class="gp-a">'+esc(r[1])+'</div></div>'; }).join('')
+        +'</div>';
+    }).join('');
   }
-  // goals
-  if(goals.length){
-    out+='<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px">What we are aiming for</div>'
-      +goals.map(function(g){ var st=g.status==='done'?'Reached':(g.status==='paused'?'Paused':'In progress'); var sub=g.detail?esc(g.detail):(g.target?'Target: '+esc(g.target):''); return '<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06)"><div style="width:30px;height:30px;border-radius:8px;background:var(--p-mist,#EDE8F7);display:flex;align-items:center;justify-content:center;color:var(--p);flex-shrink:0">&#9678;</div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(g.title)+'</div>'+(sub?'<div style="font-size:12px;color:var(--muted)">'+sub+'</div>':'')+'</div><span style="font-size:11px;font-weight:600;color:var(--p);background:var(--p-mist,#EDE8F7);padding:3px 10px;border-radius:100px">'+st+'</span></div>'; }).join('')
-      +'</div></div>';
-  }
-  // work log grouped
   if(work.length){
-    out+='<div class="card"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink)">Everything we have done</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Your receipt, month by month</div>'
-      +work.map(function(w){ return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06)"><div style="width:26px;height:26px;border-radius:7px;background:#E6F0E9;color:#3F7D5B;display:flex;align-items:center;justify-content:center;flex-shrink:0">&#10003;</div><div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(w.title||'')+'</div>'+(w.detail?'<div style="font-size:12px;color:var(--muted)">'+esc(w.detail)+'</div>':'')+'</div></div>'; }).join('')
-      +'</div></div>';
+    out += '<div class="gp-sec" style="margin-top:18px"><div class="gp-sec-head"><span class="gp-sec-emoji">\u2705</span><div><div class="gp-sec-title">Everything Eric has done</div><div class="gp-sec-sub">Your receipt, month by month.</div></div></div>'
+      +'<div class="gp-done-wrap">'+work.map(function(w){ return '<div class="gp-done"><span class="gp-done-tick">\u2713</span><span>'+esc(w.title||'')+(w.detail?' \u2014 '+esc(w.detail):'')+'</span></div>'; }).join('')+'</div></div>';
   }
-  if(!review && !goals.length && !work.length){
-    out+='<div class="card"><div class="card-body" style="text-align:center;padding:40px 24px"><div style="font-size:15px;font-weight:600;color:var(--ink)">Your progress will show here</div><div style="font-size:13px;color:var(--muted);margin-top:6px">As Eric does work each month, it gets logged here so you always have a record.</div></div></div>';
+  if(!reviews.length && !work.length){
+    out += '<div class="gp-empty">Nothing here yet. Your monthly updates will appear here as Eric works on your site.</div>';
   }
-  document.getElementById('gp_progress_body').innerHTML=out;
-}
-
-function gpRenderWebsite(){
-  var ws=GP_WS; if(!ws) return;
-  var sh=ws.site_health||null;
-  var recs=ws.recommendations||[];
-  var shared=recs.filter(function(r){return r.status==='shared';});
-  var decided=recs.filter(function(r){return r.status==='accepted'||r.status==='declined';});
-  var out='<h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px">Website health</h2><p style="font-size:13px;color:var(--muted);margin-bottom:24px">How your site is performing, and what is worth doing next.</p>';
-  // health
-  if(sh){
-    var score=sh.overall;
-    var col=score==null?'var(--muted)':(score>=70?'#3F7D5B':score>=45?'#B5781D':'#A8443A');
-    var word=score==null?'':(score>=80?'Excellent':score>=70?'Good shape':score>=45?'Some work to do':'Needs attention');
-    var bars=[['Speed',sh.performance],['Found on Google',sh.visibility],['Local presence',sh.local]].filter(function(x){return x[1]!=null;});
-    out+='<div class="card" style="margin-bottom:16px"><div class="card-body" style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">'
-      +'<div style="text-align:center;flex:none"><div style="font-family:var(--serif);font-size:40px;font-weight:400;line-height:1;color:'+col+'">'+(score==null?'&mdash;':score)+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">Overall</div>'+(word?'<div style="font-size:11px;font-weight:600;color:'+col+';margin-top:4px">'+word+'</div>':'')+'</div>'
-      +'<div style="flex:1;min-width:240px">'+bars.map(function(b){ return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px"><span>'+esc(b[0])+'</span><span style="color:var(--ink);font-weight:600">'+b[1]+'</span></div><div style="height:7px;border-radius:4px;background:rgba(91,63,160,0.08);overflow:hidden"><div style="height:100%;width:'+Math.max(0,Math.min(100,b[1]))+'%;background:linear-gradient(90deg,#5b3fa0,#B08D57)"></div></div></div>'; }).join('')+'</div>'
-      +'</div>'+(sh.checked_at?'<div style="font-size:11px;color:var(--muted);padding:0 18px 14px">Checked '+esc(gpShortDate(sh.checked_at))+'</div>':'')+'</div>';
-  }
-  // recommendations awaiting decision
-  if(shared.length){
-    out+='<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink)">Recommended next</div><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Eric found these. Your call.</div>'
-      +shared.map(function(r){ return '<div style="border:1px solid rgba(91,63,160,0.12);border-radius:12px;padding:16px;margin-top:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9a6516">'+esc(r.category||'Idea')+'</div><div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:4px">'+esc(r.title||'')+'</div>'+(r.detail?'<div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6">'+esc(r.detail)+'</div>':'')+(r.why?'<div style="font-size:13px;color:var(--p);margin-top:8px">Why it matters: '+esc(r.why)+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:12px"><button onclick="gpRespondRec(\''+esc(r.id)+'\',\'accepted\')" style="background:#5b3fa0;color:#fff;border:none;padding:9px 16px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)">Yes, let us do it</button><button onclick="gpRespondRec(\''+esc(r.id)+'\',\'declined\')" style="background:transparent;color:var(--muted);border:1px solid rgba(91,63,160,0.2);padding:9px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:var(--sans)">Not now</button></div></div>'; }).join('')
-      +'</div></div>';
-  }
-  if(decided.length){
-    out+='<div class="card"><div class="card-body"><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Already decided</div>'
-      +decided.map(function(r){ var ok=r.status==='accepted'; return '<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.06)"><div style="width:26px;height:26px;border-radius:7px;background:'+(ok?'#E6F0E9':'rgba(0,0,0,0.05)')+';color:'+(ok?'#3F7D5B':'var(--muted)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(ok?'&#10003;':'&times;')+'</div><div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(r.title||'')+'</div><div style="font-size:12px;color:var(--muted)">'+(ok?'Approved':'Declined')+'</div></div></div>'; }).join('')
-      +'</div></div>';
-  }
-  if(!sh && !shared.length && !decided.length){
-    out+='<div class="card"><div class="card-body" style="text-align:center;padding:40px 24px"><div style="font-size:15px;font-weight:600;color:var(--ink)">Website health is being set up</div><div style="font-size:13px;color:var(--muted);margin-top:6px">Eric will run a full check on your site and share what is worth doing. It will show up here.</div></div></div>';
-  }
-  document.getElementById('gp_website_body').innerHTML=out;
+  document.getElementById('gp_history_body').innerHTML = out;
 }
 
 async function gpRespondRec(id, decision){
-  try { await gpApi('gp_rec_respond', { recommendation_id:id, decision:decision }); showToast(decision==='accepted'?'Great, Eric will take it from here.':'No problem, noted.'); var r=await gpApi('gp_workspace'); GP_WS=(r&&r.data&&r.data.partnership)?r.data:GP_WS; gpRenderWebsite(); gpRenderHome(); }
+  try { await gpApi('gp_rec_respond', { recommendation_id:id, decision:decision }); showToast(decision==='accepted'?'Great, Eric will take it from here.':'No problem, noted.'); var r=await gpApi('gp_workspace'); GP_WS=(r&&r.data&&r.data.partnership)?r.data:GP_WS; gpRenderPriorities(); gpRenderHistory(); }
   catch(e){ showToast('Could not save that. Please try again.'); }
-}
-
-function gpRenderRequests(){
-  var ws=GP_WS; if(!ws) return;
-  var reqs=ws.requests||[];
-  var out='<h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px">Requests</h2><p style="font-size:13px;color:var(--muted);margin-bottom:24px">Need something changed or added? Ask here and Eric will pick it up.</p>';
-  out+='<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">New request</div>'
-    +'<input id="gpReqTitle" placeholder="What do you need? (e.g. Update our holiday hours)" style="width:100%;padding:11px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:var(--sans);outline:none;margin-bottom:10px">'
-    +'<textarea id="gpReqDetail" rows="3" placeholder="Any details that help (optional)" style="width:100%;padding:11px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:var(--sans);outline:none;resize:vertical;margin-bottom:10px"></textarea>'
-    +'<button onclick="gpSubmitRequest()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 18px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)">Send request</button>'
-    +'</div></div>';
-  if(reqs.length){
-    out+='<div class="card"><div class="card-body"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px">Your requests</div>'
-      +reqs.map(function(rq){ var st=(rq.status||'open').replace('_',' '); return '<div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(91,63,160,0.06)"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(rq.title||'')+'</div>'+(rq.created_at?'<div style="font-size:12px;color:var(--muted)">'+esc(gpShortDate(rq.created_at))+'</div>':'')+'</div><span style="font-size:11px;font-weight:600;color:var(--p);background:var(--p-mist,#EDE8F7);padding:3px 10px;border-radius:100px;text-transform:capitalize">'+esc(st)+'</span></div>'; }).join('')
-      +'</div></div>';
-  } else {
-    out+='<div class="card"><div class="card-body" style="text-align:center;padding:32px 24px"><div style="font-size:14px;color:var(--muted)">No requests yet. When you send one, it will show here with its status.</div></div></div>';
-  }
-  document.getElementById('gp_requests_body').innerHTML=out;
 }
 
 async function gpSubmitRequest(){
   var t=(document.getElementById('gpReqTitle').value||'').trim();
   var d=(document.getElementById('gpReqDetail').value||'').trim();
   if(!t){ showToast('Add a short description first.'); return; }
-  try { await gpApi('gp_submit_request', { title:t, detail:d }); showToast('Sent. Eric will pick this up.'); document.getElementById('gpReqTitle').value=''; document.getElementById('gpReqDetail').value=''; var r=await gpApi('gp_workspace'); GP_WS=(r&&r.data&&r.data.partnership)?r.data:GP_WS; gpRenderRequests(); }
+  try { await gpApi('gp_submit_request', { title:t, detail:d }); showToast('Sent. Eric will pick this up.'); document.getElementById('gpReqTitle').value=''; document.getElementById('gpReqDetail').value=''; var r=await gpApi('gp_workspace'); GP_WS=(r&&r.data&&r.data.partnership)?r.data:GP_WS; gpRenderPriorities(); }
   catch(e){ showToast('Could not send that. Please try again.'); }
 }
 
