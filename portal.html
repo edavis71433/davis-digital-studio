@@ -10,7 +10,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4">
 </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
@@ -22,11 +22,11 @@
   --pdark:#0f0820;--ink:#1a1523;--muted:#7a6d8e;
   --warm:#f5f0e8;--cream:#faf8f5;
   --green:#6abf69;--red:#e05555;--yellow:#f0b429;
-  --serif:"DM Serif Display",Georgia,serif;
-  --sans:"DM Sans",sans-serif;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:"Inter",sans-serif;
   --p-mist:#ede8f7;--p-deep:#2A1B4A;--brass:#B08D57;
 }
-body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;}
+body{font-family:"Inter",sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -58,9 +58,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .lr-title{font-family:var(--serif);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:28px;letter-spacing:-0.5px;line-height:1.2;}
 .lr-title em{font-style:italic;color:var(--p);}
 .login-label{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:7px;display:block;letter-spacing:0.3px;}
-.login-input{width:100%;background:#f7f4fd;border:1.5px solid #e8dff5;border-radius:12px;padding:13px 16px;font-family:"DM Sans",sans-serif;font-size:14px;color:var(--ink);outline:none;transition:all 0.15s;margin-bottom:14px;box-sizing:border-box;}
+.login-input{width:100%;background:#f7f4fd;border:1.5px solid #e8dff5;border-radius:12px;padding:13px 16px;font-family:"Inter",sans-serif;font-size:14px;color:var(--ink);outline:none;transition:all 0.15s;margin-bottom:14px;box-sizing:border-box;}
 .login-input:focus{border-color:var(--p);background:#fff;box-shadow:0 0 0 3px rgba(91,63,160,0.08);}
-.login-btn{width:100%;background:var(--p);color:#fff;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:600;padding:14px;border-radius:100px;border:none;cursor:pointer;margin-top:4px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(91,63,160,0.3);}
+.login-btn{width:100%;background:var(--p);color:#fff;font-family:"Inter",sans-serif;font-size:14px;font-weight:600;padding:14px;border-radius:100px;border:none;cursor:pointer;margin-top:4px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(91,63,160,0.3);}
 .login-btn:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,63,160,0.35);}
 .login-error{background:#fff0f0;border:1px solid rgba(224,85,85,0.2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-top:10px;display:none;}
 .login-note{font-size:11px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.7;}
@@ -94,14 +94,14 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .topbar-right{display:flex;align-items:center;gap:12px;}
 .status-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(106,191,105,0.15);border:1px solid rgba(106,191,105,0.3);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green);}
 .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
-.topbar-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;transition:background 0.15s,border-color 0.15s;padding:7px 14px;border-radius:100px;}
+.topbar-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;transition:background 0.15s,border-color 0.15s;padding:7px 14px;border-radius:100px;}
 .topbar-btn:hover{color:#fff;background:rgba(255,255,255,0.16);border-color:rgba(255,255,255,0.3);}
 
 /* LAYOUT */
 .portal-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px);}
 .sidebar{background:#fff;border-right:1px solid rgba(91,63,160,0.08);padding:16px 0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
 .sidebar-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 16px 4px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:background 0.15s;font-size:13px;font-weight:500;color:var(--muted);width:100%;border:none;background:none;font-family:"DM Sans",sans-serif;text-align:left;border-radius:0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:background 0.15s;font-size:13px;font-weight:500;color:var(--muted);width:100%;border:none;background:none;font-family:"Inter",sans-serif;text-align:left;border-radius:0;}
 .nav-item:hover{background:var(--pxxxl);color:var(--p);}
 .nav-item.active{background:var(--pxxxl);color:var(--p);font-weight:600;}
 .nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
@@ -116,7 +116,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .card-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(91,63,160,0.06);}
 .card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
 .card-body{padding:20px;}
-.card-action{font-size:12px;font-weight:600;color:var(--p);background:var(--pxxxl);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:"DM Sans",sans-serif;}
+.card-action{font-size:12px;font-weight:600;color:var(--p);background:var(--pxxxl);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:"Inter",sans-serif;}
 
 /* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
@@ -157,7 +157,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .upload-zone strong{color:var(--p);}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
 .file-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--pxxxl);padding:4px;border-radius:10px;}
-.file-tab{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;font-family:"DM Sans",sans-serif;transition:all 0.15s;}
+.file-tab{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;font-family:"Inter",sans-serif;transition:all 0.15s;}
 .file-tab.active{background:#fff;color:var(--p);box-shadow:0 1px 4px rgba(91,63,160,0.1);}
 .file-list{display:flex;flex-direction:column;gap:8px;}
 .file-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--cream);border:1px solid rgba(91,63,160,0.06);}
@@ -166,7 +166,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .file-info h4{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .file-info p{font-size:11px;color:var(--muted);margin-top:2px;}
 .file-actions{display:flex;gap:6px;flex-shrink:0;}
-.file-btn{background:none;border:1px solid rgba(91,63,160,0.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--p);font-family:"DM Sans",sans-serif;}
+.file-btn{background:none;border:1px solid rgba(91,63,160,0.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--p);font-family:"Inter",sans-serif;}
 .file-btn.danger{color:var(--red);border-color:rgba(224,85,85,0.2);}
 .file-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;}
 .file-status.pending{background:#fffbeb;color:#d97706;}
@@ -179,7 +179,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
 .empty-state .ei{font-size:40px;margin-bottom:12px;}
 .empty-state p{font-size:13px;line-height:1.6;}
-.empty-state .es-btn{display:inline-block;margin-top:14px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:9px 18px;border-radius:100px;border:none;cursor:pointer;font-family:"DM Sans",sans-serif;text-decoration:none;}
+.empty-state .es-btn{display:inline-block;margin-top:14px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:9px 18px;border-radius:100px;border:none;cursor:pointer;font-family:"Inter",sans-serif;text-decoration:none;}
 .empty-state .es-btn.sec{background:var(--pxxxl);color:var(--p);}
 /* Skeleton loaders */
 @keyframes shimmer{0%{background-position:-400px 0;}100%{background-position:400px 0;}}
@@ -201,7 +201,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .turn-head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;}
 .turn-head h3{font-size:14px;font-weight:700;color:var(--ink);}
 .turn-count{background:var(--p);color:#fff;font-size:11px;font-weight:700;min-width:20px;height:20px;border-radius:100px;display:flex;align-items:center;justify-content:center;padding:0 6px;}
-.turn-item{display:flex;align-items:center;gap:13px;padding:12px 16px;border-radius:11px;cursor:pointer;transition:background 0.15s;text-align:left;width:100%;border:none;background:none;font-family:"DM Sans",sans-serif;}
+.turn-item{display:flex;align-items:center;gap:13px;padding:12px 16px;border-radius:11px;cursor:pointer;transition:background 0.15s;text-align:left;width:100%;border:none;background:none;font-family:"Inter",sans-serif;}
 .turn-item:hover{background:var(--pxxxl);}
 .turn-ico{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--pxxl);}
 .turn-tx{flex:1;}
@@ -232,9 +232,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .msg-text{background:var(--pxxxl);border-radius:0 12px 12px 12px;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;}
 .from-client .msg-text{background:var(--warm);border-radius:12px 0 12px 12px;}
 .msg-compose{display:flex;gap:8px;margin-top:14px;border-top:1px solid rgba(91,63,160,0.06);padding-top:14px;align-items:flex-end;}
-.msg-input{flex:1;background:var(--cream);border:1.5px solid rgba(91,63,160,0.12);border-radius:16px;padding:10px 16px;font-family:"DM Sans",sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;min-height:42px;max-height:120px;}
+.msg-input{flex:1;background:var(--cream);border:1.5px solid rgba(91,63,160,0.12);border-radius:16px;padding:10px 16px;font-family:"Inter",sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;min-height:42px;max-height:120px;}
 .msg-input:focus{border-color:var(--p);background:#fff;}
-.msg-send{background:var(--p);color:#fff;border:none;border-radius:100px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;flex-shrink:0;}
+.msg-send{background:var(--p);color:#fff;border:none;border-radius:100px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;flex-shrink:0;}
 
 /* INVOICES */
 .inv-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(91,63,160,0.06);}
@@ -254,8 +254,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .appr-item h4{font-size:13px;font-weight:600;margin-bottom:6px;}
 .appr-item p{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
 .appr-btns{display:flex;gap:8px;}
-.btn-approve{background:var(--green);color:#fff;border:none;border-radius:100px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;}
-.btn-revise{background:var(--warm);color:var(--ink);border:1px solid rgba(91,63,160,0.15);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;}
+.btn-approve{background:var(--green);color:#fff;border:none;border-radius:100px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;}
+.btn-revise{background:var(--warm);color:var(--ink);border:1px solid rgba(91,63,160,0.15);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;}
 
 /* ADDONS */
 .addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -263,7 +263,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .addon-card .ai{font-size:20px;margin-bottom:6px;}
 .addon-card h4{font-size:13px;font-weight:600;margin-bottom:2px;}
 .addon-card p{font-size:11px;color:var(--muted);margin-bottom:8px;}
-.addon-btn{background:none;border:1px solid rgba(91,63,160,0.2);border-radius:100px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--p);cursor:pointer;font-family:"DM Sans",sans-serif;}
+.addon-btn{background:none;border:1px solid rgba(91,63,160,0.2);border-radius:100px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--p);cursor:pointer;font-family:"Inter",sans-serif;}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;padding:12px 20px;border-radius:100px;z-index:99999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
@@ -295,7 +295,7 @@ body.logged-in .mobile-nav { display: flex; }
   cursor: pointer;
   padding: 6px 0;
   color: var(--muted);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -316,9 +316,9 @@ body.logged-in .mobile-nav { display: flex; }
 .more-sheet{position:fixed;left:0;right:0;bottom:0;z-index:310;background:#fff;border-radius:18px 18px 0 0;padding:8px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(26,21,53,0.22);transform:translateY(100%);transition:transform 0.24s ease;}
 .more-sheet.open{transform:translateY(0);}
 .more-sheet-handle{width:40px;height:4px;border-radius:3px;background:rgba(91,63,160,0.2);margin:8px auto 12px;}
-.more-sheet-title{font-family:var(--serif,"DM Serif Display");font-size:16px;color:var(--ink,#1a1523);margin-bottom:12px;text-align:center;}
+.more-sheet-title{font-family:var(--serif,"Fraunces");font-size:16px;color:var(--ink,#1a1523);margin-bottom:12px;text-align:center;}
 .more-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-.more-grid button{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--cream,#faf8f5);border:1px solid rgba(91,63,160,0.08);border-radius:12px;padding:14px 6px;font-size:22px;cursor:pointer;font-family:"DM Sans",sans-serif;color:var(--ink,#1a1523);}
+.more-grid button{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--cream,#faf8f5);border:1px solid rgba(91,63,160,0.08);border-radius:12px;padding:14px 6px;font-size:22px;cursor:pointer;font-family:"Inter",sans-serif;color:var(--ink,#1a1523);}
 .more-grid button span{font-size:11px;color:var(--muted,#5e5270);}
 .more-grid button:active{background:rgba(91,63,160,0.08);}
 @media (max-width: 768px) {
@@ -329,15 +329,15 @@ body.logged-in .mobile-nav { display: flex; }
 /* FORMS */
 .form-group { margin-bottom:14px; }
 .form-label { font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px; }
-.form-input { width:100%;padding:11px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;transition:border-color 0.15s;box-sizing:border-box;resize:vertical; }
+.form-input { width:100%;padding:11px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-family:"Inter",sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;transition:border-color 0.15s;box-sizing:border-box;resize:vertical; }
 .form-input:focus { border-color:var(--p);background:#fff; }
-.form-submit-btn { background:var(--p);color:#fff;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:600;padding:13px 28px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s; }
+.form-submit-btn { background:var(--p);color:#fff;font-family:"Inter",sans-serif;font-size:14px;font-weight:600;padding:13px 28px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s; }
 .form-submit-btn:hover { opacity:0.88; }
 .brief-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
 .brief-full { grid-column:span 2; }
 
 /* PRIORITY BUTTONS */
-.priority-btn { background:var(--cream);border:1.5px solid rgba(91,63,160,0.15);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:"DM Sans",sans-serif;color:var(--muted);transition:all 0.15s; }
+.priority-btn { background:var(--cream);border:1.5px solid rgba(91,63,160,0.15);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;color:var(--muted);transition:all 0.15s; }
 .priority-btn.active { background:var(--p);border-color:var(--p);color:#fff; }
 
 /* FEEDBACK LIST */
@@ -400,8 +400,8 @@ body.logged-in .mobile-nav { display: flex; }
 .svc-includes li { font-size:11px;color:var(--ink);display:flex;align-items:flex-start;gap:6px;line-height:1.5; }
 .svc-includes li::before { content:"✓";color:var(--p);font-weight:700;flex-shrink:0;margin-top:1px; }
 .svc-price { font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:4px; }
-.svc-price span { font-family:"DM Sans",sans-serif;font-size:11px;color:var(--muted);font-weight:400; }
-.svc-request-btn { width:100%;background:var(--pxxxl);color:var(--p);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;padding:10px;border-radius:100px;border:none;cursor:pointer;transition:background 0.15s;margin-top:4px; }
+.svc-price span { font-family:"Inter",sans-serif;font-size:11px;color:var(--muted);font-weight:400; }
+.svc-request-btn { width:100%;background:var(--pxxxl);color:var(--p);font-family:"Inter",sans-serif;font-size:13px;font-weight:600;padding:10px;border-radius:100px;border:none;cursor:pointer;transition:background 0.15s;margin-top:4px; }
 .svc-request-btn:hover { background:var(--pxxl); }
 .svc-card.featured .svc-request-btn { background:var(--p);color:#fff; }
 .svc-card.featured .svc-request-btn:hover { opacity:0.88; }
@@ -411,8 +411,8 @@ body.logged-in .mobile-nav { display: flex; }
 .svc-modal h3 { font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:6px; }
 .svc-modal p { font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.7; }
 .svc-modal-btns { display:flex;gap:10px;margin-top:16px; }
-.svc-confirm-btn { flex:1;background:var(--p);color:#fff;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:100px;border:none;cursor:pointer; }
-.svc-cancel-btn { background:var(--cream);color:var(--muted);font-family:"DM Sans",sans-serif;font-size:13px;font-weight:500;padding:12px 20px;border-radius:100px;border:1px solid rgba(91,63,160,0.1);cursor:pointer; }
+.svc-confirm-btn { flex:1;background:var(--p);color:#fff;font-family:"Inter",sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:100px;border:none;cursor:pointer; }
+.svc-cancel-btn { background:var(--cream);color:var(--muted);font-family:"Inter",sans-serif;font-size:13px;font-weight:500;padding:12px 20px;border-radius:100px;border:1px solid rgba(91,63,160,0.1);cursor:pointer; }
 @media(max-width:900px) { .svc-grid { grid-template-columns:1fr 1fr; } }
 @media(max-width:580px) { .svc-grid { grid-template-columns:1fr; } }
 
@@ -530,7 +530,7 @@ body{ background:var(--bg); color:var(--ink); }
 
 /* ---------- INPUTS ---------- */
 input[type=text], input[type=email], input[type=password], textarea, select{
-  font-family:"DM Sans",sans-serif; font-size:14px; color:var(--ink);
+  font-family:"Inter",sans-serif; font-size:14px; color:var(--ink);
   background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r);
   padding:11px 14px; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
 }
@@ -647,7 +647,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 <!-- SITE BANNER -->
 <header style="background:#fff;border-bottom:1px solid rgba(91,63,160,0.08);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10;">
   <a href="/" style="text-decoration:none;display:inline-flex;align-items:center;gap:0;">
-    <span style="font-family:'DM Serif Display',Georgia,serif;font-size:22px;font-weight:400;color:#1a1523;letter-spacing:-0.5px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</span>
+    <span style="font-family:'Fraunces',Georgia,serif;font-size:22px;font-weight:400;color:#1a1523;letter-spacing:-0.5px;">Davis<span style="color:#5b3fa0;">Digital</span> Studio</span>
   </a>
   <a href="/" style="font-size:13px;font-weight:500;color:#5e5270;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
@@ -702,7 +702,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
   <div id="welcomeOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,21,35,0.55);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:20px;">
     <div style="background:#fff;border-radius:20px;max-width:480px;width:100%;padding:34px 30px;box-shadow:0 24px 70px rgba(26,21,35,0.3);text-align:center;">
       <div style="font-size:42px;margin-bottom:10px;">👋</div>
-      <h2 style="font-family:var(--serif,'DM Serif Display',Georgia,serif);font-size:26px;font-weight:400;color:var(--ink);margin-bottom:10px;">You're in, <span id="welcomeName">there</span>.</h2>
+      <h2 style="font-family:var(--serif,'Fraunces',Georgia,serif);font-size:26px;font-weight:400;color:var(--ink);margin-bottom:10px;">You're in, <span id="welcomeName">there</span>.</h2>
       <p style="font-size:14.5px;line-height:1.6;color:var(--muted);margin-bottom:22px;">This is your private hub for working with Davis Digital Studio. Everything for your project lives here, so nothing gets buried in email. Here's how it'll go:</p>
       <div style="text-align:left;margin-bottom:24px;">
         <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:13px;"><div style="font-size:20px;">1️⃣</div><div><div style="font-size:13.5px;font-weight:600;color:var(--ink);">You tell me about your business</div><div style="font-size:12.5px;color:var(--muted);">A short project brief to start. It helps me get moving in the right direction.</div></div></div>
@@ -782,7 +782,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
         <div id="clientAttention"></div>
         <div id="postLaunchCard" style="display:none;"></div>
         <div id="referralCard" style="display:none;background:linear-gradient(135deg,#5b3fa0,#7d5bc0);border-radius:16px;padding:22px 24px;margin-bottom:20px;color:#fff;">
-          <div style="font-family:var(--serif,'DM Serif Display',Georgia,serif);font-size:19px;margin-bottom:6px;">Your project is live</div>
+          <div style="font-family:var(--serif,'Fraunces',Georgia,serif);font-size:19px;margin-bottom:6px;">Your project is live</div>
           <p style="font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.9);margin-bottom:14px;">It's been a pleasure building this with you. If you know another business owner who'd benefit from the same, I'd be grateful for an introduction — referrals mean the world to a small studio like mine.</p>
           <a href="mailto:eric@davisdigitalstudio.com?subject=Referral%20for%20Davis%20Digital%20Studio&body=Hi%20Eric%2C%20I'd%20like%20to%20introduce%20you%20to..." style="display:inline-block;background:#fff;color:#5b3fa0;font-size:13px;font-weight:600;padding:10px 20px;border-radius:100px;text-decoration:none;">Refer someone →</a>
         </div>
@@ -1049,7 +1049,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
               <input aria-label="Contractcheck" type="checkbox" id="contractCheck" style="margin-top:3px;accent-color:var(--p);">
               <span style="font-size:14px;color:var(--ink);line-height:1.6;">I, <strong id="contract-client-name"></strong>, have read, understand, and agree to all 15 sections of this Project Agreement. I understand this constitutes a binding electronic signature and that work will begin after the deposit is received.</span>
             </label>
-            <button onclick="acknowledgeContract()" style="margin-top:16px;background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Sign & Acknowledge →</button>
+            <button onclick="acknowledgeContract()" style="margin-top:16px;background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Sign & Acknowledge →</button>
           </div>
         </div>
         <div class="card" id="contractAcked" style="display:none;">
@@ -1073,45 +1073,45 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
           <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">One-line tagline for your business</label>
-              <input aria-label="A wine bar where jazz and food meet in Pasadena" id="b-tagline" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. A wine bar where jazz and food meet in Pasadena">
+              <input aria-label="A wine bar where jazz and food meet in Pasadena" id="b-tagline" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. A wine bar where jazz and food meet in Pasadena">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Primary goal for this project *</label>
-              <textarea aria-label="Get more reservations and private event bookings from Google" id="b-goal" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. Get more reservations and private event bookings from Google"></textarea>
+              <textarea aria-label="Get more reservations and private event bookings from Google" id="b-goal" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;" placeholder="e.g. Get more reservations and private event bookings from Google"></textarea>
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Who is your ideal customer?</label>
-              <input aria-label="Adults 30–55, date nights, corporate events" id="b-customer" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Adults 30–55, date nights, corporate events">
+              <input aria-label="Adults 30–55, date nights, corporate events" id="b-customer" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. Adults 30–55, date nights, corporate events">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Competitors or sites you admire</label>
-              <input aria-label="URLs or names" id="b-competitors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="URLs or names">
+              <input aria-label="URLs or names" id="b-competitors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="URLs or names">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Design inspiration or vibe</label>
-              <input aria-label="Warm, sophisticated, modern wine bar feel" id="b-inspiration" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Warm, sophisticated, modern wine bar feel">
+              <input aria-label="Warm, sophisticated, modern wine bar feel" id="b-inspiration" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. Warm, sophisticated, modern wine bar feel">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Colors or brand guidelines (if any)</label>
-              <input aria-label="Deep burgundy, gold, cream" id="b-colors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Deep burgundy, gold, cream">
+              <input aria-label="Deep burgundy, gold, cream" id="b-colors" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. Deep burgundy, gold, cream">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Main call to action for visitors</label>
-              <input aria-label="Make a reservation, Book a private event" id="b-cta" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Make a reservation, Book a private event">
+              <input aria-label="Make a reservation, Book a private event" id="b-cta" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. Make a reservation, Book a private event">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Things you don't want on the site</label>
-              <input aria-label="No stock photos, no overly corporate feel" id="b-donts" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. No stock photos, no overly corporate feel">
+              <input aria-label="No stock photos, no overly corporate feel" id="b-donts" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. No stock photos, no overly corporate feel">
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Existing platform logins to share (optional)</label>
-              <textarea aria-label="WordPress login, Google Business, Yelp — these stay priva…" id="b-logins" rows="2" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="e.g. WordPress login, Google Business, Yelp — these stay private in the portal"></textarea>
+              <textarea aria-label="WordPress login, Google Business, Yelp — these stay priva…" id="b-logins" rows="2" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;" placeholder="e.g. WordPress login, Google Business, Yelp — these stay private in the portal"></textarea>
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Anything else I should know?</label>
-              <textarea aria-label="Open field — deadlines, special requests, context about y…" id="b-other" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Open field — deadlines, special requests, context about your business"></textarea>
+              <textarea aria-label="Open field — deadlines, special requests, context about y…" id="b-other" rows="3" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;" placeholder="Open field — deadlines, special requests, context about your business"></textarea>
             </div>
-            <button onclick="submitBrief()" style="background:var(--p);color:#fff;border:none;padding:14px 28px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;align-self:flex-start;">Submit brief →</button>
+            <button onclick="submitBrief()" style="background:var(--p);color:#fff;border:none;padding:14px 28px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;align-self:flex-start;">Submit brief →</button>
           </div>
         </div>
         <div class="card" id="briefSubmitted" style="display:none;">
@@ -1131,21 +1131,21 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
           <div class="card-body">
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">What's this about?</label>
-              <input aria-label="Homepage design, color choice, navigation" id="fb-subject" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;" placeholder="e.g. Homepage design, color choice, navigation">
+              <input aria-label="Homepage design, color choice, navigation" id="fb-subject" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;" placeholder="e.g. Homepage design, color choice, navigation">
             </div>
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Priority</label>
               <div style="display:flex;gap:8px;">
-                <button onclick="setPriority('low')" id="fb-low" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;">💬 Low</button>
-                <button onclick="setPriority('medium')" id="fb-medium" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;">⚡ Medium</button>
-                <button onclick="setPriority('high')" id="fb-high" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:#fff;">🔴 High</button>
+                <button onclick="setPriority('low')" id="fb-low" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:#fff;">💬 Low</button>
+                <button onclick="setPriority('medium')" id="fb-medium" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:#fff;">⚡ Medium</button>
+                <button onclick="setPriority('high')" id="fb-high" style="flex:1;padding:8px;border:1.5px solid rgba(91,63,160,0.15);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:#fff;">🔴 High</button>
               </div>
             </div>
             <div style="margin-bottom:16px;">
               <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Your feedback</label>
-              <textarea aria-label="Be as specific as possible — what did you like, what woul…" id="fb-text" rows="5" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;" placeholder="Be as specific as possible — what did you like, what would you change?"></textarea>
+              <textarea aria-label="Be as specific as possible — what did you like, what woul…" id="fb-text" rows="5" style="width:100%;padding:10px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;" placeholder="Be as specific as possible — what did you like, what would you change?"></textarea>
             </div>
-            <button onclick="submitFeedback()" style="background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Send feedback →</button>
+            <button onclick="submitFeedback()" style="background:var(--p);color:#fff;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Send feedback →</button>
           </div>
         </div>
         <div class="card" style="margin-top:0;" id="feedbackHistory">
@@ -1203,12 +1203,12 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 <!-- REVISION REQUEST MODAL -->
 <div id="revisionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;">
   <div style="background:#fff;border-radius:20px;padding:32px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-    <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:8px;">Request a revision</h3>
+    <h3 style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin-bottom:8px;">Request a revision</h3>
     <p style="font-size:13px;color:#7a6d8e;margin-bottom:16px;" id="revisionTitle"></p>
-    <textarea aria-label="What would you like changed? Be as specific as possible." id="revisionNote" rows="4" style="width:100%;padding:12px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;margin-bottom:16px;" placeholder="What would you like changed? Be as specific as possible."></textarea>
+    <textarea aria-label="What would you like changed? Be as specific as possible." id="revisionNote" rows="4" style="width:100%;padding:12px 14px;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;margin-bottom:16px;" placeholder="What would you like changed? Be as specific as possible."></textarea>
     <div style="display:flex;gap:10px;">
-      <button onclick="submitRevision()" style="flex:1;background:#5b3fa0;color:#fff;border:none;padding:12px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Send revision request</button>
-      <button onclick="closeRevisionModal()" style="background:transparent;color:#7a6d8e;border:1.5px solid rgba(91,63,160,0.2);padding:12px 20px;border-radius:100px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+      <button onclick="submitRevision()" style="flex:1;background:#5b3fa0;color:#fff;border:none;padding:12px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Send revision request</button>
+      <button onclick="closeRevisionModal()" style="background:transparent;color:#7a6d8e;border:1.5px solid rgba(91,63,160,0.2);padding:12px 20px;border-radius:100px;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;">Cancel</button>
     </div>
   </div>
 </div>
@@ -1357,7 +1357,7 @@ async function initPortal() {
   // helper can never stop the portal from loading.
   try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
   try { await loadGrowth(); } catch(e){ console.error("loadGrowth:", e); }
-  try { await loadProjectSpine(); } catch(e){ console.error("spine:", e); }
+  try { if (typeof loadProjectSpine === 'function') { await loadProjectSpine(); } } catch(e){ console.error("spine:", e); }
   try { renderAddons(); } catch(e){ console.error("renderAddons:", e); }
   try { await loadFeedback(); } catch(e){ console.error("loadFeedback:", e); }
   try { await loadBriefState(); } catch(e){ console.error("loadBriefState:", e); }
@@ -2732,7 +2732,7 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
 
     // If the partnership data already loaded, reveal now (handles the race where
     // loadGrowth finished before this rebuild ran).
-    if (window.GP_WS) { document.querySelectorAll(".growth-only").forEach(function(n){ n.style.display=""; }); }
+    if (window.GP_WS) { revealGrowthNav(); }
   }
 
   /* ============================================================
@@ -2794,14 +2794,30 @@ async function gpApi(type, payload){
 
 // Load the partnership workspace. If one exists, reveal the Growth nav and
 // render the views. If not, the client simply keeps the full project portal.
+// Reveal the Growth nav reliably, regardless of whether consolidateNav (which
+// rebuilds the sidebar) has run yet. Retries briefly until the nav items exist.
+function revealGrowthNav(){
+  if (!window.GP_WS) return;
+  var tries = 0;
+  function show(){
+    var els = document.querySelectorAll('.growth-only');
+    if (els.length){ els.forEach(function(n){ n.style.display=''; }); return true; }
+    return false;
+  }
+  if (show()) return;
+  var iv = setInterval(function(){
+    tries++;
+    if (show() || tries > 40){ clearInterval(iv); }
+  }, 150);
+}
+
 async function loadGrowth(){
   try {
     var r = await gpApi('gp_workspace');
     var ws = (r && r.data && r.data.partnership) ? r.data : null;
     GP_WS = ws;
     if(!ws){ return; } // no partnership -> Growth layer stays hidden, client tools remain
-    // reveal Growth nav
-    document.querySelectorAll('.growth-only').forEach(function(n){ n.style.display=''; });
+    revealGrowthNav();
     // badge: shared recommendations awaiting the client
     var pending = (ws.recommendations||[]).filter(function(x){ return x.status==='shared'; }).length;
     var badge = document.getElementById('badge-gp');
@@ -3131,7 +3147,7 @@ async function loadProjectSpine(){
     <button onclick="navMore('guide')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>How it works</span></button>
     <button onclick="navMore('links')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>Links</span></button>
   </div>
-  <button onclick="closeMoreSheet();logout();" style="width:100%;margin-top:14px;padding:13px;border-radius:12px;border:1px solid rgba(224,85,85,0.25);background:#fff;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Sign out</button>
+  <button onclick="closeMoreSheet();logout();" style="width:100%;margin-top:14px;padding:13px;border-radius:12px;border:1px solid rgba(224,85,85,0.25);background:#fff;color:var(--red);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Sign out</button>
 </div>
 
 
