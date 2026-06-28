@@ -51,6 +51,25 @@ section{position:relative}
 .btn-light:hover{transform:translateY(-1px)}
 .btn .arr{transition:transform .2s ease}
 .btn:hover .arr{transform:translateX(3px)}
+.btn-sm{font-size:13px;padding:9px 16px}
+/* Services dropdown — desktop hover/focus, mobile stacks inline */
+.nav-has-sub{position:relative}
+.nav-sub-toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.nav-sub-toggle .caret{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:.15s;opacity:.6}
+.nav-sub{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(6px);
+  min-width:230px;background:var(--paper);border:1px solid var(--hair);border-radius:14px;
+  box-shadow:0 12px 34px rgba(27,21,37,.12);padding:8px;opacity:0;visibility:hidden;transition:.16s;z-index:60}
+.nav-has-sub:hover .nav-sub,.nav-has-sub:focus-within .nav-sub{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.nav-has-sub:hover .caret,.nav-has-sub:focus-within .caret{opacity:1;transform:rotate(225deg);margin-top:2px}
+.nav-sub a{display:block;padding:10px 12px;border-radius:9px;font-size:14px;color:var(--ink);font-weight:450}
+.nav-sub a:hover{background:var(--paper-2,#F4F0E9)}
+.nav-sub a small{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px}
+@media(max-width:880px){
+  .nav-sub{position:static;transform:none;opacity:1;visibility:visible;box-shadow:none;border:none;
+    background:transparent;padding:4px 0 4px 14px;min-width:0}
+  .nav-sub a{padding:8px 0}
+  .nav-sub-toggle .caret{display:none}
+}
 
 .textlink{font-weight:550;border-bottom:1px solid var(--brass);padding-bottom:1px;transition:.15s}
 .textlink:hover{color:var(--brass-deep)}
