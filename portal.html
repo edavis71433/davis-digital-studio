@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS portal v7.2 clean-login+growth 20260628 -->
+<!-- DDS portal v8.0 growth-workflow 20260628 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -640,7 +640,20 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .gp-pill-impact { background: #E6F0E9; color: #2f6248; }
 .gp-pill-effort { background: #F4ECDE; color: #8A6B3C; }
 .gp-pill-eric { background: var(--p-mist,#EDE8F7); color: var(--p); }
-.gp-rec-actions { display: flex; gap: 10px; margin-top: 16px; }
+.gp-rec-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.gp-rec-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.gp-status { font-size: 11.5px; font-weight: 600; padding: 4px 11px; border-radius: 100px; white-space: nowrap; }
+.gp-rec-actions2 { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.gp-link2 { background: none; border: none; color: var(--p); font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 0; }
+.gp-link2:hover { text-decoration: underline; }
+.gp-link-mute { color: var(--muted); }
+.gp-btn-soft { background: var(--paper-2,#F4F0E9); color: var(--ink); border: 1px solid var(--hair,#E7E1D6); }
+.gp-btn-soft:hover { border-color: var(--p); color: var(--p); }
+.gp-panel { margin-top: 14px; padding: 14px; background: var(--cream,#FBFAF7); border: 1px solid var(--hair,#E7E1D6); border-radius: 12px; }
+.gp-panel-q { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.gp-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.gp-chip { background: #fff; border: 1px solid var(--hair,#E7E1D6); border-radius: 100px; padding: 8px 14px; font-size: 13px; font-family: var(--sans); color: var(--ink); cursor: pointer; transition: .15s; }
+.gp-chip:hover { border-color: var(--p); color: var(--p); }
 .gp-btn { font-family: var(--sans); font-size: 14px; font-weight: 600; border-radius: 100px; padding: 11px 20px; cursor: pointer; border: none; transition: .15s; }
 .gp-btn-yes { background: var(--p); color: #fff; }
 .gp-btn-yes:hover { background: var(--p-deep,#2A1B4A); }
@@ -2915,28 +2928,88 @@ function gpIgnoreLine(r){
 function gpCatLabel(c){ c=(c||'').toLowerCase(); return c==='local'?'Getting found locally':c==='content'?'Your website content':c==='demand'?'Winning ready buyers':c==='technical'?'Site performance':'Growth idea'; }
 
 // One recommendation card. `mode` = 'action' (needs approve/not now) or 'plain'.
+// Status label + color for any recommendation state.
+function gpStatusChip(r){
+  var s = r.status === 'accepted' ? 'approved' : r.status;
+  var map = {
+    approved:   ['Approved \u00b7 Eric will start','#2f6248','#E6F0E9'],
+    in_progress:['In progress','#5b3fa0','#EDE8F7'],
+    completed:  ['Completed','#2f6248','#E6F0E9'],
+    quote_requested:['Quote requested','#8A6B3C','#F4ECDE'],
+    scheduled:  ['Scheduled'+(r.scheduled_label?' \u00b7 '+esc(r.scheduled_label):(r.scheduled_for?' \u00b7 '+esc(gpShortDate(r.scheduled_for)):'')),'#8A6B3C','#F4ECDE'],
+    declined:   ['Not now','#8b8098','#F0EEF2'],
+    question:   ['Question sent','#5b3fa0','#EDE8F7']
+  };
+  var m = map[s]; if(!m) return '';
+  return '<span class="gp-status" style="color:'+m[1]+';background:'+m[2]+'">'+m[0]+'</span>';
+}
+
 function gpRecCard(r){
-  var impact = gpImpactWord(r.impact);
-  var effort = gpEffortWord(r.effort);
-  var pillImpact = '<span class="gp-pill gp-pill-impact">'+impact+'</span>';
-  var pillEffort = '<span class="gp-pill gp-pill-effort">'+effort+'</span>';
+  var pillImpact = '<span class="gp-pill gp-pill-impact">'+gpImpactWord(r.impact)+'</span>';
+  var pillEffort = '<span class="gp-pill gp-pill-effort">'+gpEffortWord(r.effort)+'</span>';
   var pillEric  = '<span class="gp-pill gp-pill-eric">Eric handles this</span>';
+  var status = r.status === 'accepted' ? 'approved' : (r.status||'shared');
+  var rid = esc(r.id);
+  var detail = r.detail || '';
+  var why = r.why || '';
+  var whyNow = r.ai_reasoning ? '<div class="gp-qa"><div class="gp-q">Why now</div><div class="gp-a">'+esc(r.ai_reasoning)+'</div></div>' : '';
+
+  var actions = '';
+  if (status === 'shared') {
+    actions =
+      '<div class="gp-rec-actions">'
+        +'<button class="gp-btn gp-btn-yes" onclick="gpRecAction(\''+rid+'\',\'approve\')">Yes, let\u2019s do it</button>'
+        +'<button class="gp-btn gp-btn-soft" onclick="gpRecAction(\''+rid+'\',\'request_quote\')">Get a price first</button>'
+      +'</div>'
+      +'<div class="gp-rec-actions2">'
+        +'<button class="gp-link2" onclick="gpTogglePanel(\'sched-\'+\''+rid+'\')">Schedule for later</button>'
+        +'<button class="gp-link2" onclick="gpTogglePanel(\'quest-\'+\''+rid+'\')">Ask a question</button>'
+        +(r.needs_client_input?'<button class="gp-link2" onclick="gpRecAction(\''+rid+'\',\'provide_info\')">I\u2019ll send what\u2019s needed</button>':'')
+        +'<button class="gp-link2 gp-link-mute" onclick="gpRecAction(\''+rid+'\',\'decline\')">Not interested</button>'
+      +'</div>'
+      +'<div class="gp-panel" id="sched-'+rid+'" style="display:none">'
+        +'<div class="gp-panel-q">When should Eric come back to this?</div>'
+        +'<div class="gp-chip-row">'
+          +'<button class="gp-chip" onclick="gpRecAction(\''+rid+'\',\'schedule\',{label:\'In a few weeks\'})">In a few weeks</button>'
+          +'<button class="gp-chip" onclick="gpRecAction(\''+rid+'\',\'schedule\',{label:\'Next month\'})">Next month</button>'
+          +'<button class="gp-chip" onclick="gpRecAction(\''+rid+'\',\'schedule\',{label:\'Next quarter\'})">Next quarter</button>'
+        +'</div>'
+      +'</div>'
+      +'<div class="gp-panel" id="quest-'+rid+'" style="display:none">'
+        +'<textarea class="gp-input" id="qtext-'+rid+'" rows="2" placeholder="What would you like to know about this?"></textarea>'
+        +'<button class="gp-btn gp-btn-yes" onclick="gpAskQuestion(\''+rid+'\')">Send question to Eric</button>'
+      +'</div>';
+  } else if (status === 'in_progress') {
+    actions = '<div class="gp-rec-actions"><span class="gp-status" style="color:#5b3fa0;background:#EDE8F7">Eric is working on this now</span></div>';
+  } else if (status === 'completed') {
+    actions = '';
+  } else {
+    actions = '<div class="gp-rec-actions2">'
+      +'<button class="gp-link2" onclick="gpTogglePanel(\'quest-\'+\''+rid+'\')">Ask a question</button>'
+      +(status==='declined'?'<button class="gp-link2" onclick="gpRecAction(\''+rid+'\',\'approve\')">Actually, let\u2019s do it</button>':'')
+      +'</div>'
+      +'<div class="gp-panel" id="quest-'+rid+'" style="display:none">'
+        +'<textarea class="gp-input" id="qtext-'+rid+'" rows="2" placeholder="What would you like to know?"></textarea>'
+        +'<button class="gp-btn gp-btn-yes" onclick="gpAskQuestion(\''+rid+'\')">Send question to Eric</button>'
+      +'</div>';
+  }
+
   return ''
-  +'<div class="gp-rec">'
-    +'<div class="gp-rec-cat">'+esc(gpCatLabel(r.category))+'</div>'
+  +'<div class="gp-rec" id="rec-'+rid+'">'
+    +'<div class="gp-rec-top"><div class="gp-rec-cat">'+esc(gpCatLabel(r.category))+'</div>'+gpStatusChip(r)+'</div>'
     +'<div class="gp-rec-title">'+esc(r.title||'')+'</div>'
-    +(r.detail?'<div class="gp-rec-detail">'+esc(r.detail)+'</div>':'')
+    +(detail?'<div class="gp-rec-detail">'+esc(detail)+'</div>':'')
     +'<div class="gp-rec-grid">'
-      +(r.why?'<div class="gp-qa"><div class="gp-q">Why this matters</div><div class="gp-a">'+esc(r.why)+'</div></div>':'')
+      +(why?'<div class="gp-qa"><div class="gp-q">Why this matters</div><div class="gp-a">'+esc(why)+'</div></div>':'')
       +'<div class="gp-qa"><div class="gp-q">If you do nothing</div><div class="gp-a">'+esc(gpIgnoreLine(r))+'</div></div>'
+      +whyNow
     +'</div>'
     +'<div class="gp-rec-meta">'+pillImpact+pillEffort+pillEric+'</div>'
-    +'<div class="gp-rec-actions">'
-      +'<button class="gp-btn gp-btn-yes" onclick="gpRespondRec(\''+esc(r.id)+'\',\'accepted\')">Yes, let\u2019s do it</button>'
-      +'<button class="gp-btn gp-btn-no" onclick="gpRespondRec(\''+esc(r.id)+'\',\'declined\')">Not now</button>'
-    +'</div>'
+    +actions
   +'</div>';
 }
+
+function gpTogglePanel(id){ var el=document.getElementById(id); if(el) el.style.display = (el.style.display==='none'?'block':'none'); }
 
 // Section wrapper with an emoji + title + one-line subtitle.
 function gpSection(emoji, title, sub, inner){
@@ -2948,7 +3021,8 @@ function gpRenderPriorities(){
   var ws = GP_WS; if(!ws){ return; }
   var p = ws.partnership;
   var recs = (ws.recommendations||[]);
-  var shared = recs.filter(function(r){ return r.status==='shared'; });
+  function st(r){ return r.status==='accepted' ? 'approved' : (r.status||'shared'); }
+  var shared = recs.filter(function(r){ return st(r)==='shared'; });
 
   // Classify shared recs into the owner's buckets.
   var quickWins = shared.filter(function(r){ return (r.effort==='low') && (r.impact==='high'||r.impact==='medium'); });
@@ -2956,7 +3030,13 @@ function gpRenderPriorities(){
   var top = shared.filter(function(r){ return !quickIds[r.id] && (r.priority==='urgent' || r.impact==='high'); });
   var topIds = {}; top.forEach(function(r){ topIds[r.id]=1; });
   var opportunities = shared.filter(function(r){ return !quickIds[r.id] && !topIds[r.id]; });
-  var completed = recs.filter(function(r){ return r.status==='accepted'; });
+
+  // Workflow-state buckets (the rest of the 9-action system).
+  var happeningNow = recs.filter(function(r){ return st(r)==='approved' || st(r)==='in_progress'; });
+  var awaitingEric = recs.filter(function(r){ return st(r)==='quote_requested' || st(r)==='question'; });
+  var scheduled    = recs.filter(function(r){ return st(r)==='scheduled'; });
+  var declined     = recs.filter(function(r){ return st(r)==='declined'; });
+  var completed    = recs.filter(function(r){ return st(r)==='completed'; });
 
   // ---- HERO ----
   var sharedCount = shared.length;
@@ -2992,6 +3072,20 @@ function gpRenderPriorities(){
     compSec = gpSection('\u2705','Completed wins','Everything already improved on your site.', inner);
   }
 
+  // ---- HAPPENING NOW (approved + in progress) — full cards so the client can
+  //      track status and still ask questions. ----
+  var nowHtml = happeningNow.length ? happeningNow.map(gpRecCard).join('') : '';
+  var nowSec = gpSection('\uD83D\uDEE0\uFE0F','Happening now','What you approved that Eric is on.', nowHtml);
+
+  // ---- WAITING ON ERIC (quote requested / question asked) ----
+  var waitHtml = awaitingEric.length ? awaitingEric.map(gpRecCard).join('') : '';
+  var waitSec = gpSection('\u23F3','Waiting on Eric','He\u2019ll get back to you on these.', waitHtml);
+
+  // ---- SCHEDULED & SET ASIDE (scheduled + declined, recoverable) ----
+  var laterAll = scheduled.concat(declined);
+  var laterHtml = laterAll.length ? laterAll.map(gpRecCard).join('') : '';
+  var laterSec = gpSection('\uD83D\uDCC6','Scheduled & set aside','Things you parked. Pick any back up anytime.', laterHtml);
+
   // ---- THIS MONTH'S FOCUS ----
   var planned = (ws.content||[]).filter(function(c){ return c.status!=='published'; });
   var review = (ws.reviews||[])[0]||null;
@@ -3025,11 +3119,11 @@ function gpRenderPriorities(){
   askSec += '</section>';
 
   // ---- empty fallback: no recs at all yet ----
-  var anyRecs = top.length||quickWins.length||opportunities.length;
+  var anyRecs = top.length||quickWins.length||opportunities.length||happeningNow.length||awaitingEric.length||scheduled.length;
   var emptyTop = (!anyRecs) ? '<div class="gp-allgood"><div class="gp-allgood-ico">\u2713</div><div class="gp-allgood-t">Nothing needs you right now</div><div class="gp-allgood-d">Eric is keeping an eye on your website. The moment something is worth doing, it\u2019ll appear here, in plain English, with a simple yes or no.</div></div>' : '';
 
   document.getElementById('gp_priorities_body').innerHTML =
-    hero + emptyTop + topSec + qwSec + healthSec + oppSec + compSec + focusSec + askSec;
+    hero + emptyTop + topSec + qwSec + healthSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + askSec;
 }
 
 // Website Health — plain words, no scary numbers leading.
@@ -3081,9 +3175,52 @@ function gpRenderHistory(){
   document.getElementById('gp_history_body').innerHTML = out;
 }
 
-async function gpRespondRec(id, decision){
-  try { await gpApi('gp_rec_respond', { recommendation_id:id, decision:decision }); showToast(decision==='accepted'?'Great, Eric will take it from here.':'No problem, noted.'); var r=await gpApi('gp_workspace'); GP_WS=(r&&r.data&&r.data.partnership)?r.data:GP_WS; gpRenderPriorities(); gpRenderHistory(); }
-  catch(e){ showToast('Could not save that. Please try again.'); }
+// The unified action handler. Calls the real gp_rec_action route. Each action
+// maps to a distinct backend record (see growth-edge-routes-spec.md). We do NOT
+// fake success: if the route isn't deployed yet, we tell the user honestly.
+var GP_ACTION_MSG = {
+  approve:        'Approved. Eric will take it from here.',
+  request_quote:  'Quote requested. Eric will send pricing.',
+  schedule:       'Scheduled. Eric will come back to it then.',
+  decline:        'Noted. This stays in your list in case you change your mind.',
+  provide_info:   'Added to your checklist. Send Eric what he needs when ready.'
+};
+async function gpRecAction(id, action, payload){
+  payload = payload || {};
+  try {
+    await gpApi('gp_rec_action', { recommendation_id:id, action:action, payload:payload });
+    showToast(GP_ACTION_MSG[action] || 'Done.');
+    await gpReloadGrowth();
+  } catch(e){
+    // Honest failure: the backend route may not be deployed yet. Do NOT pretend
+    // it worked. Tell the user it didn't go through.
+    var msg = (e && e.message) ? e.message : '';
+    if (msg.indexOf('gp_rec_action') > -1 || msg.indexOf('unknown') > -1 || msg.indexOf('not') > -1) {
+      showToast('This isn\u2019t connected yet on Eric\u2019s side. Nothing was lost \u2014 please try again shortly.');
+    } else {
+      showToast('Could not save that just now. Please try again.');
+    }
+  }
+}
+
+async function gpAskQuestion(id){
+  var ta = document.getElementById('qtext-'+id);
+  var body = ta ? (ta.value||'').trim() : '';
+  if(!body){ showToast('Type your question first.'); return; }
+  try {
+    await gpApi('gp_rec_action', { recommendation_id:id, action:'ask_question', payload:{ body:body } });
+    showToast('Sent to Eric. He\u2019ll reply here.');
+    if(ta) ta.value='';
+    await gpReloadGrowth();
+  } catch(e){
+    showToast('Couldn\u2019t send that just now. Please try again.');
+  }
+}
+
+// Reload the workspace and re-render both Growth views.
+async function gpReloadGrowth(){
+  try { var r = await gpApi('gp_workspace'); if(r&&r.data&&r.data.partnership){ GP_WS=r.data; } } catch(e){}
+  gpRenderPriorities(); gpRenderHistory();
 }
 
 async function gpSubmitRequest(){
