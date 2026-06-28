@@ -716,6 +716,39 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 <body>
 <div class="toast" id="toast"></div>
 
+<!-- ── Release 0.4: Archive + Purge modals ── -->
+<div id="archiveModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(23,18,33,0.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:24px;z-index:9000;" onclick="if(event.target===this)closeArchiveModals()">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(23,18,33,0.26);width:100%;max-width:460px;overflow:hidden;">
+    <div style="padding:24px 24px 0;"><h3 style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:400;color:var(--ink);margin:0 0 8px;">Archive this client?</h3></div>
+    <div style="padding:16px 24px;">
+      <p id="archiveModalDesc" style="font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 16px;"></p>
+      <label style="display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;">Reason (optional)</label>
+      <textarea id="archiveModalReason" style="width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#f7f5f2;border:1px solid #ddd6ea;border-radius:12px;padding:12px 14px;min-height:80px;resize:vertical;box-sizing:border-box;" placeholder="e.g. Project complete, partnership ended amicably."></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Saved to the audit trail. Helpful future context, never shown to the client.</div>
+    </div>
+    <div style="padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="closeArchiveModals()" style="font-size:13px;font-weight:600;padding:11px 20px;border-radius:100px;border:none;background:transparent;color:var(--muted);cursor:pointer;">Cancel</button>
+      <button id="archiveModalConfirm" onclick="confirmArchiveClient()" style="font-size:13px;font-weight:600;padding:11px 20px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer;">Archive client</button>
+    </div>
+  </div>
+</div>
+
+<div id="purgeModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(23,18,33,0.5);backdrop-filter:blur(2px);align-items:center;justify-content:center;padding:24px;z-index:9000;" onclick="if(event.target===this)closeArchiveModals()">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(23,18,33,0.26);width:100%;max-width:460px;overflow:hidden;">
+    <div style="padding:24px 24px 0;"><h3 style="font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:400;color:#dc4747;margin:0 0 8px;">Permanently delete?</h3></div>
+    <div style="padding:16px 24px;">
+      <p style="font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 12px;">This permanently deletes <strong id="purgeModalName"></strong> and <strong>every related record</strong> \u2014 projects, invoices, messages, files, and all Growth history. This <strong>cannot be undone</strong> and is not recoverable.</p>
+      <label style="display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;">Type the client name to confirm</label>
+      <input id="purgeModalInput" autocomplete="off" oninput="checkPurgeName()" style="width:100%;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#f7f5f2;border:1px solid #ddd6ea;border-radius:12px;padding:12px 14px;box-sizing:border-box;">
+      <div id="purgeModalErr" style="display:none;font-size:12px;color:#dc4747;margin-top:8px;">Name doesn't match yet.</div>
+    </div>
+    <div style="padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="closeArchiveModals()" style="font-size:13px;font-weight:600;padding:11px 20px;border-radius:100px;border:none;background:transparent;color:var(--muted);cursor:pointer;">Cancel</button>
+      <button id="purgeModalConfirm" onclick="confirmPurgeClient()" disabled style="font-size:13px;font-weight:600;padding:11px 20px;border-radius:100px;border:none;background:#dc4747;color:#fff;cursor:pointer;opacity:0.5;">Permanently delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div class="login" id="loginWrap">
   <div class="login-card">
@@ -774,6 +807,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn" data-dest="clients" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> All clients</button>
       <button class="sn" data-dest="clients" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
       <button class="sn" data-dest="clients" onclick="go('newclient')" id="sn-newclient" style="color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
+      <button class="sn" data-dest="clients" onclick="go('archive')" id="sn-archive"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/><path d="M10 11h4"/></svg> Archived</button>
 
       <!-- Quick actions (jump into a client task without leaving) -->
       <div class="sl" style="margin-top:10px;font-size:10px;opacity:.7;">Quick send to a client</div>
@@ -1419,6 +1453,17 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
       <!-- EMAIL TEMPLATES -->
       <div class="page" id="page-growth"></div>
 
+      <!-- ── Release 0.4: Client Archive view ── -->
+      <div class="page" id="page-archive">
+        <div style="margin-bottom:18px;">
+          <div style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brass,#B08D57);">Clients</div>
+          <h1 style="font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:24px;color:var(--ink);margin:4px 0 6px;">Recently archived</h1>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;max-width:540px;margin:0;">Archived clients are hidden everywhere else in the studio but kept here, fully recoverable. Restore brings back the client and every project, invoice, message, file, and Growth record exactly as it was. Nothing is ever deleted automatically.</p>
+        </div>
+        <div id="archiveBody"></div>
+      </div>
+
+
       <div class="page" id="page-templates">
         <div class="pt">Email Templates</div>
         <div class="ps">Your outreach copy, ready to paste into your sending tool. These lead with a free site review, not a hard pitch. Fill in the brackets per business. Your CAN-SPAM footer is already included.</div>
@@ -1640,6 +1685,7 @@ function go(page) {
   if (page === "reports") loadReports();
   if (page === "visibility") loadVisibility();
   if (page === "growth") loadGrowth();
+  if (page === "archive") loadArchive();
   try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
 }
 
@@ -2659,6 +2705,7 @@ async function openHubClient(id) {
   html += '<span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;background:'+(active?"rgba(34,197,94,0.12)":"rgba(148,163,184,0.15)")+';color:'+(active?"#16a34a":"#64748b")+';">'+(active?"Active":"Inactive")+'</span>';
   html += '<button onclick="toggleHubStatus(\''+c.id+'\','+active+')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--p);cursor:pointer;">Mark '+(active?"inactive":"active")+'</button>';
   html += '<button onclick="hubToGrowth(\''+c.id+'\')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid var(--p);background:var(--pxxxl);color:var(--p);cursor:pointer;font-weight:600;">Growth partnership →</button>';
+  html += '<button onclick="askArchiveClient(\''+c.id+'\',\''+String(c.name||"").replace(/\'/g,"")+'\')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(220,71,71,0.25);background:transparent;color:#dc4747;cursor:pointer;">Archive</button>';
   html += '<button onclick="document.getElementById(\'hubDetail\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;">Close</button>';
   html += '</div></div>';
 
@@ -5569,6 +5616,148 @@ async function openDetail(id, tab){
 /* Bridge: from a client's Hub record, jump straight to that same client's
    Growth partnership (one client, one record, reached two ways). If no
    partnership exists yet, drop them on the Growth page with the create flow. */
+// ──────────────────────────────────────────────────────────────────────────
+// RELEASE 0.4 — CLIENT ARCHIVE LIFECYCLE (archive view + archive/restore/purge)
+// ──────────────────────────────────────────────────────────────────────────
+var ARCHIVE_ROWS = [];
+var ARCHIVE_IS_OWNER = false;
+var _archiveTarget = null;
+
+function archApi(payload){
+  return adminJwt().then(function(jwt){
+    if(!jwt) return Promise.reject('no-jwt');
+    return fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body:JSON.stringify(payload)
+    }).then(function(r){ return r.json(); });
+  });
+}
+
+function archFmtDate(iso){ if(!iso) return '\u2014'; try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }catch(e){ return '\u2014'; } }
+
+async function loadArchive(){
+  var body = document.getElementById('archiveBody');
+  if(!body) return;
+  body.innerHTML = '<div class="card" style="padding:0;"><div style="padding:20px;">'
+    + '<div style="height:14px;background:#f3f0f9;border-radius:8px;margin-bottom:12px;"></div>'
+    + '<div style="height:14px;width:70%;background:#f3f0f9;border-radius:8px;margin-bottom:12px;"></div>'
+    + '<div style="height:14px;width:85%;background:#f3f0f9;border-radius:8px;"></div></div></div>';
+  try{
+    var who = await archApi({type:'whoami'});
+    ARCHIVE_IS_OWNER = !!(who && who.role === 'owner');
+  }catch(e){ ARCHIVE_IS_OWNER = false; }
+  try{
+    var res = await archApi({type:'archived_clients_list'});
+    ARCHIVE_ROWS = (res && res.data) || [];
+    renderArchive();
+  }catch(e){
+    body.innerHTML = '<div class="card"><div style="text-align:center;padding:48px 24px;color:var(--muted);">'
+      + '<div style="font-family:\'Fraunces\',Georgia,serif;font-size:16px;color:var(--ink);margin-bottom:8px;">Could not load the archive</div>'
+      + '<div style="font-size:13px;">Check your connection and try again.</div></div></div>';
+  }
+}
+
+function renderArchive(){
+  var body = document.getElementById('archiveBody');
+  if(!ARCHIVE_ROWS.length){
+    body.innerHTML = '<div class="card"><div style="text-align:center;padding:48px 24px;color:var(--muted);">'
+      + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd6ea" stroke-width="1.5" style="margin:0 auto 16px;display:block;"><rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/><path d="M10 11h4"/></svg>'
+      + '<div style="font-family:\'Fraunces\',Georgia,serif;font-size:16px;color:var(--ink);margin-bottom:8px;">Nothing archived</div>'
+      + '<div style="font-size:13px;max-width:340px;margin:0 auto;line-height:1.6;">When you archive a client, they\'ll wait here, fully recoverable. Nothing is ever deleted automatically.</div></div></div>';
+    return;
+  }
+  var rows = ARCHIVE_ROWS.map(function(c){
+    var safeName = String(c.name||'').replace(/'/g,"\\'");
+    var purgeBtn = ARCHIVE_IS_OWNER
+      ? '<button onclick="askPurgeClient(\''+c.id+'\')" style="font-size:11px;font-weight:600;padding:6px 12px;border-radius:100px;border:none;background:rgba(220,71,71,0.1);color:#dc4747;cursor:pointer;">Permanently delete</button>'
+      : '';
+    return '<tr style="border-bottom:1px solid #ece8f1;">'
+      + '<td style="padding:13px 16px;"><div style="font-weight:600;color:var(--ink);font-size:13px;">'+(c.name||'Unnamed')+'</div>'
+        + (c.archive_reason?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+c.archive_reason+'</div>':'')+'</td>'
+      + '<td style="padding:13px 16px;font-family:\'Geist Mono\',monospace;font-size:12px;color:var(--ink);white-space:nowrap;">'+archFmtDate(c.archived_at)+'</td>'
+      + '<td style="padding:13px 16px;font-size:12px;color:var(--muted);">'+(c.archived_by||'\u2014')+'</td>'
+      + '<td style="padding:13px 16px;"><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">'
+        + '<button onclick="doRestoreClient(\''+c.id+'\',\''+safeName+'\')" style="font-size:11px;font-weight:600;padding:6px 12px;border-radius:100px;border:1px solid var(--p);background:#fff;color:var(--p);cursor:pointer;">Restore</button>'
+        + purgeBtn
+      + '</div></td></tr>';
+  }).join('');
+  body.innerHTML = '<div class="card" style="padding:0;overflow:auto;"><table style="width:100%;border-collapse:collapse;">'
+    + '<thead><tr style="border-bottom:1px solid #ddd6ea;">'
+    + '<th style="text-align:left;padding:10px 16px;font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);">Client</th>'
+    + '<th style="text-align:left;padding:10px 16px;font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);">Archived</th>'
+    + '<th style="text-align:left;padding:10px 16px;font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);">By</th>'
+    + '<th style="text-align:right;padding:10px 16px;font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);">Actions</th>'
+    + '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function askArchiveClient(id, name){
+  _archiveTarget = { id:id, name:name };
+  document.getElementById('archiveModalDesc').innerHTML = 'You\u2019re about to archive <strong>'+name+'</strong>. They\u2019ll be hidden from your active clients, dashboards, and reports, and moved to Archived. You can restore them any time.';
+  document.getElementById('archiveModalReason').value = '';
+  document.getElementById('archiveModalOverlay').style.display = 'flex';
+}
+async function confirmArchiveClient(){
+  if(!_archiveTarget) return;
+  var btn = document.getElementById('archiveModalConfirm');
+  btn.disabled = true; btn.textContent = 'Archiving\u2026';
+  try{
+    var res = await archApi({ type:'client_archive', clientId:_archiveTarget.id, reason:document.getElementById('archiveModalReason').value });
+    if(res && res.ok){
+      closeArchiveModals();
+      toast(_archiveTarget.name+' archived');
+      var hd=document.getElementById('hubDetail'); if(hd) hd.style.display='none';
+      if(typeof loadHub==='function') loadHub();
+    } else { toast((res && res.error) || 'Could not archive'); }
+  }catch(e){ toast('Could not archive'); }
+  btn.disabled = false; btn.textContent = 'Archive client';
+}
+
+async function doRestoreClient(id, name){
+  try{
+    var res = await archApi({ type:'client_restore', clientId:id });
+    if(res && res.ok){ toast((name||'Client')+' restored'); loadArchive(); }
+    else { toast((res && res.error) || 'Could not restore'); }
+  }catch(e){ toast('Could not restore'); }
+}
+
+function askPurgeClient(id){
+  var c = ARCHIVE_ROWS.filter(function(x){ return x.id===id; })[0];
+  if(!c) return;
+  _archiveTarget = c;
+  document.getElementById('purgeModalName').textContent = c.name || 'this client';
+  document.getElementById('purgeModalInput').value = '';
+  document.getElementById('purgeModalConfirm').disabled = true;
+  document.getElementById('purgeModalErr').style.display = 'none';
+  document.getElementById('purgeModalOverlay').style.display = 'flex';
+}
+function checkPurgeName(){
+  var v = document.getElementById('purgeModalInput').value.trim();
+  var ok = _archiveTarget && v === String(_archiveTarget.name||'').trim();
+  var btn = document.getElementById('purgeModalConfirm');
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.5';
+  document.getElementById('purgeModalErr').style.display = (v && !ok) ? 'block' : 'none';
+}
+async function confirmPurgeClient(){
+  if(!_archiveTarget) return;
+  var btn = document.getElementById('purgeModalConfirm');
+  btn.disabled = true; btn.textContent = 'Deleting\u2026';
+  try{
+    var res = await archApi({ type:'client_purge', clientId:_archiveTarget.id, confirmName:document.getElementById('purgeModalInput').value });
+    if(res && res.ok){ closeArchiveModals(); toast(_archiveTarget.name+' permanently deleted'); loadArchive(); }
+    else if(res && res.error==='name_mismatch'){ document.getElementById('purgeModalErr').style.display='block'; }
+    else { toast((res && res.error) || 'Could not delete'); }
+  }catch(e){ toast('Could not delete'); }
+  btn.disabled = false; btn.textContent = 'Permanently delete';
+}
+
+function closeArchiveModals(){
+  var a=document.getElementById('archiveModalOverlay'); if(a) a.style.display='none';
+  var p=document.getElementById('purgeModalOverlay'); if(p) p.style.display='none';
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeArchiveModals(); });
+
 async function hubToGrowth(clientId){
   go('growth');
   try {
