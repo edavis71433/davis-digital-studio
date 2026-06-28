@@ -2870,19 +2870,46 @@ function revealGrowthNav(){
 }
 
 async function loadGrowth(){
+  var r, ws = null, errMsg = '';
   try {
-    var r = await gpApi('gp_workspace');
-    var ws = (r && r.data && r.data.partnership) ? r.data : null;
-    GP_WS = ws;
-    if(!ws){ return; } // no partnership -> Growth layer stays hidden, client tools remain
-    revealGrowthNav();
-    // badge: shared recommendations awaiting the client
-    var pending = (ws.recommendations||[]).filter(function(x){ return x.status==='shared'; }).length;
-    var badge = document.getElementById('badge-gp');
-    if(badge){ if(pending>0){ badge.textContent=String(pending); badge.style.display='inline-flex'; } else { badge.style.display='none'; } }
-    // render the single Growth page
-    gpRenderPriorities(); gpRenderHistory();
-  } catch(e){ console.error('loadGrowth:', e); }
+    r = await gpApi('gp_workspace');
+    ws = (r && r.data && r.data.partnership) ? r.data : null;
+  } catch(e){
+    errMsg = (e && e.message) ? e.message : String(e);
+    console.error('loadGrowth gp_workspace error:', errMsg);
+  }
+  GP_WS = ws;
+
+  // Tell the developer console exactly what happened (helps diagnose "no Growth").
+  try {
+    var sess = await sb.auth.getSession();
+    var email = sess && sess.data && sess.data.session && sess.data.session.user ? sess.data.session.user.email : '(no session)';
+    console.log('[Growth] signed in as:', email, '| partnership found:', !!ws, errMsg ? ('| error: '+errMsg) : '');
+  } catch(_){}
+
+  if(!ws){
+    // No partnership for THIS login. The Growth nav stays hidden (correct for a
+    // client who only has a project). But if there was an ERROR, that's worth
+    // surfacing rather than hiding silently.
+    if (errMsg) {
+      // reveal the Growth nav and show a clear, non-scary explanation so it's
+      // never an invisible failure.
+      revealGrowthNav();
+      var body = document.getElementById('gp_priorities_body');
+      if (body) body.innerHTML =
+        '<div class="gp-hero"><h2 class="gp-hero-title">Your priorities</h2>'
+        +'<p class="gp-hero-sub">We had trouble loading your growth plan just now. This is usually a quick fix on our end. Please refresh in a moment, or message Eric and he\u2019ll sort it out.</p></div>'
+        +'<button class="gp-btn gp-btn-yes" onclick="loadGrowth()">Try again</button>';
+    }
+    return;
+  }
+  revealGrowthNav();
+  // badge: shared recommendations awaiting the client
+  var pending = (ws.recommendations||[]).filter(function(x){ return x.status==='shared'; }).length;
+  var badge = document.getElementById('badge-gp');
+  if(badge){ if(pending>0){ badge.textContent=String(pending); badge.style.display='inline-flex'; } else { badge.style.display='none'; } }
+  // render the single Growth page
+  gpRenderPriorities(); gpRenderHistory();
 }
 
 /* ============================================================================
