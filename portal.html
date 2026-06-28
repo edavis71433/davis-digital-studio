@@ -693,6 +693,49 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .gp-allgood-ico { width: 44px; height: 44px; border-radius: 50%; background: #E6F0E9; color: #2f6248; font-size: 22px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
 .gp-allgood-t { font-family: var(--serif); font-size: 20px; color: var(--ink); }
 .gp-allgood-d { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 46ch; margin-inline: auto; line-height: 1.6; }
+
+/* ════ DIGITAL HEADQUARTERS — client home styles (scoped to .hq) ════ */
+.hq-skel{ background:var(--p-soft,#f3effb); animation:hqShimmer 1.4s ease infinite; }
+@keyframes hqShimmer{ 0%,100%{opacity:.5} 50%{opacity:1} }
+.hq{ max-width:600px; margin:0 auto; }
+.hq-band1{ padding:30px 0 26px; }
+.hq-pill{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--green,#1a7e49); background:var(--green-soft,#eaf5ee); padding:6px 14px; border-radius:100px; margin-bottom:18px; font-weight:600; }
+.hq-dot{ width:7px; height:7px; border-radius:50%; background:var(--green,#1a7e49); position:relative; }
+.hq-dot::after{ content:''; position:absolute; inset:-4px; border-radius:50%; background:var(--green,#1a7e49); opacity:.25; animation:hqPulse 2.4s cubic-bezier(.22,.61,.36,1) infinite; }
+@keyframes hqPulse{ 0%{transform:scale(1);opacity:.25} 70%{transform:scale(2.4);opacity:0} 100%{opacity:0} }
+.hq-confidence{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:27px; line-height:1.28; font-weight:400; color:var(--ink); letter-spacing:-0.01em; max-width:18em; }
+.hq-anim{ opacity:0; transform:translateY(8px); animation:hqRise .5s cubic-bezier(.22,.61,.36,1) forwards; }
+.hq-anim:nth-of-type(2){animation-delay:.05s} .hq-anim:nth-of-type(3){animation-delay:.12s} .hq-anim:nth-of-type(4){animation-delay:.19s} .hq-anim:nth-of-type(5){animation-delay:.26s}
+@keyframes hqRise{ to{opacity:1;transform:none} }
+.hq-label{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--brass,#b08d57); margin-bottom:12px; }
+.hq-card{ background:#fff; border:1px solid var(--line,rgba(91,63,160,0.09)); border-radius:18px; padding:22px 24px; margin-bottom:14px; }
+.hq-intro{ font-size:15px; color:var(--muted); margin-bottom:14px; }
+.hq-did{ display:flex; align-items:flex-start; gap:12px; padding:9px 0; font-size:15px; color:var(--ink); }
+.hq-did:not(:last-child){ border-bottom:1px solid var(--line,rgba(91,63,160,0.09)); }
+.hq-check{ width:20px; height:20px; border-radius:50%; background:var(--green-soft,#eaf5ee); color:var(--green,#1a7e49); display:flex; align-items:center; justify-content:center; font-size:11px; flex:none; margin-top:1px; }
+.hq-active{ display:flex; align-items:center; gap:14px; background:var(--p-soft,#f3effb); border:1px solid #e6ddf6; border-radius:18px; padding:20px 24px; margin-bottom:14px; }
+.hq-orbit{ width:34px; height:34px; flex:none; position:relative; display:flex; align-items:center; justify-content:center; }
+.hq-orbit::before{ content:''; width:12px; height:12px; border-radius:50%; background:var(--p); animation:hqBreathe 2.2s cubic-bezier(.22,.61,.36,1) infinite; }
+.hq-orbit::after{ content:''; position:absolute; width:12px; height:12px; border-radius:50%; background:var(--p); opacity:.3; animation:hqBreatheRing 2.2s cubic-bezier(.22,.61,.36,1) infinite; }
+@keyframes hqBreathe{ 0%,100%{transform:scale(.85);opacity:.9} 50%{transform:scale(1);opacity:1} }
+@keyframes hqBreatheRing{ 0%{transform:scale(1);opacity:.3} 70%{transform:scale(2.6);opacity:0} 100%{opacity:0} }
+.hq-active-t{ font-size:15px; color:var(--ink); }
+.hq-active-t b{ color:var(--p); font-weight:600; }
+.hq-momentum{ text-align:center; padding:30px 24px; }
+.hq-mbig{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:33px; font-weight:500; color:var(--p); line-height:1.12; letter-spacing:-0.01em; }
+.hq-msub{ font-size:15px; color:var(--muted); margin-top:8px; }
+.hq-mbadge{ font-size:11px; color:var(--muted); margin-top:12px; opacity:.85; }
+.hq-next{ font-size:15px; color:var(--ink); display:flex; align-items:center; gap:10px; }
+.hq-arrow{ color:var(--brass,#b08d57); font-weight:600; }
+.hq-welcome{ text-align:center; padding:40px 24px; }
+.hq-welcome-h{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:26px; margin:0 0 12px; line-height:1.3; font-weight:400; }
+.hq-welcome-p{ font-size:15px; color:var(--muted); line-height:1.6; max-width:24em; margin:0 auto; }
+.hq-foot{ text-align:center; font-size:13px; color:var(--muted); margin-top:30px; line-height:1.6; }
+@media (prefers-reduced-motion: reduce){
+  .hq-anim{ animation:none; opacity:1; transform:none; }
+  .hq-dot::after,.hq-orbit::before,.hq-orbit::after,.hq-skel{ animation:none; }
+}
+
 </style>
 </head>
 <body>
@@ -803,67 +846,9 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
     <div class="main-content">
 
-      <!-- DASHBOARD -->
+      <!-- DASHBOARD = DIGITAL HEADQUARTERS -->
       <div class="page-view active" id="page-dashboard">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:4px;" id="greeting"></h2>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-          <p style="font-size:13px;color:var(--muted);margin:0;" id="dash-sub"></p>
-          <span id="statusChipHost"></span>
-        </div>
-        <div id="clientAttention"></div>
-        <div id="postLaunchCard" style="display:none;"></div>
-        <div id="referralCard" style="display:none;background:linear-gradient(135deg,#5b3fa0,#7d5bc0);border-radius:16px;padding:22px 24px;margin-bottom:20px;color:#fff;">
-          <div style="font-family:var(--serif,'Fraunces',Georgia,serif);font-size:19px;margin-bottom:6px;">Your project is live</div>
-          <p style="font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.9);margin-bottom:14px;">It's been a pleasure building this with you. If you know another business owner who'd benefit from the same, I'd be grateful for an introduction — referrals mean the world to a small studio like mine.</p>
-          <a href="mailto:eric@davisdigitalstudio.com?subject=Referral%20for%20Davis%20Digital%20Studio&body=Hi%20Eric%2C%20I'd%20like%20to%20introduce%20you%20to..." style="display:inline-block;background:#fff;color:#5b3fa0;font-size:13px;font-weight:600;padding:10px 20px;border-radius:100px;text-decoration:none;">Refer someone →</a>
-        </div>
-        <div class="stats-row" id="statsRow"></div>
-
-        <!-- Project Spine: live status + whose-turn + activity feed -->
-        <div class="card" id="spineCard" style="display:none;margin-bottom:20px;">
-          <div class="card-header">
-            <div class="card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Where your project stands
-            </div>
-          </div>
-          <div style="padding:20px;">
-            <!-- whose-turn banner -->
-            <div id="spineTurn" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13.5px;"></div>
-            <!-- stage + progress -->
-            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-              <span id="spineStage" style="font-size:15px;font-weight:600;color:var(--ink);"></span>
-              <span id="spinePct" style="font-size:13px;font-weight:700;color:var(--p);"></span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" id="spineFill" style="width:0%;"></div></div>
-            <!-- feed -->
-            <div id="spineFeed" style="margin-top:18px;"></div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-          <div class="card">
-            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</div><span id="dash-pct" style="font-size:13px;font-weight:700;color:var(--p);"></span></div>
-            <div style="padding:20px;">
-              <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-              <div class="phase-row" id="phaseRow"></div>
-              <p style="font-size:11px;color:var(--muted);margin-top:8px;" id="dash-phase"></p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Next Up</div></div>
-            <div class="card-body" id="nextUp"></div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:0;">
-          <div class="card">
-            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Recent Files</div><button class="card-action" onclick="nav('files')">View all</button></div>
-            <div class="card-body" id="dashFiles"></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Recent Messages</div><button class="card-action" onclick="nav('messages')">View all</button></div>
-            <div class="card-body" id="dashMsgs"></div>
-          </div>
-        </div>
+        <div id="hqHost"><div id="hqSkeleton" style="padding:40px 0;"><div class="hq-skel" style="height:28px;width:140px;border-radius:8px;margin-bottom:24px;"></div><div class="hq-skel" style="height:64px;width:80%;border-radius:12px;"></div></div></div>
       </div>
 
       <!-- TIMELINE -->
@@ -1354,36 +1339,15 @@ async function initPortal() {
 
   var h = new Date().getHours();
   var g = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-  document.getElementById("greeting").textContent = g + ", " + CLIENT.name + " 👋";
-  document.getElementById("dash-sub").textContent = CLIENT.project_name + " · Davis Digital Studio";
-  document.getElementById("topbarClient").textContent = CLIENT.name;
-  document.getElementById("topbarStatus").textContent = CLIENT.project_status;
-  
-  // Stats — pulled from live data
-  var balanceDue = 0;
-  var currentPhase = "Discovery";
-  document.getElementById("statsRow").innerHTML = [
-    {val: CLIENT.progress + "%", label: "Project complete", cls: "purple"},
-    {val: CLIENT.project_status || "In Progress", label: "Current status", cls: ""},
-    {val: "$" + balanceDue, label: "Balance due", cls: "green", id: "stat-balance"},
-    {val: CLIENT.project_name ? CLIENT.project_name.split(" ")[0] : "Project", label: "Active project", cls: ""},
-  ].map(s => `<div class="stat"><div class="stat-val ${s.cls}"${s.id?' id="'+s.id+'"':''}>${s.val}</div><div class="stat-label">${s.label}</div></div>`).join("");
-  
-  // Progress
-  setTimeout(() => {
-    document.getElementById("progressFill").style.width = CLIENT.progress + "%";
-  }, 300);
-  document.getElementById("dash-pct").textContent = CLIENT.progress + "%";
+  // Topbar still shows client + status (those elements remain).
+  var tbC = document.getElementById("topbarClient"); if (tbC) tbC.textContent = CLIENT.name;
+  var tbS = document.getElementById("topbarStatus"); if (tbS) tbS.textContent = CLIENT.project_status;
 
-  // Show the referral ask once the project is complete (the happiest moment to ask).
-  if (CLIENT.progress >= 100) {
-    var rc = document.getElementById("referralCard");
-    if (rc) rc.style.display = "block";
-  }
-  renderPostLaunch();
-  
+  // ── DIGITAL HEADQUARTERS: the new Home. Loads the five-band experience. ──
+  try { await loadHQ(); } catch(e){ console.error("loadHQ:", e); renderHQFallback(); }
+
   // Each step is independently guarded so one failing query or undefined
-  // helper can never stop the portal from loading.
+  // helper can never stop the portal from loading. These feed the OTHER views.
   try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
   try { await loadGrowth(); } catch(e){ console.error("loadGrowth:", e); }
   try { if (typeof loadProjectSpine === 'function') { await loadProjectSpine(); } } catch(e){ console.error("spine:", e); }
@@ -1667,7 +1631,7 @@ async function loadTimeline() {
   var active = data.find(t => t.status === "active");
   if (active) {
     document.getElementById("dash-phase").textContent = "Currently in: " + active.title;
-    document.getElementById("nextUp").innerHTML = `<div style="display:flex;gap:12px;align-items:flex-start;">
+    var _nu=document.getElementById("nextUp"); if(_nu) _nu.innerHTML = `<div style="display:flex;gap:12px;align-items:flex-start;">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${active.icon}</div>
       <div><h4 style="font-size:14px;font-weight:600;margin-bottom:4px;">${active.title}</h4>
       <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">${active.description}</p>
@@ -1676,7 +1640,7 @@ async function loadTimeline() {
   
   // Phase dots
   var phases = data.map(t => `<div class="phase ${t.status}"></div>`).join("");
-  document.getElementById("phaseRow").innerHTML = phases;
+  var _pr=document.getElementById("phaseRow"); if(_pr) _pr.innerHTML = phases;
   
   // Full timeline
   document.getElementById("timelineBody").innerHTML = data.map(t => `
@@ -1700,7 +1664,7 @@ async function loadFiles() {
   
   // Dashboard preview
   var recent = allFiles.slice(0, 3);
-  document.getElementById("dashFiles").innerHTML = recent.length === 0
+  var _df=document.getElementById("dashFiles"); if(_df) _df.innerHTML = recent.length === 0
     ? "<div class=\"empty-state\"><div class=\"ei\">📁</div><p>No files yet</p></div>"
     : recent.map(f => `<div class="file-item" style="margin-bottom:6px;">
         <div class="file-thumb">${fileIcon(f.name)}</div>
@@ -1945,7 +1909,7 @@ async function loadMessages() {
   
   // Dashboard preview
   var recent = allMessages.slice(-2);
-  document.getElementById("dashMsgs").innerHTML = recent.length === 0
+  var _dm=document.getElementById("dashMsgs"); if(_dm) _dm.innerHTML = recent.length === 0
     ? "<div class=\"empty-state\"><div class=\"ei\">💬</div><p>No messages yet.<br>Have a question or want to share feedback? Send Eric a note below — he typically replies within 24 hours.</p></div>"
     : recent.map(m => `<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
         <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${esc(m.sender_name)} · ${formatDate(m.created_at)}</div>
@@ -3366,6 +3330,77 @@ async function loadProjectSpine(){
   feedEl.innerHTML = head + items;
   try { mirrorSpineToProjectTab(project, feed); } catch(e){}
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  DIGITAL HEADQUARTERS — the client home (replaces the old dashboard)
+//  Reuses gpApi() for identical auth. Renders the five emotional bands.
+// ════════════════════════════════════════════════════════════════════════════
+function hqEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function hqGreeting(){ var h=new Date().getHours(); return h<12?'Good morning':h<17?'Good afternoon':'Good evening'; }
+
+async function loadHQ(){
+  var host=document.getElementById('hqHost');
+  if(!host) return;
+  var lastVisit=null; try{ lastVisit=localStorage.getItem('hq_last_visit'); }catch(e){}
+  var d=null;
+  try{ var r=await gpApi('client_hq',{lastVisit:lastVisit}); d=(r&&r.data)?r.data:null; }catch(e){ console.error('client_hq:',e); }
+  if(!d){ renderHQFallback(); return; }
+  if(d.state==='onboarding'){ renderHQOnboarding(d); }
+  else if(d.state==='no_partnership'){ renderHQFallback(); }
+  else { renderHQ(d); }
+  try{ localStorage.setItem('hq_last_visit', new Date().toISOString()); }catch(e){}
+}
+
+function renderHQ(d){
+  var biz=d.business||{};
+  var first=(d.contact_first||(CLIENT&&CLIENT.name?CLIENT.name.split(' ')[0]:''))||'';
+  var html='<div class="hq">';
+  // BAND 1 — CONFIDENCE (instant)
+  html+='<div class="hq-band1"><div class="hq-pill"><span class="hq-dot"></span>'+hqEsc(d.confidence.word||'healthy')+'</div>'
+    +'<div class="hq-confidence">'+hqEsc(d.confidence.line)+'</div></div>';
+  // BAND 2 — TRUST
+  if(d.trust&&d.trust.items&&d.trust.items.length){
+    html+='<div class="hq-anim"><div class="hq-label">What we\u2019ve done</div><div class="hq-card"><div class="hq-intro">'+hqEsc(d.trust.intro)+':</div>';
+    d.trust.items.forEach(function(t){ html+='<div class="hq-did"><span class="hq-check">\u2713</span><span>'+hqEsc(t)+'</span></div>'; });
+    html+='</div></div>';
+  }
+  // BAND 3 — ACTIVE CARE
+  if(d.active_care){
+    html+='<div class="hq-anim"><div class="hq-label">Right now</div><div class="hq-active"><div class="hq-orbit"></div><div class="hq-active-t">We\u2019re <b>'+hqEsc(d.active_care)+'</b>.</div></div></div>';
+  }
+  // BAND 4 — MOMENTUM
+  if(d.momentum){
+    html+='<div class="hq-anim"><div class="hq-label">Your momentum</div><div class="hq-card hq-momentum"><div class="hq-mbig">'+hqEsc(d.momentum.headline)+'</div><div class="hq-msub">'+hqEsc(d.momentum.sub)+'</div>'
+      +(d.momentum.building?'<div class="hq-mbadge">Results build over the coming weeks</div>':(d.momentum.measured?'<div class="hq-mbadge">Measured from your live data</div>':''))+'</div></div>';
+  }
+  // BAND 5 — PARTNERSHIP
+  if(d.partnership&&d.partnership.next){
+    html+='<div class="hq-anim"><div class="hq-label">What\u2019s next</div><div class="hq-card"><div class="hq-next"><span class="hq-arrow">\u2192</span><span>Next, we\u2019re '+hqEsc(d.partnership.next.toLowerCase())+'.</span></div></div></div>';
+  }
+  html+='<div class="hq-foot">This is your Digital Headquarters.<br>We\u2019re always here, working on your business.</div></div>';
+  document.getElementById('hqHost').innerHTML=html;
+}
+
+function renderHQOnboarding(d){
+  var first=(d.contact_first||(CLIENT&&CLIENT.name?CLIENT.name.split(' ')[0]:''))||'';
+  var html='<div class="hq"><div class="hq-welcome"><div class="hq-pill"><span class="hq-dot"></span>getting started</div>'
+    +'<h1 class="hq-welcome-h">Welcome to your<br>Digital Headquarters'+(first?', '+hqEsc(first):'')+'</h1>'
+    +'<p class="hq-welcome-p">This is where you\u2019ll always see how your business is doing and everything we\u2019re working on. We\u2019ve already started \u2014 here\u2019s what\u2019s underway.</p></div>';
+  if(d.active_care){ html+='<div class="hq-active" style="opacity:1;"><div class="hq-orbit"></div><div class="hq-active-t">We\u2019re <b>'+hqEsc(d.active_care)+'</b>.</div></div>'; }
+  if(d.trust&&d.trust.items&&d.trust.items.length){
+    html+='<div class="hq-card"><div class="hq-intro">Already done:</div>';
+    d.trust.items.forEach(function(t){ html+='<div class="hq-did"><span class="hq-check">\u2713</span><span>'+hqEsc(t)+'</span></div>'; });
+    html+='</div>';
+  }
+  html+='<div class="hq-foot">Your numbers and results will appear here<br>as the work takes effect.</div></div>';
+  document.getElementById('hqHost').innerHTML=html;
+}
+
+function renderHQFallback(){
+  var host=document.getElementById('hqHost'); if(!host) return;
+  host.innerHTML='<div class="hq"><div class="hq-welcome" style="padding-top:60px;"><div class="hq-pill"><span class="hq-dot"></span>all good</div><h1 class="hq-welcome-h">Your Digital Headquarters</h1><p class="hq-welcome-p">Everything\u2019s running smoothly. We\u2019re actively managing your business and will keep this updated with progress and results.</p></div></div>';
+}
+
 </script>
 
 <!-- Mobile bottom nav -->
