@@ -1630,7 +1630,7 @@ async function loadTimeline() {
   
   var active = data.find(t => t.status === "active");
   if (active) {
-    document.getElementById("dash-phase").textContent = "Currently in: " + active.title;
+    var _dp=document.getElementById("dash-phase"); if(_dp) _dp.textContent = "Currently in: " + active.title;
     var _nu=document.getElementById("nextUp"); if(_nu) _nu.innerHTML = `<div style="display:flex;gap:12px;align-items:flex-start;">
       <div style="width:40px;height:40px;border-radius:50%;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${active.icon}</div>
       <div><h4 style="font-size:14px;font-weight:600;margin-bottom:4px;">${active.title}</h4>
@@ -3284,8 +3284,8 @@ async function loadProjectSpine(){
   card.style.display = "block";
 
   // Stage + progress
-  document.getElementById("spineStage").textContent = spineStageLabel(project.stage);
-  document.getElementById("spinePct").textContent = (project.progress || 0) + "%";
+  var _ss=document.getElementById("spineStage"); if(_ss) _ss.textContent = spineStageLabel(project.stage);
+  var _sp=document.getElementById("spinePct"); if(_sp) _sp.textContent = (project.progress || 0) + "%";
 
   // ── Unify: make the OLD top-of-portal stats reflect the spine (one source) ──
   try {
