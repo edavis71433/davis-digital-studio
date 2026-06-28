@@ -2703,6 +2703,7 @@ async function openHubClient(id) {
   html += '</div></div>';
   html += '<div style="display:flex;gap:8px;align-items:center;">';
   html += '<span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;background:'+(active?"rgba(34,197,94,0.12)":"rgba(148,163,184,0.15)")+';color:'+(active?"#16a34a":"#64748b")+';">'+(active?"Active":"Inactive")+'</span>';
+  html += '<button onclick="openClientWorkspace(\''+c.id+'\')" style="font-size:11px;padding:5px 14px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer;font-weight:600;">Open workspace →</button>';
   html += '<button onclick="toggleHubStatus(\''+c.id+'\','+active+')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--p);cursor:pointer;">Mark '+(active?"inactive":"active")+'</button>';
   html += '<button onclick="hubToGrowth(\''+c.id+'\')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid var(--p);background:var(--pxxxl);color:var(--p);cursor:pointer;font-weight:600;">Growth partnership →</button>';
   html += '<button onclick="askArchiveClient(\''+c.id+'\',\''+String(c.name||"").replace(/\'/g,"")+'\')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(220,71,71,0.25);background:transparent;color:#dc4747;cursor:pointer;">Archive</button>';
@@ -6301,5 +6302,267 @@ window.loadGrowth = function(){ try{ gpBuildShell(); if(!GP.nav) GP.nav='dashboa
 })();
 
 </script>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PHASE 4B — CLIENT WORKSPACE  (overlay + 5 sections, EBV decision surface)
+     Injected into the admin. openClientWorkspace(clientId, contactId) opens it.
+     Reads existing routes + the new client_decision_surface. Additive: the old
+     hub detail remains; this is the new primary client view.
+═══════════════════════════════════════════════════════════════════════ -->
+<div id="wsOverlay" style="display:none;position:fixed;inset:0;background:var(--bg,#f7f5f2);z-index:8000;overflow-y:auto;">
+  <div style="max-width:1020px;margin:0 auto;padding:20px;">
+    <a href="#" onclick="closeWorkspace();return false;" style="display:inline-flex;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:16px;">← Back to clients</a>
+    <div id="wsShell"></div>
+  </div>
+</div>
+
+<style>
+  #wsOverlay .ws-head{ background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:18px;box-shadow:0 1px 3px rgba(23,18,33,.06);overflow:hidden;margin-bottom:12px; }
+  #wsOverlay .ws-htop{ display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 20px 16px;flex-wrap:wrap; }
+  #wsOverlay .ws-av{ width:48px;height:48px;border-radius:12px;background:var(--pxxxl,#efeafc);color:var(--p,#5b3fa0);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-size:22px;flex:none; }
+  #wsOverlay .ws-nm{ font-family:'Fraunces',Georgia,serif;font-size:22px;margin:0; }
+  #wsOverlay .ws-diag{ display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(91,63,160,0.10); }
+  #wsOverlay .ws-dc{ padding:13px 20px;border-right:1px solid rgba(91,63,160,0.10); }
+  #wsOverlay .ws-dc:last-child{ border-right:none; }
+  #wsOverlay .ws-dk{ font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px; }
+  #wsOverlay .ws-dn{ font-family:'Geist Mono',monospace;font-size:26px;font-weight:500;line-height:1; }
+  #wsOverlay .ws-dl{ font-size:13px;font-weight:600;margin-left:8px; }
+  #wsOverlay .ws-de{ font-size:11px;color:#6b6478;margin-top:6px;line-height:1.5; }
+  #wsOverlay .up{ color:#1a7e49; } #wsOverlay .down{ color:#c0392b; } #wsOverlay .flat{ color:var(--muted); }
+  #wsOverlay .ws-tabs{ display:flex;gap:2px;border-bottom:1px solid rgba(91,63,160,0.12);margin-bottom:20px;overflow-x:auto; }
+  #wsOverlay .ws-tab{ flex:none;font-size:14px;font-weight:500;color:var(--muted);padding:11px 16px;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap; }
+  #wsOverlay .ws-tab:hover{ color:var(--ink,#171221); } #wsOverlay .ws-tab.on{ color:var(--p);border-bottom-color:var(--p);font-weight:600; }
+  #wsOverlay .ws-tq{ display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:1px; }
+  #wsOverlay .ws-pane{ display:none; } #wsOverlay .ws-pane.on{ display:block; }
+  #wsOverlay .wsc{ background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:12px;padding:16px; }
+  #wsOverlay .wslab{ font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#B08D57;margin:20px 0 12px; }
+  #wsOverlay .wslab:first-child{ margin-top:0; }
+  #wsOverlay .ws-attn{ display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px; }
+  #wsOverlay .ws-ac{ border-radius:12px;padding:14px 18px;border:1px solid rgba(91,63,160,0.12); }
+  #wsOverlay .ws-needs{ background:#fdf6e9;border-color:#f3e2c2; } #wsOverlay .ws-doing{ background:#fff; }
+  #wsOverlay .ws-act{ font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px; }
+  #wsOverlay .ws-needs .ws-act{ color:#a8690c; } #wsOverlay .ws-doing .ws-act{ color:var(--muted); }
+  #wsOverlay .ws-ai{ display:flex;gap:12px;background:var(--pxxxl,#efeafc);border:1px solid #e4d9f5;border-radius:12px;padding:14px 18px;margin-bottom:16px; }
+  #wsOverlay .ws-aii{ width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;font-size:13px; }
+  #wsOverlay .brief{ background:#fff;border:1.5px solid var(--p);border-radius:18px;box-shadow:0 4px 12px rgba(23,18,33,.08);padding:20px;margin-bottom:16px; }
+  #wsOverlay .brief-tag{ font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--p);margin-bottom:8px; }
+  #wsOverlay .brief-h{ font-family:'Fraunces',Georgia,serif;font-size:20px;line-height:1.2;margin:0 0 12px; }
+  #wsOverlay .brief-why{ font-size:14px;color:#3d3650;line-height:1.6;margin-bottom:16px; }
+  #wsOverlay .brief-grid{ display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:16px; }
+  #wsOverlay .bfk{ font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px; }
+  #wsOverlay .bfv{ font-size:13px;line-height:1.5; } #wsOverlay .bfb{ font-size:11px;color:var(--muted); }
+  #wsOverlay .brief-rsn{ background:#f7f5f2;border-radius:12px;padding:11px 16px;font-size:13px;color:#3d3650;margin-bottom:16px;border-left:2px solid #B08D57; }
+  #wsOverlay .ws-row{ display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(91,63,160,0.08);font-size:13px; }
+  #wsOverlay .ws-row:last-child{ border:none; }
+  #wsOverlay .ws-badge{ font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:6px;flex:none; }
+  #wsOverlay .b-urgent{ background:#fbeaea;color:#c0392b; } #wsOverlay .b-soon{ background:var(--pxxxl);color:var(--p); } #wsOverlay .b-fyi{ background:#f0eef4;color:var(--muted); }
+  #wsOverlay .ws-empty{ font-size:13px;color:var(--muted);font-style:italic;padding:6px 0; }
+  #wsOverlay .wsbtn{ font-size:13px;font-weight:600;padding:9px 16px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer; }
+  #wsOverlay .wsbtn2{ font-size:13px;font-weight:600;padding:9px 16px;border-radius:100px;border:1px solid rgba(91,63,160,0.2);background:#fff;color:var(--p);cursor:pointer; }
+  #wsOverlay .wsdeep{ font-size:13px;color:var(--p);background:none;border:none;cursor:pointer;margin-left:8px; }
+  #wsOverlay .wsskel{ background:#f0eef4;border-radius:8px;animation:wssh 1.3s ease infinite; }
+  @keyframes wssh{ 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
+  @media(max-width:680px){ #wsOverlay .ws-diag,#wsOverlay .ws-attn,#wsOverlay .brief-grid{ grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion: reduce){ #wsOverlay .wsskel{ animation:none; } }
+</style>
+
+<script>
+// ── Workspace state + open/close ──
+var WS_CLIENT=null, WS_DATA=null;
+function openClientWorkspace(clientId, contactId){
+  WS_CLIENT={ id:clientId, contactId:contactId||null };
+  document.getElementById('wsOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+  document.getElementById('wsShell').innerHTML='<div class="wsskel" style="height:120px;border-radius:18px;margin-bottom:12px;"></div><div class="wsskel" style="height:200px;border-radius:18px;"></div>';
+  wsLoadOverview();
+}
+function closeWorkspace(){ document.getElementById('wsOverlay').style.display='none'; document.body.style.overflow=''; }
+
+function wsApi(type, extra){
+  return adminJwt().then(function(jwt){
+    return fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},extra||{}))}).then(function(r){return r.json();});
+  });
+}
+function wsAq(path){ return wsApi('admin_query',{path:path}).then(function(j){return (j&&j.data)||[];}); }
+function wsEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function wsAgo(iso){ if(!iso)return''; var d=Math.floor((Date.now()-new Date(iso))/86400000); return d<=0?'today':d===1?'yesterday':d+'d ago'; }
+function wsDate(iso){ if(!iso)return'—'; try{ if(/^\d{4}-\d{2}$/.test(iso)){var p=iso.split('-');return new Date(p[0],p[1]-1,1).toLocaleDateString(undefined,{month:'short',year:'numeric'});} return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }catch(e){return'—';} }
+
+// ── Shell: header (from decision surface) + tabs ──
+function wsRenderShell(d){
+  WS_DATA=d;
+  var c=d.client||{}, h=d.header||{};
+  var hs=h.health_score;
+  var health = hs==null?'<span class="ws-dl flat">Steady</span>':'<span class="ws-dn '+(hs>=80?'up':hs>=60?'':'down')+'">'+hs+'</span><span class="ws-dl">'+(hs>=80?'Strong':hs>=60?'Steady':'Needs care')+'</span>';
+  var healthExp=(h.health_drivers&&h.health_drivers.length)?'Held back by '+h.health_drivers.slice(0,2).map(wsEsc).join(' and ')+'.':'No issues dragging it down.';
+  var g=h.growth_score;
+  var growth = g==null?'<span class="ws-dl flat">Not enough history</span>':'<span class="ws-dn '+(g>0?'up':g<0?'down':'flat')+'">'+(g>0?'+':'')+g+'%</span><span class="ws-dl">'+(g>0?'trending up':g<0?'softening':'flat')+'</span>';
+  var html='<div class="ws-head"><div class="ws-htop"><div style="display:flex;gap:16px;align-items:center;"><div class="ws-av">'+wsEsc((c.name||'?').charAt(0).toUpperCase())+'</div><div><h1 class="ws-nm">'+wsEsc(c.name)+'</h1><div style="font-size:13px;color:var(--muted);margin-top:3px;">'+[c.type,c.city].filter(Boolean).map(wsEsc).join(' · ')+'</div></div></div></div>'
+    +'<div class="ws-diag"><div class="ws-dc"><div class="ws-dk">Business Health · present</div><div>'+health+'</div><div class="ws-de">'+healthExp+'</div></div>'
+    +'<div class="ws-dc"><div class="ws-dk">Growth · trajectory</div><div>'+growth+'</div><div class="ws-de">'+wsEsc(h.growth_why||'')+'</div></div></div></div>';
+  // tabs
+  var tabs=[['overview','Overview','How are they doing?'],['delivery','Delivery','What are we delivering?'],['growth','Growth','How are we growing them?'],['relationship','Relationship','How\u2019s the partnership?'],['business','Business','What do we know?']];
+  html+='<div class="ws-tabs">'+tabs.map(function(t,i){return '<button class="ws-tab'+(i===0?' on':'')+'" data-tab="'+t[0]+'" onclick="wsTab(\''+t[0]+'\')">'+t[1]+'<span class="ws-tq">'+t[2]+'</span></button>';}).join('')+'</div>';
+  tabs.forEach(function(t,i){ html+='<div class="ws-pane'+(i===0?' on':'')+'" id="wsp-'+t[0]+'"></div>'; });
+  document.getElementById('wsShell').innerHTML=html;
+  wsRenderOverview(d);
+}
+function wsTab(id){
+  document.querySelectorAll('#wsOverlay .ws-tab').forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-tab')===id); });
+  document.querySelectorAll('#wsOverlay .ws-pane').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('wsp-'+id).classList.add('on');
+  document.getElementById('wsOverlay').scrollTo({top:0,behavior:'smooth'});
+  if(id==='delivery' && !wsLoaded.delivery){ wsLoadDelivery(); }
+  if(id==='growth' && !wsLoaded.growth){ wsRenderGrowth(WS_DATA); wsLoaded.growth=true; }
+  if(id==='relationship' && !wsLoaded.relationship){ wsLoadRelationship(); }
+  if(id==='business' && !wsLoaded.business){ wsLoadBusiness(); }
+}
+var wsLoaded={};
+
+// ── OVERVIEW (decision surface) ──
+function wsLoadOverview(){
+  wsApi('client_decision_surface',{clientId:WS_CLIENT.id}).then(function(j){
+    if(j&&j.data){ wsRenderShell(j.data); }
+    else { document.getElementById('wsShell').innerHTML='<div class="wsc"><div class="ws-empty">Could not load this client\u2019s workspace.</div></div>'; }
+  }).catch(function(){ document.getElementById('wsShell').innerHTML='<div class="wsc"><div class="ws-empty">Could not load. Try again.</div></div>'; });
+}
+function wsBrief(ins, primary){
+  var conf=ins.confidence||{}, imp=ins.impact||{};
+  var owner=ins.owner==='client'?'Client approves':ins.owner==='eric'?'Eric handles':'System';
+  var h='<div class="brief"'+(primary?'':' style="border-color:rgba(91,63,160,0.12);box-shadow:0 1px 3px rgba(23,18,33,.06);margin-bottom:8px;"')+'>';
+  h+='<div class="brief-tag">'+(primary?'\u2605 The one decision':'\u2192 '+(ins.urgency||'next'))+(ins.ebv_score?' · EBV '+ins.ebv_score:'')+'</div>';
+  h+='<h3 class="brief-h">'+wsEsc(ins.headline)+'</h3>';
+  if(ins.why) h+='<div class="brief-why">'+wsEsc(ins.why)+'</div>';
+  if(primary){
+    h+='<div class="brief-grid">';
+    h+='<div><div class="bfk">Expected result</div><div class="bfv">'+wsEsc(imp.direction||'+')+wsEsc(imp.magnitude||'')+' '+wsEsc(imp.metric||'')+'</div><div class="bfb">Based on: '+(imp.basis||[]).map(wsEsc).join(' · ')+'</div></div>';
+    h+='<div><div class="bfk">Confidence</div><div class="bfv">'+(conf.pct!=null?conf.pct+'% · '+wsEsc(conf.level):wsEsc(conf.level||''))+'</div><div class="bfb">'+wsEsc(conf.reason||'')+'</div></div>';
+    h+='<div><div class="bfk">Effort</div><div class="bfv">'+wsEsc(ins.effort||'')+'</div></div>';
+    h+='<div><div class="bfk">Owner of next step</div><div class="bfv">'+wsEsc(owner)+'</div></div>';
+    if((ins.dependencies||[]).length) h+='<div><div class="bfk">Depends on</div><div class="bfv">'+ins.dependencies.map(wsEsc).join(', ')+'</div></div>';
+    h+='<div><div class="bfk">Predicted by next review</div><div class="bfv">'+wsEsc(ins.predicted||'')+'</div></div>';
+    h+='</div>';
+    if((ins.assumptions||[]).length) h+='<div class="bfb" style="margin-bottom:12px;">Assumes: '+ins.assumptions.map(wsEsc).join(' · ')+'</div>';
+  }
+  if(ins.ranking_reason) h+='<div class="brief-rsn">'+wsEsc(ins.ranking_reason)+'</div>';
+  h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button class="wsbtn">'+wsEsc((ins.decision&&ins.decision.prompt)||'Approve')+'</button>'+(ins.deepenable?'<button class="wsdeep" onclick="wsDeepen()">\u2726 Go deeper</button>':'')+'</div></div>';
+  return h;
+}
+function wsRenderOverview(d){
+  var html='';
+  if(d.since_last_look>0) html+='<div style="display:inline-flex;gap:8px;font-size:13px;color:var(--p);background:var(--pxxxl);border:1px solid #e4d9f5;border-radius:100px;padding:7px 14px;margin-bottom:12px;">\u2726 '+d.since_last_look+' thing'+(d.since_last_look>1?'s':'')+' changed since you last looked</div>';
+  if(d.ai_insight) html+='<div class="ws-ai"><div class="ws-aii">\u2726</div><div style="font-size:13px;line-height:1.55;">'+wsEsc(d.ai_insight)+'</div></div>';
+  if(d.the_one_decision) html+=wsBrief(d.the_one_decision,true);
+  // attention + working on
+  html+='<div class="ws-attn"><div class="ws-ac ws-needs"><div class="ws-act">\u26a0 Needs attention</div>';
+  html+=(d.attention&&d.attention.length)?d.attention.map(function(a){return '<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13px;"><span class="ws-badge b-'+a.urgency+'">'+a.urgency+'</span><div><div>'+wsEsc(a.label)+'</div><div style="font-size:11px;color:var(--muted);">If it waits: '+wsEsc(a.cost)+'</div></div></div>';}).join(''):'<div class="ws-empty">Nothing waiting.</div>';
+  html+='</div><div class="ws-ac ws-doing"><div class="ws-act">\u2713 You\u2019re working on</div>';
+  html+=(d.in_flight&&d.in_flight.length)?d.in_flight.map(function(w){return '<div style="padding:5px 0;font-size:13px;">'+wsEsc(w.label)+(w.payoff?'<div style="font-size:11px;color:var(--muted);">'+wsEsc(w.payoff)+'</div>':'')+'</div>';}).join(''):'<div class="ws-empty">No active work.</div>';
+  html+='</div></div>';
+  // next best moves
+  if(d.decision_queue&&d.decision_queue.length){ html+='<div class="wslab">Next best moves</div>'; d.decision_queue.forEach(function(ins){ html+=wsBrief(ins,false); }); }
+  // risks
+  if(d.risks&&d.risks.length){ html+='<div class="wslab">Risks to watch</div>'; d.risks.forEach(function(r){ html+='<div class="wsc" style="border-left:2px solid '+(r.level==='attention'?'#c0392b':'#c4731a')+';margin-bottom:8px;"><div style="font-size:13px;font-weight:600;">'+wsEsc(r.headline)+'</div><div style="font-size:11px;color:var(--muted);margin:2px 0 4px;">'+wsEsc(r.why)+'</div><div style="font-size:13px;color:#3d3650;">'+wsEsc(r.suggestion)+'</div></div>'; }); }
+  document.getElementById('wsp-overview').innerHTML=html;
+}
+function wsDeepen(){ toast('AI deep-dive: on-demand layer (coming next)'); }
+
+// ── DELIVERY ──
+var WS_STAGES=['kickoff','content','design','build','review','launch'];
+function wsLoadDelivery(){
+  wsLoaded.delivery=true;
+  var pane=document.getElementById('wsp-delivery'); pane.innerHTML='<div class="wsskel" style="height:140px;border-radius:18px;margin-bottom:12px;"></div>';
+  var cid=WS_CLIENT.contactId, clid=encodeURIComponent(WS_CLIENT.id);
+  Promise.all([
+    cid?wsAq('projects?contact_id=eq.'+encodeURIComponent(cid)+'&deleted_at=is.null&select=id,name,stage,ball_in_court,progress,updated_at&order=created_at.desc&limit=1'):Promise.resolve([]),
+    wsAq('growth_tasks?client_id=eq.'+clid+'&deleted_at=is.null&select=id,title,status,due_at&status=neq.done&order=due_at.asc&limit=8').catch(function(){return[];}),
+    wsAq('client_requests?client_id=eq.'+clid+'&deleted_at=is.null&select=id,text,status,created_at&order=created_at.desc&limit=6').catch(function(){return[];}),
+    wsAq('approvals?client_id=eq.'+clid+'&deleted_at=is.null&status=eq.pending&select=id,title,created_at&order=created_at.asc&limit=6').catch(function(){return[];}),
+    wsAq('invoices?client_id=eq.'+clid+'&deleted_at=is.null&select=amount,status,due_date&order=created_at.desc&limit=20').catch(function(){return[];})
+  ]).then(function(r){ wsRenderDelivery({project:r[0][0]||null,tasks:r[1],requests:r[2],approvals:r[3],invoices:r[4]}); });
+}
+function wsRenderDelivery(d){
+  var p=d.project, html='';
+  if(p){
+    var si=WS_STAGES.indexOf((p.stage||'').toLowerCase()), ball=p.ball_in_court==='client';
+    html+='<div class="wsc"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px;"><div><div style="font-family:\'Fraunces\',Georgia,serif;font-size:18px;">'+wsEsc(p.name||'Current project')+'</div><div style="font-size:13px;color:var(--muted);">'+(p.progress!=null?p.progress+'% complete':'')+(p.updated_at?' · updated '+wsAgo(p.updated_at):'')+'</div></div><span style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:'+(ball?'#fdf6e9':'var(--pxxxl)')+';color:'+(ball?'#a8690c':'var(--p)')+';">'+(ball?'Waiting on client':'Eric is on it')+'</span></div>';
+    html+='<div style="display:flex;gap:4px;margin-bottom:14px;">'+WS_STAGES.map(function(s,i){var on=i<=si;return '<div style="flex:1;text-align:center;"><div style="height:4px;border-radius:2px;background:'+(on?'var(--p)':'#e8e4f0')+';margin-bottom:5px;"></div><div style="font-family:\'Geist Mono\',monospace;font-size:9px;text-transform:uppercase;color:'+(i===si?'var(--p)':'var(--muted)')+';">'+s+'</div></div>';}).join('')+'</div>';
+    var overdue=(d.invoices||[]).filter(function(i){return i.status&&i.status!=='paid'&&i.due_date&&new Date(i.due_date)<new Date();});
+    html+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button class="wsbtn">Advance stage</button><span style="font-family:\'Geist Mono\',monospace;font-size:10px;padding:3px 9px;border-radius:100px;background:'+(overdue.length?'#fdf6e9':'#e8f5ec')+';color:'+(overdue.length?'#a8690c':'#1a7e49')+';">'+(overdue.length?overdue.length+' overdue':'Billing current')+'</span><a href="#" onclick="wsTab(\'business\');return false;" style="color:var(--p);font-size:13px;text-decoration:none;">View invoices \u2192</a></div></div>';
+  } else html+='<div class="wsc"><div class="ws-empty">No active project.</div><button class="wsbtn" style="margin-top:10px;">Start a project</button></div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">';
+  html+=wsFacet('Tasks',d.tasks,function(t){return wsEsc(t.title)+(t.due_at?'<div style="font-size:11px;color:var(--muted);">due '+wsAgo(t.due_at)+'</div>':'');},'No open tasks.');
+  html+=wsFacet('Requests from them',d.requests,function(r){return wsEsc((r.text||'').slice(0,80));},'No open requests.');
+  html+=wsFacet('Approvals waiting',d.approvals,function(a){return wsEsc(a.title)+'<div style="font-size:11px;color:var(--muted);">waiting '+wsAgo(a.created_at)+'</div>';},'Nothing awaiting sign-off.');
+  html+='</div>';
+  document.getElementById('wsp-delivery').innerHTML=html;
+}
+function wsFacet(title,items,fn,empty){ items=items||[]; return '<div class="wsc"><div style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;">'+title+(items.length?'<span>'+items.length+'</span>':'')+'</div>'+(items.length?items.map(function(it){return '<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.08);font-size:13px;">'+fn(it)+'</div>';}).join(''):'<div class="ws-empty">'+empty+'</div>')+'</div>'; }
+
+// ── GROWTH (reuses overview's decision data) ──
+function wsRenderGrowth(d){
+  var html='', one=d.the_one_decision;
+  if(one) html+='<div class="brief"><div class="brief-tag">\u2605 The one thing'+(one.ebv_score?' · EBV '+one.ebv_score:'')+'</div><h3 class="brief-h">'+wsEsc(one.headline)+'</h3>'+(one.why?'<div class="brief-why">'+wsEsc(one.why)+'</div>':'')+(one.ranking_reason?'<div class="brief-rsn">'+wsEsc(one.ranking_reason)+'</div>':'')+'<div style="display:flex;gap:8px;align-items:center;"><button class="wsbtn">'+wsEsc((one.decision&&one.decision.prompt)||'Approve')+'</button><button class="wsdeep" onclick="wsDeepen()">\u2726 Go deeper</button></div></div>';
+  else html+='<div class="wsc"><div class="ws-empty">No active recommendation.</div><button class="wsbtn" style="margin-top:10px;">Generate recommendations</button></div>';
+  html+='<div class="wsc" style="margin-bottom:12px;"><div style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">This month\u2019s review</div><div class="ws-empty">Draft a review with AI when ready.</div><button class="wsbtn2" style="margin-top:8px;">Draft with AI</button></div>';
+  if(d.decision_queue&&d.decision_queue.length){ html+='<div class="wslab">Recommendation queue</div><div class="wsc">'+d.decision_queue.map(function(ins){return '<div class="ws-row"><span class="ws-badge b-soon">queued</span><span style="flex:1;">'+wsEsc(ins.headline)+'</span><span style="font-family:\'Geist Mono\',monospace;font-size:11px;color:var(--muted);">EBV '+(ins.ebv_score||'')+'</span></div>';}).join('')+'</div>'; }
+  html+='<div style="text-align:center;font-size:13px;color:var(--muted);margin-top:16px;">Growth is where you decide and act. Raw SEO &amp; site data lives in Business.</div>';
+  document.getElementById('wsp-growth').innerHTML=html;
+}
+
+// ── RELATIONSHIP ──
+function wsLoadRelationship(){
+  wsLoaded.relationship=true;
+  var pane=document.getElementById('wsp-relationship'); pane.innerHTML='<div class="wsskel" style="height:200px;border-radius:12px;"></div>';
+  var clid=encodeURIComponent(WS_CLIENT.id), cid=WS_CLIENT.contactId;
+  Promise.all([
+    wsAq('messages?client_id=eq.'+clid+'&deleted_at=is.null&select=from_who,text,created_at&order=created_at.desc&limit=8').catch(function(){return[];}),
+    wsApi('note_list',{clientId:WS_CLIENT.id}).then(function(j){return (j&&j.data)||[];}).catch(function(){return[];}),
+    cid?wsAq('events?contact_id=eq.'+encodeURIComponent(cid)+'&select=type,payload,created_at&order=created_at.desc&limit=10').catch(function(){return[];}):Promise.resolve([])
+  ]).then(function(r){ wsRenderRelationship({messages:r[0],notes:r[1],events:r[2]}); });
+}
+function wsRenderRelationship(d){
+  var html='<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;">';
+  var msgs=d.messages||[], lastClient=msgs.length&&msgs[0].from_who==='client';
+  html+='<div class="wsc"><div style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Conversation</div>';
+  if(lastClient) html+='<div style="background:#fdf6e9;border:1px solid #f3e2c2;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px;color:#a8690c;">\u26a0 Their last message is unanswered</div>';
+  html+=(msgs.length?msgs.slice(0,6).map(function(m){var who=m.from_who==='client';return '<div style="padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.08);"><div style="font-family:\'Geist Mono\',monospace;font-size:10px;text-transform:uppercase;color:'+(who?'#B08D57':'var(--p)')+';margin-bottom:3px;">'+(who?'Them':'You')+'</div><div style="font-size:13px;color:#3d3650;">'+wsEsc((m.text||'').slice(0,140))+'</div><div style="font-size:11px;color:var(--muted);">'+wsAgo(m.created_at)+'</div></div>';}).join(''):'<div class="ws-empty">No messages yet.</div>');
+  html+='</div><div><div class="wsc" style="margin-bottom:12px;"><div style="font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Your notes</div>';
+  var notes=d.notes||[];
+  html+=(notes.length?notes.slice(0,4).map(function(n){return '<div style="font-size:13px;color:#3d3650;padding:7px 0;border-bottom:1px solid rgba(91,63,160,0.08);">'+(n.pinned?'\ud83d\udccc ':'')+wsEsc(n.body||n.text||'')+'</div>';}).join(''):'<div class="ws-empty">No notes yet.</div>');
+  html+='</div></div></div>';
+  html+='<div class="wslab">Activity</div><div class="wsc">';
+  var ev=d.events||[];
+  html+=(ev.length?ev.map(function(e){var l=String(e.type||'').replace(/[._]/g,' ');if(e.type==='project.stage_advanced'&&e.payload&&e.payload.to_stage)l='Stage advanced to '+e.payload.to_stage;return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.08);font-size:13px;"><span>'+wsEsc(l)+'</span><span style="margin-left:auto;font-family:\'Geist Mono\',monospace;font-size:11px;color:var(--muted);">'+wsAgo(e.created_at)+'</span></div>';}).join(''):'<div class="ws-empty">No activity yet.</div>');
+  html+='</div>';
+  document.getElementById('wsp-relationship').innerHTML=html;
+}
+
+// ── BUSINESS ──
+function wsLoadBusiness(){
+  wsLoaded.business=true;
+  var pane=document.getElementById('wsp-business'); pane.innerHTML='<div class="wsskel" style="height:120px;border-radius:12px;"></div>';
+  var clid=encodeURIComponent(WS_CLIENT.id);
+  Promise.all([
+    wsAq('clients?id=eq.'+clid+'&select=*&limit=1').catch(function(){return[];}),
+    wsAq('invoices?client_id=eq.'+clid+'&deleted_at=is.null&select=id,amount,status&order=created_at.desc&limit=10').catch(function(){return[];})
+  ]).then(function(r){ wsRenderBusiness({client:r[0][0]||{},invoices:r[1]}); });
+}
+function wsRenderBusiness(d){
+  var c=d.client||{}, html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  var bk='font-family:\'Geist Mono\',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;';
+  html+='<div class="wsc"><div style="'+bk+'">Business profile</div><div style="font-size:13px;color:#3d3650;line-height:1.7;"><b>'+wsEsc(c.name||'\u2014')+'</b><br>'+wsEsc([c.business_type||c.industry,c.city].filter(Boolean).join(' · ')||'No details')+'</div></div>';
+  html+='<div class="wsc"><div style="'+bk+'">Website & domain</div><div style="font-size:13px;color:#3d3650;"><b>'+wsEsc(c.website||c.url||c.domain||'No site on file')+'</b></div></div>';
+  html+='<div class="wsc"><div style="'+bk+'">SEO & analytics</div><div style="font-size:13px;color:#3d3650;">'+(c.ga4?'GA4 connected':'GA4 not connected')+'<br>'+(c.gsc?'Search Console connected':'Search Console not connected')+'</div></div>';
+  html+='<div class="wsc"><div style="'+bk+'">Integrations</div><div style="font-size:13px;color:#3d3650;">Stripe · Resend'+(c.gbp?'<br>Google Business Profile':'')+'</div></div>';
+  html+='</div><div class="wslab">Invoices</div><div class="wsc">';
+  var inv=d.invoices||[];
+  html+=(inv.length?inv.map(function(i){var paid=i.status==='paid';return '<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(91,63,160,0.08);font-size:13px;"><span style="font-family:\'Geist Mono\',monospace;font-size:9px;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:'+(paid?'#e8f5ec':'#fdf6e9')+';color:'+(paid?'#1a7e49':'#a8690c')+';">'+(paid?'paid':'open')+'</span><span>#'+wsEsc(String(i.id||'').slice(0,6))+'</span><span style="margin-left:auto;font-family:\'Geist Mono\',monospace;">$'+wsEsc(i.amount)+'</span></div>';}).join(''):'<div class="ws-empty">No invoices yet.</div>');
+  html+='<button class="wsbtn2" style="margin-top:12px;">Send invoice</button></div>';
+  html+='<div style="text-align:center;font-size:13px;color:var(--muted);margin-top:16px;">Business is the durable facts and the money \u2014 what you look up, not act on.</div>';
+  document.getElementById('wsp-business').innerHTML=html;
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape' && document.getElementById('wsOverlay').style.display==='block') closeWorkspace(); });
+</script>
+
 </body>
 </html>
