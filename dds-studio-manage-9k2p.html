@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DDS v4.0 redesign 20260626 -->
+<!-- DDS admin v5.1 premium-polish 20260628 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -148,6 +148,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--ink);-
 .menu-toggle{display:none;}
 .drawer-scrim{display:none;}
 .admin-botnav{display:none;}
+.drawer-head{display:none;}
 @media(max-width:768px){
   .shell{grid-template-columns:1fr;}
   /* Sidebar becomes a slide-out drawer instead of disappearing */
@@ -397,14 +398,25 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 .admin-botnav button.active{ color:var(--p); }
 
 /* ---------- LOGIN ---------- */
-.login{ background:radial-gradient(120% 120% at 50% 0%, #1a1138 0%, #0f0820 60%); }
+/* Premium light login — matches the client portal gate. */
+.login{ background:radial-gradient(120% 80% at 50% 0%, var(--p-soft, #EDE8F7) 0%, var(--paper, #FBFAF7) 60%); }
+.login::before{ display:none; }
 .login-card{
-  background:var(--surface); border-radius:var(--r-xl); box-shadow:var(--sh-pop);
-  border:1px solid rgba(255,255,255,0.08); padding:40px 36px;
+  background:#fff; border-radius:20px; box-shadow:0 2px 6px rgba(27,21,37,.06),0 18px 50px rgba(27,21,37,.10);
+  border:1px solid var(--line, #E7E1D6); padding:36px 32px; max-width:380px;
 }
-.login-logo{ font-family:var(--serif); font-size:24px; color:var(--ink); }
+.login-logo{ font-family:var(--serif); font-size:23px; font-weight:500; color:var(--ink); text-align:center; }
 .login-logo span{ color:var(--p); }
-.login-sub{ font-size:10.5px; letter-spacing:1.5px; color:var(--muted); }
+.login-sub{ font-size:10.5px; letter-spacing:1.5px; color:var(--muted); text-align:center; margin-bottom:26px; }
+.login-input{
+  width:100%; background:var(--paper, #FBFAF7); border:1px solid var(--line, #E7E1D6);
+  border-radius:11px; padding:12px 14px; font-family:"DM Sans",sans-serif; font-size:14px;
+  color:var(--ink); outline:none; margin-bottom:12px; transition:border-color .15s, box-shadow .15s;
+}
+.login-input::placeholder{ color:var(--muted); }
+.login-input:focus{ border-color:var(--p); background:#fff; box-shadow:0 0 0 3px var(--p-soft, #EDE8F7); }
+.login-btn{ width:100%; margin-top:4px; }
+.login-err{ color:var(--stop, #A8443A); }
 
 /* ============================================================
    COMMAND PALETTE
@@ -691,6 +703,13 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 #page-growth .mt-l{margin-top:30px}
 #page-growth .divider{height:1px;background:var(--hair);margin:20px 0}
 @media (prefers-reduced-motion:reduce){#page-growth *{animation:none!important;transition:none!important}}
+/* ── v5 IA: grouped sidebar ── */
+.sidebar .sl{font-family:"DM Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 16px 4px;opacity:.85;}
+.sidebar .sn.nav-dest{font-weight:600;}
+.sidebar .sn.sn-sub{padding-left:30px;font-size:12.5px;color:var(--muted);}
+.sidebar .sn.sn-sub svg{opacity:.7;}
+.sidebar .sn.sn-sub:hover,.sidebar .sn.sn-sub.active{color:var(--p);}
+.sidebar .sdiv{height:1px;background:rgba(91,63,160,0.08);margin:8px 14px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -701,7 +720,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 <div class="login" id="loginWrap">
   <div class="login-card">
     <div class="login-logo">Davis<span>Digital</span> Studio</div>
-    <div class="login-sub">ADMIN PANEL · ERIC ONLY</div>
+    <div class="login-sub">STUDIO ADMIN</div>
     <input aria-label="Admin email" class="login-input" id="aem" type="email" autocomplete="username" placeholder="Admin email" onkeydown="if(event.key==='Enter')doLogin()">
     <input aria-label="Admin password" class="login-input" id="ap" type="password" autocomplete="current-password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Sign in →</button>
@@ -724,10 +743,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
   </div>
   <div class="drawer-scrim" id="drawerScrim" onclick="closeDrawer()"></div>
   <nav class="admin-botnav" id="adminBotnav">
-    <button onclick="go('overview')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Today</span></button>
+    <button onclick="go('overview')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Today</span></button>
+    <button onclick="go('leads')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><span>Pipeline</span></button>
     <button onclick="go('hub')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Clients</span></button>
-    <button onclick="go('leads')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><span>Leads</span></button>
-    <button onclick="go('messages')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Message</span></button>
+    <button onclick="go('visibility')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><span>Tools</span></button>
     <button onclick="toggleDrawer()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>More</span></button>
   </nav>
   <div class="shell">
@@ -738,33 +757,45 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <span class="drawer-head-title">Menu</span>
         <button class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">&times;</button>
       </div>
-      <div class="sl">Workspace</div>
-      <button class="sn active" onclick="go('overview')" id="sn-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Today</button>
-      <button class="sn" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients</button>
-      <button class="sn" onclick="go('newclient')" id="sn-newclient" style="margin-top:6px;color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
-      <button class="sn" onclick="go('team')" id="sn-team"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team</button>
-      <div class="sdiv"></div>
-      <div class="sl">Growth</div>
-      <button class="sn" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
-      <div class="sdiv"></div>
-      <div class="sl">Client work</div>
-      <button class="sn" onclick="go('messages')" id="sn-messages"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message</button>
-      <button class="sn" onclick="go('files')" id="sn-files"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Files</button>
-      <button class="sn" onclick="go('approvals')" id="sn-approvals"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Approvals</button>
-      <button class="sn" onclick="go('timeline')" id="sn-timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Timeline</button>
-      <button class="sn" onclick="go('invoices')" id="sn-invoices"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Invoices</button>
-      <button class="sn" onclick="go('contracts')" id="sn-contracts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Contracts</button>
+
+      <!-- 1 · TODAY -->
+      <button class="sn nav-dest active" data-dest="today" onclick="go('overview')" id="sn-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Today</button>
+
+      <!-- 2 · PIPELINE -->
       <div class="sdiv"></div>
       <div class="sl">Pipeline</div>
-      <button class="sn" onclick="go('leads')" id="sn-leads"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Leads</button>
-      <button class="sn" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
-      <button class="sn" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
-      <button class="sn" onclick="go('visibility')" id="sn-visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Visibility</button>
-      <button class="sn" onclick="go('quote')" id="sn-quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Build quote</button>
+      <button class="sn" data-dest="pipeline" onclick="go('leads')" id="sn-leads"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 7a3 3 0 0 1 6 0"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Leads &amp; inbox</button>
+      <button class="sn" data-dest="pipeline" onclick="go('prospects')" id="sn-prospects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Prospects</button>
+      <button class="sn" data-dest="pipeline" onclick="go('quote')" id="sn-quote"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Build a quote</button>
+
+      <!-- 3 · CLIENTS -->
       <div class="sdiv"></div>
-      <div class="sl">Library</div>
-      <button class="sn" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email templates</button>
-      <button class="sn" onclick="go('disclosures')" id="sn-disclosures"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Disclosures</button>
+      <div class="sl">Clients</div>
+      <button class="sn" data-dest="clients" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> All clients</button>
+      <button class="sn" data-dest="clients" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
+      <button class="sn" data-dest="clients" onclick="go('newclient')" id="sn-newclient" style="color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
+
+      <!-- Quick actions (jump into a client task without leaving) -->
+      <div class="sl" style="margin-top:10px;font-size:10px;opacity:.7;">Quick send to a client</div>
+      <button class="sn sn-sub" data-dest="clients" onclick="go('messages')" id="sn-messages"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message</button>
+      <button class="sn sn-sub" data-dest="clients" onclick="go('files')" id="sn-files"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Files</button>
+      <button class="sn sn-sub" data-dest="clients" onclick="go('approvals')" id="sn-approvals"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Approval</button>
+      <button class="sn sn-sub" data-dest="clients" onclick="go('invoices')" id="sn-invoices"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Invoice</button>
+      <button class="sn sn-sub" data-dest="clients" onclick="go('timeline')" id="sn-timeline"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Timeline</button>
+
+      <!-- 4 · TOOLS -->
+      <div class="sdiv"></div>
+      <div class="sl">Tools</div>
+      <button class="sn" data-dest="tools" onclick="go('visibility')" id="sn-visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Site monitor</button>
+      <button class="sn" data-dest="tools" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
+      <button class="sn" data-dest="tools" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email templates</button>
+      <button class="sn" data-dest="tools" onclick="go('contracts')" id="sn-contracts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Contracts</button>
+      <button class="sn" data-dest="tools" onclick="go('disclosures')" id="sn-disclosures"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Disclosures</button>
+
+      <!-- 5 · SETTINGS -->
+      <div class="sdiv"></div>
+      <div class="sl">Settings</div>
+      <button class="sn" data-dest="settings" onclick="go('team')" id="sn-team"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team &amp; access</button>
     </div>
 
     <!-- MAIN -->
@@ -777,10 +808,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <div class="triage" id="ddsTriage"></div>
         <div class="stats" id="ovStats"></div>
         <div id="ovAttention"></div>
-        <div class="card" id="whoNeedsMeCard" style="display:none;margin-bottom:16px;border:1.5px solid rgba(91,63,160,0.2);">
+        <div class="card" id="whoNeedsMeCard" style="display:none;margin-bottom:16px;border:1px solid var(--line);">
           <div class="ch"><div class="ct">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            What needs you today
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Across your work
           </div></div>
           <div class="cb" id="whoNeedsMeBody"></div>
         </div>
@@ -1609,6 +1640,7 @@ function go(page) {
   if (page === "reports") loadReports();
   if (page === "visibility") loadVisibility();
   if (page === "growth") loadGrowth();
+  try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
 }
 
 // ── LEADS ──
@@ -2037,7 +2069,7 @@ async function leadDrop(e, stageKey){
 function convertLeadToClient(id){
   var lead = allLeads.find(function(l){return String(l.id)===String(id);});
   if (!lead) return;
-  go('clients');
+  go('newclient');
   setTimeout(function(){
     try {
       var n=document.getElementById('nc-name'); if(n) n.value = lead.business_name||'';
@@ -2578,7 +2610,7 @@ function renderHub() {
 }
 
 async function openHubClient(id) {
-  var c = hubClients.find(function(x){ return x.id === id; });
+  var c = hubClients.find(function(x){ return String(x.id) === String(id); });
   if (!c) return;
   var detail = document.getElementById("hubDetail");
   detail.style.display = "block";
@@ -2626,6 +2658,7 @@ async function openHubClient(id) {
   html += '<div style="display:flex;gap:8px;align-items:center;">';
   html += '<span style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;background:'+(active?"rgba(34,197,94,0.12)":"rgba(148,163,184,0.15)")+';color:'+(active?"#16a34a":"#64748b")+';">'+(active?"Active":"Inactive")+'</span>';
   html += '<button onclick="toggleHubStatus(\''+c.id+'\','+active+')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--p);cursor:pointer;">Mark '+(active?"inactive":"active")+'</button>';
+  html += '<button onclick="hubToGrowth(\''+c.id+'\')" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid var(--p);background:var(--pxxxl);color:var(--p);cursor:pointer;font-weight:600;">Growth partnership →</button>';
   html += '<button onclick="document.getElementById(\'hubDetail\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;">Close</button>';
   html += '</div></div>';
 
@@ -3142,11 +3175,10 @@ async function loadWhoNeedsMe(){
     var card = document.getElementById("whoNeedsMeCard");
     var body = document.getElementById("whoNeedsMeBody");
     if (!card || !body) return;
-    if (!Array.isArray(rows) || !rows.length) { card.style.display="none"; return; }
 
     var now = Date.now(), DAY=86400000;
     var items = [];
-    rows.forEach(function(p){
+    (Array.isArray(rows)?rows:[]).forEach(function(p){
       var who = (p.contacts && p.contacts.name) ? p.contacts.name : "A client";
       var days = p.updated_at ? Math.floor((now - new Date(p.updated_at).getTime())/DAY) : 0;
       if (p.ball_in_court === "agency") {
@@ -3157,17 +3189,60 @@ async function loadWhoNeedsMe(){
         items.push({ urgent:false, who:who, name:p.name, msg:"Waiting on them "+days+" days, consider a nudge", stage:p.stage });
       }
     });
-    if (!items.length) { card.style.display="none"; return; }
     // urgent first
     items.sort(function(a,b){ return (b.urgent?1:0)-(a.urgent?1:0); });
-    card.style.display="block";
-    body.innerHTML = items.map(function(it){
-      var dot = it.urgent ? "var(--red)" : "var(--yellow)";
-      return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:'+dot+';margin-top:6px;flex-shrink:0;"></span>'+
-        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+it.who+' · '+it.name+'</div>'+
-        '<div style="font-size:12px;color:var(--muted);margin-top:1px;">'+it.msg+'</div></div></div>';
+    if (items.length) {
+      card.style.display="block";
+      body.innerHTML = items.map(function(it){
+        var dot = it.urgent ? "var(--red)" : "var(--yellow)";
+        return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:'+dot+';margin-top:6px;flex-shrink:0;"></span>'+
+          '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+it.who+' · '+it.name+'</div>'+
+          '<div style="font-size:12px;color:var(--muted);margin-top:1px;">'+it.msg+'</div></div></div>';
+      }).join("");
+    } else {
+      body.innerHTML = "";
+    }
+    // Fold in the Growth relationship reminders so "Today" is the one place
+    // that answers "what needs me" across project work AND partnerships.
+    // This runs regardless of project items, and will reveal the card itself
+    // if only partnership reminders exist.
+    loadGrowthReminders(card, body);
+  } catch(e){}
+}
+
+/* Pull reminders_feed (renewals, at-risk health, missing reviews, pending recs)
+   and append them to the Today card, each deep-linking into the Growth detail. */
+async function loadGrowthReminders(card, body){
+  try {
+    var jwt = await adminJwt(); if (!jwt) return;
+    var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type:"reminders_feed" })
+    });
+    var jr = await res.json();
+    var items = (jr && jr.data && jr.data.items) || [];
+    if (!Array.isArray(items) || !items.length) return;
+    var KIND = {
+      renewal:{dot:"var(--yellow)",lbl:"Renewal",bg:"rgba(181,120,29,0.1)",fg:"#9a6516"},
+      at_risk:{dot:"var(--red)",lbl:"At risk",bg:"rgba(168,68,58,0.1)",fg:"#a8443a"},
+      review_due:{dot:"var(--yellow)",lbl:"Review due",bg:"rgba(181,120,29,0.1)",fg:"#9a6516"},
+      recs:{dot:"var(--p)",lbl:"To review",bg:"var(--p-soft)",fg:"var(--p)"},
+      reminder:{dot:"var(--p)",lbl:"Reminder",bg:"var(--p-soft)",fg:"var(--p)"}
+    };
+    var header = '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 0 6px;">Across your partnerships</div>';
+    var rows = items.map(function(it){
+      var k = KIND[it.kind] || {dot:"var(--muted)",lbl:"",bg:"transparent",fg:"var(--muted)"};
+      var click = it.partnership_id ? ' onclick="go(\'growth\');setTimeout(function(){openDetail(\''+it.partnership_id+'\',\'overview\')},120)"' : '';
+      return '<div'+click+' style="display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+k.dot+';flex-shrink:0;"></span>'+
+        '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--ink);">'+(it.title||"")+'</div>'+
+        (it.detail?'<div style="font-size:12px;color:var(--muted);margin-top:1px;">'+it.detail+'</div>':'')+'</div>'+
+        (k.lbl?'<span style="font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:100px;background:'+k.bg+';color:'+k.fg+';flex-shrink:0;">'+k.lbl+'</span>':'')+'</div>';
     }).join("");
+    card.style.display="block";
+    body.insertAdjacentHTML('beforeend', header + rows);
   } catch(e){}
 }
 
@@ -5408,6 +5483,22 @@ async function openDetail(id, tab){
   drawDetail();
 }
 
+/* Bridge: from a client's Hub record, jump straight to that same client's
+   Growth partnership (one client, one record, reached two ways). If no
+   partnership exists yet, drop them on the Growth page with the create flow. */
+async function hubToGrowth(clientId){
+  go('growth');
+  try {
+    var rows = (await gpApi('partnership_list')).data || [];
+    var match = rows.find(function(r){ return String(r.client_id) === String(clientId); });
+    if (match) { openDetail(match.id, 'overview'); }
+    else {
+      gpGo('partnerships');
+      toast('No partnership yet for this client. Use New partnership to start one.');
+    }
+  } catch(e){ gpGo('dashboard'); }
+}
+
 function drawDetail(){
   const d = GP.cache.detail; if(!d) return;
   const p = d.partnership;
@@ -5422,11 +5513,13 @@ function drawDetail(){
   </div>
   <div class="ph-actions">
     <span class="chip"><span class="chip-dot ${HEALTH_DOT[p.health]||''}"></span>${gpEsc(p.health||'green')}</span>
+    ${p.client_id?`<button class="btn btn-sm" id="toHub">Full client record</button>`:''}
     <button class="btn btn-sm" id="editP">Edit</button>
   </div>`;
   main.append(h);
   gpQ('#backLink').addEventListener('click',()=>gpGo('partnerships'));
   gpQ('#editP').addEventListener('click',()=>openEditPartnership(p));
+  var toHubBtn = gpQ('#toHub'); if(toHubBtn){ toHubBtn.addEventListener('click',function(){ growthToHub(p.client_id); }); }
 
   // tabs
   const tabs = el('div',{class:'dtabs'});
@@ -5447,6 +5540,17 @@ function drawDetail(){
 }
 
 function refreshDetail(){ openDetail(GP.detail, GP.dtab); }
+
+/* Reverse bridge: from a Growth partnership back to the client's full Hub
+   record (messages, files, invoices, approvals, timeline, intake). */
+async function growthToHub(clientId){
+  if(!clientId) return;
+  go('hub');
+  try {
+    if (typeof loadHub === 'function' && (typeof hubClients === 'undefined' || !hubClients.length)) { await loadHub(); }
+    openHubClient(clientId);
+  } catch(e){ /* hub page already shown */ }
+}
 
 /* ---------- OVERVIEW ---------- */
 function tabOverview(root, d){
