@@ -6433,12 +6433,16 @@ function anGroup(title, summaries, interpretation, primaryKey){
   var interpHtml = interpretation.filter(function(i){return i.status!=='no_data';}).map(function(i){
     var st=STATUS_STYLE[i.status]||STATUS_STYLE.no_data;
     var deltaTag = (i.delta!=null && i.status!=='baseline') ? '<span style="font-size:12px;font-weight:600;color:'+st.c+';">'+(i.delta>0?'▲':(i.delta<0?'▼':'■'))+' '+(i.pct!=null?(Math.abs(i.pct)+'%'):Math.abs(i.delta))+'</span>' : '';
+    // baseline gets a clear "one month — not a trend yet" treatment
+    var baselineNote = i.status==='baseline' ? '<div style="font-size:11px;color:#9a7a1a;background:#fdf6e3;border-radius:6px;padding:4px 8px;margin-top:5px;display:inline-block;">⏳ One month of data — not a trend yet. Another month needed to compare.</div>' : '';
+    var srcTag = i.source ? '<span style="font-size:10px;color:var(--muted);background:#f4f2f7;border-radius:5px;padding:1px 6px;margin-left:6px;">'+escHtml(i.source)+'</span>' : '';
     return '<div style="padding:12px 0;border-top:1px solid var(--line,#eee);">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px;">'
-      +   '<span style="font-weight:600;font-size:13.5px;">'+escHtml(i.label)+(i.value!=null?' <span style="color:var(--muted);font-weight:500;">'+anFmt(i.value)+'</span>':'')+'</span>'
+      +   '<span style="font-weight:600;font-size:13.5px;">'+escHtml(i.label)+(i.value!=null?' <span style="color:var(--muted);font-weight:500;">'+anFmt(i.value)+'</span>':'')+srcTag+'</span>'
       +   '<span style="display:inline-flex;align-items:center;gap:6px;">'+deltaTag+'<span style="font-size:10.5px;font-weight:600;color:'+st.c+';background:'+st.bg+';padding:2px 8px;border-radius:100px;">'+st.word+'</span></span>'
       + '</div>'
       + '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;">'+escHtml(i.text)+'</div>'
+      + baselineNote
       + '</div>';
   }).join('');
   var primary = primaryKey && summaries[primaryKey];
@@ -6460,18 +6464,61 @@ function renderAnalytics(){
       + '<div style="color:var(--muted);font-size:13px;">Connect a data source in Integrations, or run a sync. Internal signals (approvals, requests, project progress) populate as the client engages.</div></div>';
     return;
   }
-  var html = '';
+  var html = anBriefBanner(d.executive_brief) + anFreshnessBar(d.executive_brief);
   // grid: two columns on wide screens
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;">';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;margin-top:16px;">';
   html += anGroup('Website analytics', d.website_analytics, d.website_analytics.interpretation, 'sessions');
   html += anGroup('Search analytics', d.search_analytics, d.search_analytics.interpretation, 'search_clicks');
   html += anGroup('Website health', d.website_health, d.website_health.interpretation, 'psi_performance');
   html += anGroup('Business Profile', d.business_profile, d.business_profile.interpretation, 'gbp_calls');
   html += anGroup('Engagement & delivery', d.engagement_ops, d.engagement_ops.interpretation, 'project_progress');
   html += '</div>';
-  // available metrics footnote (operator transparency)
   html += '<div style="margin-top:8px;font-size:11px;color:var(--muted);">Metrics present for this client: '+(d.available_metrics||[]).map(escHtml).join(', ')+'</div>';
   body.innerHTML = html;
+}
+
+// ── executive brief banner (the intelligence layer) ──
+var CONF_STYLE = { high:{c:'#1a7e49',bg:'#eaf5ee',label:'High confidence'}, medium:{c:'#9a7a1a',bg:'#fdf6e3',label:'Medium confidence'}, low:{c:'#7a6d8e',bg:'#f3f0fa',label:'Early — low confidence'} };
+function anBriefBanner(brief){
+  if(!brief) return '';
+  var cf = CONF_STYLE[brief.confidence]||CONF_STYLE.low;
+  var cell = function(label, move, tone){
+    if(!move){ return '<div style="flex:1;min-width:150px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.6);margin-bottom:3px;">'+label+'</div><div style="font-size:13px;color:rgba(255,255,255,.75);">None yet</div></div>'; }
+    var arrow = move.improved ? '▲' : '▼';
+    var col = move.improved ? '#7ee0a6' : '#ff9b9b';
+    return '<div style="flex:1;min-width:150px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.6);margin-bottom:3px;">'+label+'</div>'
+      + '<div style="font-size:14px;font-weight:600;color:#fff;">'+escHtml(move.label)+' <span style="color:'+col+';font-size:12.5px;">'+arrow+' '+Math.abs(move.pct)+'%</span></div></div>';
+  };
+  return '<div style="background:linear-gradient(135deg,#2a1f47,#43306b);border-radius:18px;padding:22px 24px;color:#fff;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;">'
+    +   '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.55);">Executive analytics brief</div>'
+    +   '<span style="font-size:10.5px;font-weight:600;color:'+cf.c+';background:'+cf.bg+';padding:3px 10px;border-radius:100px;">'+cf.label+'</span>'
+    + '</div>'
+    + '<div style="font-family:var(--serif,Georgia);font-size:19px;line-height:1.35;margin-bottom:16px;">'+escHtml(brief.headline)+'</div>'
+    + '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;">'
+    +   cell('Biggest change', brief.biggest_change)
+    +   cell('Biggest risk', brief.biggest_risk)
+    +   cell('Biggest opportunity', brief.biggest_opportunity)
+    + '</div>'
+    + '<div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;">'
+    +   '<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.55);margin-bottom:3px;">Recommended next action</div>'
+    +   '<div style="font-size:13.5px;color:#fff;line-height:1.5;">'+escHtml(brief.next_action)+'</div>'
+    + '</div>'
+    + (brief.needs_more_data && brief.needs_more_data.length
+      ? '<div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.7);">⏳ Too early to trust: '+brief.needs_more_data.map(escHtml).join(', ')+' (need a second month).</div>' : '')
+    + '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.5);">'+escHtml(brief.confidence_reason)+'</div>'
+    + '</div>';
+}
+
+// ── freshness + operator framing bar ──
+function anFreshnessBar(brief){
+  var fresh = (brief && brief.freshness) || {};
+  var when = fresh.latest_observed ? fmtWhen(fresh.latest_observed) : 'never';
+  var sources = (fresh.sources||[]).length ? fresh.sources.map(escHtml).join(', ') : 'none';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);">'
+    + '<div>Data freshness: <b style="color:var(--ink,#2a2433);">'+when+'</b> · Sources: '+sources+'</div>'
+    + '<div style="font-size:11px;background:#f3f0fa;color:#5b3fa0;padding:3px 10px;border-radius:100px;font-weight:600;">Operator view · not client-facing</div>'
+    + '</div>';
 }
 
 
