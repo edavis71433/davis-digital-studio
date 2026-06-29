@@ -23,49 +23,25 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})()</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
+<link rel="stylesheet" href="styles.css">
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;overflow-x:hidden;}
-body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;padding-top:68px;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'DM Serif Display',Georgia,serif;}
+body{font-family:var(--sans);background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'Fraunces',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;}
 *:focus-visible{outline:2px solid var(--p);outline-offset:3px;}
 a{color:inherit;}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.1);box-shadow:0 1px 20px rgba(0,0,0,0.06);}
-.nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:6px;}
-.navlink{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;}
-.navlink:hover{color:var(--p);background:var(--pxxxl);}
-.nav-cta{background:var(--p);color:#fff!important;font-size:13px;font-weight:600;padding:8px 20px;border-radius:100px;text-decoration:none;transition:opacity 0.15s;}
-.nav-cta:hover{opacity:0.88;}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
-.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-.nav-mob.open{display:flex;}
-.nav-mob a{font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:13px 12px;border-radius:8px;}
-.nav-mob a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:6px;}
 .skip-link{position:absolute;left:-9999px;top:6px;background:var(--p);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:6px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
 
 /* PAGE HERO */
-.page-hero{background:var(--pdark);padding:80px 24px 100px;position:relative;overflow:hidden;}
-.page-hero::before{content:'';position:absolute;top:-80px;right:-60px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.4) 0%,transparent 65%);pointer-events:none;}
-.page-hero-inner{max-width:800px;position:relative;z-index:1;}
-.hero-label{font-size:10px;color:var(--pxl);letter-spacing:2.5px;text-transform:uppercase;font-weight:600;margin-bottom:14px;display:block;}
-.page-hero h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:400;color:#fff;line-height:1.05;letter-spacing:-1.5px;margin-bottom:20px;}
-.page-hero h1 em{font-style:italic;color:var(--pxl);}
-.page-hero p{font-size:17px;color:rgba(255,255,255,0.5);line-height:1.8;max-width:520px;}
-.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.75);font-weight:500;}
 
 /* FREE AUDIT TOOL */
 .audit-section{background:var(--pdark);padding:0 24px 80px;position:relative;}
@@ -83,12 +59,12 @@ a{color:inherit;}
 .form-field{display:flex;flex-direction:column;gap:6px;}
 .form-field.full{grid-column:span 2;}
 .form-label{font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:0.3px;}
-.form-input,.form-select{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:#fff;outline:none;transition:border-color 0.15s;width:100%;appearance:none;}
+.form-input,.form-select{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;font-family:var(--sans);font-size:14px;color:#fff;outline:none;transition:border-color 0.15s;width:100%;appearance:none;}
 .form-input::placeholder{color:rgba(255,255,255,0.25);}
 .form-input:focus,.form-select:focus{border-color:var(--pxl);background:rgba(255,255,255,0.12);}
 .form-select option{background:#1e1338;color:#fff;}
 .submit-row{margin-top:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.audit-btn{background:var(--p);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:13px 32px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s,transform 0.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;}
+.audit-btn{background:var(--p);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 32px;border-radius:100px;border:none;cursor:pointer;transition:opacity 0.15s,transform 0.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;}
 .audit-btn:hover{opacity:0.88;transform:translateY(-1px);}
 .audit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 .submit-note{font-size:12px;color:rgba(255,255,255,0.3);}
@@ -150,8 +126,8 @@ a{color:inherit;}
 .gate-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:8px;}
 .gate-desc{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:20px;}
 .gate-form{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;}
-.gate-input{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:12px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;outline:none;text-align:center;width:100%;}
-.gate-btn{background:var(--p);color:#fff;border:none;border-radius:100px;padding:13px 24px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s;}
+.gate-input{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:12px 16px;font-size:14px;font-family:var(--sans);color:#fff;outline:none;text-align:center;width:100%;}
+.gate-btn{background:var(--p);color:#fff;border:none;border-radius:100px;padding:13px 24px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:opacity 0.15s;}
 .gate-btn:hover{opacity:0.88;}
 .gate-msg{font-size:12px;color:rgba(255,255,255,0.35);margin-top:4px;}
 
@@ -165,7 +141,7 @@ a{color:inherit;}
 .upsell-note{font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;}
 .upsell-link{display:inline-block;background:var(--p);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:100px;text-decoration:none;margin-top:10px;transition:opacity 0.15s;}
 .upsell-link:hover{opacity:0.88;}
-.reset-btn{background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;transition:color 0.15s;margin-top:4px;}
+.reset-btn{background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;font-family:var(--sans);padding:0;transition:color 0.15s;margin-top:4px;}
 .reset-btn:hover{color:rgba(255,255,255,0.7);}
 
 /* PRICING */
@@ -211,33 +187,16 @@ a{color:inherit;}
 .cta-band h2{font-family:var(--serif);font-size:clamp(28px,4vw,48px);font-weight:400;color:#fff;letter-spacing:-1px;margin-bottom:12px;position:relative;}
 .cta-band h2 em{font-style:italic;color:var(--pxl);}
 .cta-band p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:28px;position:relative;}
-.btn-white{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;transition:transform 0.15s;}
-.btn-white:hover{transform:translateY(-2px);}
 
 /* FOOTER */
-.site-footer{padding:40px 52px 0;background:var(--pdark);}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;}
-.footer-logo{font-family:var(--serif);font-size:20px;color:#fff;margin-bottom:8px;}
-.footer-logo span{color:var(--pxl);}
-.footer-tagline{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:14px;max-width:260px;}
-.footer-social{display:flex;gap:12px;}
-.footer-social a{font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;}
-.footer-col-title{font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
-.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;margin-bottom:8px;transition:color 0.15s;}
-.footer-col a:hover{color:#fff;}
-.footer-bottom{border-top:1px solid rgba(255,255,255,0.08);padding:16px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-.footer-copy{font-size:12px;color:rgba(255,255,255,0.3);}
-.footer-legal{display:flex;gap:16px;}
-.footer-legal a{font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;}
-.footer-legal a:hover{color:rgba(255,255,255,0.7);}
 
 /* COOKIE */
 .cookie-banner{display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .cookie-text{font-size:13px;color:rgba(255,255,255,0.65);flex:1;min-width:200px;}
 .cookie-text a{color:var(--pxl);}
 .cookie-btns{display:flex;gap:10px;flex-shrink:0;}
-.cookie-accept{background:var(--p);color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.cookie-decline{background:transparent;color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cookie-accept{background:var(--p);color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+.cookie-decline{background:transparent;color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:var(--sans);}
 
 @media(max-width:900px){
   .form-grid{grid-template-columns:1fr;}.form-field.full{grid-column:span 1;}
@@ -246,105 +205,25 @@ a{color:inherit;}
   .upsell-box{flex-direction:column;}
   .scores-row{grid-template-columns:repeat(3,1fr);}
   .tiers-grid{grid-template-columns:1fr;}
-  .footer-grid{grid-template-columns:1fr 1fr;}.site-footer{padding:40px 24px 0;}
-  .footer-bottom{padding:16px 0;}
 }
 @media(max-width:480px){
-  .page-hero h1{font-size:32px;}
   .scores-row{grid-template-columns:repeat(3,1fr);}
-  .footer-grid{grid-template-columns:1fr;}
 }
 
 /* ── Footer mobile responsive fix ── */
-@media (max-width: 768px) {
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 28px !important;
-    padding: 32px 20px 20px !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-strip {
-    padding: 28px 20px 0 !important;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 14px !important;
-    padding: 16px 18px !important;
-  }
-  .footer-bottom {
-    padding: 14px 20px !important;
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 10px !important;
-  }
-}
-@media (max-width: 480px) {
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-  .footer-trust-inner {
-    grid-template-columns: 1fr !important;
-  }
-}
 
 /* NAV-FINAL-V5 */
 
 .skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
-.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:2px;}
-.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
-.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
-.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
-.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
-.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
-.nav-drop{position:relative;}
-.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-drop:hover>button svg{transform:rotate(180deg);}
-.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
-.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
-.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
-.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
-.nav-mob.open{display:flex;}
-.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
-.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group{margin:2px 0;}
-.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
-.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
-.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
-.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
-.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
-.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
-.nav-mob .mob-cta:hover{background:#4a3280!important;}
-body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
 
 
 /* Dropdown gap fix - bridge pseudo-element */
-.nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
-.nav-drop:hover .nav-drop-menu{display:block;}
 
 
 /* Dropdown bridge - prevents menu closing when moving mouse down */
-.nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
-.nav-drop{padding-bottom:0;}
 
 </style>
 <script type="application/ld+json">
@@ -372,94 +251,32 @@ body{padding-top:68px;}
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/about">About Us</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Solutions</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
-        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
-        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Ongoing Support</a>
-      </div>
-    </div>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
-        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
-        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
-        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
-      </div>
-    </div>
-    <a href="/work">Case Studies</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
-        <a href="/ai-critique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/></svg> AI Website Review</a>
-        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
-        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
-        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
-        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
-        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
-      </div>
-    </div>
-    <a href="/report-card" class="nav-report">Free Report Card</a>
-    <a href="/portal" style="font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;transition:color 0.15s,background 0.15s;" onmouseover="this.style.color='#5b3fa0';this.style.background='#f7f4fd'" onmouseout="this.style.color='#7a6d8e';this.style.background=''">Client Login</a>
-    <a href="/audit" class="nav-cta">Free Site Score</a>
+<header class="nav">
+<div class="wrap nav-in">
+  <a href="index.html" class="brand"><svg class="mark" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="16" cy="16" r="15" stroke="#B08D57" stroke-width="1"/>
+<path d="M10 21V11h4.2c3 0 4.8 1.9 4.8 5s-1.8 5-4.8 5H10z" stroke="#1B1525" stroke-width="1.4" fill="none"/>
+<circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
+  <nav class="nav-links">
+    <a href="how-we-work.html">How we work</a>
+    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle">Services <i class="caret" aria-hidden="true"></i></a>
+      <span class="nav-sub">
+        <a href="services.html">All services<small>Pricing and the full picture</small></a>
+        <a href="web-design.html">Web design<small>Strategy-led sites that convert</small></a>
+        <a href="seo-strategy.html">SEO strategy<small>Get found by people searching</small></a>
+        <a href="monthly-retainer.html">Ongoing care<small>Keep your site working after launch</small></a>
+      </span></span>
+    <a href="industries.html">Industries</a>
+    <a href="about.html">About</a>
+    <a href="tools.html" class="active">Free tools</a>
+  </nav>
+  <div class="nav-actions">
+    <a href="portal.html" class="nav-login">Client login</a>
+    <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
-    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-  </button>
-</nav>
-<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="/">Home</a>
-  <a href="/about">About Us</a>
-  <div class="nav-mob-group" id="mobServices">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/services">All Solutions</a>
-      <a href="/web-design">Web Design</a>
-      <a href="/seo-strategy">SEO Strategy</a>
-      <a href="/monthly-retainer">Ongoing Support</a>
-    </div>
-  </div>
-  <div class="nav-mob-group" id="mobIndustries">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
-      <a href="/salon-web-design">Salons &amp; Spas</a>
-      <a href="/retail-web-design">Retail &amp; Boutiques</a>
-      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
-      <a href="/home-services-web-design">Home Services</a>
-    </div>
-  </div>
-  <a href="/work">Case Studies</a>
-  <div class="nav-mob-group" id="mobTools">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/audit#free-audit">Free Site Score</a>
-      <a href="/ai-critique">AI Website Review</a>
-      <a href="/report-card">Digital Report Card</a>
-      <a href="/roi-calculator">ROI Calculator</a>
-      <a href="/speed-test">Speed Test</a>
-      <a href="/local-visibility">Local Visibility</a>
-      <a href="/pricing-estimator">Pricing Estimator</a>
-    </div>
-  </div>
-  <a href="/report-card">Free Report Card</a>
-  <a href="/portal" style="font-size:16px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;">Client Login</a>
-  <a href="/contact" class="mob-cta">Book a free call</a>
+  <button class="burger" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')"><span></span><span></span></button>
 </div>
-
+</header>
 <style>
 /* ===== AI CRITIQUE TOOL ===== */
 .crit-hero{background:var(--pdark);padding:72px 24px 88px;position:relative;overflow:hidden;}
@@ -728,59 +545,38 @@ body{padding-top:68px;}
 </section>
 
 </main>
-<footer class="site-footer" role="contentinfo">
-  <div class="footer-grid">
+<footer class="site">
+<div class="wrap">
+  <div class="fwrap">
     <div>
-      <div class="footer-logo">Davis<span>Digital</span> Studio</div>
-      <p class="footer-tagline">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-      <div class="footer-social">
-        <a href="https://www.linkedin.com/in/eric-davis-4b1034b8/">LinkedIn</a>
-        <a href="mailto:eric@davisdigitalstudio.com">Email</a>
-      </div>
+      <div class="brand serif">Davis Digital Studio</div>
+      <p>Strategy-led web design and SEO for small businesses, plus ongoing support and one organized place to work together. Built around your business, from the first call onward.</p>
+      <p style="margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:rgba(255,255,255,.4)">Los Angeles &middot; working with businesses nationwide</p>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Services</div>
-      <a href="/services">Web Design</a>
-      <a href="/services">SEO Strategy</a>
-      <a href="/services">Ongoing Support</a>
-      <a href="/audit">Audits from $99</a>
-      <a href="/contact">Contact</a>
+    <div class="fcol">
+      <h5>Studio</h5>
+      <a href="how-we-work.html">How we work</a>
+      <a href="the-experience.html">The experience</a>
+      <a href="services.html">Services</a>
+      <a href="industries.html">Industries</a>
+      <a href="about.html">About</a>
+      <a href="work.html">Work</a>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Industries</div>
-      <a href="/restaurant-web-design">Restaurants & Bars</a>
-      <a href="/salon-web-design">Salons & Spas</a>
-      <a href="/retail-web-design">Retail & Boutiques</a>
-      <a href="/health-wellness-web-design">Health & Wellness</a>
-      <a href="/home-services-web-design">Home Services</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Free Tools</div>
-      <a href="/tools">All Free Tools</a>
-      <a href="/report-card">Free Report Card</a>
-      <a href="/audit#free-audit">Free Site Score</a>
-      <a href="/speed-test">Speed Test</a>
-      <a href="/local-visibility">Local Visibility</a>
-      <a href="/pricing-estimator">Pricing Estimator</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Company</div>
-      <a href="/work">Case Studies</a>
-      <a href="/about">About Us</a>
-      <a href="/contact">Contact</a>
+    <div class="fcol">
+      <h5>Start</h5>
+      <a href="tools.html">Free site review</a>
+      <a href="contact.html">Book a free call</a>
+      <a href="portal.html">Client login</a>
+      <a href="contact.html">Contact</a>
     </div>
   </div>
-  <div class="footer-bottom">
-    <div class="footer-copy">© <span id="footerYear">2026</span> Davis Digital Studio · Eric Davis</div>
-    <div class="footer-legal">
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
-      <a href="/accessibility">Accessibility</a>
-      <a href="/portal-terms">Portal Terms</a>
-      <a href="/ai-disclaimer">AI Disclaimer</a>
-      <a href="/portal">Client Login</a>
-    </div>
+  <div class="fbase">
+    <span>&copy; 2026 Davis Digital Studio &middot; Eric Davis</span>
+    <span style="display:flex;gap:18px">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="accessibility.html">Accessibility</a>
+    </span>
   </div>
+</div>
 </footer>
 
 <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie consent">
@@ -1001,19 +797,6 @@ body{padding-top:68px;}
 })();
 </script>
 <script>
-// Nav hamburger
-(function() {
-  var ham = document.getElementById('navHam');
-  var mob = document.getElementById('navMob');
-  if (!ham || !mob) return;
-  ham.addEventListener('click', function() {
-    var open = mob.classList.toggle('open');
-    ham.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  mob.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() { mob.classList.remove('open'); ham.setAttribute('aria-expanded','false'); });
-  });
-})();
 
 // Cookie
 (function(){
@@ -1023,8 +806,6 @@ body{padding-top:68px;}
 function acceptCookies(){ localStorage.setItem('cookie_consent','accepted'); document.getElementById('cookieBanner').style.display='none'; }
 function declineCookies(){ localStorage.setItem('cookie_consent','declined'); window['ga-disable-G-V4WF04NX7F']=true; document.getElementById('cookieBanner').style.display='none'; }
 
-// Footer year
-document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 // PWA
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -1035,12 +816,8 @@ pb.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:linear-gra
 document.body.appendChild(pb);
 window.addEventListener('scroll', function(){ var h=document.documentElement.scrollHeight-window.innerHeight; if(h>0) pb.style.width=(window.scrollY/h*100)+'%'; });
 </script>
-<script>
-/* Mobile nav dropdown toggle */
-function toggleMobGroup(id){var g=document.getElementById(id);if(g)g.classList.toggle('open');}
-</script>
 <div id="ddsStickyCta" style="position:fixed;bottom:24px;right:24px;z-index:9990;opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease;pointer-events:none;">
-  <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Book a free call →</a>
+  <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Book a free call →</a>
 </div>
 <style>@media(max-width:640px){#ddsStickyCta{display:none;}}</style>
 <script>
