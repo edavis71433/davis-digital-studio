@@ -816,6 +816,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <!-- 3 · CLIENTS -->
       <div class="sdiv"></div>
       <div class="sl">Clients</div>
+      <button class="sn" data-dest="clients" onclick="go('clients')" id="sn-clients"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/><path d="M12 14v3"/></svg> Clients</button>
       <button class="sn" data-dest="clients" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> All clients</button>
       <button class="sn" data-dest="clients" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
       <button class="sn" data-dest="clients" onclick="go('integrations')" id="sn-integrations"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Integrations</button>
@@ -858,6 +859,15 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       </div>
 
       <!-- CLIENT HUB -->
+      <!-- CLIENTS — the third consumer of the reasoning engine. Asks the brain
+           "which clients need attention?" (clients_attention), and per client
+           "is this relationship healthy?" (relationship_health) + "what should I
+           recommend?" (recommend_for_client). No reasoning logic of its own;
+           every judgment comes from reasoning_query. Rendered by loadClients(). -->
+      <div class="page" id="page-clients">
+        <div id="clientsRoot" style="max-width:720px;"></div>
+      </div>
+
       <div class="page" id="page-hub">
         <div class="pt">Client Hub</div>
         <div class="ps">Everyone you work with, in one place. Click a client to see their full record: messages, files, invoices, approvals, timeline, and any tools they have run on the site.</div>
@@ -1682,6 +1692,7 @@ function go(page) {
   closeDrawer();
   if (page !== "overview" && page !== "leads") populateSelects(page);
   if (page === "leads") loadLeads();
+  if (page === "clients") loadClients();
   if (page === "hub") loadHub();
   if (page === "team") { tmLoad(); tmRoleHint(); }
   if (page === "messages") loadTemplates();
@@ -3696,6 +3707,179 @@ function oppLookAtBusiness(){
   try{ window.open('https://davisdigitalstudio.com/ai-critique?url=' + encodeURIComponent(url), '_blank'); }
   catch(e){ go('prospects'); }
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  CLIENTS — the third consumer of the reasoning engine.
+//  Landing asks the brain "which clients need attention?" (clients_attention).
+//  Each client drills into "is this relationship healthy?" (relationship_health)
+//  + "what should I recommend?" (recommend_for_client). It holds NO reasoning of
+//  its own. A client-intelligence experience, not a CRM: who needs care, why,
+//  and what to do next.
+// ════════════════════════════════════════════════════════════════════════════
+var CLIENTS = { data:null, loading:false, detail:null };
+
+async function loadClients(){
+  var root=document.getElementById('clientsRoot');
+  if(!root) return;
+  if(CLIENTS.detail){ return loadClientDetail(CLIENTS.detail.id, CLIENTS.detail.name); }
+  if(CLIENTS.loading) return;
+  CLIENTS.loading=true;
+  clRenderSkeleton(root, 'Clients');
+  try{
+    var r=await integApi('reasoning_query',{question:'clients_attention'});
+    CLIENTS.data=(r&&r.data)||null;
+    clRenderLanding(root, CLIENTS.data);
+  }catch(e){
+    clRenderError(root, e, loadClients);
+  }finally{
+    CLIENTS.loading=false;
+  }
+}
+
+function clRenderSkeleton(root, label){
+  root.innerHTML =
+    '<div class="bf-eyebrow">'+escHtml(label)+'</div>'
+    +'<div class="bf-skel" style="height:29px;width:76%;margin-bottom:10px;"></div>'
+    +'<div class="bf-skel" style="height:29px;width:48%;margin-bottom:24px;"></div>'
+    +[0,1,2].map(function(){ return '<div style="padding:16px 2px;border-top:1px solid var(--bf-line);display:flex;gap:14px;align-items:center;"><div class="bf-skel" style="height:36px;width:36px;border-radius:50%;"></div><div style="flex:1;"><div class="bf-skel" style="height:15px;width:38%;margin-bottom:8px;"></div><div class="bf-skel" style="height:13px;width:60%;"></div></div></div>'; }).join('');
+}
+
+function clRenderError(root, e, retry){
+  root.innerHTML =
+    '<div class="bf-eyebrow">Clients</div>'
+    +'<h1 class="bf-headline" style="margin-bottom:10px;">I couldn\u2019t read your client relationships just now.</h1>'
+    +'<div class="bf-sub" style="margin-bottom:18px;">Nothing\u2019s broken on your end. This is usually a brief hiccup talking to the server.</div>'
+    +'<button class="bf-act" onclick="loadClients()">Try again</button>';
+}
+
+function clInitials(name){ return String(name||'?').split(/\s+/).map(function(w){return w[0];}).slice(0,2).join('').toUpperCase(); }
+function clHealth(kind){
+  // map the dominant item kind to a relationship-health read
+  if(kind==='risk') return {c:'#a8443a',bg:'#f6e5e2',w:'Needs care'};
+  if(kind==='owed'||kind==='unblock') return {c:'#b5781d',bg:'#f7eedd',w:'Owes a touch'};
+  return {c:'#3f7d5b',bg:'#e6f0e9',w:'Healthy'};
+}
+
+function clRenderLanding(root, d){
+  if(!d){ return clRenderError(root, null); }
+  var items=d.items||[];
+
+  if(!items.length){
+    root.innerHTML =
+      '<div class="bf-eyebrow">Clients</div>'
+      +'<div style="padding:24px 0 8px;">'
+        +'<div style="width:46px;height:46px;border-radius:50%;background:#e6f0e9;display:flex;align-items:center;justify-content:center;margin-bottom:20px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3f7d5b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+        +'<h1 class="bf-headline" style="max-width:560px;margin-bottom:10px;">'+escHtml(d.answer||'Every client is in a good place right now, Eric.')+'</h1>'
+        +'<div style="font-size:14.5px;color:var(--ink-2,#574d68);line-height:1.6;max-width:520px;margin-bottom:24px;">No relationship needs care today. When something shifts for a client, billing, a quiet stretch, a review coming due, the ones that need you surface here, ranked by how much.</div>'
+        +'<button class="bf-act" onclick="go(\'hub\')">Browse all clients</button>'
+      +'</div>';
+    return;
+  }
+
+  var patternLine = d.pattern
+    ? '<div class="bf-pattern"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(d.pattern)+'</span></div>'
+    : '';
+
+  var rows=items.map(function(it){
+    var h=clHealth(it.kind);
+    return '<div class="bf-row cl-row" tabindex="0" role="button" style="align-items:center;cursor:pointer;" data-cid="'+escAttr(it.subjectId)+'" data-name="'+escAttr(it.subject)+'">'
+      +'<div style="width:36px;height:36px;border-radius:50%;background:var(--p,#5b3fa0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex:none;">'+escHtml(clInitials(it.subject))+'</div>'
+      +'<div class="bf-rmain">'
+        +'<div class="bf-rtop"><div class="bf-subj">'+escHtml(it.subject)+'</div><span style="display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:'+h.c+';background:'+h.bg+';padding:3px 9px;border-radius:100px;"><span style="width:6px;height:6px;border-radius:50%;background:'+h.c+';"></span>'+h.w+'</span></div>'
+        +'<div class="bf-changed">'+escHtml(it.changed||'')+'</div>'
+      +'</div>'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted,#8b8098)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;align-self:center;"><polyline points="9 18 15 12 9 6"/></svg>'
+    +'</div>';
+  }).join('');
+
+  var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[d.confidence]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
+
+  root.innerHTML =
+    '<div class="bf-eyebrow">Clients</div>'
+    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(d.answer||'')+'</h1>'
+    +'<div class="bf-sub">Your active relationships, ranked by who needs care right now.</div>'
+    +patternLine
+    +'<div class="bf-secl">Who needs you</div>'
+    +rows
+    +'<div class="bf-conf"><span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(d.confidence_reason||'')+'</span></div>';
+
+  Array.prototype.forEach.call(root.querySelectorAll('.cl-row'), function(r){
+    function open(){ loadClientDetail(r.getAttribute('data-cid'), r.getAttribute('data-name')); }
+    r.addEventListener('click', open);
+    r.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
+  });
+}
+
+// ── per-client intelligence: health verdict + recommendation + their signals ──
+async function loadClientDetail(clientId, name){
+  var root=document.getElementById('clientsRoot');
+  if(!root || !clientId) return;
+  CLIENTS.detail={ id:clientId, name:name };
+  clRenderSkeleton(root, (name||'Client'));
+  try{
+    // two questions to the same brain, in parallel, scoped to this client
+    var pair=await Promise.all([
+      integApi('reasoning_query',{question:'relationship_health', subjectId:clientId}),
+      integApi('reasoning_query',{question:'recommend_for_client', subjectId:clientId}),
+    ]);
+    var health=(pair[0]&&pair[0].data)||null;
+    var rec=(pair[1]&&pair[1].data)||null;
+    clRenderDetail(root, name, health, rec);
+  }catch(e){
+    clRenderError(root, e);
+  }
+}
+
+function clRenderDetail(root, name, health, rec){
+  var items=(health&&health.items)||[];
+  var dominant=items[0]||null;
+  var h=clHealth(dominant?dominant.kind:'healthy');
+  var recItem=(rec&&rec.items&&rec.items[0])||null;
+  var recAction=(rec&&rec.answer)||'';
+
+  var signalsHtml = items.length
+    ? items.map(function(it){
+        var ih=clHealth(it.kind);
+        return '<div class="bf-row" style="align-items:flex-start;">'
+          +'<span class="bf-cdot" style="background:'+ih.c+';margin-top:6px;"></span>'
+          +'<div class="bf-rmain"><div class="bf-rtop"><div class="bf-subj" style="font-size:14px;">'+escHtml(it.changed||'')+'</div><span class="bf-mod">'+escHtml(it.module||'')+'</span></div>'
+          +'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;">'+escHtml(it.why||'')+'</div></div>'
+        +'</div>';
+      }).join('')
+    : '<div style="padding:16px 2px;border-top:1px solid var(--bf-line);font-size:13px;color:var(--muted);">Nothing active for this client right now. A good moment for a proactive, value-add touch.</div>';
+
+  // the recommendation card (only when the brain has a concrete next move)
+  var recCard = recItem
+    ? '<div class="bf-start">'
+        +'<div class="bf-start-l">Recommended next action</div>'
+        +'<div class="bf-start-row"><div class="bf-start-action">'+escHtml(recItem.action||recAction)+'</div>'
+        +'<button class="bf-start-btn" onclick="clActOn(\''+escAttr(recItem.go||'hub')+'\',\''+escAttr(recItem.refId||'')+'\')">'+clActLabel(recItem.go)+' \u2192</button></div>'
+      +'</div>'
+    : '<div class="bf-start" style="background:#3f7d5b;"><div class="bf-start-l" style="color:rgba(255,255,255,.6);">Recommended next action</div><div class="bf-start-action" style="margin-top:4px;">'+escHtml(recAction||'No pressing move. A proactive check-in is never wasted.')+'</div></div>';
+
+  root.innerHTML =
+    '<button class="cl-back" onclick="clBack()" style="background:none;border:none;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px;margin-bottom:16px;padding:0;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> All clients</button>'
+    +'<div style="display:flex;align-items:center;gap:13px;margin-bottom:6px;flex-wrap:wrap;">'
+      +'<div style="width:44px;height:44px;border-radius:50%;background:var(--p,#5b3fa0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex:none;">'+escHtml(clInitials(name))+'</div>'
+      +'<div class="serif" style="font-family:var(--serif);font-size:24px;line-height:1.1;">'+escHtml(name||'Client')+'</div>'
+      +'<div style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:'+h.c+';background:'+h.bg+';padding:5px 12px;border-radius:100px;"><span style="width:7px;height:7px;border-radius:50%;background:'+h.c+';"></span>'+h.w+'</div>'
+    +'</div>'
+    +'<div style="font-size:15px;color:var(--ink);line-height:1.55;margin:16px 0 22px;padding-left:14px;border-left:2px solid '+h.c+';">'+escHtml((health&&health.answer)||'')+'</div>'
+    +recCard
+    +'<div class="bf-secl" style="margin-top:24px;">What\u2019s going on with them</div>'
+    +signalsHtml
+    +'<div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;gap:10px;flex-wrap:wrap;">'
+      +'<button class="bf-act" onclick="clOpenRecord()">Open full record \u2192</button>'
+      +'<button class="bf-act" onclick="go(\'messages\')">Message them</button>'
+    +'</div>';
+}
+
+function clActLabel(go){
+  return ({invoices:'Open billing',messages:'Open messages',approvals:'Open approvals',growth:'Open partnership',hub:'Open record',timeline:'Open timeline'})[go]||'Take me there';
+}
+function clActOn(go, refId){ if(go) window.go(go); }
+function clBack(){ CLIENTS.detail=null; loadClients(); }
+function clOpenRecord(){ go('hub'); }
 // ── MESSAGES ──
 async function loadMessages(client) {
   var data = await api("messages?select=*&client_id=eq."+client.id+"&order=created_at");
@@ -4879,6 +5063,7 @@ document.addEventListener("DOMContentLoaded", function() {
     { group:"Go to", label:"Clients",          sub:"All client records", ico:"users", run:function(){ go("hub"); } },
     { group:"Go to", label:"Leads",            sub:"Inbound enquiries",  ico:"inbox", run:function(){ go("leads"); } },
     { group:"Go to", label:"Opportunities",     sub:"Businesses worth your time", ico:"target",run:function(){ go("opportunities"); } },
+    { group:"Go to", label:"Clients",           sub:"Who needs care", ico:"users", run:function(){ go("clients"); } },
     { group:"Go to", label:"Prospects",        sub:"Outreach log (legacy)",  ico:"target",run:function(){ go("prospects"); } },
     { group:"Go to", label:"Email templates",  sub:"Saved templates",    ico:"mail",  run:function(){ go("templates"); } },
     { group:"Create",label:"Add new client",   sub:"Onboard a client",   ico:"plus",  run:function(){ go("newclient"); } },
