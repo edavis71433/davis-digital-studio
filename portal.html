@@ -953,6 +953,81 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .bill-empty{ text-align:center; padding:48px 24px; }
 .bill-empty-h{ font-family:var(--serif); font-size:22px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
 .bill-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:28em; margin:0 auto; }
+/* ── Progress: a confidence briefing. Current focus is the visual primary;
+   completed work collapses into calm milestones. All on foundation tokens. ── */
+
+.prog-headline{ font-family:var(--serif); font-size:23px; line-height:1.35; color:var(--ink);
+  letter-spacing:-0.01em; max-width:30em; margin-bottom:20px; padding-left:14px;
+  border-left:3px solid var(--brass,#B08D57); }
+.prog-tone-good{ border-left-color:var(--ok,#3F7D5B); }
+.prog-tone-action{ border-left-color:var(--p); }
+.prog-tone-win{ border-left-color:var(--ok,#3F7D5B); }
+.prog-tone-calm{ border-left-color:var(--brass,#B08D57); }
+
+/* CURRENT FOCUS — the primary element, given the most weight */
+.prog-current{ background:var(--p-soft); border-radius:var(--r-xl,22px); padding:26px 28px; margin-bottom:14px; }
+.prog-current-done{ background:var(--ok-mist,#E6F0E9); }
+.prog-current-label{ font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--p); margin-bottom:10px; }
+.prog-current-done .prog-current-label{ color:var(--ok,#3F7D5B); }
+.prog-current-line{ font-family:var(--serif); font-size:24px; font-weight:400; line-height:1.35;
+  color:var(--ink); letter-spacing:-0.01em; }
+
+/* needs-you signal */
+.prog-needs{ display:flex; align-items:flex-start; gap:10px; border-radius:var(--r,12px);
+  padding:14px 18px; margin-bottom:24px; font-size:14.5px; line-height:1.5; }
+.prog-needs-yes{ background:var(--p-soft); color:var(--ink); }
+.prog-needs-no{ background:var(--ok-mist,#E6F0E9); color:var(--ok,#3F7D5B); }
+.prog-needs-ico{ flex:none; margin-top:1px; }
+
+.prog-block{ margin-bottom:24px; }
+.prog-block-label{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--brass); margin-bottom:12px; }
+.prog-card{ background:#fff; border:1px solid var(--line); border-radius:var(--r-lg,16px); padding:18px 22px; }
+
+.prog-did{ display:flex; align-items:flex-start; gap:11px; padding:8px 0; font-size:14.5px; color:var(--ink); line-height:1.5; }
+.prog-did-ico{ width:18px; height:18px; border-radius:50%; background:var(--ok-mist,#E6F0E9); color:var(--ok,#3F7D5B);
+  display:flex; align-items:center; justify-content:center; font-size:10px; flex:none; margin-top:1px; }
+
+/* the journey stepper — calm, honest, no jargon */
+.prog-journey{ display:flex; flex-direction:column; gap:2px; }
+.prog-step{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:var(--r,12px); }
+.prog-step-mark{ width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:11px; flex:none; }
+.prog-step-label{ flex:1; font-size:14.5px; }
+.prog-step-tag{ font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  padding:3px 9px; border-radius:var(--r-pill,100px); }
+.prog-step-done .prog-step-mark{ background:var(--ok-mist,#E6F0E9); color:var(--ok,#3F7D5B); }
+.prog-step-done .prog-step-label{ color:var(--muted); }
+.prog-step-tag-done{ color:var(--ok,#3F7D5B); background:var(--ok-mist,#E6F0E9); }
+.prog-step-cur{ background:var(--p-soft); }
+.prog-step-cur .prog-step-mark{ background:var(--p); color:#fff; }
+.prog-step-cur .prog-step-label{ color:var(--ink); font-weight:600; }
+.prog-step-cur .prog-step-tag{ color:#fff; background:var(--p); }
+.prog-step-soon .prog-step-mark{ background:var(--surface-3,#f3f0f9); color:var(--muted); }
+.prog-step-soon .prog-step-label{ color:var(--muted); }
+
+/* coming next */
+.prog-next{ display:flex; align-items:flex-start; gap:11px; font-size:15px; line-height:1.55; color:var(--ink);
+  background:#fff; border:1px solid var(--line); border-radius:var(--r-lg,16px); padding:16px 20px; }
+.prog-next-arrow{ color:var(--p); flex:none; font-weight:600; }
+
+/* confidence */
+.prog-conf{ border-left:3px solid var(--ok,#3F7D5B); }
+.prog-conf-line{ font-family:var(--serif); font-size:18px; line-height:1.4; color:var(--ink);
+  letter-spacing:-0.01em; margin-bottom:12px; }
+.prog-conf-pts{ border-top:1px solid var(--line); padding-top:6px; }
+
+/* recent updates — literal */
+.prog-update{ display:flex; gap:11px; padding:10px 0; border-top:1px solid var(--line); }
+.prog-update:first-child{ border-top:none; }
+.prog-update-dot{ width:7px; height:7px; border-radius:50%; background:var(--p); margin-top:6px; flex:none; }
+.prog-update-text{ font-size:14px; color:var(--ink); line-height:1.5; }
+.prog-update-when{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+
+.prog-empty{ text-align:center; padding:56px 24px; }
+.prog-empty-h{ font-family:var(--serif); font-size:20px; font-weight:400; color:var(--ink);
+  line-height:1.5; max-width:30em; margin:0 auto; letter-spacing:-0.01em; }
 
 @media (max-width:560px){
   .bill-row-top{ flex-direction:column; }
@@ -1088,7 +1163,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
     <div class="sidebar">
       <div style="padding:8px 0;">
         <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg></span>Home</button>
-        <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Project<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Progress<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Conversation<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Billing</button>
 
@@ -1122,27 +1197,9 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- TIMELINE -->
       <div class="page-view" id="page-timeline">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:20px;">Your Project</h2>
-
-        <!-- Live spine status on the Project tab (real stage, whose-turn, feed) -->
-        <div class="card" id="projSpineCard" style="display:none;margin-bottom:20px;">
-          <div class="card-header"><div class="card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Current status
-          </div></div>
-          <div style="padding:20px;">
-            <div id="projSpineTurn" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13.5px;"></div>
-            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-              <span id="projSpineStage" style="font-size:15px;font-weight:600;color:var(--ink);"></span>
-              <span id="projSpinePct" style="font-size:13px;font-weight:700;color:var(--p);"></span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" id="projSpineFill" style="width:0%;"></div></div>
-            <div id="projSpineFeed" style="margin-top:18px;"></div>
-          </div>
-        </div>
-
-        <h3 style="font-family:var(--serif);font-size:18px;font-weight:400;margin:0 0 12px;color:var(--muted);">Project phases</h3>
-        <div class="card"><div class="card-body" id="timelineBody"></div></div>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Progress</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Where things stand, what we’re working on, and what’s coming next.</p>
+        <div id="timelineBody"></div>
       </div>
 
       <!-- FILES -->
@@ -1880,35 +1937,126 @@ document.addEventListener("click", function(e){
 });
 
 // ── TIMELINE ──
+// ════════════════════════════════════════════════════════════════════════════
+//  PROGRESS — the client's Progress experience. Thin consumer of client_progress.
+//  A confidence briefing: current focus primary, completed work collapsed into
+//  milestones, next step previewed plainly, literal updates beneath. Replaces the
+//  old timeline + spine duplication with one engine-driven view.
+// ════════════════════════════════════════════════════════════════════════════
 async function loadTimeline() {
-  renderLoading("timelineBody", 4);
-  const { data, error } = await sb.from("timeline")
-    .select("*").eq("client_id", CLIENT.id).order("sort_order");
-  if (error) { renderError("timelineBody", "loadTimeline()"); return; }
-  try { window._timelineCache = (data||[]).map(function(t){ return { name:t.name||t.title, status:t.status, date:t.date||t.target_date }; }); } catch(e){}
-  if (!data) { document.getElementById("timelineBody").innerHTML = ""; return; }
-  
-  var active = data.find(t => t.status === "active");
-  if (active) {
-    var _dp=document.getElementById("dash-phase"); if(_dp) _dp.textContent = "Currently in: " + active.title;
-    var _nu=document.getElementById("nextUp"); if(_nu) _nu.innerHTML = `<div style="display:flex;gap:12px;align-items:flex-start;">
-      <div style="width:40px;height:40px;border-radius:50%;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${active.icon}</div>
-      <div><h4 style="font-size:14px;font-weight:600;margin-bottom:4px;">${active.title}</h4>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">${active.description}</p>
-      <span class="tl-badge active">${active.date_label}</span></div></div>`;
+  renderLoading("timelineBody", 3);
+  var brief = null;
+  try { var r = await gpApi('client_progress', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); brief = (r && r.data) ? r.data : null; }
+  catch(e){ console.error('client_progress:', e); }
+  if (!brief) { renderError("timelineBody", "loadTimeline()"); return; }
+  window._progress = brief;
+  renderProgress(brief);
+
+  // Dashboard mirrors (one source of truth): current focus + whose-turn.
+  try {
+    var dp = document.getElementById("dash-phase");
+    if (dp) dp.textContent = brief.current ? brief.current.label : "In progress";
+    var ts = document.getElementById("topbarStatus");
+    if (ts) ts.textContent = brief.needs_you && brief.needs_you.yes ? "Needs your attention" : (brief.current ? brief.current.label : "");
+  } catch(e){}
+}
+
+function pEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function pTimeAgo(iso){
+  try {
+    var d=new Date(iso),now=new Date(),sec=Math.floor((now-d)/1000);
+    if(sec<60) return "just now";
+    var m=Math.floor(sec/60); if(m<60) return m+(m===1?" min ago":" min ago");
+    var h=Math.floor(m/60); if(h<24) return h+(h===1?" hour ago":" hours ago");
+    var dy=Math.floor(h/24); if(dy<7) return dy+(dy===1?" day ago":" days ago");
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  } catch(e){ return ""; }
+}
+
+function renderProgress(b){
+  var host = document.getElementById("timelineBody");
+  if (!host) return;
+
+  if (!b.has_project) {
+    host.innerHTML = '<div class="prog-empty"><div class="prog-empty-h">'+pEsc(b.headline.line)+'</div></div>';
+    return;
   }
-  
-  // Phase dots
-  var phases = data.map(t => `<div class="phase ${t.status}"></div>`).join("");
-  var _pr=document.getElementById("phaseRow"); if(_pr) _pr.innerHTML = phases;
-  
-  // Full timeline
-  document.getElementById("timelineBody").innerHTML = data.map(t => `
-    <div class="tl-item">
-      <div class="tl-circle ${t.status}">${t.icon}</div>
-      <div class="tl-body"><h4>${t.title}</h4><p>${t.description}</p></div>
-      <span class="tl-badge ${t.status}">${t.date_label}</span>
-    </div>`).join("");
+
+  var html = '';
+
+  // ── CONFIDENCE HEADLINE ──
+  html += '<div class="prog-headline prog-tone-'+pEsc(b.headline.tone)+'">'+pEsc(b.headline.line)+'</div>';
+
+  // ── CURRENT FOCUS — the primary element of the page ──
+  if (b.current) {
+    html += '<div class="prog-current'+(b.current.is_complete?' prog-current-done':'')+'">';
+    html += '<div class="prog-current-label">'+(b.current.is_complete?'\u2713 ':'')+pEsc(b.current.label)+'</div>';
+    html += '<div class="prog-current-line">'+pEsc(b.current.line)+'</div>';
+    html += '</div>';
+  }
+
+  // ── DO YOU NEED ANYTHING FROM ME — the single clearest signal ──
+  html += '<div class="prog-needs '+(b.needs_you.yes?'prog-needs-yes':'prog-needs-no')+'">'
+    + '<span class="prog-needs-ico">'+(b.needs_you.yes?'\u25C9':'\u2713')+'</span>'
+    + '<span>'+pEsc(b.needs_you.line)+'</span></div>';
+
+  // ── SINCE YOU WERE LAST HERE — meaningful movement only ──
+  if (b.since && b.since.length) {
+    html += '<div class="prog-block"><div class="prog-block-label">Since you were last here</div><div class="prog-card">';
+    b.since.forEach(function(t){
+      html += '<div class="prog-did"><span class="prog-did-ico">\u2713</span><span>'+pEsc(t)+'</span></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── THE JOURNEY — a calm, honest stepper. Completed collapse to milestones,
+  //    current stands out, upcoming is previewed lightly. No PM jargon. ──
+  if (b.journey && b.journey.length) {
+    html += '<div class="prog-block"><div class="prog-block-label">Your journey</div><div class="prog-journey">';
+    b.journey.forEach(function(m){
+      var cls = m.current ? 'cur' : (m.done ? 'done' : 'soon');
+      var mark = m.done ? '\u2713' : (m.current ? '\u25C9' : '\u00B7');
+      html += '<div class="prog-step prog-step-'+cls+'">'
+        + '<span class="prog-step-mark">'+mark+'</span>'
+        + '<span class="prog-step-label">'+pEsc(m.label)+'</span>'
+        + (m.current ? '<span class="prog-step-tag">Now</span>' : (m.done ? '<span class="prog-step-tag prog-step-tag-done">Done</span>' : ''))
+        + '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── WHAT'S COMING NEXT — one step, previewed plainly ──
+  if (b.next) {
+    html += '<div class="prog-block"><div class="prog-block-label">Coming next</div>'
+      + '<div class="prog-next"><span class="prog-next-arrow">\u2192</span><span>'+pEsc(b.next.line)+'</span></div></div>';
+  }
+
+  // ── WHY YOU CAN FEEL CONFIDENT — evidence, not assertion ──
+  if (b.confidence && (b.confidence.line || (b.confidence.points && b.confidence.points.length))) {
+    html += '<div class="prog-block"><div class="prog-block-label">Why you can feel confident</div><div class="prog-card prog-conf">';
+    if (b.confidence.line) html += '<div class="prog-conf-line">'+pEsc(b.confidence.line)+'</div>';
+    if (b.confidence.points && b.confidence.points.length) {
+      html += '<div class="prog-conf-pts">';
+      b.confidence.points.forEach(function(p){
+        html += '<div class="prog-did"><span class="prog-did-ico">\u2713</span><span>'+pEsc(p)+'</span></div>';
+      });
+      html += '</div>';
+    }
+    html += '</div></div>';
+  }
+
+  // ── RECENT UPDATES — the literal record, plain English, beneath everything ──
+  if (b.updates && b.updates.length) {
+    html += '<div class="prog-block"><div class="prog-block-label">Recent updates</div><div class="prog-card">';
+    b.updates.forEach(function(u){
+      html += '<div class="prog-update"><span class="prog-update-dot"></span>'
+        + '<div><div class="prog-update-text">'+pEsc(u.text)+'</div>'
+        + (u.when?'<div class="prog-update-when">'+pEsc(pTimeAgo(u.when))+'</div>':'')+'</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  host.innerHTML = html;
 }
 
 // ── FILES ──
@@ -3782,31 +3930,7 @@ function spineEventLine(ev){
 
 
 // Mirror the Home spine card onto the Project tab (same data, second location).
-function mirrorSpineToProjectTab(project, feed){
-  var card = document.getElementById("projSpineCard");
-  if (!card || !project) { if(card) card.style.display="none"; return; }
-  card.style.display = "block";
-  document.getElementById("projSpineStage").textContent = spineStageLabel(project.stage);
-  document.getElementById("projSpinePct").textContent = (project.progress||0) + "%";
-  setTimeout(function(){ var f=document.getElementById("projSpineFill"); if(f) f.style.width=(project.progress||0)+"%"; }, 200);
-  var turn = document.getElementById("projSpineTurn");
-  if (project.ball_in_court === "client") {
-    turn.style.background="rgba(240,180,41,0.12)"; turn.style.border="1px solid rgba(240,180,41,0.35)";
-    turn.innerHTML='<span style="font-size:16px;">\u270B</span><span style="color:var(--ink);"><strong>It\u2019s your turn.</strong> Eric is waiting on something from you. Check your messages or files for what\u2019s needed.</span>';
-  } else {
-    turn.style.background="rgba(106,191,105,0.12)"; turn.style.border="1px solid rgba(106,191,105,0.35)";
-    turn.innerHTML='<span style="font-size:16px;">\u2713</span><span style="color:var(--ink);"><strong>You\u2019re all set.</strong> Eric is working on your project. Nothing is needed from you right now.</span>';
-  }
-  var feedEl = document.getElementById("projSpineFeed");
-  if (!feed || !feed.length) { feedEl.innerHTML=''; return; }
-  var head='<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
-  feedEl.innerHTML = head + feed.map(function(ev){
-    return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">'+
-      '<span style="width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:6px;flex-shrink:0;"></span>'+
-      '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">'+spineEventLine(ev)+'</div>'+
-      '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+spineTimeAgo(ev.created_at)+'</div></div></div>';
-  }).join("");
-}
+function mirrorSpineToProjectTab(){ /* retired: the Progress room renders from client_progress */ }
 
 async function loadProjectSpine(){
   var card = document.getElementById("spineCard");
