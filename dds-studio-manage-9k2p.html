@@ -6211,6 +6211,23 @@ function renderProviderGrid(){
 
     var errorBlock = p.last_failure_error ? '<div style="margin-top:10px;font-size:12px;color:#c0392b;background:#fdecea;border-radius:8px;padding:8px 10px;">⚠ '+escHtml(String(p.last_failure_error).slice(0,160))+'</div>' : '';
 
+    // property picker: OAuth providers with selectable properties (ga4/gsc/gbp) need one chosen before data flows
+    var needsProperty = connected && !isInternal && ['ga4','gsc','gbp'].indexOf(p.id)>=0;
+    var propBlock = '';
+    if(needsProperty){
+      if(p.property_id){
+        propBlock = '<div style="margin-top:10px;font-size:12px;background:#f3f0fa;border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+          + '<span style="color:var(--muted);">Syncing: <b style="color:var(--ink,#2a2433);">'+escHtml(String(p.property_id))+'</b></span>'
+          + '<button onclick="openPropertyPicker(\''+p.id+'\')" class="integ-btn integ-btn-ghost" style="padding:4px 10px;">Change</button></div>';
+      } else {
+        propBlock = '<div style="margin-top:10px;font-size:12px;background:#fdf6e3;border:1px solid #f0e0b0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="color:#9a7a1a;font-weight:600;margin-bottom:6px;">⚠ Choose which property to sync</div>'
+          + '<div style="color:var(--muted);margin-bottom:8px;">Connected, but no property selected yet — that\'s why 0 signals came through.</div>'
+          + '<button onclick="openPropertyPicker(\''+p.id+'\')" class="integ-btn integ-btn-primary" style="padding:6px 12px;">Choose property</button></div>';
+      }
+    }
+    var pickerHost = '<div id="picker-'+p.id+'" style="margin-top:10px;"></div>';
+
     return '<div style="background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:16px;padding:18px 20px;">'
       + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +   '<div><div style="font-weight:600;font-size:15px;">'+escHtml(p.label)+'</div>'
@@ -6224,6 +6241,8 @@ function renderProviderGrid(){
       +   '<div>Provides<br><b style="color:var(--ink,#2a2433);font-weight:600;">'+(p.metrics?p.metrics.length:0)+' metrics</b></div>'
       + '</div>'
       + errorBlock
+      + propBlock
+      + pickerHost
       + '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">'+actions+viewHist+'</div>'
       + '</div>';
   }).join('');
@@ -6239,6 +6258,41 @@ async function connectProvider(provider){
   }catch(e){ integToast('Connection failed: '+e.message); }
 }
 function reauthorize(provider){ connectProvider(provider); } // re-runs OAuth, refreshes tokens
+
+// ── property picker ──
+async function openPropertyPicker(provider){
+  var host = document.getElementById('picker-'+provider); if(!host) return;
+  host.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;">Loading available properties…</div>';
+  try{
+    var r = await integApi('integration_list_properties',{clientId:INTEG.clientId,provider:provider});
+    if(r&&r.error){ host.innerHTML='<div style="font-size:12px;color:#c0392b;padding:8px;">Could not list properties: '+escHtml(r.error)+(r.detail?(' — '+escHtml(String(r.detail).slice(0,120))):'')+'</div>'; return; }
+    var opts=(r&&r.data&&r.data.options)||[];
+    var current=(r&&r.data&&r.data.current)||null;
+    if(!opts.length){ host.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px;">No properties found for this account. Make sure this Google account has access to a '+provider.toUpperCase()+' property.</div>'; return; }
+    var sel='<select id="propsel-'+provider+'" style="width:100%;padding:9px 11px;border:1px solid var(--line,#e5e0ee);border-radius:9px;font-size:13px;margin-bottom:8px;">'
+      + opts.map(function(o){ return '<option value="'+escHtml(o.id)+'"'+(o.id===current?' selected':'')+'>'+escHtml(o.label)+'</option>'; }).join('')
+      + '</select>';
+    host.innerHTML = '<div style="background:#f3f0fa;border-radius:8px;padding:10px 12px;">'
+      + '<div style="font-size:12px;font-weight:600;margin-bottom:8px;">Select the property to sync</div>'
+      + sel
+      + '<div style="display:flex;gap:8px;"><button onclick="selectProperty(\''+provider+'\')" class="integ-btn integ-btn-primary" style="padding:6px 12px;">Save &amp; sync</button>'
+      + '<button onclick="document.getElementById(\'picker-'+provider+'\').innerHTML=\'\'" class="integ-btn integ-btn-ghost" style="padding:6px 12px;">Cancel</button></div></div>';
+  }catch(e){ host.innerHTML='<div style="font-size:12px;color:#c0392b;padding:8px;">Error: '+escHtml(e.message)+'</div>'; }
+}
+async function selectProperty(provider){
+  var seleml=document.getElementById('propsel-'+provider); if(!seleml) return;
+  var propertyId=seleml.value;
+  integToast('Saving property…');
+  try{
+    await integApi('integration_set_property',{clientId:INTEG.clientId,provider:provider,propertyId:propertyId});
+    integToast('Property set. Syncing…');
+    var r=await integApi('provider_sync',{clientId:INTEG.clientId,provider:provider});
+    var res=(r&&r.data&&r.data.synced)||[]; var me=res.find(function(x){return x.provider===provider;});
+    integToast(me&&me.status==='ok'?('Synced — '+me.signals_written+' signals'):'Sync complete');
+    refreshIntegrations();
+  }catch(e){ integToast('Failed: '+e.message); }
+}
+
 function pollAfterConnect(){ var n=0; var t=setInterval(function(){ n++; refreshIntegrations(); if(n>=6) clearInterval(t); }, 5000); } // poll for ~30s while user authorizes
 
 async function disconnectProvider(provider){
