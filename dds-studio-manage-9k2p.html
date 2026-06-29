@@ -774,6 +774,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn" data-dest="clients" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> All clients</button>
       <button class="sn" data-dest="clients" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
       <button class="sn" data-dest="clients" onclick="go('integrations')" id="sn-integrations"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Integrations</button>
+      <button class="sn" data-dest="clients" onclick="go('analytics')" id="sn-analytics"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg> Analytics</button>
       <button class="sn" data-dest="clients" onclick="go('newclient')" id="sn-newclient" style="color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
 
       <!-- Quick actions (jump into a client task without leaving) -->
@@ -1421,6 +1422,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
       <div class="page" id="page-growth"></div>
 
       <div class="page" id="page-integrations"><div id="integrationsBody"></div></div>
+      <div class="page" id="page-analytics"><div id="analyticsBody"></div></div>
 
       <div class="page" id="page-templates">
         <div class="pt">Email Templates</div>
@@ -1644,6 +1646,7 @@ function go(page) {
   if (page === "visibility") loadVisibility();
   if (page === "growth") loadGrowth();
   if (page === "integrations") loadIntegrations();
+  if (page === "analytics") loadAnalytics();
   try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
 }
 
@@ -6343,6 +6346,135 @@ function integToast(msg){
 }
 // minimal style for the integ buttons
 (function(){ if(document.getElementById('integStyles'))return; var s=document.createElement('style'); s.id='integStyles'; s.textContent='.integ-btn{padding:7px 13px;border:1px solid var(--line,#e5e0ee);border-radius:9px;background:#fff;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--ink,#2a2433);}.integ-btn:hover{border-color:var(--p,#5b3fa0);color:var(--p,#5b3fa0);}.integ-btn-primary{background:var(--p,#5b3fa0);color:#fff;border-color:var(--p,#5b3fa0);}.integ-btn-primary:hover{opacity:.9;color:#fff;}.integ-btn-danger:hover{border-color:#c0392b;color:#c0392b;}.integ-btn-ghost{border-color:transparent;color:var(--muted);}'; document.head.appendChild(s); })();
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ADMIN ANALYTICS — operator BI experience.
+//  Philosophy: analytics WITH decision intelligence. Every metric group leads
+//  with interpretation (what changed / why / what to do), then shows the chart.
+//  Charts are lightweight inline SVG — no dependency.
+// ════════════════════════════════════════════════════════════════════════════
+var ANALYTICS = { clientId: null, clients: [], data: null };
+
+async function loadAnalytics(){
+  var host = document.getElementById('analyticsBody'); if(!host) return;
+  host.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">Loading analytics…</div>';
+  if(!ANALYTICS.clients.length){
+    try{ var r = await integApi('admin_query',{path:'clients?deleted_at=is.null&select=id,name&order=name.asc&limit=500'}); ANALYTICS.clients=(r&&r.data)||[]; }catch(e){ ANALYTICS.clients=[]; }
+  }
+  if(!ANALYTICS.clientId && ANALYTICS.clients.length) ANALYTICS.clientId = ANALYTICS.clients[0].id;
+  renderAnalyticsShell();
+  if(ANALYTICS.clientId) await refreshAnalytics();
+}
+
+function renderAnalyticsShell(){
+  var host = document.getElementById('analyticsBody');
+  var opts = ANALYTICS.clients.map(function(c){ return '<option value="'+c.id+'"'+(c.id===ANALYTICS.clientId?' selected':'')+'>'+escHtml(c.name||'Unnamed')+'</option>'; }).join('');
+  host.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:8px;">'
+    + '<div><h1 style="font-family:var(--serif,Georgia);font-size:24px;margin:0 0 2px;">Analytics</h1>'
+    + '<p style="color:var(--muted);font-size:13px;margin:0;">The data behind every decision — with the interpretation on top.</p></div>'
+    + '<select id="anClientSel" onchange="anSelectClient(this.value)" style="padding:9px 12px;border:1px solid var(--line,#e5e0ee);border-radius:10px;font-size:14px;min-width:200px;">'+opts+'</select>'
+    + '</div>'
+    + '<div id="anBody" style="margin-top:18px;"></div>';
+}
+function anSelectClient(id){ ANALYTICS.clientId=id; refreshAnalytics(); }
+
+async function refreshAnalytics(){
+  var body = document.getElementById('anBody');
+  if(body) body.innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px;">Loading…</div>';
+  try{ var r = await integApi('admin_analytics',{clientId:ANALYTICS.clientId}); ANALYTICS.data=(r&&r.data)||null; }catch(e){ ANALYTICS.data=null; }
+  renderAnalytics();
+}
+
+// ── inline SVG line chart (no dependency) ──
+function anLineChart(points, opts){
+  opts=opts||{};
+  var w=opts.w||520, h=opts.h||120, pad=opts.pad||8;
+  if(!points||points.length===0) return '<div style="color:var(--muted);font-size:12px;padding:18px 0;">No data points yet.</div>';
+  if(points.length===1){
+    // single point — show the value big, note it needs another month
+    return '<div style="padding:14px 0;"><span style="font-size:30px;font-weight:700;font-family:var(--serif,Georgia);">'+anFmt(points[0].value)+'</span> <span style="color:var(--muted);font-size:12px;">'+escHtml(points[0].period||'')+' · one data point, trend appears next month</span></div>';
+  }
+  var vals=points.map(function(p){return p.value;});
+  var min=Math.min.apply(null,vals), max=Math.max.apply(null,vals);
+  if(min===max){ min=min-1; max=max+1; }
+  var innerW=w-pad*2-30, innerH=h-pad*2-16;
+  var x=function(i){ return pad+30+(i/(points.length-1))*innerW; };
+  var y=function(v){ return pad+innerH-((v-min)/(max-min))*innerH; };
+  var d=points.map(function(p,i){ return (i===0?'M':'L')+x(i).toFixed(1)+','+y(p.value).toFixed(1); }).join(' ');
+  var area=d+' L'+x(points.length-1).toFixed(1)+','+(pad+innerH).toFixed(1)+' L'+x(0).toFixed(1)+','+(pad+innerH).toFixed(1)+' Z';
+  var up=points[points.length-1].value>=points[0].value;
+  var col=opts.color||(up?'#1f9d57':'#c0392b');
+  var dots=points.map(function(p,i){ return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(p.value).toFixed(1)+'" r="2.5" fill="'+col+'"/>'; }).join('');
+  // y labels (min/max) + x labels (first/last period)
+  var lbls='<text x="2" y="'+(pad+10)+'" font-size="9" fill="#9b93a8">'+anFmt(max)+'</text>'
+    + '<text x="2" y="'+(pad+innerH).toFixed(1)+'" font-size="9" fill="#9b93a8">'+anFmt(min)+'</text>'
+    + '<text x="'+x(0).toFixed(1)+'" y="'+(h-2)+'" font-size="9" fill="#9b93a8">'+escHtml(points[0].period||'')+'</text>'
+    + '<text x="'+x(points.length-1).toFixed(1)+'" y="'+(h-2)+'" font-size="9" fill="#9b93a8" text-anchor="end">'+escHtml(points[points.length-1].period||'')+'</text>';
+  return '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;display:block;">'
+    + '<path d="'+area+'" fill="'+col+'" opacity="0.08"/>'
+    + '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    + dots + lbls + '</svg>';
+}
+function anFmt(v){ if(v==null) return '—'; if(Math.abs(v)>=1000) return (v/1000).toFixed(1).replace(/\.0$/,'')+'k'; return (Math.round(v*10)/10).toString(); }
+
+var STATUS_STYLE = {
+  good:{c:'#1a7e49',bg:'#eaf5ee',dot:'#1f9d57',word:'Improving'},
+  attention:{c:'#c0392b',bg:'#fdecea',dot:'#c0392b',word:'Needs attention'},
+  flat:{c:'#7a6d8e',bg:'#f3f0fa',dot:'#8b8098',word:'Steady'},
+  baseline:{c:'#9a7a1a',bg:'#fdf6e3',dot:'#d68a12',word:'Baseline'},
+  no_data:{c:'#8b8098',bg:'#f2f2f2',dot:'#bbb',word:'No data'}
+};
+
+// render one metric group: interpretation cards + a chart for the primary metric
+function anGroup(title, summaries, interpretation, primaryKey){
+  var hasAny = interpretation.some(function(i){ return i.status!=='no_data'; });
+  if(!hasAny) return ''; // hide groups with zero data — show only what's real
+  var interpHtml = interpretation.filter(function(i){return i.status!=='no_data';}).map(function(i){
+    var st=STATUS_STYLE[i.status]||STATUS_STYLE.no_data;
+    var deltaTag = (i.delta!=null && i.status!=='baseline') ? '<span style="font-size:12px;font-weight:600;color:'+st.c+';">'+(i.delta>0?'▲':(i.delta<0?'▼':'■'))+' '+(i.pct!=null?(Math.abs(i.pct)+'%'):Math.abs(i.delta))+'</span>' : '';
+    return '<div style="padding:12px 0;border-top:1px solid var(--line,#eee);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px;">'
+      +   '<span style="font-weight:600;font-size:13.5px;">'+escHtml(i.label)+(i.value!=null?' <span style="color:var(--muted);font-weight:500;">'+anFmt(i.value)+'</span>':'')+'</span>'
+      +   '<span style="display:inline-flex;align-items:center;gap:6px;">'+deltaTag+'<span style="font-size:10.5px;font-weight:600;color:'+st.c+';background:'+st.bg+';padding:2px 8px;border-radius:100px;">'+st.word+'</span></span>'
+      + '</div>'
+      + '<div style="font-size:12.5px;color:var(--muted);line-height:1.5;">'+escHtml(i.text)+'</div>'
+      + '</div>';
+  }).join('');
+  var primary = primaryKey && summaries[primaryKey];
+  var chart = primary && primary.points ? '<div style="margin-top:8px;background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:12px;padding:12px 14px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;">'+escHtml(primary.metric)+' over time</div>'+anLineChart(primary.points)+'</div>' : '';
+  return '<div style="background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:16px;padding:18px 20px;margin-bottom:16px;">'
+    + '<h3 style="font-size:15px;margin:0 0 4px;font-family:var(--serif,Georgia);">'+escHtml(title)+'</h3>'
+    + chart
+    + interpHtml
+    + '</div>';
+}
+
+function renderAnalytics(){
+  var body = document.getElementById('anBody'); if(!body) return;
+  var d = ANALYTICS.data;
+  if(!d){ body.innerHTML='<div style="color:var(--muted);padding:20px;">Could not load analytics.</div>'; return; }
+  if(!d.has_any_data){
+    body.innerHTML='<div style="background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:16px;padding:32px;text-align:center;">'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">No data yet for this client</div>'
+      + '<div style="color:var(--muted);font-size:13px;">Connect a data source in Integrations, or run a sync. Internal signals (approvals, requests, project progress) populate as the client engages.</div></div>';
+    return;
+  }
+  var html = '';
+  // grid: two columns on wide screens
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;">';
+  html += anGroup('Website analytics', d.website_analytics, d.website_analytics.interpretation, 'sessions');
+  html += anGroup('Search analytics', d.search_analytics, d.search_analytics.interpretation, 'search_clicks');
+  html += anGroup('Website health', d.website_health, d.website_health.interpretation, 'psi_performance');
+  html += anGroup('Business Profile', d.business_profile, d.business_profile.interpretation, 'gbp_calls');
+  html += anGroup('Engagement & delivery', d.engagement_ops, d.engagement_ops.interpretation, 'project_progress');
+  html += '</div>';
+  // available metrics footnote (operator transparency)
+  html += '<div style="margin-top:8px;font-size:11px;color:var(--muted);">Metrics present for this client: '+(d.available_metrics||[]).map(escHtml).join(', ')+'</div>';
+  body.innerHTML = html;
+}
+
+
 
 </script>
 </body>
