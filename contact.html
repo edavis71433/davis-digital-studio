@@ -47,18 +47,21 @@
 
 <section class="pad-sm">
 <div class="wrap" style="display:grid;grid-template-columns:1.1fr .9fr;gap:64px">
-  <form class="reveal" onsubmit="this.style.display='none';document.getElementById('thanks').style.display='block';return false">
+  <form id="contactForm" class="reveal" onsubmit="return submitContact(event)">
     <div class="field"><label for="n">Your name</label><input id="n" type="text" required></div>
     <div class="field"><label for="e">Email address</label><input id="e" type="email" required></div>
     <div class="field"><label for="b">Business name &amp; what you do</label><input id="b" type="text"></div>
     <div class="field"><label for="w">Current website (if any)</label><input id="w" type="text" placeholder="yourbusiness.com"></div>
     <div class="field"><label for="g">What are you hoping to fix or achieve?</label><textarea id="g"></textarea></div>
-    <button type="submit" class="btn btn-primary">Send it over <span class="arr">&rarr;</span></button>
+    <div id="contactError" role="alert" style="display:none;margin:0 0 16px;padding:12px 16px;border-radius:10px;background:rgba(224,85,85,0.08);border:1px solid rgba(224,85,85,0.25);color:#c0392b;font-size:14px;line-height:1.5"></div>
+    <button id="contactSubmit" type="submit" class="btn btn-primary">Send it over <span class="arr">&rarr;</span></button>
     <p class="hint">I reply personally, usually within one business day.</p>
+    <p class="hint" style="margin-top:14px">Prefer to skip the form? Email me at <a href="mailto:eric@davisdigitalstudio.com" style="color:var(--p)">eric@davisdigitalstudio.com</a> or <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" style="color:var(--p)">grab a time directly &rarr;</a></p>
   </form>
   <div id="thanks" style="display:none">
     <h2 class="serif" style="font-size:28px">Got it &mdash; thank you.</h2>
-    <p class="lead-muted mt-s">I've received your note and I'll be in touch personally, usually within one business day. Talk soon.</p>
+    <p class="lead-muted mt-s">Your note came through, and I'll be in touch personally, usually within one business day. Talk soon.</p>
+    <p class="lead-muted mt-s" style="font-size:15px">Want to lock in a time now? <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" style="color:var(--p)">Pick a slot on my calendar &rarr;</a></p>
   </div>
 
   <aside class="reveal">
@@ -108,6 +111,64 @@
   </div>
 </div>
 </footer>
+<script>
+function submitContact(ev){
+  ev.preventDefault();
+  var form = document.getElementById('contactForm');
+  var btn = document.getElementById('contactSubmit');
+  var errBox = document.getElementById('contactError');
+  var name = document.getElementById('n').value.trim();
+  var email = document.getElementById('e').value.trim();
+  var business = document.getElementById('b').value.trim();
+  var website = document.getElementById('w').value.trim();
+  var goal = document.getElementById('g').value.trim();
+
+  errBox.style.display = 'none';
+  if (!name || !email || email.indexOf('@') === -1) {
+    errBox.textContent = 'Please add your name and a valid email so I can get back to you.';
+    errBox.style.display = 'block';
+    return false;
+  }
+
+  var original = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Sending\u2026';
+
+  fetch('https://formspree.io/f/mvznevlo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      _subject: 'New contact from ' + name + (business ? ' (' + business + ')' : ''),
+      _replyto: email,
+      name: name,
+      email: email,
+      business: business || 'Not provided',
+      website: website || 'Not provided',
+      message: goal || 'Not provided'
+    })
+  })
+  .then(function(r){
+    if (r.ok) {
+      form.style.display = 'none';
+      document.getElementById('thanks').style.display = 'block';
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', { event_category: 'lead', event_label: 'contact_form' });
+      }
+    } else {
+      throw new Error('bad_status');
+    }
+  })
+  .catch(function(){
+    // Failure: keep everything the visitor typed, show a clear error + fallbacks.
+    btn.disabled = false;
+    btn.innerHTML = original;
+    errBox.innerHTML = 'Something went wrong sending that \u2014 your message is still here. Please try again, or reach me directly at <a href="mailto:eric@davisdigitalstudio.com" style="color:#c0392b;text-decoration:underline">eric@davisdigitalstudio.com</a> or <a href="https://calendly.com/eric-davisdigitalstudio/30min" target="_blank" rel="noopener" style="color:#c0392b;text-decoration:underline">book a time directly</a>.';
+    errBox.style.display = 'block';
+  });
+
+  return false;
+}
+</script>
 <script>
 // Opt into animation only when JS runs; content is visible by default otherwise.
 document.documentElement.classList.add('js-anim');
