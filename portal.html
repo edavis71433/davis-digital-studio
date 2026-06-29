@@ -792,6 +792,79 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
   font-size:26px; margin:0 auto 20px; }
 .dec-clear-h{ font-family:var(--serif); font-size:26px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
 .dec-clear-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:30em; margin:0 auto; }
+/* ── Files as a delivery experience. Each delivery is a card that explains
+   itself; the file stays literal beneath. All on foundation tokens. ── */
+
+.dlv-intro{ font-family:var(--serif); font-size:18px; line-height:1.45; color:var(--ink);
+  letter-spacing:-0.01em; max-width:36em; margin-bottom:20px; }
+
+.dlv-card{ background:#fff; border:1px solid var(--line); border-radius:var(--r-xl,22px);
+  padding:24px 26px; margin-bottom:16px; box-shadow:var(--sh-1); position:relative; }
+.dlv-primary{ border-color:var(--p-soft); box-shadow:var(--sh-2); }
+
+.dlv-first{ display:inline-block; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--p); background:var(--p-soft); padding:6px 12px; border-radius:var(--r-pill,100px); margin-bottom:14px; }
+
+.dlv-top{ display:flex; align-items:flex-start; gap:16px; margin-bottom:14px; }
+.dlv-thumb{ width:46px; height:46px; border-radius:var(--r,12px); background:var(--surface-3,#f3f0f9);
+  display:flex; align-items:center; justify-content:center; font-size:20px; flex:none; color:var(--p); }
+.dlv-head{ flex:1; min-width:0; }
+.dlv-kind{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--brass);
+  margin-bottom:5px; display:flex; align-items:center; gap:8px; }
+.dlv-new{ font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--ok,#3F7D5B);
+  background:var(--ok-mist,#E6F0E9); padding:2px 8px; border-radius:var(--r-pill,100px); text-transform:none; }
+.dlv-name{ font-family:var(--serif); font-size:20px; font-weight:400; line-height:1.25; color:var(--ink);
+  letter-spacing:-0.01em; word-break:break-word; }
+.dlv-meta{ font-size:12.5px; color:var(--muted); margin-top:5px; }
+
+.dlv-why{ font-size:15px; line-height:1.6; color:var(--ink-2,#574d68); margin-bottom:14px; }
+
+.dlv-changed{ display:flex; align-items:flex-start; gap:9px; font-size:14px; line-height:1.55;
+  color:var(--ink-2,#574d68); background:var(--surface-2,#faf9fc); border-radius:var(--r,12px);
+  padding:11px 14px; margin-bottom:14px; }
+.dlv-changed-ico{ color:var(--p); flex:none; margin-top:1px; }
+
+.dlv-next{ font-size:14.5px; line-height:1.55; color:var(--ink); margin-bottom:18px; }
+.dlv-next-label{ display:block; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--brass); margin-bottom:5px; }
+
+.dlv-actions{ display:flex; flex-wrap:wrap; gap:10px; }
+.dlv-btn{ padding:12px 20px; border-radius:var(--r-pill,100px); border:none; cursor:pointer;
+  font-family:var(--sans); font-size:14px; font-weight:600; transition:all var(--dur-fast,.15s) var(--ease); }
+.dlv-btn-open{ background:var(--p); color:#fff; }
+.dlv-btn-open:hover{ background:var(--p-deep,#2A1B4A); transform:translateY(-1px); }
+.dlv-btn-ghost{ background:#fff; color:var(--ink); border:1px solid var(--line-strong); padding:11px 18px; }
+.dlv-btn-ghost:hover{ background:var(--surface-2,#faf9fc); }
+.dlv-btn-ghost.danger{ color:var(--stop,#A8443A); border-color:var(--stop-mist,#F6E5E2); }
+
+/* earlier versions — present and exact, but clearly ignorable */
+.dlv-older{ margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+.dlv-older-label{ font-size:12px; color:var(--muted); margin-bottom:8px; }
+.dlv-older-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; }
+.dlv-older-name{ font-size:13px; color:var(--muted); word-break:break-word; }
+.dlv-older-link{ flex:none; border:none; background:none; cursor:pointer; font-family:var(--sans);
+  font-size:13px; font-weight:550; color:var(--p); }
+.dlv-older-link:hover{ opacity:.7; }
+
+/* your uploads — literal, tidy rows */
+.dlv-upload{ display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line);
+  border-radius:var(--r,12px); padding:14px 16px; margin-bottom:10px; }
+.dlv-up-info{ flex:1; min-width:0; }
+.dlv-up-name{ font-size:14.5px; font-weight:550; color:var(--ink); word-break:break-word; }
+.dlv-up-actions{ display:flex; gap:8px; flex:none; }
+
+/* empty state — confidence-building, never a dead end */
+.dlv-empty{ text-align:center; padding:56px 24px; }
+.dlv-empty-mark{ width:52px; height:52px; border-radius:50%; background:var(--ok-mist,#E6F0E9);
+  color:var(--ok,#3F7D5B); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 18px; }
+.dlv-empty-h{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
+.dlv-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:30em; margin:0 auto; }
+
+@media (max-width:560px){
+  .dlv-card{ padding:20px 18px; }
+  .dlv-actions{ flex-direction:column; }
+  .dlv-btn{ width:100%; }
+}
 
 @media (max-width:560px){
   .dec-outcomes{ grid-template-columns:1fr; }
@@ -976,8 +1049,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- FILES -->
       <div class="page-view" id="page-files">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Files</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Upload anything: PDFs, images, docs, videos. Files are stored securely and accessible any time.</p>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Your work, delivered</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Everything we’ve completed for you, with a note on what each one is and what to do with it.</p>
         <div class="card">
           <div class="card-body">
             <div id="uploadProgressWrap" style="display:none;" class="upload-progress">
@@ -985,17 +1058,17 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
               <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadFill" style="width:0%"></div></div>
             </div>
             <div class="upload-zone" id="uploadZone" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-              <div class="uz-icon">📤</div>
+              <div class="uz-icon" style="font-size:20px;color:var(--p);">↑</div>
               <p><strong>Click to upload</strong> or drag and drop</p>
               <p style="font-size:11px;margin-top:4px;">PDF, DOC, PPT, PNG, JPG, MP4, up to 50MB</p>
               <input type="file" multiple onchange="handleFiles(this.files)">
             </div>
             <div class="file-tabs">
-              <button class="file-tab active" onclick="filterFiles('all',this)">All Files</button>
-              <button class="file-tab" onclick="filterFiles('eric',this)">From Eric</button>
-              <button class="file-tab" onclick="filterFiles('client',this)">Your Uploads</button>
+              <button class="file-tab active" onclick="filterFiles('all',this)">Delivered to you</button>
+              
+              <button class="file-tab" onclick="filterFiles('client',this)">Your uploads</button>
             </div>
-            <div class="file-list" id="fileList"><div class="empty-state"><div class="ei">📁</div><p>No files yet.<br>Start by uploading your logo and brand assets so Eric can get going.</p><button class="es-btn" onclick="document.querySelector('#uploadZone input').click()">Upload your first file</button></div></div>
+            <div class="file-list" id="fileList"><div class="dlv-empty"><div class="dlv-empty-h">Loading your deliveries</div><div class="dlv-empty-p">One moment while we gather everything we've delivered for you.</div></div></div>
           </div>
         </div>
       </div>
@@ -1752,26 +1825,147 @@ async function loadTimeline() {
 // ── FILES ──
 var allFiles = [];
 
+// ════════════════════════════════════════════════════════════════════════════
+//  FILES — THE DELIVERY EXPERIENCE.  Thin consumer of client_deliveries.
+//  The engine interprets each delivery's context (what it is, why, what changed,
+//  what to do, which is current, what to ignore). The FILE stays literal: exact
+//  name, exact download via the existing signed-URL path. Upload, comments,
+//  approve, delete all keep their existing working mechanics.
+// ════════════════════════════════════════════════════════════════════════════
 async function loadFiles() {
   renderLoading("fileList", 3);
-  const { data, error } = await sb.from("files")
-    .select("*").eq("client_id", CLIENT.id).order("created_at", {ascending: false});
-  if (error) { renderError("fileList", "loadFiles()"); return; }
-  allFiles = data || [];
+  var brief = null;
+  try { var r = await gpApi('client_deliveries', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); brief = (r && r.data) ? r.data : null; }
+  catch(e){ console.error('client_deliveries:', e); }
+  if (!brief) { renderError("fileList", "loadFiles()"); return; }
+  window._deliveries = brief;
   renderFiles();
-  
-  // Dashboard preview
-  var recent = allFiles.slice(0, 3);
-  var _df=document.getElementById("dashFiles"); if(_df) _df.innerHTML = recent.length === 0
-    ? "<div class=\"empty-state\"><div class=\"ei\">📁</div><p>No files yet</p></div>"
-    : recent.map(f => `<div class="file-item" style="margin-bottom:6px;">
-        <div class="file-thumb">${fileIcon(f.name)}</div>
-        <div class="file-info"><h4>${esc(f.name)}</h4><p>${esc(f.type||"")} · ${esc(f.size||"")}</p></div>
-        <span class="file-status ${f.status}">${cap(f.status)}</span></div>`).join("");
-  
-  // Badge
-  var pending = allFiles.filter(f => f.from_who === "eric" && f.status === "pending").length;
-  setBadge("badge-files", pending);
+
+  // Dashboard preview: show the primary delivery, interpreted, not a raw list.
+  var _df = document.getElementById("dashFiles");
+  if (_df) {
+    var prim = (brief.deliveries || []).find(function(d){ return d.look_first; }) || (brief.deliveries || [])[0];
+    _df.innerHTML = prim
+      ? '<div class="file-item" style="margin-bottom:6px;"><div class="file-thumb">'+fileIcon(prim.current.name)+'</div>'
+        + '<div class="file-info"><h4>'+fEsc(prim.current.name)+'</h4><p>'+fEsc(prim.kind)+(prim.current.is_new?' · new':'')+'</p></div></div>'
+      : '<div class="empty-state"><p style="font-size:13px;color:var(--muted);">Delivered work will appear here.</p></div>';
+  }
+
+  // Badge: count brand-new deliveries from Eric.
+  var newCount = (brief.deliveries || []).filter(function(d){ return d.current.is_new; }).length;
+  setBadge("badge-files", newCount);
+}
+
+function fEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function fAttr(s){ return String(s==null?'':s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function renderFiles() {
+  var host = document.getElementById("fileList");
+  if (!host) return;
+  var brief = window._deliveries;
+  // filter tabs: 'all' (deliveries), 'eric' (deliveries), 'client' (your uploads)
+  if (currentFilter === "client") { renderYourUploads(host, brief); return; }
+
+  if (!brief || !brief.has_deliveries) {
+    host.innerHTML =
+      '<div class="dlv-empty"><div class="dlv-empty-mark">\u2713</div>'
+      + '<div class="dlv-empty-h">No deliveries yet</div>'
+      + '<div class="dlv-empty-p">'+fEsc(brief ? brief.empty_line : 'As we complete work, it will appear here.')+'</div></div>';
+    return;
+  }
+
+  var html = '<div class="dlv-intro">'+fEsc(brief.intro)+'</div>';
+
+  (brief.deliveries || []).forEach(function(d){
+    var f = d.current;
+    html += '<div class="dlv-card'+(d.look_first?' dlv-primary':'')+'" id="file-'+fEsc(f.id)+'">';
+
+    // "look at this first" marker — answers "which file am I supposed to open?"
+    if (d.look_first) {
+      html += '<div class="dlv-first">\u25C9 Start here</div>';
+    }
+
+    html += '<div class="dlv-top">';
+    html += '<div class="dlv-thumb">'+fileIcon(f.name)+'</div>';
+    html += '<div class="dlv-head">';
+    // WHAT IS THIS — interpreted kind + the LITERAL filename (exact, unchanged)
+    html += '<div class="dlv-kind">'+fEsc(d.kind)+(f.is_new?'<span class="dlv-new">New</span>':'')+'</div>';
+    html += '<div class="dlv-name">'+fEsc(d.title)+'</div>';
+    html += '<div class="dlv-meta">'+(f.type?fEsc(f.type)+' · ':'')+(f.size?fEsc(f.size)+' · ':'')+(f.created_at?fEsc(formatDate(f.created_at)):'')+'</div>';
+    html += '</div></div>';
+
+    // WHY AM I RECEIVING THIS — interpreted
+    html += '<div class="dlv-why">'+fEsc(d.why)+'</div>';
+
+    // WHAT CHANGED — interpreted, only when there is something to say
+    if (d.what_changed) {
+      html += '<div class="dlv-changed"><span class="dlv-changed-ico">\u2192</span>'+fEsc(d.what_changed)+'</div>';
+    }
+
+    // WHAT SHOULD I DO NEXT — interpreted
+    html += '<div class="dlv-next"><span class="dlv-next-label">What to do</span>'+fEsc(d.next_step)+'</div>';
+
+    // THE LITERAL FILE — exact, downloaded via the existing signed-URL mechanic
+    html += '<div class="dlv-actions">';
+    if (f.storage_path) {
+      html += '<button class="dlv-btn dlv-btn-open" onclick="downloadFile(\''+fAttr(f.storage_path)+'\')">Open '+fEsc(d.kind.toLowerCase())+'</button>';
+    }
+    html += '<button class="dlv-btn dlv-btn-ghost" onclick="toggleFileComments(\''+fEsc(f.id)+'\')">Comments</button>';
+    if (f.from_who === "eric" && f.status === "pending") {
+      html += '<button class="dlv-btn dlv-btn-ghost" onclick="approveFile(\''+fEsc(f.id)+'\')">Approve</button>';
+    }
+    html += '</div>';
+
+    // WHICH VERSION IS CURRENT / WHAT CAN I IGNORE — older versions kept, marked
+    if (d.older && d.older.length) {
+      html += '<div class="dlv-older"><div class="dlv-older-label">Earlier versions (you can ignore these)</div>';
+      d.older.forEach(function(o){
+        html += '<div class="dlv-older-row"><span class="dlv-older-name">'+fEsc(o.name)+'</span>'
+          + (o.storage_path?'<button class="dlv-older-link" onclick="downloadFile(\''+fAttr(o.storage_path)+'\')">Open</button>':'')
+          + '</div>';
+      });
+      html += '</div>';
+    }
+
+    // comments box (existing mechanic, unchanged markup ids)
+    html += '<div class="file-comments" id="fc-'+fEsc(f.id)+'" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">'
+      + '<div id="fc-list-'+fEsc(f.id)+'" style="margin-bottom:10px;"></div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<input id="fc-input-'+fEsc(f.id)+'" type="text" placeholder="Add a comment about this file..." style="flex:1;padding:9px 12px;border:1px solid var(--line-strong);border-radius:9px;font-size:13px;font-family:var(--sans);" onkeydown="if(event.key===\'Enter\')postFileComment(\''+fEsc(f.id)+'\')">'
+      + '<button class="dlv-btn dlv-btn-ghost" onclick="postFileComment(\''+fEsc(f.id)+'\')">Send</button>'
+      + '</div></div>';
+
+    html += '</div>'; // dlv-card
+  });
+
+  host.innerHTML = html;
+}
+
+// Your own uploads — literal, no interpretation. Simple and tidy.
+function renderYourUploads(host, brief) {
+  var ups = (brief && brief.your_uploads) ? brief.your_uploads : [];
+  if (!ups.length) {
+    host.innerHTML = '<div class="dlv-empty"><div class="dlv-empty-h">No uploads yet</div>'
+      + '<div class="dlv-empty-p">Anything you share with us appears here. Drag a file into the box above to upload.</div></div>';
+    return;
+  }
+  host.innerHTML = ups.map(function(f){
+    return '<div class="dlv-upload" id="file-'+fEsc(f.id)+'">'
+      + '<div class="dlv-thumb">'+fileIcon(f.name)+'</div>'
+      + '<div class="dlv-up-info"><div class="dlv-up-name">'+fEsc(f.name)+'</div>'
+      + '<div class="dlv-meta">'+(f.type?fEsc(f.type)+' · ':'')+(f.size?fEsc(f.size)+' · ':'')+(f.created_at?fEsc(formatDate(f.created_at)):'')+'</div></div>'
+      + '<div class="dlv-up-actions">'
+      + (f.storage_path?'<button class="dlv-btn dlv-btn-ghost" onclick="downloadFile(\''+fAttr(f.storage_path)+'\')">Open</button>':'')
+      + '<button class="dlv-btn dlv-btn-ghost danger" onclick="deleteFile(\''+fEsc(f.id)+'\',\''+fAttr(f.storage_path)+'\')">Delete</button>'
+      + '</div></div>';
+  }).join("");
+}
+
+function filterFiles(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".file-tab").forEach(function(t){ t.classList.remove("active"); });
+  if (btn) btn.classList.add("active");
+  renderFiles();
 }
 
 // Generate a short-lived signed URL on demand and open it.
@@ -1793,34 +1987,6 @@ async function downloadFile(storagePath) {
   }
 }
 
-function renderFiles() {
-  var list = currentFilter === "all" ? allFiles
-    : allFiles.filter(f => f.from_who === currentFilter);
-  
-  document.getElementById("fileList").innerHTML = list.length === 0
-    ? "<div class=\"empty-state\"><div class=\"ei\">📁</div><p>No files here yet.<br>Drag a file in above, or upload your brand assets to get started.</p><button class=\"es-btn\" onclick=\"document.querySelector('#uploadZone input').click()\">Upload a file</button></div>"
-    : list.map(f => `
-      <div class="file-item" id="file-${f.id}">
-        <div class="file-thumb">${fileIcon(f.name)}</div>
-        <div class="file-info"><h4>${esc(f.name)}</h4><p>${esc(f.type||"")} · ${esc(f.size||"")} · ${formatDate(f.created_at)}</p></div>
-        <span class="file-status ${f.status}">${cap(f.status)}</span>
-        <div class="file-actions">
-          ${f.storage_path ? `<button class="file-btn" onclick="downloadFile('${f.storage_path.replace(/'/g,"\\'")}')">Download</button>` : ""}
-          <button class="file-btn" onclick="toggleFileComments('${f.id}')">💬 Comments</button>
-          ${f.from_who === "eric" && f.status === "pending" ? `<button class="file-btn" onclick="approveFile('${f.id}')">Approve ✓</button>` : ""}
-          ${f.from_who === "client" ? `<button class="file-btn danger" onclick="deleteFile('${f.id}','${f.storage_path}')">Delete</button>` : ""}
-        </div>
-        <div class="file-comments" id="fc-${f.id}" style="display:none;flex-basis:100%;width:100%;margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,63,160,0.08);">
-          <div id="fc-list-${f.id}" style="margin-bottom:10px;"></div>
-          <div style="display:flex;gap:8px;">
-            <input id="fc-input-${f.id}" type="text" placeholder="Add a comment about this file..." style="flex:1;padding:9px 12px;border:1px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter')postFileComment('${f.id}')">
-            <button class="file-btn" onclick="postFileComment('${f.id}')">Send</button>
-          </div>
-        </div>
-      </div>`).join("");
-}
-
-// ── FILE COMMENTS ──
 async function toggleFileComments(fileId) {
   var box = document.getElementById("fc-" + fileId);
   if (!box) return;
@@ -1870,12 +2036,6 @@ async function postFileComment(fileId) {
   await loadFileComments(fileId);
 }
 
-function filterFiles(filter, btn) {
-  currentFilter = filter;
-  document.querySelectorAll(".file-tab").forEach(t => t.classList.remove("active"));
-  btn.classList.add("active");
-  renderFiles();
-}
 
 async function handleFiles(files) {
   for (var file of Array.from(files)) {
