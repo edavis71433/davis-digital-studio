@@ -901,6 +901,63 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .conv-empty{ text-align:center; padding:48px 24px; }
 .conv-empty-h{ font-family:var(--serif); font-size:22px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
 .conv-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:28em; margin:0 auto; }
+/* ── Billing: calm status line, then exact literal invoice records. Money is
+   never styled to look interpreted. All on foundation tokens. ── */
+
+.bill-status{ display:flex; flex-direction:column; align-items:flex-start; gap:0;
+  border-radius:var(--r-lg,16px); padding:24px 26px; margin-bottom:14px;
+  background:var(--surface-2,#faf9fc); border-left:3px solid var(--brass,#B08D57); }
+.bill-status-good{ background:var(--ok-mist,#E6F0E9); border-left-color:var(--ok,#3F7D5B); }
+.bill-status-action{ background:var(--p-soft); border-left-color:var(--p); }
+.bill-status-mark{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:18px; margin-bottom:14px;
+  background:#fff; color:var(--brass,#B08D57); }
+.bill-status-good .bill-status-mark{ color:var(--ok,#3F7D5B); }
+.bill-status-action .bill-status-mark{ color:var(--p); }
+.bill-status-line{ font-family:var(--serif); font-size:25px; font-weight:400; line-height:1.25;
+  color:var(--ink); letter-spacing:-0.01em; }
+.bill-status-sub{ font-size:14.5px; color:var(--ink-2,#574d68); margin-top:8px; }
+
+.bill-clear{ display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:1.55;
+  color:var(--ok,#3F7D5B); background:var(--ok-mist,#E6F0E9); border-radius:var(--r,12px);
+  padding:14px 16px; margin-bottom:20px; }
+.bill-clear-ico{ flex:none; margin-top:1px; font-weight:700; }
+
+.bill-section-label{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--brass); margin:22px 0 12px; }
+
+.bill-row{ background:#fff; border:1px solid var(--line); border-radius:var(--r,12px);
+  padding:18px 20px; margin-bottom:10px; }
+.bill-row-due{ border-color:var(--p-soft); box-shadow:var(--sh-1); }
+.bill-row-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.bill-row-main{ min-width:0; }
+.bill-row-name{ font-size:15.5px; font-weight:600; color:var(--ink); }
+.bill-row-desc{ font-size:13.5px; color:var(--muted); line-height:1.5; margin-top:4px; }
+.bill-row-date{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+.bill-row-right{ flex:none; text-align:right; }
+/* the amount: exact, prominent, never dressed up as a computed figure */
+.bill-row-amount{ font-family:var(--serif); font-size:22px; font-weight:400; color:var(--ink);
+  letter-spacing:-0.01em; line-height:1; margin-bottom:8px; }
+.bill-badge{ display:inline-block; font-size:11px; font-weight:600; letter-spacing:.03em;
+  padding:4px 10px; border-radius:var(--r-pill,100px); }
+.bill-badge-paid{ color:var(--ok,#3F7D5B); background:var(--ok-mist,#E6F0E9); }
+.bill-badge-due{ color:var(--p); background:var(--p-soft); }
+.bill-badge-other{ color:var(--muted); background:var(--surface-3,#f3f0f9); }
+
+.bill-row-pay{ margin-top:16px; padding-top:16px; border-top:1px solid var(--line); }
+.bill-pay{ display:inline-block; background:var(--p); color:#fff; text-decoration:none;
+  font-family:var(--sans); font-size:14.5px; font-weight:600; padding:13px 22px;
+  border-radius:var(--r-pill,100px); transition:all var(--dur-fast,.15s) var(--ease); }
+.bill-pay:hover{ background:var(--p-deep,#2A1B4A); transform:translateY(-1px); }
+
+.bill-empty{ text-align:center; padding:48px 24px; }
+.bill-empty-h{ font-family:var(--serif); font-size:22px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
+.bill-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:28em; margin:0 auto; }
+
+@media (max-width:560px){
+  .bill-row-top{ flex-direction:column; }
+  .bill-row-right{ text-align:left; }
+}
 
 @media (max-width:560px){
   .dlv-card{ padding:20px 18px; }
@@ -1210,11 +1267,11 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- INVOICES -->
       <div class="page-view" id="page-invoices">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Invoices</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">All billing in one place. Pay securely via Stripe.</p>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Billing</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Your payments, clear and exact. Pay securely via Stripe.</p>
         <div class="card"><div class="card-body" id="invoiceBody"></div></div>
         <div class="card" style="margin-top:0;">
-          <div class="card-header"><div class="card-title">➕ Request an Add-On</div></div>
+          <div class="card-header"><div class="card-title">Request an add-on</div></div>
           <div class="card-body">
             <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Need something extra? Request below and Eric will add it to your next invoice.</p>
             <div class="addon-grid" id="addonGrid"></div>
@@ -1660,7 +1717,7 @@ function computeActionItems() {
     items.push({ico:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', t1:window._pendingApprovals+" deliverable"+(window._pendingApprovals>1?"s":"")+" to review", t2:"Approve or request changes", tab:"approvals"});
   }
   if ((window._unpaidInvoices||0) > 0) {
-    items.push({ico:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>', t1:window._unpaidInvoices+" invoice"+(window._unpaidInvoices>1?"s":"")+" ready to pay", t2:"$"+(window._unpaidTotal||0).toLocaleString()+" due", tab:"invoices"});
+    items.push({ico:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>', t1:window._unpaidInvoices+" invoice"+(window._unpaidInvoices>1?"s":"")+" ready to pay", t2:"See the exact amount in Billing", tab:"invoices"});
   }
   window._actionItems = items;
   return items;
@@ -2324,37 +2381,119 @@ async function sendMsg() {
 }
 
 // ── INVOICES ──
+// ════════════════════════════════════════════════════════════════════════════
+//  BILLING — calm, exact, trustworthy. Thin consumer of client_billing.
+//  Leads with ONE calm status line about the situation. Beneath it, every
+//  invoice renders LITERAL: exact amount, exact date, exact status, exact Stripe
+//  link. The engine never touches money; the room never reformats it. The Stripe
+//  payment mechanic (inv.stripe_url) is preserved exactly.
+// ════════════════════════════════════════════════════════════════════════════
 async function loadInvoices() {
   renderLoading("invoiceBody", 2);
-  const { data, error } = await sb.from("invoices")
-    .select("*").eq("client_id", CLIENT.id).order("created_at");
-  if (error) { renderError("invoiceBody", "loadInvoices()"); return; }
-  try { window._invoiceCache = (data||[]).map(function(i){ return { label:i.label||i.description, amount:i.amount, status:i.status, paid:i.paid }; }); } catch(e){}
-  if (!data) { document.getElementById("invoiceBody").innerHTML = '<div class="empty-state"><div class="ei">🧾</div><p>No invoices yet.</p></div>'; return; }
-  
-  var total = 0; var paid = 0;
-  var html = data.map(inv => {
-    var amt = parseFloat(inv.amount?.replace(/[^0-9.]/g,"")) || 0;
-    total += amt;
-    if (inv.status === "paid") paid += amt;
-    var payBtn = inv.status === "pending" && inv.stripe_url
-      ? `<a href="${inv.stripe_url}" target="_blank" class="pay-btn" rel="noopener">💳 Pay now →</a>` : "";
-    return `<div class="inv-item">
-      <div class="inv-left"><h4>${esc(inv.name)}</h4><p>${esc(inv.description||"")}<br>${esc(inv.due_date||"")}</p></div>
-      <div class="inv-right"><div class="inv-amount">${inv.amount}</div>
-      <span class="inv-badge ${inv.status}">${cap(inv.status)}</span>${payBtn}</div></div>`;
-  }).join("");
-  
-  html += `<div style="margin-top:16px;padding-top:16px;border-top:2px solid rgba(91,63,160,0.1);display:flex;justify-content:space-between;">
-    <div style="font-size:13px;color:var(--muted);">Total: <strong>$${total.toLocaleString()}</strong></div>
-    <div style="font-size:13px;color:var(--muted);">Balance: <strong style="color:var(--p);font-family:var(--serif);font-size:18px;">$${(total-paid).toLocaleString()}</strong></div></div>`;
-  
-  document.getElementById("invoiceBody").innerHTML = html;
-  window._unpaidInvoices = data.filter(i => i.status === "pending").length;
-  window._unpaidTotal = data.filter(i => i.status === "pending").reduce((s,i)=>s+(parseFloat(i.amount?.replace(/[^0-9.]/g,""))||0),0);
-  var balEl = document.getElementById("stat-balance");
-  if (balEl) balEl.textContent = "$" + (window._unpaidTotal || 0).toLocaleString();
-  updateAttention();
+  var payload = null;
+  try { var r = await gpApi('client_billing', {}); payload = (r && r.data) ? r.data : null; }
+  catch(e){ console.error('client_billing:', e); }
+  if (!payload) { renderError("invoiceBody", "loadInvoices()"); return; }
+
+  var sit = payload.situation || {};
+  var invoices = payload.invoices || [];
+
+  // keep attention/badge counts working from the same source of truth, using
+  // the engine's COUNT (never a summed amount).
+  window._unpaidInvoices = sit.due_count || 0;
+  try { updateAttention(); } catch(e){}
+
+  renderBilling(sit, invoices);
+}
+
+function bEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+// status -> human label + tone, WITHOUT touching amounts
+function bStatusLabel(status){
+  var x = String(status||'').toLowerCase();
+  if (x === 'paid' || x === 'complete' || x === 'completed') return 'Paid';
+  if (x === 'overdue') return 'Overdue';
+  if (x === 'pending' || x === 'due' || x === 'unpaid' || x === 'open') return 'Due';
+  return status ? (status.charAt(0).toUpperCase()+status.slice(1)) : '';
+}
+function bIsDue(status){ var x=String(status||'').toLowerCase(); return x==='pending'||x==='due'||x==='unpaid'||x==='open'||x==='overdue'; }
+function bIsPaid(status){ var x=String(status||'').toLowerCase(); return x==='paid'||x==='complete'||x==='completed'; }
+
+function renderBilling(sit, invoices){
+  var host = document.getElementById("invoiceBody");
+  if (!host) return;
+
+  // ── THE CALM STATUS LINE — the situation, never a number ──
+  var tone = (sit.status && sit.status.tone) ? sit.status.tone : 'calm';
+  var line = (sit.status && sit.status.line) ? sit.status.line : '';
+  var html = '<div class="bill-status bill-status-'+bEsc(tone)+'">'
+    + '<div class="bill-status-mark">'+(tone==='good'?'\u2713':(tone==='action'?'\u25C9':'\u2713'))+'</div>'
+    + '<div class="bill-status-line">'+bEsc(line)+'</div>';
+  // when due, point to WHEN it's due using the LITERAL due date (pass-through)
+  if (sit.due_count > 0 && sit.next_due_when) {
+    html += '<div class="bill-status-sub">Due '+bEsc(sit.next_due_when)+'.</div>';
+  } else if (sit.next_note) {
+    html += '<div class="bill-status-sub">'+bEsc(sit.next_note)+'</div>';
+  }
+  html += '</div>';
+
+  // ── all-clear confidence note (only when genuinely settled) ──
+  if (sit.all_clear && sit.all_clear_line) {
+    html += '<div class="bill-clear"><span class="bill-clear-ico">\u2713</span>'+bEsc(sit.all_clear_line)+'</div>';
+  }
+
+  if (!invoices.length) {
+    html += '<div class="bill-empty"><div class="bill-empty-h">No invoices yet</div>'
+      + '<div class="bill-empty-p">When there is something to pay, it will appear here, clear and itemized.</div></div>';
+    host.innerHTML = html;
+    return;
+  }
+
+  // order: anything due first (so the actionable item is on top), then paid history
+  var dueRows = invoices.filter(function(i){ return bIsDue(i.status); });
+  var paidRows = invoices.filter(function(i){ return bIsPaid(i.status); });
+  var otherRows = invoices.filter(function(i){ return !bIsDue(i.status) && !bIsPaid(i.status); });
+
+  // ── DUE NOW — the literal invoice(s) needing payment ──
+  if (dueRows.length) {
+    html += '<div class="bill-section-label">Ready to pay</div>';
+    dueRows.forEach(function(inv){ html += billRow(inv, true); });
+  }
+
+  // ── PAID — what you've already paid (literal history) ──
+  if (paidRows.length) {
+    html += '<div class="bill-section-label">Already paid</div>';
+    paidRows.forEach(function(inv){ html += billRow(inv, false); });
+  }
+  otherRows.forEach(function(inv){ html += billRow(inv, false); });
+
+  host.innerHTML = html;
+}
+
+// One literal invoice row. EVERYTHING here is verbatim from the invoice record:
+// the amount string exactly as stored, the exact description, exact date, exact
+// status, exact Stripe link. We never compute, round, or restate the money.
+function billRow(inv, isDue){
+  var label = bStatusLabel(inv.status);
+  var statusClass = bIsPaid(inv.status) ? 'paid' : (bIsDue(inv.status) ? 'due' : 'other');
+  // the literal payment link, preserved exactly (per-invoice stripe_url)
+  var payBtn = (bIsDue(inv.status) && inv.stripe_url)
+    ? '<a href="'+bEsc(inv.stripe_url)+'" target="_blank" rel="noopener" class="bill-pay">Pay this invoice \u2192</a>'
+    : '';
+  return '<div class="bill-row'+(isDue?' bill-row-due':'')+'">'
+    + '<div class="bill-row-top">'
+    +   '<div class="bill-row-main">'
+    +     '<div class="bill-row-name">'+bEsc(inv.name)+'</div>'
+    +     (inv.description ? '<div class="bill-row-desc">'+bEsc(inv.description)+'</div>' : '')
+    +     (inv.due_date ? '<div class="bill-row-date">'+(bIsPaid(inv.status)?'':'Due ')+bEsc(inv.due_date)+'</div>' : '')
+    +   '</div>'
+    +   '<div class="bill-row-right">'
+    +     '<div class="bill-row-amount">'+bEsc(inv.amount)+'</div>'   // EXACT, verbatim
+    +     '<span class="bill-badge bill-badge-'+statusClass+'">'+bEsc(label)+'</span>'
+    +   '</div>'
+    + '</div>'
+    + (payBtn ? '<div class="bill-row-pay">'+payBtn+'</div>' : '')
+    + '</div>';
 }
 
 // ── APPROVALS ──
