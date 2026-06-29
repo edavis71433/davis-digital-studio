@@ -325,6 +325,11 @@ footer.site .fbase a{color:rgba(255,255,255,.5)}
   /* — Reveal animation: instant-feeling on mobile — */
   .js-anim .reveal{transition:opacity .4s ease,transform .4s ease}
 
-  /* — Tap targets: 44px minimum in footer — */
-  .fcol a{padding:8px 0;display:inline-block}
+  /* — Contact: collapse the two-column form/aside grid to one column.
+       (overrides an inline desktop grid; !important is required to beat inline) — */
+  body[data-page="contact"] .wrap[style*="grid"]{grid-template-columns:1fr !important;gap:36px !important}
+
+  /* — Tap targets: 44px minimum (HIG) for the two real offenders — */
+  .burger{padding:13px;margin:-5px -8px -5px 0}
+  footer.site .fcol a{padding:9px 0}
 }
