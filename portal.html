@@ -859,6 +859,48 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
   color:var(--ok,#3F7D5B); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 18px; }
 .dlv-empty-h{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
 .dlv-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:30em; margin:0 auto; }
+/* ── Conversation room: an orientation strip above the literal thread. The
+   strip helps the client get their bearings; the thread is the source of truth.
+   All on foundation tokens. ── */
+
+.conv-orient{ border-radius:var(--r-lg,16px); padding:18px 20px; margin-bottom:8px;
+  border-left:3px solid var(--brass,#B08D57); background:var(--surface-2,#faf9fc); }
+.conv-orient-action{ border-left-color:var(--p); background:var(--p-soft); }
+.conv-orient-good{ border-left-color:var(--ok,#3F7D5B); background:var(--ok-mist,#E6F0E9); }
+.conv-orient-calm{ border-left-color:var(--brass,#B08D57); }
+.conv-orient-line{ font-family:var(--serif); font-size:18px; line-height:1.4; color:var(--ink);
+  letter-spacing:-0.01em; }
+.conv-orient-wait{ display:flex; align-items:flex-start; gap:9px; font-size:14px; line-height:1.5;
+  color:var(--ink-2,#574d68); margin-top:12px; }
+.conv-orient-ico{ color:var(--p); flex:none; margin-top:1px; }
+.conv-orient-next{ font-size:13.5px; line-height:1.5; color:var(--muted); margin-top:10px; }
+
+/* the handoff line to the literal record */
+.conv-anchor{ font-size:12px; color:var(--muted); text-align:center; margin:18px 0 14px;
+  position:relative; }
+.conv-anchor::before, .conv-anchor::after{ content:""; position:absolute; top:50%; width:18%;
+  height:1px; background:var(--line); }
+.conv-anchor::before{ left:6%; }
+.conv-anchor::after{ right:6%; }
+
+/* the literal thread */
+.conv-thread{ display:flex; flex-direction:column; gap:14px; }
+.conv-msg{ display:flex; gap:12px; align-items:flex-start; max-width:88%; }
+.conv-msg.from-client{ flex-direction:row-reverse; align-self:flex-end; }
+.conv-av{ width:34px; height:34px; border-radius:50%; flex:none; display:flex; align-items:center;
+  justify-content:center; font-size:13px; font-weight:600; background:var(--brass,#B08D57); color:#fff; }
+.conv-av.client{ background:var(--p); }
+.conv-content{ min-width:0; }
+.conv-meta{ font-size:11.5px; color:var(--muted); margin-bottom:5px; }
+.conv-msg.from-client .conv-meta{ text-align:right; }
+.conv-text{ font-size:15px; line-height:1.6; color:var(--ink); background:#fff; border:1px solid var(--line);
+  border-radius:16px; padding:13px 16px; white-space:pre-wrap; word-break:break-word; }
+.conv-msg.from-client .conv-text{ background:var(--p-soft); border-color:transparent; }
+
+/* empty state — relationship framing, not an apology */
+.conv-empty{ text-align:center; padding:48px 24px; }
+.conv-empty-h{ font-family:var(--serif); font-size:22px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
+.conv-empty-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:28em; margin:0 auto; }
 
 @media (max-width:560px){
   .dlv-card{ padding:20px 18px; }
@@ -990,7 +1032,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       <div style="padding:8px 0;">
         <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg></span>Home</button>
         <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Project<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
-        <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Messages<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Conversation<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Billing</button>
 
         <div class="sidebar-divider growth-only" style="display:none"></div>
@@ -1153,7 +1195,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- MESSAGES -->
       <div class="page-view" id="page-messages">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:20px;">Messages</h2>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Conversation</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">You and Eric, staying in touch. Everything here is exactly as it was said.</p>
         <div class="card">
           <div class="card-body">
             <div class="msg-thread" id="msgThread"></div>
@@ -2157,36 +2200,88 @@ function escAttr(s) {
 }
 var allMessages = [];
 
+// ════════════════════════════════════════════════════════════════════════════
+//  CONVERSATION — the ongoing relationship, not an inbox.
+//  Thin consumer of client_conversation. The engine ORIENTS (what's waiting,
+//  what's caught up, what to do); Eric's words render VERBATIM beneath, exactly
+//  as sent. No paraphrase, no summary, no generated replies. The thread is the
+//  source of truth. Send mechanic is preserved untouched.
+// ════════════════════════════════════════════════════════════════════════════
 async function loadMessages() {
   renderLoading("msgThread", 3);
-  const { data, error } = await sb.from("messages")
-    .select("*").eq("client_id", CLIENT.id).order("created_at");
-  if (error) { renderError("msgThread", "loadMessages()"); return; }
-  allMessages = data || [];
+  var payload = null;
+  try { var r = await gpApi('client_conversation', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); payload = (r && r.data) ? r.data : null; }
+  catch(e){ console.error('client_conversation:', e); }
+  if (!payload) { renderError("msgThread", "loadMessages()"); return; }
+  allMessages = payload.messages || [];
+  window._convOrient = payload.orient || null;
   renderMessages();
-  
-  // Dashboard preview
-  var recent = allMessages.slice(-2);
-  var _dm=document.getElementById("dashMsgs"); if(_dm) _dm.innerHTML = recent.length === 0
-    ? "<div class=\"empty-state\"><div class=\"ei\">💬</div><p>No messages yet.<br>Have a question or want to share feedback? Send Eric a note below — he typically replies within 24 hours.</p></div>"
-    : recent.map(m => `<div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${esc(m.sender_name)} · ${formatDate(m.created_at)}</div>
-        <p style="font-size:12px;line-height:1.5;">${esc(m.text.substring(0,80))}${m.text.length>80?"...":""}</p></div>`).join("");
+
+  // Dashboard preview: an orientation line, not a truncated message (we never
+  // excerpt Eric's words out of context).
+  var _dm = document.getElementById("dashMsgs");
+  if (_dm) {
+    var o = payload.orient;
+    _dm.innerHTML = o
+      ? '<div style="padding:10px 0;"><p style="font-size:13px;line-height:1.55;color:var(--ink);">'+cEsc(o.status.line)+'</p></div>'
+      : '<div style="padding:10px 0;"><p style="font-size:13px;color:var(--muted);">This is where you and Eric stay in touch.</p></div>';
+  }
+
+  // Badge: genuinely new from Eric since last visit.
+  var unread = payload.orient ? payload.orient.unread_since_visit : 0;
+  setBadge("badge-messages", unread);
 }
+
+function cEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
 function renderMessages(msgs) {
   if (msgs) allMessages = msgs;
   var thread = document.getElementById("msgThread");
   if (!thread) return;
-  thread.innerHTML = allMessages.map(m => `
-    <div class="msg-bubble from-${m.from_who}">
-      <div class="msg-av ${m.from_who==="client"?"client":""}">${m.from_who==="client"?CLIENT.name[0]:"E"}</div>
-      <div class="msg-content">
-        <div class="msg-meta">${esc(m.sender_name)} · ${formatDate(m.created_at)}</div>
-        <div class="msg-text">${esc(m.text)}</div>
-      </div>
-    </div>`).join("");
-  thread.scrollTop = thread.scrollHeight;
+  var o = window._convOrient;
+
+  var html = '';
+
+  // ── ORIENTATION STRIP — about the SHAPE of the conversation, never its words ──
+  if (o) {
+    html += '<div class="conv-orient conv-orient-'+cEsc(o.status.tone)+'">';
+    html += '<div class="conv-orient-line">'+cEsc(o.status.line)+'</div>';
+    // a pointer to what's waiting — by time, never quoting the message
+    if (o.waiting_on_you && o.waiting_pointer) {
+      html += '<div class="conv-orient-wait"><span class="conv-orient-ico">\u25C9</span>'+cEsc(o.waiting_pointer)+' is below.</div>';
+    }
+    html += '<div class="conv-orient-next">'+cEsc(o.next_step)+'</div>';
+    html += '</div>';
+    // a clear divider that hands off to the literal record
+    if (allMessages.length) {
+      html += '<div class="conv-anchor">'+cEsc(o.read_anchor)+'</div>';
+    }
+  }
+
+  // ── THE LITERAL THREAD — verbatim, exactly as it happened ──
+  if (!allMessages.length) {
+    html += '<div class="conv-empty"><div class="conv-empty-h">No messages yet</div>'
+      + '<div class="conv-empty-p">Send Eric a note below whenever you have a question or something to share.</div></div>';
+  } else {
+    html += '<div class="conv-thread">';
+    allMessages.forEach(function(m){
+      var mine = m.from_who === "client";
+      var initial = mine ? ((CLIENT && CLIENT.name) ? CLIENT.name[0] : "Y") : "E";
+      html += '<div class="conv-msg from-'+cEsc(m.from_who)+'">'
+        + '<div class="conv-av '+(mine?"client":"")+'">'+cEsc(initial)+'</div>'
+        + '<div class="conv-content">'
+        + '<div class="conv-meta">'+cEsc(m.sender_name)+' \u00B7 '+formatDate(m.created_at)+'</div>'
+        // m.text is rendered VERBATIM (escaped for safety only, never altered)
+        + '<div class="conv-text">'+cEsc(m.text)+'</div>'
+        + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  thread.innerHTML = html;
+  // keep the latest in view, as a conversation should
+  var t = document.getElementById("msgThread");
+  if (t) t.scrollTop = t.scrollHeight;
 }
 
 var _sendingMsg = false;
