@@ -24,6 +24,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="styles.css">
 <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})();</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-V4WF04NX7F',{anonymize_ip:true});</script>
@@ -35,7 +36,6 @@ html{scroll-behavior:smooth;overflow-x:hidden;}
 body{font-family:var(--sans);background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;}
 :root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'Fraunces',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;}
 a{color:inherit;}
-.site-footer{background:var(--pdark);}
 .section{padding:72px 24px;}
 .section-inner{max-width:960px;margin:0 auto;}
 .section-tag{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:12px;}
@@ -56,12 +56,8 @@ a{color:inherit;}
 .cta-band h2{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:400;color:#fff;letter-spacing:-0.8px;margin-bottom:12px;}
 .cta-band h2 em{font-style:italic;color:var(--pxl);}
 .cta-band p{font-size:16px;color:rgba(255,255,255,0.65);margin-bottom:32px;}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--p);font-size:14px;font-weight:700;padding:14px 28px;border-radius:100px;text-decoration:none;transition:transform 0.15s;}
-.btn-primary:hover{transform:translateY(-2px);}
-.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;padding:13px 28px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.2);text-decoration:none;}
 .photo-hero{width:100%;height:320px;object-fit:cover;border-radius:20px;display:block;}
 @media(max-width:768px){
-  .footer-grid{grid-template-columns:1fr 1fr!important;}
   .section{padding:52px 24px;}
 }
 @media(max-width:480px){
@@ -73,54 +69,14 @@ a{color:inherit;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:#5b3fa0;color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
-.nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
-.nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
-.nav-logo span{color:#5b3fa0;}
-.nav-links{display:flex;align-items:center;gap:2px;}
-.nav-links>a,.nav-drop>button{font-family:var(--sans);font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
-.nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
-.nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
-.nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
-.nav-report{color:#5b3fa0!important;background:#ede8f7!important;font-weight:700;padding:7px 14px;border-radius:100px;text-decoration:none;border:1.5px solid #c4aee8;white-space:nowrap;margin-left:2px;display:inline-flex;align-items:center;}
-.nav-drop{position:relative;}
-.nav-drop>button svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-drop:hover>button svg{transform:rotate(180deg);}
-.nav-drop-menu{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.12);padding:8px;min-width:210px;z-index:10000;}
-.nav-drop:hover .nav-drop-menu{display:block;}
-.nav-drop-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#1a1523;text-decoration:none;white-space:nowrap;}
-.nav-drop-menu a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-drop-menu a svg{color:#5b3fa0;flex-shrink:0;}
-.nav-drop-divider{height:1px;background:rgba(91,63,160,0.08);margin:4px 0;}
-.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;width:44px;height:44px;align-items:center;justify-content:center;}
-.nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
-.nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
-.nav-mob.open{display:flex;}
-.nav-mob>a{font-family:var(--sans);font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
-.nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group{margin:2px 0;}
-.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:var(--sans);font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
-.nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
-.nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
-.nav-mob-sub{display:none;padding-left:12px;border-left:2px solid #ede8f7;margin:2px 0 4px 14px;}
-.nav-mob-group.open .nav-mob-sub{display:flex;flex-direction:column;}
-.nav-mob-sub a{font-size:14px;color:#6b5f7e;padding:9px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;min-height:44px;}
-.nav-mob-sub a:hover{background:#f7f4fd;color:#5b3fa0;}
-.nav-mob .mob-cta{font-weight:600;background:#5b3fa0;color:#fff!important;text-align:center;border-radius:100px;margin-top:8px;justify-content:center;}
-.nav-mob .mob-cta:hover{background:#4a3280!important;}
 body{padding-top:68px;}
-@media(max-width:900px){.nav{padding:0 20px;}.nav-links{display:none;}.nav-ham{display:flex;}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}}
 
 
 /* Dropdown gap fix - bridge pseudo-element */
-.nav-drop-menu::before{content:'';position:absolute;top:-10px;left:0;right:0;height:10px;background:transparent;}
-.nav-drop:hover .nav-drop-menu{display:block;}
 
 
 /* Dropdown bridge - prevents menu closing when moving mouse down */
-.nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
-.nav-drop{padding-bottom:0;}
 
 </style>
 <link rel="stylesheet" href="/enhance.css">
@@ -137,99 +93,32 @@ body{padding-top:68px;}
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
-<nav class="nav" role="navigation" aria-label="Main navigation">
-  <a href="/" class="nav-logo">Davis<span>Digital</span> Studio</a>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/about">About Us</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/services"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> All Solutions</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Web Design</a>
-        <a href="/seo-strategy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> SEO Strategy</a>
-        <a href="/monthly-retainer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M8 2v4M16 2v4M3 10h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z"/></svg> Ongoing Support</a>
-      </div>
-    </div>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/restaurant-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-5v12L3 14v-3z"/></svg> Restaurants &amp; Bars</a>
-        <a href="/salon-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 8v4l3 3"/></svg> Salons &amp; Spas</a>
-        <a href="/retail-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 4.5h9L18 2M3 6h18l-1.5 14H4.5z"/></svg> Retail &amp; Boutiques</a>
-        <a href="/health-wellness-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health &amp; Wellness</a>
-        <a href="/home-services-web-design"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Home Services</a>
-      </div>
-    </div>
-    <a href="/work">Case Studies</a>
-    <div class="nav-drop">
-      <button class="nav-drop-btn">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div class="nav-drop-menu">
-        <a href="/tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg> All Free Tools</a>
-        <div class="nav-drop-divider"></div>
-        <a href="/audit#free-audit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16"/></svg> Free Site Score</a>
-        <a href="/ai-critique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5.7.7 1 1.3 1 2.5h6c0-1.2.3-1.8 1-2.5 1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/><path d="M9 21h6"/></svg> AI Website Review</a>
-        <a href="/report-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg> Digital Report Card</a>
-        <a href="/roi-calculator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 6 13.5 15.5 8.5 10.5 1 18"/></svg> ROI Calculator</a>
-        <a href="/speed-test"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20M12 12l4-4"/></svg> Speed Test</a>
-        <a href="/local-visibility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 4.5-7 13-7 13S5 13.5 5 9a7 7 0 0 1 7-7z"/></svg> Local Visibility</a>
-        <a href="/pricing-estimator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Pricing Estimator</a>
-      </div>
-    </div>
-    <a href="/report-card" class="nav-report">Free Report Card</a>
-    <a href="/portal" style="font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;transition:color 0.15s,background 0.15s;" onmouseover="this.style.color='#5b3fa0';this.style.background='#f7f4fd'" onmouseout="this.style.color='#7a6d8e';this.style.background=''">Client Login</a>
-    <a href="/audit" class="nav-cta">Free Site Score</a>
+<header class="nav">
+<div class="wrap nav-in">
+  <a href="index.html" class="brand"><svg class="mark" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="16" cy="16" r="15" stroke="#B08D57" stroke-width="1"/>
+<path d="M10 21V11h4.2c3 0 4.8 1.9 4.8 5s-1.8 5-4.8 5H10z" stroke="#1B1525" stroke-width="1.4" fill="none"/>
+<circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
+  <nav class="nav-links">
+    <a href="how-we-work.html">How we work</a>
+    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle">Services <i class="caret" aria-hidden="true"></i></a>
+      <span class="nav-sub">
+        <a href="services.html">All services<small>Pricing and the full picture</small></a>
+        <a href="web-design.html">Web design<small>Strategy-led sites that convert</small></a>
+        <a href="seo-strategy.html">SEO strategy<small>Get found by people searching</small></a>
+        <a href="monthly-retainer.html" class="active">Ongoing care<small>Keep your site working after launch</small></a>
+      </span></span>
+    <a href="industries.html">Industries</a>
+    <a href="about.html">About</a>
+    <a href="tools.html">Free tools</a>
+  </nav>
+  <div class="nav-actions">
+    <a href="portal.html" class="nav-login">Client login</a>
+    <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="nav-ham" id="navHam" aria-expanded="false" aria-controls="navMob" aria-label="Open menu">
-    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-  </button>
-</nav>
-<div class="nav-mob" id="navMob" role="navigation" aria-label="Mobile navigation">
-  <a href="/">Home</a>
-  <a href="/about">About Us</a>
-  <div class="nav-mob-group" id="mobServices">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobServices')">Solutions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/services">All Solutions</a>
-      <a href="/web-design">Web Design</a>
-      <a href="/seo-strategy">SEO Strategy</a>
-      <a href="/monthly-retainer">Ongoing Support</a>
-    </div>
-  </div>
-  <div class="nav-mob-group" id="mobIndustries">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobIndustries')">Industries <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/restaurant-web-design">Restaurants &amp; Bars</a>
-      <a href="/salon-web-design">Salons &amp; Spas</a>
-      <a href="/retail-web-design">Retail &amp; Boutiques</a>
-      <a href="/health-wellness-web-design">Health &amp; Wellness</a>
-      <a href="/home-services-web-design">Home Services</a>
-    </div>
-  </div>
-  <a href="/work">Case Studies</a>
-  <div class="nav-mob-group" id="mobTools">
-    <button class="nav-mob-group-btn" onclick="toggleMobGroup('mobTools')">Free Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <div class="nav-mob-sub">
-      <a href="/audit#free-audit">Free Site Score</a>
-      <a href="/ai-critique">AI Website Review</a>
-      <a href="/report-card">Digital Report Card</a>
-      <a href="/roi-calculator">ROI Calculator</a>
-      <a href="/speed-test">Speed Test</a>
-      <a href="/local-visibility">Local Visibility</a>
-      <a href="/pricing-estimator">Pricing Estimator</a>
-    </div>
-  </div>
-  <a href="/report-card">Free Report Card</a>
-  <a href="/portal" style="font-size:16px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;">Client Login</a>
-  <a href="/contact" class="mob-cta">Book a free call</a>
+  <button class="burger" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')"><span></span><span></span></button>
 </div>
-<nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
-  <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;font-size:13px;flex-wrap:wrap;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);opacity:0.5;flex-shrink:0;margin-right:8px;" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-    <a href="/" style="color:var(--muted);text-decoration:none;">Home</a><span style="color:var(--muted);opacity:0.4;margin:0 8px;">/</span><a href="/services" style="color:var(--muted);text-decoration:none;">Services</a><span style="color:var(--muted);opacity:0.4;margin:0 8px;">/</span><span style="color:var(--p);font-weight:600;">Ongoing Support</span>
-  </div>
-</nav>
+</header>
 <section role="banner" style="padding:48px 24px 64px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div aria-hidden="true" style="position:absolute;top:-120px;left:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,63,160,0.10) 0%,transparent 65%);pointer-events:none;"></div>
   <div style="max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;align-items:center;position:relative;z-index:1;">
@@ -242,8 +131,8 @@ body{padding-top:68px;}
       <h1 style="font-family:var(--serif);font-size:clamp(36px,5vw,62px);font-weight:400;line-height:1.05;letter-spacing:-2px;color:#1a1523;margin-bottom:20px;">Launching a website is the beginning. <em style="color:#5b3fa0;font-style:italic;">Not the finish line.</em></h1>
       <p style="font-size:17px;line-height:1.65;color:#6b5f7e;margin-bottom:28px;max-width:500px;">The businesses that perform best online don't launch and disappear. They improve. Adapt. Test. Refine. That's what a retainer is designed to support.</p>
       <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:36px;">
-        <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Book a free call →</a>
-        <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1a1523;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">Book a free call</a>
+        <a href="contact.html" class="btn btn-primary">Book a free call &rarr;</a>
+        <a href="how-we-work.html" class="btn btn-ghost">See how I work</a>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;border-top:1px solid rgba(91,63,160,0.08);padding-top:24px;">
         <div><div style="font-family:var(--serif);font-size:24px;color:#5b3fa0;line-height:1;">$400</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">per month for full managed service</div></div>
@@ -362,8 +251,8 @@ body{padding-top:68px;}
     <h2>Let's keep your site <em>moving forward.</em></h2>
     <p>A free call will tell us which plan fits your business and what we'd focus on in the first 90 days together.</p>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-      <a href="/contact" class="btn-primary">Book a free call →</a>
-      <a href="/how-we-work" class="btn-ghost">See how I work</a>
+      <a href="contact.html" class="btn btn-primary">Book a free call &rarr;</a>
+      <a href="how-we-work.html" class="btn btn-ghost" style="color:var(--paper);border-color:rgba(255,255,255,.3)">See how I work</a>
     </div>
     <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:20px;">Free · No signup · No sales call unless you ask</p>
   </div>
@@ -375,67 +264,41 @@ body{padding-top:68px;}
       <h3 style="font-family:var(--serif);font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;color:#fff;">Ready to grow your business online?</h3>
       <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;">Let's build a website that works as hard as you do.</p>
     </div>
-    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;">Book a free call →</a>
+    <a href="contact.html" class="btn btn-light" style="flex-shrink:0">Book a free call &rarr;</a>
   </div>
 </section>
-<footer class="site-footer" role="contentinfo">
-  <div style="max-width:1100px;margin:0 auto;padding:40px 52px 0;">
-    <div class="ftr-cred-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;padding:22px 28px;background:rgba(196,174,232,0.06);border:1px solid rgba(196,174,232,0.10);border-radius:16px;margin-bottom:40px;">
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Founder</div><div style="font-size:13px;color:#fff;font-weight:500;">Eric Davis</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Web Design &amp; SEO Strategist</div></div>
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Background</div><div style="font-size:13px;color:#fff;font-weight:500;">Enterprise digital team</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Domain Name Manager &amp; Content Producer · 9+ years</div></div>
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Education</div><div style="font-size:13px;color:#fff;font-weight:500;">M.S. Business Analytics</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">CSUN · Dean's Scholar</div></div>
-      <div><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,174,232,0.7);text-transform:uppercase;margin-bottom:5px;">Scale</div><div style="font-size:13px;color:#fff;font-weight:500;">Enterprise scale</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Enterprise governance experience</div></div>
+<footer class="site">
+<div class="wrap">
+  <div class="fwrap">
+    <div>
+      <div class="brand serif">Davis Digital Studio</div>
+      <p>Strategy-led web design and SEO for small businesses, plus ongoing support and one organized place to work together. Built around your business, from the first call onward.</p>
+      <p style="margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:rgba(255,255,255,.4)">Los Angeles &middot; working with businesses nationwide</p>
     </div>
-    <div class="ftr-cols-grid" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;">
-      <div>
-        <div style="font-family:var(--serif);font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
-        <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
-        <div style="display:flex;gap:12px;"><a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a><a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a></div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Solutions</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="/services" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">All Services</a>
-          <a href="/web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Web Design</a>
-          <a href="/seo-strategy" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">SEO Strategy</a>
-          <a href="/monthly-retainer" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Ongoing Support</a>
-          <a href="/audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Audits from $99</a>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Industries</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="/restaurant-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Restaurants &amp; Bars</a>
-          <a href="/salon-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Salons &amp; Spas</a>
-          <a href="/retail-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Retail &amp; Boutiques</a>
-          <a href="/health-wellness-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Health &amp; Wellness</a>
-          <a href="/home-services-web-design" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Home Services</a>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">Free Tools</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="/report-card" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Report Card</a>
-          <a href="/audit#free-audit" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Free Site Score</a>
-          <a href="/roi-calculator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">ROI Calculator</a>
-          <a href="/speed-test" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Speed Test</a>
-          <a href="/local-visibility" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Local Visibility</a>
-          <a href="/pricing-estimator" style="font-size:13px;color:rgba(255,255,255,0.55);text-decoration:none;">Pricing Estimator</a>
-        </div>
-      </div>
+    <div class="fcol">
+      <h5>Studio</h5>
+      <a href="how-we-work.html">How we work</a>
+      <a href="the-experience.html">The experience</a>
+      <a href="services.html">Services</a>
+      <a href="industries.html">Industries</a>
+      <a href="about.html">About</a>
+      <a href="work.html">Work</a>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.08);padding:16px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <p style="font-size:12px;color:rgba(255,255,255,0.3);">© <span id="footer-year">2026</span> Davis Digital Studio · Eric Davis</p>
-      <div style="display:flex;gap:16px;flex-wrap:wrap;">
-        <a href="/privacy" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Privacy</a>
-        <a href="/terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Terms</a>
-        <a href="/accessibility" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Accessibility</a>
-        <a href="/portal-terms" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Portal Terms</a>
-        <a href="/ai-disclaimer" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">AI Disclaimer</a>
-        <a href="/portal" style="font-size:12px;color:rgba(255,255,255,0.3);text-decoration:none;">Client Login</a>
-      </div>
+    <div class="fcol">
+      <h5>Start</h5>
+      <a href="tools.html">Free site review</a>
+      <a href="contact.html">Book a free call</a>
+      <a href="portal.html">Client login</a>
+      <a href="contact.html">Contact</a>
     </div>
   </div>
+  <div class="fbase">
+    <span>&copy; 2026 Davis Digital Studio &middot; Eric Davis</span>
+    <span style="display:flex;gap:18px">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="accessibility.html">Accessibility</a>
+    </span>
+  </div>
+</div>
 </footer>
 <script>var y=document.getElementById('footer-year');if(y)y.textContent=new Date().getFullYear();</script>
 <div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
@@ -451,28 +314,6 @@ function acceptCookies(){localStorage.setItem('cookie_consent','accepted');docum
 function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-V4WF04NX7F']=true;document.getElementById('cookieBanner').style.display='none';}
 </script>
 <script>
-(function(){
-  var ham=document.getElementById('navHam');
-  var mob=document.getElementById('navMob');
-  if(!ham||!mob)return;
-  ham.addEventListener('click',function(){
-    var open=mob.classList.toggle('open');
-    ham.setAttribute('aria-expanded',open?'true':'false');
-    ham.setAttribute('aria-label',open?'Close menu':'Open menu');
-  });
-  mob.querySelectorAll('a').forEach(function(a){
-    a.addEventListener('click',function(){
-      mob.classList.remove('open');
-      ham.setAttribute('aria-expanded','false');
-      ham.setAttribute('aria-label','Open menu');
-    });
-  });
-})();
-function toggleMobGroup(id){
-  var el=document.getElementById(id);
-  if(!el)return;
-  el.classList.toggle('open');
-}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
 </script>
 <div id="ddsStickyCta" style="position:fixed;bottom:24px;right:24px;z-index:9990;opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease;pointer-events:none;">
