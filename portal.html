@@ -621,6 +621,10 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 #gp_priorities_body, #gp_history_body { max-width: 760px; }
 .gp-hero { margin-bottom: 26px; }
 .gp-hero-title { font-family: var(--serif); font-size: 30px; font-weight: 400; color: var(--ink); line-height: 1.1; }
+.gp-hero-tag { font-family:'Inter',sans-serif; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; vertical-align:middle; margin-left:8px; }
+.gp-hero-tag-action { color:#fff; background:var(--p,#5b3fa0); }
+.gp-hero-tag-active { color:#1a7e49; background:#eaf5ee; }
+.gp-hero-tag-win { color:#9a7a1a; background:#fdf6e3; }
 .gp-hero-sub { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.55; max-width: 56ch; }
 .gp-sec { margin-bottom: 30px; }
 .gp-sec-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
@@ -708,6 +712,11 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .hq-anim:nth-of-type(2){animation-delay:.05s} .hq-anim:nth-of-type(3){animation-delay:.12s} .hq-anim:nth-of-type(4){animation-delay:.19s} .hq-anim:nth-of-type(5){animation-delay:.26s}
 @keyframes hqRise{ to{opacity:1;transform:none} }
 .hq-label{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--brass,#b08d57); margin-bottom:12px; }
+.hq-headline{ display:flex; align-items:flex-start; gap:12px; padding:22px 24px; margin-bottom:18px; background:linear-gradient(135deg,#faf8f5,#f3eef8); border:1px solid var(--line,rgba(91,63,160,0.1)); border-radius:18px; }
+.hq-headline-icon{ font-size:20px; font-weight:700; line-height:1.3; flex-shrink:0; }
+.hq-headline-text{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:19px; line-height:1.4; color:var(--ink); flex:1; }
+.hq-headline-cta{ flex-shrink:0; background:var(--p); color:#fff; border:none; border-radius:100px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; align-self:center; }
+.hq-headline-cta:hover{ opacity:.9; }
 .hq-card{ background:#fff; border:1px solid var(--line,rgba(91,63,160,0.09)); border-radius:18px; padding:22px 24px; margin-bottom:14px; }
 .hq-intro{ font-size:15px; color:var(--muted); margin-bottom:14px; }
 .hq-did{ display:flex; align-items:flex-start; gap:12px; padding:9px 0; font-size:15px; color:var(--ink); }
@@ -3016,14 +3025,19 @@ function gpRenderPriorities(){
   var declined     = recs.filter(function(r){ return st(r)==='declined'; });
   var completed    = recs.filter(function(r){ return st(r)==='completed'; });
 
-  // ---- HERO ----
+  // ---- HERO ----  (lead with the intelligent headline from the route)
   var sharedCount = shared.length;
+  var hl = ws.headline;
   var lead = sharedCount===0
     ? 'You\u2019re all caught up. Eric is watching your site and will flag the next worthwhile move here.'
     : 'Eric reviewed your website and found '+sharedCount+(sharedCount===1?' thing':' things')+' worth doing. Here\u2019s what matters most, in order.';
+  var heroLead = (hl && hl.text) ? hqEsc(hl.text) : lead;
+  var heroTag = (hl && hl.kind==='action') ? '<span class="gp-hero-tag gp-hero-tag-action">Needs you</span>'
+    : (hl && hl.kind==='active') ? '<span class="gp-hero-tag gp-hero-tag-active">In progress</span>'
+    : (hl && hl.kind==='win') ? '<span class="gp-hero-tag gp-hero-tag-win">Recent win</span>' : '';
   var hero = '<div class="gp-hero">'
-    +'<h2 class="gp-hero-title">Your priorities</h2>'
-    +'<p class="gp-hero-sub">'+lead+'</p>'
+    +'<h2 class="gp-hero-title">Your priorities '+heroTag+'</h2>'
+    +'<p class="gp-hero-sub">'+heroLead+'</p>'
     +'</div>';
 
   // ---- TOP PRIORITIES ----
@@ -3369,6 +3383,15 @@ function renderHQ(d){
   var biz=d.business||{};
   var first=(d.contact_first||(CLIENT&&CLIENT.name?CLIENT.name.split(' ')[0]:''))||'';
   var html='<div class="hq">';
+  // THE HEADLINE — the one most important thing right now (interpretation before detail)
+  if(d.headline&&d.headline.text){
+    var hk=d.headline.kind||'calm';
+    var hicon = hk==='action'?'\u2192':(hk==='win'?'\u2191':'\u2713');
+    var hcol = hk==='action'?'var(--p)':(hk==='win'?'#1a7e49':'var(--brass,#b08d57)');
+    html+='<div class="hq-headline"><span class="hq-headline-icon" style="color:'+hcol+'">'+hicon+'</span><span class="hq-headline-text">'+hqEsc(d.headline.text)+'</span>'
+      +(d.headline.cta?'<button class="hq-headline-cta" onclick="nav(\''+(d.headline.cta==='approvals'?'approvals':'messages')+'\')">'+(d.headline.cta==='approvals'?'Review now':'Open')+'</button>':'')
+      +'</div>';
+  }
   // BAND 1 — CONFIDENCE (instant)
   html+='<div class="hq-band1"><div class="hq-pill"><span class="hq-dot"></span>'+hqEsc(d.confidence.word||'healthy')+'</div>'
     +'<div class="hq-confidence">'+hqEsc(d.confidence.line)+'</div></div>';

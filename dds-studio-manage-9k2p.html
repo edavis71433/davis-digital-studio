@@ -857,6 +857,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <button onclick="deleteSelectedLeads()" id="leadDeleteSelBtn" style="margin-left:auto;background:var(--red);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Delete selected</button>
           <button onclick="clearLeadSelection()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Clear</button>
         </div>
+        <div id="leadsTriage"></div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <button id="lv-board" onclick="setLeadView('board')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;background:var(--p);color:#fff;">Pipeline board</button>
           <button id="lv-list" onclick="setLeadView('list')" style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;background:transparent;color:var(--muted);">List</button>
@@ -1933,6 +1934,32 @@ async function loadLeads() {
 
   renderLeadsList();
   try { if (_leadView==="board") renderLeadsBoard(); } catch(e){}
+  renderLeadsTriage();
+}
+
+// Triage line: lead with what matters most — hot, uncontacted leads first.
+// Interpretation before the board/list, the smallest "what should I do now" layer.
+function renderLeadsTriage(){
+  var host = document.getElementById('leadsTriage'); if(!host) return;
+  var leads = allLeads || [];
+  if(!leads.length){ host.innerHTML=''; return; }
+  var isNew = function(l){ var s=l.pipeline_stage||l.status; return !s || s==='new'; };
+  var uncontacted = leads.filter(function(l){ return isNew(l) && l.status!=='contacted' && l.status!=='closed'; });
+  var hot = uncontacted.filter(function(l){ return l.score!=null && l.score>=65; });
+  var recent = uncontacted.filter(function(l){ var d=new Date(l.created_at); return (Date.now()-d.getTime())<7*86400000; });
+  var lead, tone;
+  if(hot.length){ lead = hot.length+(hot.length===1?' hot lead worth calling first':' hot leads worth calling first'); tone='action'; }
+  else if(recent.length){ lead = recent.length+(recent.length===1?' new lead':' new leads')+' this week to review'; tone='active'; }
+  else if(uncontacted.length){ lead = uncontacted.length+(uncontacted.length===1?' lead':' leads')+' waiting for a first reply'; tone='active'; }
+  else { lead = 'You\u2019re caught up — every lead has been actioned'; tone='calm'; }
+  var col = tone==='action'?'#5b3fa0':(tone==='active'?'#c4731a':'#1a7e49');
+  var bg = tone==='action'?'rgba(91,63,160,0.06)':(tone==='active'?'rgba(196,115,26,0.07)':'rgba(26,126,73,0.06)');
+  var icon = tone==='action'?'\u2192':(tone==='calm'?'\u2713':'\u25cf');
+  host.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:14px;background:'+bg+';border-radius:12px;">'
+    + '<span style="color:'+col+';font-weight:700;font-size:15px;">'+icon+'</span>'
+    + '<span style="font-size:14px;color:var(--ink);font-weight:500;">'+escHtml(lead)+'.</span>'
+    + (hot.length?'<span style="margin-left:auto;font-size:12px;color:var(--muted);">Sorted by score in List view</span>':'')
+    + '</div>';
 }
 
 function filterLeads(tool) {
@@ -5508,7 +5535,17 @@ async function viewReminders(){
   catch(e){ return errorPane('reminders', e); }
   const items = (d&&d.items)||[];
   const main = gpQ('#gp-main'); main.innerHTML='';
-  main.append(elHeader('What needs me', 'Across every partnership, in one calm list.', []));
+  // count by kind for a one-line "what matters most" summary (interpretation before the list)
+  var summary = '';
+  if(items.length){
+    var counts = {}; items.forEach(function(it){ counts[it.kind]=(counts[it.kind]||0)+1; });
+    var KLABEL = { at_risk:'at risk', renewal:'renewal', review_due:'review due', recs:'AI recs', reminder:'reminder' };
+    var KORDER = ['at_risk','renewal','review_due','recs','reminder'];
+    var parts = KORDER.filter(function(k){return counts[k];}).map(function(k){ var n=counts[k]; return n+' '+KLABEL[k]+(n>1&&k!=='at_risk'?'s':(n>1&&k==='at_risk'?'':'')); });
+    var lead = counts.at_risk ? 'Most urgent first \u2014 a client is at risk.' : (counts.renewal ? 'Renewals are the priority this week.' : 'Here\u2019s what\u2019s waiting, in order.');
+    summary = lead+' '+items.length+(items.length===1?' item':' items')+': '+parts.join(', ')+'.';
+  }
+  main.append(elHeader('What needs me', summary || 'Across every partnership, in one calm list.', []));
   const card = el('div',{class:'card card-pad'});
   if(!items.length){ card.append(el('div',{class:'empty',html:`<div class="ei">You're clear</div><p>No reminders, renewals, or reviews waiting right now.</p>`})); }
   else {
@@ -5720,7 +5757,14 @@ function tabReview(root, d){
 
   // current month panel
   const cur = el('div',{class:'card card-pad'});
-  cur.innerHTML = `<div class="card-h"><div><h3>${periodLabel(thisPeriod())} review</h3><div class="sub">${thisOne?(thisOne.status==='published'?'Published to client':'Draft — not sent'):'Not started'}</div></div>
+  // readiness hint for a draft: is it ready to publish, or still missing key parts?
+  var draftHint = '';
+  if(thisOne && thisOne.status!=='published'){
+    var key = ['headline','intro','next_up'];
+    var missing = key.filter(function(k){ return !(thisOne[k]||'').trim(); });
+    draftHint = missing.length ? ' \u00b7 needs '+missing.map(function(m){return m==='next_up'?'next steps':m;}).join(', ') : ' \u00b7 ready to publish';
+  }
+  cur.innerHTML = `<div class="card-h"><div><h3>${periodLabel(thisPeriod())} review</h3><div class="sub">${thisOne?(thisOne.status==='published'?'Published to client':'Draft — not sent'+draftHint):'Not started'}</div></div>
     ${thisOne&&thisOne.status==='published'?'<span class="chip chip-ok">Published</span>':thisOne?'<span class="chip chip-warn">Draft</span>':''}</div>`;
   if(thisOne){
     cur.append(reviewEditor(p, thisOne));
@@ -6162,6 +6206,7 @@ function renderIntegrationsShell(){
     + '<button onclick="refreshIntegrations()" title="Refresh status" style="padding:9px 12px;border:1px solid var(--line,#e5e0ee);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;">↻ Refresh</button>'
     + '<button onclick="forceSyncAll()" style="padding:9px 14px;border:none;border-radius:10px;background:var(--p,#5b3fa0);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Sync all</button>'
     + '</div></div>'
+    + '<div id="integAttention"></div>'
     + '<div id="integGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;margin-top:20px;"></div>'
     + '<div id="integHistory" style="margin-top:28px;"></div>';
 }
@@ -6191,6 +6236,20 @@ function fmtWhen(iso){ if(!iso) return 'never'; var d=new Date(iso); var diff=(D
 function renderProviderGrid(){
   var grid = document.getElementById('integGrid'); if(!grid) return;
   if(!INTEG.providers.length){ grid.innerHTML='<div style="color:var(--muted);">No providers registered.</div>'; return; }
+  // attention summary — only surfaces when something actually needs the operator.
+  // Stays silent (no noise) when everything is healthy.
+  var att = document.getElementById('integAttention');
+  if(att){
+    var needs = INTEG.providers.filter(function(p){ return p.health==='red' || p.status==='error'; });
+    var noProp = INTEG.providers.filter(function(p){ return (p.status==='connected'||p.status==='always_on') && ['ga4','gsc','gbp'].indexOf(p.id)>=0 && !p.property_id; });
+    if(needs.length){
+      att.innerHTML = '<div style="padding:11px 15px;margin-bottom:14px;background:#fdecea;border-radius:10px;font-size:13px;color:#b03020;font-weight:500;">\u26a0 '+needs.length+' '+(needs.length===1?'source needs':'sources need')+' attention: '+needs.map(function(p){return escHtml(p.label);}).join(', ')+'.</div>';
+    } else if(noProp.length){
+      att.innerHTML = '<div style="padding:11px 15px;margin-bottom:14px;background:#fdf6e3;border-radius:10px;font-size:13px;color:#9a7a1a;font-weight:500;">'+noProp.length+' connected '+(noProp.length===1?'source needs':'sources need')+' a property chosen before data flows: '+noProp.map(function(p){return escHtml(p.label);}).join(', ')+'.</div>';
+    } else {
+      att.innerHTML = '';
+    }
+  }
   grid.innerHTML = INTEG.providers.map(function(p){
     var h = HEALTH[p.health]||HEALTH.grey;
     var isInternal = p.kind==='internal';
