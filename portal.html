@@ -720,6 +720,83 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .hq-conf-line{ font-family:var(--serif); font-size:19px; line-height:1.4; font-weight:400; color:var(--ink);
   letter-spacing:-0.01em; margin-bottom:14px; }
 .hq-conf-ev{ border-top:1px solid var(--line); padding-top:8px; }
+/* ── Decisions room: a decision experience. Calm, clear, satisfying. All on
+   foundation tokens, matched to the portal's material. No dashboard, no clutter. ── */
+
+.dec-intro{ font-family:var(--serif); font-size:19px; line-height:1.45; color:var(--ink);
+  letter-spacing:-0.01em; max-width:34em; margin-bottom:22px; }
+
+.dec-card{ background:#fff; border:1px solid var(--line); border-radius:var(--r-xl,22px);
+  padding:26px 28px; margin-bottom:18px; box-shadow:var(--sh-1); }
+
+.dec-head{ display:flex; align-items:flex-start; gap:14px; margin-bottom:16px; }
+.dec-title{ flex:1; font-family:var(--serif); font-size:22px; font-weight:400; line-height:1.25;
+  color:var(--ink); letter-spacing:-0.01em; }
+.dec-flag{ flex:none; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--p); background:var(--p-soft); padding:6px 12px; border-radius:var(--r-pill,100px); white-space:nowrap; margin-top:3px; }
+
+.dec-why{ font-size:15px; line-height:1.6; color:var(--ink-2,#574d68); margin-bottom:18px; }
+.dec-why-label{ display:block; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--brass); margin-bottom:6px; }
+
+/* Eric's human note — visibly a personal message, never styled like system copy */
+.dec-note{ background:var(--warm,#f5f0e8); border-radius:var(--r,12px); padding:16px 18px; margin-bottom:18px; }
+.dec-note-from{ font-size:12px; font-weight:600; color:var(--brass-deep,#8A6B3C); margin-bottom:6px; }
+.dec-note-text{ font-size:15px; line-height:1.6; color:var(--ink); white-space:pre-wrap; }
+
+/* What exactly you're approving — the literal artifact */
+.dec-what{ border:1px solid var(--line); border-radius:var(--r,12px); padding:16px 18px; margin-bottom:16px; }
+.dec-what-label{ display:block; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--brass); margin-bottom:8px; }
+.dec-what-desc{ font-size:15px; line-height:1.6; color:var(--ink); white-space:pre-wrap; }
+.dec-what-desc.dec-muted{ color:var(--muted); }
+.dec-review-link{ display:inline-block; margin-top:12px; padding:0; border:none; background:none; cursor:pointer;
+  font-family:var(--sans); font-size:14px; font-weight:550; color:var(--p);
+  transition:opacity var(--dur-fast,.15s) var(--ease); }
+.dec-review-link:hover{ opacity:.7; }
+
+/* What to look at first */
+.dec-review{ display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:1.55;
+  color:var(--ink-2,#574d68); margin-bottom:20px; }
+.dec-review-ico{ color:var(--brass); flex:none; margin-top:1px; }
+
+/* The two outcomes, side by side */
+.dec-outcomes{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+.dec-outcome{ border-radius:var(--r,12px); padding:14px 16px; }
+.dec-outcome-yes{ background:var(--ok-mist,#E6F0E9); }
+.dec-outcome-chg{ background:var(--surface-3,#f3f0f9); }
+.dec-outcome-h{ font-size:12px; font-weight:600; color:var(--ink); margin-bottom:5px; }
+.dec-outcome-yes .dec-outcome-h{ color:var(--ok,#3F7D5B); }
+.dec-outcome-t{ font-size:13.5px; line-height:1.55; color:var(--ink-2,#574d68); }
+
+/* What you can stop worrying about */
+.dec-closes{ display:flex; align-items:flex-start; gap:10px; font-size:14px; line-height:1.55;
+  color:var(--ok,#3F7D5B); background:var(--ok-mist,#E6F0E9); border-radius:var(--r,12px);
+  padding:13px 16px; margin-bottom:22px; }
+.dec-closes-ico{ flex:none; margin-top:1px; font-weight:700; }
+
+/* The action moment — crisp, two clear paths */
+.dec-actions{ display:flex; gap:12px; }
+.dec-btn{ flex:1; padding:15px; border-radius:var(--r-pill,100px); border:none; cursor:pointer;
+  font-family:var(--sans); font-size:15px; font-weight:600;
+  transition:all var(--dur-fast,.15s) var(--ease); }
+.dec-btn-approve{ background:var(--p); color:#fff; }
+.dec-btn-approve:hover{ background:var(--p-deep,#2A1B4A); transform:translateY(-1px); }
+.dec-btn-changes{ background:#fff; color:var(--ink); border:1px solid var(--line-strong); }
+.dec-btn-changes:hover{ background:var(--surface-2,#faf9fc); }
+
+/* All-clear empty state — explicit, confidence-building, not a dead end */
+.dec-clear{ text-align:center; padding:60px 24px; }
+.dec-clear-mark{ width:56px; height:56px; border-radius:50%; background:var(--ok-mist,#E6F0E9);
+  color:var(--ok,#3F7D5B); display:flex; align-items:center; justify-content:center;
+  font-size:26px; margin:0 auto 20px; }
+.dec-clear-h{ font-family:var(--serif); font-size:26px; font-weight:400; color:var(--ink); margin-bottom:10px; letter-spacing:-0.01em; }
+.dec-clear-p{ font-size:15px; line-height:1.6; color:var(--muted); max-width:30em; margin:0 auto; }
+
+@media (max-width:560px){
+  .dec-outcomes{ grid-template-columns:1fr; }
+  .dec-card{ padding:22px 20px; }
+}
 .hq-active{ display:flex; align-items:center; gap:14px; background:var(--p-soft,#f3effb); border:1px solid #e6ddf6; border-radius:18px; padding:20px 24px; margin-bottom:14px; }
 .hq-orbit{ width:34px; height:34px; flex:none; position:relative; display:flex; align-items:center; justify-content:center; }
 .hq-orbit::before{ content:''; width:12px; height:12px; border-radius:50%; background:var(--p); animation:hqBreathe 2.2s cubic-bezier(.22,.61,.36,1) infinite; }
@@ -925,8 +1002,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- APPROVALS -->
       <div class="page-view" id="page-approvals">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Approvals</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Review and approve deliverables as they come in.</p>
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Your decisions</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Everything you need to decide with confidence. Take your time.</p>
         <div id="approvalsBody"></div>
       </div>
 
@@ -2026,35 +2103,101 @@ async function loadInvoices() {
 }
 
 // ── APPROVALS ──
+// ════════════════════════════════════════════════════════════════════════════
+//  DECISIONS ROOM  —  a decision experience, not an approval queue.
+//  Thin consumer of client_decisions. The engine interprets the situation; the
+//  title, description, and Eric's note render LITERAL and exact. Approve / request
+//  changes keep their existing, working write-path untouched.
+// ════════════════════════════════════════════════════════════════════════════
 async function loadApprovals() {
   renderLoading("approvalsBody", 2);
-  const { data, error } = await sb.from("approvals")
-    .select("*").eq("client_id", CLIENT.id).order("created_at");
-  if (error) { renderError("approvalsBody", "loadApprovals()"); return; }
-  try { window._approvalsCache = (data||[]).map(function(a){ return { title:a.title||a.name, status:a.status }; }); } catch(e){}
-  if (!data) { document.getElementById("approvalsBody").innerHTML = ""; return; }
-  
-  var pending = data.filter(a => a.status === "pending").length;
+  var brief = null;
+  try { var r = await gpApi('client_decisions', {}); brief = (r && r.data) ? r.data : null; }
+  catch(e){ console.error('client_decisions:', e); }
+  // Keep the badge + attention counts working from the same source of truth.
+  var pending = brief ? brief.count : 0;
   setBadge("badge-approvals", pending);
   window._pendingApprovals = pending;
-  updateAttention();
-  
-  document.getElementById("approvalsBody").innerHTML = data.length === 0
-    ? `<div class="empty-state"><div class="ei">✅</div><p>Nothing to approve yet.<br>Deliverables will appear here when Eric shares them.</p></div>`
-    : data.map(a => `
-      <div class="card" style="margin-bottom:12px;" id="appr-${a.id}">
-        <div class="card-body">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <h4 style="font-size:15px;font-weight:600;flex:1;">${esc(a.title)}</h4>
-            <span class="file-status ${a.status==="pending"?"pending":"approved"}">${a.status==="pending"?"Needs review":"Approved"}</span>
-          </div>
-          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;">${esc(a.description) || "Review this deliverable and click Approve or Request revision below."}</p>
-          ${a.status==="pending" ? `<div class="appr-btns">
-            <button class="btn-approve" onclick="approve('${a.id}')">✓ Approve</button>
-            <button class="btn-revise" onclick="requestRevision('${a.id}','${escAttr(a.title)}')">Request revision</button>
-          </div>` : `<p style="font-size:12px;color:var(--green);font-weight:600;">✓ Approved</p>`}
-        </div>
-      </div>`).join("");
+  try { updateAttention(); } catch(e){}
+  if (!brief) { renderError("approvalsBody", "loadApprovals()"); return; }
+  renderDecisions(brief);
+}
+
+function dEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+function renderDecisions(brief){
+  var host = document.getElementById("approvalsBody");
+  if (!host) return;
+
+  // ── all-clear: an explicit, confidence-building empty state ──
+  if (brief.clear || !brief.decisions || !brief.decisions.length) {
+    host.innerHTML =
+      '<div class="dec-clear">'
+      + '<div class="dec-clear-mark">\u2713</div>'
+      + '<div class="dec-clear-h">You\u2019re all caught up</div>'
+      + '<div class="dec-clear-p">' + dEsc(brief.clear_line || 'Nothing needs your decision right now.') + '</div>'
+      + '</div>';
+    return;
+  }
+
+  // ── the calm framing line for the whole room (interpreted) ──
+  var html = '<div class="dec-intro">' + dEsc(brief.intro) + '</div>';
+
+  brief.decisions.forEach(function(d){
+    html += '<div class="dec-card" id="appr-' + dEsc(d.id) + '">';
+
+    // header: WHAT needs my decision (literal title) + a calm waiting note
+    html += '<div class="dec-head">'
+      + '<div class="dec-title">' + dEsc(d.title) + '</div>'
+      + '<span class="dec-flag">Needs your decision</span>'
+      + '</div>';
+
+    // WHY this matters (interpreted situation)
+    html += '<div class="dec-why"><span class="dec-why-label">Why this matters</span>' + dEsc(d.why) + '</div>';
+
+    // Eric's human note — VERBATIM, never paraphrased, clearly attributed to him
+    if (d.note && d.note.text) {
+      html += '<div class="dec-note"><div class="dec-note-from">' + dEsc(d.note.from) + ' left you a note</div>'
+        + '<div class="dec-note-text">' + dEsc(d.note.text) + '</div></div>';
+    }
+
+    // WHAT EXACTLY am I approving (literal description, verbatim) + the real artifact
+    html += '<div class="dec-what"><span class="dec-what-label">What you\u2019re approving</span>';
+    if (d.description) {
+      html += '<div class="dec-what-desc">' + dEsc(d.description) + '</div>';
+    } else {
+      html += '<div class="dec-what-desc dec-muted">Open the files to see exactly what\u2019s being shared for your approval.</div>';
+    }
+    // the literal file link (the actual work lives in Files)
+    if (d.review && d.review.source) {
+      html += '<button class="dec-review-link" onclick="nav(\'files\')">' + dEsc(d.review.source.label || 'Open the files') + ' \u2192</button>';
+    }
+    html += '</div>';
+
+    // WHAT SHOULD I LOOK AT before deciding (interpreted pointer)
+    if (d.review && d.review.line) {
+      html += '<div class="dec-review"><span class="dec-review-ico">\u25C9</span>' + dEsc(d.review.line) + '</div>';
+    }
+
+    // the two outcomes, side by side, so the consequence of each path is clear
+    html += '<div class="dec-outcomes">'
+      + '<div class="dec-outcome dec-outcome-yes"><div class="dec-outcome-h">If you approve</div><div class="dec-outcome-t">' + dEsc(d.after_approve) + '</div></div>'
+      + '<div class="dec-outcome dec-outcome-chg"><div class="dec-outcome-h">If you need changes</div><div class="dec-outcome-t">' + dEsc(d.after_changes) + '</div></div>'
+      + '</div>';
+
+    // WHAT CAN I STOP WORRYING ABOUT once done (the confidence closer)
+    html += '<div class="dec-closes"><span class="dec-closes-ico">\u2713</span>' + dEsc(d.closes) + '</div>';
+
+    // THE ACTION MOMENT — crisp, two clear paths, primary = approve
+    html += '<div class="dec-actions">'
+      + '<button class="dec-btn dec-btn-approve" onclick="approve(\'' + dEsc(d.id) + '\')">Approve</button>'
+      + '<button class="dec-btn dec-btn-changes" onclick="requestRevision(\'' + dEsc(d.id) + '\',\'' + dEsc(d.title).replace(/'/g, "\\'") + '\')">Request changes</button>'
+      + '</div>';
+
+    html += '</div>'; // dec-card
+  });
+
+  host.innerHTML = html;
 }
 
 async function approve(id) {
