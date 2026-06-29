@@ -22,8 +22,8 @@
 <meta name="twitter:site" content="@davisdigitalstudio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <script>(function(){if(localStorage.getItem('cookie_consent')==='declined'){window['ga-disable-G-V4WF04NX7F']=true;}})();</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4WF04NX7F"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-V4WF04NX7F',{anonymize_ip:true});</script>
@@ -32,8 +32,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;overflow-x:hidden;}
-body{font-family:'DM Sans',sans-serif;background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'DM Serif Display',Georgia,serif;}
+body{font-family:var(--sans);background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;}
+:root{--p:#5b3fa0;--pxl:#c4aee8;--pxxl:#ede8f7;--pxxxl:#f7f4fd;--pdark:#1e1338;--ink:#1a1523;--muted:#6b5f7e;--serif:'Fraunces',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;}
 a{color:inherit;}
 .site-footer{background:var(--pdark);}
 .section{padding:72px 24px;}
@@ -74,10 +74,10 @@ a{color:inherit;}
 .skip-link:focus{left:8px;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;border-radius:4px;}
 .nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:#fff;border-bottom:1px solid rgba(91,63,160,0.10);box-shadow:0 1px 20px rgba(0,0,0,0.06);box-sizing:border-box;}
-.nav-logo{font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
+.nav-logo{font-family:var(--serif);font-size:20px;color:#1a1523;text-decoration:none;flex-shrink:0;}
 .nav-logo span{color:#5b3fa0;}
 .nav-links{display:flex;align-items:center;gap:2px;}
-.nav-links>a,.nav-drop>button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
+.nav-links>a,.nav-drop>button{font-family:var(--sans);font-size:13px;font-weight:500;color:#7a6d8e;text-decoration:none;padding:6px 9px;border-radius:8px;background:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;transition:color 0.15s,background 0.15s;}
 .nav-links>a:hover,.nav-drop>button:hover,.nav-links>a.active{color:#5b3fa0;background:#f7f4fd;}
 .nav-cta{background:#5b3fa0!important;color:#fff!important;font-weight:700!important;padding:8px 18px!important;border-radius:100px!important;margin-left:4px;transition:opacity 0.15s!important;}
 .nav-cta:hover{opacity:0.88;background:#5b3fa0!important;}
@@ -95,10 +95,10 @@ a{color:inherit;}
 .nav-ham .bar{display:block;width:22px;height:2px;background:#1a1523;border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
 .nav-mob{display:none;position:fixed;top:68px;left:0;right:0;background:#fff;z-index:9998;flex-direction:column;padding:8px 16px 16px;border-bottom:1px solid rgba(91,63,160,0.12);box-shadow:0 8px 32px rgba(0,0,0,0.08);max-height:calc(100vh - 68px);overflow-y:auto;}
 .nav-mob.open{display:flex;}
-.nav-mob>a{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
+.nav-mob>a{font-family:var(--sans);font-size:16px;font-weight:500;color:#1a1523;text-decoration:none;padding:12px 12px;border-radius:8px;display:flex;align-items:center;min-height:48px;}
 .nav-mob>a:hover{background:#f7f4fd;color:#5b3fa0;}
 .nav-mob-group{margin:2px 0;}
-.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
+.nav-mob-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;font-family:var(--sans);font-size:16px;font-weight:500;color:#1a1523;padding:12px 12px;border-radius:8px;cursor:pointer;min-height:48px;}
 .nav-mob-group-btn:hover{background:#f7f4fd;color:#5b3fa0;}
 .nav-mob-group-btn svg{transition:transform 0.2s;flex-shrink:0;}
 .nav-mob-group.open .nav-mob-group-btn svg{transform:rotate(180deg);}
@@ -122,6 +122,18 @@ body{padding-top:68px;}
 .nav-drop-menu::before{content:'';position:absolute;top:-12px;left:-10px;right:-10px;height:12px;}
 .nav-drop{padding-bottom:0;}
 
+.work-proof{padding:88px 24px;background:var(--cream);}
+.work-proof-inner{max-width:1000px;margin:0 auto;}
+.work-proof .section-tag{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--p);margin-bottom:12px;}
+.work-proof h2{font-family:var(--serif);font-size:clamp(26px,3.6vw,40px);font-weight:400;color:var(--ink);letter-spacing:-0.6px;line-height:1.15;margin-bottom:14px;}
+.work-proof-sub{font-size:16px;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:40px;}
+.approach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.approach-n{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--brass-deep);margin-bottom:12px;}
+.approach-item h3{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);margin-bottom:8px;line-height:1.25;}
+.approach-item p{font-size:14px;color:var(--muted);line-height:1.65;}
+.work-proof-note{margin-top:40px;font-size:14px;color:var(--muted);line-height:1.7;max-width:600px;padding-top:24px;border-top:1px solid var(--line-strong);}
+@media(max-width:760px){.approach-grid{grid-template-columns:1fr;gap:24px;}}
+@media(max-width:600px){.work-proof{padding:60px 20px;}}
 </style>
 <link rel="stylesheet" href="/enhance.css">
 <style>
@@ -239,16 +251,16 @@ body{padding-top:68px;}
         Available for new projects · Nationwide / Remote
       </div>
       <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:#5b3fa0;margin-bottom:14px;">Web Design</div>
-      <h1 style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(36px,5vw,62px);font-weight:400;line-height:1.05;letter-spacing:-2px;color:#1a1523;margin-bottom:20px;">Your website shouldn't just look good. It should help your business <em style="color:#5b3fa0;font-style:italic;">grow.</em></h1>
+      <h1 style="font-family:var(--serif);font-size:clamp(36px,5vw,62px);font-weight:400;line-height:1.05;letter-spacing:-2px;color:#1a1523;margin-bottom:20px;">Your website shouldn't just look good. It should help your business <em style="color:#5b3fa0;font-style:italic;">grow.</em></h1>
       <p style="font-size:17px;line-height:1.65;color:#6b5f7e;margin-bottom:28px;max-width:500px;">Most websites are built around what the owner wants to say. The best websites are built around what customers need to hear. My goal isn't to create something impressive. It's to create something effective.</p>
       <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:36px;">
         <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;">Book a free call →</a>
         <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1a1523;font-size:14px;font-weight:600;padding:13px 24px;border-radius:100px;text-decoration:none;border:1px solid rgba(91,63,160,0.15);">Book a free call</a>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;border-top:1px solid rgba(91,63,160,0.08);padding-top:24px;">
-        <div><div style="font-family:'DM Serif Display',Georgia,serif;font-size:24px;color:#5b3fa0;line-height:1;">$1,500</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">starting price for a full redesign</div></div>
-        <div><div style="font-family:'DM Serif Display',Georgia,serif;font-size:24px;color:#5b3fa0;line-height:1;">45 days</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">average time from kickoff to live</div></div>
-        <div><div style="font-family:'DM Serif Display',Georgia,serif;font-size:24px;color:#5b3fa0;line-height:1;">30 days</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">post-launch support included</div></div>
+        <div><div style="font-family:var(--serif);font-size:24px;color:#5b3fa0;line-height:1;">$1,500</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">starting price for a full redesign</div></div>
+        <div><div style="font-family:var(--serif);font-size:24px;color:#5b3fa0;line-height:1;">45 days</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">average time from kickoff to live</div></div>
+        <div><div style="font-family:var(--serif);font-size:24px;color:#5b3fa0;line-height:1;">30 days</div><div style="font-size:11px;color:#6b5f7e;margin-top:4px;line-height:1.4;">post-launch support included</div></div>
       </div>
     </div>
     <div>
@@ -339,6 +351,31 @@ body{padding-top:68px;}
     </div></div>
   </div>
 </section>
+<section class="work-proof">
+  <div class="work-proof-inner">
+    <div class="section-tag">What "custom" means here</div>
+    <h2>Built from scratch, around your business.</h2>
+    <p class="work-proof-sub">Not a template with your logo dropped in. Every site starts from your goals, your customers, and how people actually find and choose you.</p>
+    <div class="approach-grid">
+      <div class="approach-item">
+        <div class="approach-n">01</div>
+        <h3>Your structure, not a stock layout</h3>
+        <p>Pages and navigation built around what your customers need to do, whether that's book a table, request a quote, or find your hours fast.</p>
+      </div>
+      <div class="approach-item">
+        <div class="approach-n">02</div>
+        <h3>Your brand, expressed properly</h3>
+        <p>Type, color, and tone chosen to fit your business, so the site feels like you and not like a thousand other small-business sites.</p>
+      </div>
+      <div class="approach-item">
+        <div class="approach-n">03</div>
+        <h3>Designed to convert, not just decorate</h3>
+        <p>Every page has a clear next step and a reason to take it. Good design earns its keep by turning visitors into customers.</p>
+      </div>
+    </div>
+    <p class="work-proof-note">Featured client work is coming soon. I only showcase projects with my clients' clear permission, the same respect I bring to every relationship.</p>
+  </div>
+</section>
 <section class="cta-band">
   <div style="max-width:600px;margin:0 auto;">
     <h2>Ready for a site that <em>actually works?</em></h2>
@@ -354,7 +391,7 @@ body{padding-top:68px;}
 <section style="background:linear-gradient(135deg,#1e1338 0%,#5b3fa0 100%);padding:48px 24px;" aria-label="Get in touch">
   <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">
     <div style="flex:1;min-width:260px;color:#fff;">
-      <h3 style="font-family:'DM Serif Display',Georgia,serif;font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;color:#fff;">Ready to grow your business online?</h3>
+      <h3 style="font-family:var(--serif);font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;color:#fff;">Ready to grow your business online?</h3>
       <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;">Let's build a website that works as hard as you do.</p>
     </div>
     <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;">Book a free call →</a>
@@ -370,7 +407,7 @@ body{padding-top:68px;}
     </div>
     <div class="ftr-cols-grid" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;">
       <div>
-        <div style="font-family:'DM Serif Display',Georgia,serif;font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
+        <div style="font-family:var(--serif);font-size:20px;color:#fff;margin-bottom:8px;">Davis<span style="color:#c4aee8;">Digital</span> Studio</div>
         <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:16px;max-width:280px;">Web design and SEO for small businesses across the US. Enterprise thinking, human pricing.</p>
         <div style="display:flex;gap:12px;"><a href="https://www.linkedin.com/in/eric-davis-4b1034b8/" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">LinkedIn</a><a href="mailto:eric@davisdigitalstudio.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;">Email</a></div>
       </div>
@@ -458,7 +495,7 @@ function toggleMobGroup(id){
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
 </script>
 <div id="ddsStickyCta" style="position:fixed;bottom:24px;right:24px;z-index:9990;opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease;pointer-events:none;">
-  <a href="/audit#free-audit" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Get your free site score →</a>
+  <a href="/audit#free-audit" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Get your free site score →</a>
 </div>
 <style>@media(max-width:640px){#ddsStickyCta{display:none;}}</style>
 <script>
