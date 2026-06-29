@@ -6220,7 +6220,7 @@ function renderProviderGrid(){
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:14px;font-size:12px;color:var(--muted);">'
       +   '<div>Last success<br><b style="color:var(--ink,#2a2433);font-weight:600;">'+fmtWhen(p.last_success_at)+(p.last_success_count!=null?' · '+p.last_success_count+' signals':'')+'</b></div>'
       +   '<div>Last failure<br><b style="color:'+(p.last_failure_at?'#c0392b':'var(--ink,#2a2433)')+';font-weight:600;">'+fmtWhen(p.last_failure_at)+'</b></div>'
-      +   '<div>Next sync<br><b style="color:var(--ink,#2a2433);font-weight:600;">Manual</b></div>'
+      +   '<div>Next sync<br><b style="color:var(--ink,#2a2433);font-weight:600;">Nightly</b></div>'
       +   '<div>Provides<br><b style="color:var(--ink,#2a2433);font-weight:600;">'+(p.metrics?p.metrics.length:0)+' metrics</b></div>'
       + '</div>'
       + errorBlock

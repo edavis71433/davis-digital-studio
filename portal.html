@@ -832,6 +832,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
         <div class="sidebar-label">Your work</div>
         <button class="nav-item" onclick="nav('files')" id="nav-files"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Files<span class="nav-badge" id="badge-files" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('approvals')" id="nav-approvals2"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Approvals</button>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Resources</div>
         <button class="nav-item" onclick="nav('feedback')" id="nav-feedback"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></span>Feedback<span class="nav-badge" id="badge-feedback" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('services')" id="nav-services"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>Add-ons</button>
 
@@ -1350,7 +1352,7 @@ async function initPortal() {
   // helper can never stop the portal from loading. These feed the OTHER views.
   try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
   try { await loadGrowth(); } catch(e){ console.error("loadGrowth:", e); }
-  try { if (typeof loadProjectSpine === 'function') { await loadProjectSpine(); } } catch(e){ console.error("spine:", e); }
+  // (Project spine card was replaced by the Digital HQ; its loader is no longer called.)
   try { renderAddons(); } catch(e){ console.error("renderAddons:", e); }
   try { await loadFeedback(); } catch(e){ console.error("loadFeedback:", e); }
   try { await loadBriefState(); } catch(e){ console.error("loadBriefState:", e); }
