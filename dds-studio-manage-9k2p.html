@@ -805,22 +805,11 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 
       <!-- OVERVIEW -->
       <div class="page active" id="page-overview">
-        <div class="pt">Welcome back, Eric</div>
-        <div class="ps" id="ovSubtitle">Davis Digital Studio Admin</div>
-        <div class="triage" id="ddsTriage"></div>
-        <div class="stats" id="ovStats"></div>
-        <div id="ovAttention"></div>
-        <div class="card" id="whoNeedsMeCard" style="display:none;margin-bottom:16px;border:1px solid var(--line);">
-          <div class="ch"><div class="ct">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            Across your work
-          </div></div>
-          <div class="cb" id="whoNeedsMeBody"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Active projects</div></div><div class="cb" id="ovClients"></div></div>
-          <div class="card"><div class="ch"><div class="ct"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Recent activity</div></div><div class="cb" id="ovActivity"></div></div>
-        </div>
+        <!-- THE BRIEF — the intelligence layer above every module. One narrated
+             read that answers: what changed, what deserves attention, who needs
+             me most, what to do next, what can wait, and why. Modeled on the
+             Analytics executive brief. Rendered by loadBrief(). -->
+        <div id="briefRoot" style="max-width:720px;"></div>
       </div>
 
       <!-- CLIENT HUB -->
@@ -3281,92 +3270,194 @@ async function loadGrowthReminders(card, body){
 }
 
 async function loadOverview() {
-  try { loadWhoNeedsMe(); } catch(e){}
-  checkOverdueInvoices().catch(()=>{});
-  var [cls, msgs, files, invs, leadsData, approvals] = await Promise.all([
-    api("clients?select=*"),
-    api("messages?select=*&order=created_at.desc&limit=8"),
-    api("files?select=*"),
-    api("invoices?select=*&status=eq.pending"),
-    api("audit_leads?select=*").catch(()=>[]),
-    api("approvals?select=*&status=eq.pending").catch(()=>[]),
-  ]);
-  clients = cls || [];
-  var pendingInvs = invs || [];
-  var total = pendingInvs.reduce((s,i) => s + parseFloat((i.amount||"0").replace(/[^0-9.]/g,"")), 0);
-  var newLeads = (leadsData||[]).filter(l => !l.archived && l.status !== "closed").length;
-  var clientMsgs = (msgs||[]).filter(m=>m.from_who==="client").length;
-
-  document.getElementById("ovStats").innerHTML = [
-    {v:(cls||[]).length, l:"Active clients", ic:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
-    {v:newLeads, l:"New leads", ic:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'},
-    {v:clientMsgs, l:"Client messages", ic:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
-    {v:"$"+(total||0).toLocaleString(), l:"Pending invoices", ic:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
-  ].map(s=>`<div class="stat"><div style="display:flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg><span class="sl2">${s.l}</span></div><div class="sv">${s.v}</div></div>`).join("");
-
-  // Attention bar: overdue invoices + pending approvals + unanswered messages + stale projects
-  var overdue = pendingInvs.filter(i => i.due_date && new Date(i.due_date) < new Date());
-  var alerts = [];
-  if (overdue.length) {
-    var odTotal = overdue.reduce((s,i)=>s+parseFloat((i.amount||"0").replace(/[^0-9.]/g,"")),0);
-    alerts.push(overdue.length+" invoice"+(overdue.length>1?"s":"")+" overdue ($"+odTotal.toLocaleString()+")");
-  }
-  if ((approvals||[]).length) {
-    alerts.push((approvals.length)+" approval"+(approvals.length>1?"s":"")+" waiting on you");
-  }
-  // Unanswered client messages: latest message per client is from the client.
-  try {
-    var latestByClient = {};
-    (msgs||[]).forEach(function(m){
-      if (!latestByClient[m.client_id]) latestByClient[m.client_id] = m; // msgs are desc, first seen is latest
-    });
-    var needReply = Object.values(latestByClient).filter(function(m){ return m.from_who === "client"; }).length;
-    if (needReply) alerts.push(needReply+" client message"+(needReply>1?"s":"")+" awaiting your reply");
-  } catch(e){}
-  // Stale projects: active clients with no activity in 7+ days.
-  try {
-    var acts = await api("activity_log?select=client_id,created_at&order=created_at.desc&limit=200").catch(()=>[]);
-    var lastSeen = {};
-    (acts||[]).forEach(function(a){ if (!lastSeen[a.client_id]) lastSeen[a.client_id] = a.created_at; });
-    var weekAgo = Date.now() - 7*86400000;
-    var stale = (cls||[]).filter(function(c){
-      if ((c.progress||0) >= 100) return false; // launched projects aren't "stale"
-      var ls = lastSeen[c.id] ? new Date(lastSeen[c.id]).getTime() : 0;
-      return ls < weekAgo;
-    }).length;
-    if (stale) alerts.push(stale+" project"+(stale>1?"s":"")+" with no client activity in 7+ days");
-  } catch(e){}
-  var attEl = document.getElementById("ovAttention");
-  if (attEl) {
-    // The AI Manager briefing now surfaces approvals, messages, invoices,
-    // overdue items and stalled projects in one place, so this separate amber
-    // bar is retired to avoid telling Eric the same things twice.
-    attEl.innerHTML = "";
-  }
-
-  // Dynamic date subtitle
-  var subEl = document.getElementById("ovSubtitle");
-  if (subEl) {
-    var d = new Date();
-    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    var mons = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    subEl.textContent = days[d.getDay()]+", "+mons[d.getMonth()]+" "+d.getDate()+" · here's where things stand";
-  }
-
-  document.getElementById("ovClients").innerHTML = clients.length === 0
-    ? "<p style='font-size:13px;color:var(--muted);'>No clients yet.</p>"
-    : clients.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
-        <div><div style="font-size:13px;font-weight:600;">${c.name}</div><div style="font-size:11px;color:var(--muted);">${c.project_name||""}</div></div>
-        <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--pxxxl);color:var(--p);">${c.progress||0}%</span>
-      </div>`).join("");
-
-  document.getElementById("ovActivity").innerHTML = (msgs||[]).slice(0,5).map(m=>`
-    <div style="padding:8px 0;border-bottom:1px solid rgba(91,63,160,0.05);">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${escHtml(m.sender_name)} · ${fmtDate(m.created_at)}</div>
-      <div style="font-size:12px;">${escHtml(m.text.substring(0,65))}${m.text.length>65?"...":""}</div>
-    </div>`).join("") || "<p style='font-size:13px;color:var(--muted);'>No activity.</p>";
+  // Retained name so every existing call site still routes here; the dashboard
+  // it used to render has been replaced by The Brief.
+  return loadBrief();
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+//  THE BRIEF — the narrated morning read across every module.
+//  Answers the six questions in order: what changed, what deserves attention,
+//  who needs me most, what to do next, what can wait, why. Modeled bone-for-bone
+//  on the Analytics executive brief: interpret before presenting, state
+//  confidence honestly, propose never dispose, and say what can be ignored.
+// ════════════════════════════════════════════════════════════════════════════
+function escAttr(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var BRIEF = { data:null, loading:false };
+
+function bfDateLine(){
+  var d=new Date();
+  var days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var mons=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return days[d.getDay()]+", "+mons[d.getMonth()]+" "+d.getDate()+" · The Brief";
+}
+
+async function loadBrief(){
+  var root=document.getElementById('briefRoot');
+  if(!root) return;
+  if(BRIEF.loading) return;
+  BRIEF.loading=true;
+  bfRenderSkeleton(root);
+  try{
+    var r=await integApi('studio_brief',{});
+    BRIEF.data=(r&&r.data)||null;
+    bfRender(root, BRIEF.data);
+  }catch(e){
+    bfRenderError(root, e);
+  }finally{
+    BRIEF.loading=false;
+  }
+}
+
+// ── loading: a skeleton that mirrors the final shape, never a blank spinner ──
+function bfRenderSkeleton(root){
+  root.innerHTML =
+    '<div class="bf-eyebrow">'+escHtml(bfDateLine())+'</div>'
+    +'<div class="bf-skel" style="height:30px;width:80%;margin-bottom:10px;"></div>'
+    +'<div class="bf-skel" style="height:30px;width:55%;margin-bottom:24px;"></div>'
+    +'<div class="bf-skel" style="height:74px;width:100%;border-radius:16px;margin-bottom:26px;"></div>'
+    +'<div class="bf-skel" style="height:14px;width:120px;margin-bottom:14px;"></div>'
+    +[0,1,2].map(function(){ return '<div style="padding:16px 2px;border-top:1px solid var(--bf-line);display:flex;gap:14px;"><div class="bf-skel" style="height:7px;width:7px;border-radius:50%;margin-top:7px;"></div><div style="flex:1;"><div class="bf-skel" style="height:15px;width:40%;margin-bottom:8px;"></div><div class="bf-skel" style="height:13px;width:65%;"></div></div></div>'; }).join('');
+}
+
+// ── error: honest, retryable, never alarming ──
+function bfRenderError(root, e){
+  root.innerHTML =
+    '<div class="bf-eyebrow">'+escHtml(bfDateLine())+'</div>'
+    +'<h1 class="bf-headline" style="margin-bottom:10px;">I couldn\u2019t pull your brief together just now.</h1>'
+    +'<div class="bf-sub" style="margin-bottom:18px;">Nothing\u2019s broken on your end. This is usually a brief hiccup talking to the server.</div>'
+    +'<button class="bf-act" onclick="loadBrief()">Try again</button>';
+}
+
+function bfConfStyle(c){
+  return ({
+    high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},
+    medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},
+    low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}
+  })[c]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
+}
+function bfDot(c){ return ({high:'#1f9d57',medium:'#d68a12',low:'#8b8098'})[c]||'#8b8098'; }
+
+// route a brief item into the exact module spot where Eric acts
+function bfGo(go, refId, kind){
+  if(!go){ return; }
+  go && window.go(go);
+  // leads/partnerships deep-link into their detail after the page mounts
+  if(go==='leads' && refId){ try{ if(window.DDS && typeof DDS.briefDraft==='function'){ DDS.briefDraft(refId); return; } showLeadDetail && go('leads'); }catch(e){} }
+  if(go==='growth' && refId){ setTimeout(function(){ try{ openDetail && openDetail(refId,'overview'); }catch(e){} },160); }
+  if(go==='prospects' && refId){ setTimeout(function(){ try{ var el=document.getElementById('prSearch'); }catch(e){} },140); }
+}
+
+function bfRender(root, d){
+  if(!d){ return bfRenderError(root, null); }
+  var needs=d.needs_you||[];
+  // ── ALL-CLEAR / empty: the hero state, calm and earned, not a void ──
+  if(!needs.length){
+    var ctx=d.context||{};
+    root.innerHTML =
+      '<div class="bf-eyebrow">'+escHtml(bfDateLine())+'</div>'
+      +'<div style="padding:24px 0 8px;">'
+        +'<div style="width:46px;height:46px;border-radius:50%;background:#e7f6ee;display:flex;align-items:center;justify-content:center;margin-bottom:20px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1f9d57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+        +'<h1 class="bf-headline" aria-live="polite" style="max-width:560px;margin-bottom:10px;">'+escHtml(d.headline||'Quiet morning, Eric.')+'</h1>'
+        +'<div style="font-size:14.5px;color:var(--ink-2,#574d68);line-height:1.6;max-width:520px;margin-bottom:24px;">I checked billing, your clients, the inbox, and overnight audit runs. Everything\u2019s handled. A morning like this is a good one to spend on proactive growth work.</div>'
+        +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+          +'<button class="bf-act primary" onclick="go(\'prospects\')">Look at a business \u2192</button>'
+          +'<button class="bf-act" onclick="go(\'growth\')">Review partnerships</button>'
+        +'</div>'
+      +'</div>'
+      +'<div style="margin-top:30px;padding-top:18px;border-top:1px solid var(--bf-line);display:flex;gap:26px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">'
+        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">'+(ctx.active_clients||0)+'</span>active clients, all current</div>'
+        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">'+(ctx.waiting_on_others||0)+'</span>waiting on a client, not you</div>'
+        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">0</span>things overdue anywhere</div>'
+      +'</div>';
+    return;
+  }
+
+  // ── the active brief ──
+  var na=d.next_action;
+  var startCard='';
+  if(na){
+    var startBtn = na.canDraft
+      ? '<button class="bf-start-btn" onclick="bfDraftFromBrief(\''+escAttr(na.refId)+'\')">Draft a reply \u2192</button>'
+      : '<button class="bf-start-btn" onclick="bfGo(\''+escAttr(na.go)+'\',\''+escAttr(na.refId||'')+'\',\''+escAttr(na.kind||'')+'\')">Take me there \u2192</button>';
+    startCard=
+      '<div class="bf-start">'
+        +'<div class="bf-start-l">Start here</div>'
+        +'<div class="bf-start-row"><div class="bf-start-action">'+escHtml(na.title)+'</div>'+startBtn+'</div>'
+      +'</div>';
+  }
+
+  var rows=needs.map(function(it,i){
+    var cf=bfConfStyle(it.confidence);
+    var actionBtn = it.canDraft
+      ? '<button class="bf-act primary" onclick="event.stopPropagation();bfDraftFromBrief(\''+escAttr(it.refId)+'\')">Draft a reply</button>'
+      : '<button class="bf-act" onclick="event.stopPropagation();bfGo(\''+escAttr(it.go)+'\',\''+escAttr(it.refId||'')+'\',\''+escAttr(it.kind||'')+'\')">Open '+escHtml((it.module||'').toLowerCase())+' \u2192</button>';
+    return '<div class="bf-row exp" tabindex="0" role="button" aria-expanded="false" data-bi="'+i+'">'
+      +'<span class="bf-cdot" style="background:'+bfDot(it.confidence)+';" title="'+cf.w+'"></span>'
+      +'<div class="bf-rmain">'
+        +'<div class="bf-rtop"><div class="bf-subj">'+escHtml(it.subject)+'</div><div class="bf-mod">'+escHtml(it.module||'')+'</div></div>'
+        +'<div class="bf-changed">'+escHtml(it.changed)+'</div>'
+        +'<div class="bf-why">'+escHtml(it.why||'')+'</div>'
+        +'<div class="bf-ractions">'+actionBtn+'<span class="bf-impact">'+escHtml(it.impact||'')+'</span><button class="bf-whymore" onclick="event.stopPropagation();bfToggleRow(this)">why this?</button></div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  // ── what can wait: the calm-maker. "I checked these, they're fine." ──
+  var cw=d.can_wait||[];
+  var handled='';
+  if(cw.length){
+    var parts=cw.map(function(g){ return '<b>'+g.count+' '+escHtml(g.module.toLowerCase())+'</b>'; });
+    var phrase = parts.length===1 ? parts[0] : parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1];
+    handled =
+      '<div class="bf-handled">'
+        +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1f9d57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>'
+        +'<div style="font-size:13px;color:var(--ink-2,#574d68);line-height:1.55;">Also today, handled: '+phrase+'. Nothing here needs you right now.</div>'
+      +'</div>';
+  }
+
+  var cf=bfConfStyle(d.confidence);
+  var confLine=
+    '<div class="bf-conf">'
+      +'<span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span>'
+      +'<span>'+escHtml(d.confidence_reason||'')+'</span>'
+    +'</div>';
+
+  var aiTag = d.headline_is_ai ? '' : '';
+
+  root.innerHTML =
+    '<div class="bf-eyebrow">'+escHtml(bfDateLine())+'</div>'
+    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(d.headline||'')+'</h1>'
+    +'<div class="bf-sub">Your morning read across the whole studio.</div>'
+    +startCard
+    +'<div class="bf-secl">What needs you</div>'
+    +rows
+    +handled
+    +confLine;
+
+  // wire row expansion (click anywhere on the row, or keyboard)
+  Array.prototype.forEach.call(root.querySelectorAll('.bf-row.exp'), function(r){
+    function toggle(e){ if(e.target && (e.target.tagName==='BUTTON'))return; bfToggleRow(r); }
+    r.addEventListener('click', toggle);
+    r.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); bfToggleRow(r); } });
+  });
+}
+
+function bfToggleRow(elOrBtn){
+  var row = elOrBtn.classList && elOrBtn.classList.contains('bf-row') ? elOrBtn : elOrBtn.closest('.bf-row');
+  if(!row) return;
+  var open=row.classList.toggle('open');
+  row.setAttribute('aria-expanded', open?'true':'false');
+}
+
+// draft a reply for a lead straight from the brief, reusing the leads pipeline
+function bfDraftFromBrief(refId){
+  // Reuse the proven leads pipeline (briefDraft): navigate, await loadLeads,
+  // open the 'os_'-keyed form lead, and pre-draft a reply. Falls back to the
+  // leads page if that pipeline isn't present.
+  try{ if(window.DDS && typeof DDS.briefDraft==='function'){ return DDS.briefDraft(refId); } }catch(e){}
+  window.go('leads');
+}
 // ── MESSAGES ──
 async function loadMessages(client) {
   var data = await api("messages?select=*&client_id=eq."+client.id+"&order=created_at");
@@ -4142,6 +4233,47 @@ function previewQuote() {
     .deposit-box { background:#f7f4fd;border:1.5px solid rgba(91,63,160,0.15);border-radius:12px;padding:16px 20px;margin-bottom:24px; }
     .notes-box { background:#f7f4fd;border-radius:12px;padding:16px 20px;font-size:13px;color:#7a6d8e;line-height:1.7;margin-bottom:32px; }
     .quote-footer { font-size:11px;color:#c4bdd8;text-align:center;border-top:1px solid #f0ecf8;padding-top:20px; }
+
+    /* ════ THE BRIEF ════ the narrated morning read. Calm, intentional,
+       worthy of the Analytics benchmark. Uses the shared token system. */
+    #briefRoot{ --bf-line:#ece8f1; --bf-line2:#ddd6ea; }
+    .bf-eyebrow{ font-family:var(--mono,'Geist Mono',monospace); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .bf-headline{ font-family:var(--serif); font-size:30px; font-weight:500; line-height:1.22; letter-spacing:-.01em; margin:0 0 4px; color:var(--ink); }
+    .bf-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; }
+    .bf-start{ background:linear-gradient(135deg,#2a1f47,#43306b); border-radius:16px; padding:18px 20px; color:#fff; margin-bottom:26px; }
+    .bf-start-l{ font-family:var(--mono,monospace); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:7px; }
+    .bf-start-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    .bf-start-action{ font-size:16px; font-weight:550; letter-spacing:-.01em; }
+    .bf-start-btn{ background:#fff; color:#2a1f47; border:none; font-family:inherit; font-size:13px; font-weight:600; padding:9px 18px; border-radius:100px; white-space:nowrap; cursor:pointer; transition:transform .12s; }
+    .bf-start-btn:hover{ transform:translateY(-1px); }
+    .bf-secl{ font-family:var(--mono,monospace); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+    .bf-row{ padding:16px 2px; border-top:1px solid var(--bf-line); display:flex; gap:14px; align-items:flex-start; transition:background .15s,padding .15s; border-radius:10px; }
+    .bf-row.exp{ cursor:pointer; }
+    .bf-row.exp:hover{ background:var(--surface-2,#faf9fc); padding-left:10px; padding-right:10px; }
+    .bf-row:focus-visible{ outline:2px solid var(--p); outline-offset:2px; }
+    .bf-cdot{ width:7px; height:7px; border-radius:50%; flex:none; margin-top:7px; }
+    .bf-rmain{ flex:1; min-width:0; }
+    .bf-rtop{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .bf-subj{ font-size:15px; font-weight:550; letter-spacing:-.01em; color:var(--ink); }
+    .bf-mod{ font-family:var(--mono,monospace); font-size:10.5px; color:var(--muted); white-space:nowrap; }
+    .bf-changed{ font-size:13.5px; color:var(--ink-2,#574d68); margin-top:2px; line-height:1.5; }
+    .bf-why{ overflow:hidden; max-height:0; opacity:0; transition:max-height .22s ease,opacity .18s ease,margin .22s ease; font-size:12.5px; color:var(--muted); line-height:1.55; border-left:2px solid var(--bf-line2); padding-left:10px; }
+    .bf-row.open .bf-why{ max-height:120px; opacity:1; margin-top:7px; }
+    .bf-ractions{ margin-top:9px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .bf-act{ background:var(--surface,#fff); color:var(--ink); border:1px solid var(--bf-line2); font-family:inherit; font-size:12px; font-weight:550; padding:6px 13px; border-radius:100px; cursor:pointer; transition:background .14s; }
+    .bf-act:hover{ background:var(--surface-2,#faf9fc); }
+    .bf-act.primary{ background:var(--p); color:#fff; border-color:transparent; }
+    .bf-act.primary:hover{ background:var(--p-600,#4a3286); }
+    .bf-impact{ font-size:11.5px; color:var(--muted); }
+    .bf-whymore{ background:none; border:none; color:var(--muted); font-family:inherit; font-size:11.5px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; }
+    .bf-handled{ margin-top:20px; padding:14px 16px; background:var(--surface-3,#f3f0f9); border-radius:12px; display:flex; align-items:flex-start; gap:10px; }
+    .bf-handled b{ color:var(--ink); font-weight:550; }
+    .bf-conf{ margin-top:16px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+    .bf-conf-pill{ display:inline-flex; align-items:center; gap:5px; font-weight:550; padding:3px 10px; border-radius:100px; }
+    .bf-skel{ height:14px; background:linear-gradient(90deg,var(--bf-line) 0%,var(--surface-2,#faf9fc) 50%,var(--bf-line) 100%); background-size:200% 100%; border-radius:6px; animation:bfShimmer 1.3s infinite; }
+    @keyframes bfShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    @media (prefers-reduced-motion: reduce){ .bf-skel{ animation:none } .bf-why{ transition:none } .bf-start-btn:hover{ transform:none } }
+    @media(max-width:640px){ .bf-headline{ font-size:25px } .bf-start-btn{ width:100%; margin-top:4px } .bf-start-row{ flex-direction:column; align-items:stretch } }
   </style></head><body>
   <div class="quote-wrap">
     <div class="quote-header">
@@ -4555,7 +4687,7 @@ document.addEventListener("DOMContentLoaded", function() {
     { group:"Create",label:"New quote",        sub:"Build a quote PDF",  ico:"file",  run:function(){ go("quote"); } },
     { group:"Create",label:"Send a message",   sub:"Message a client",   ico:"chat",  run:function(){ go("messages"); } },
     { group:"AI",    label:"Draft a reply with AI", sub:"For the open message", ico:"spark", run:function(){ openAiReply(); } },
-    { group:"AI",    label:"What needs my attention?", sub:"AI triage of today", ico:"spark", run:function(){ go("overview"); setTimeout(runTriage,150); } }
+    { group:"AI",    label:"What needs my attention?", sub:"Your morning brief", ico:"spark", run:function(){ go("overview"); } }
   ];
 
   var ICONS = {
@@ -4843,10 +4975,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  /* run triage automatically when landing on overview */
+  /* refresh The Brief automatically when landing on the home page */
   var _origGo = window.go;
   if (typeof _origGo==="function"){
-    window.go = function(page){ _origGo.apply(this, arguments); if (page==="overview"){ setTimeout(runTriage, 120); } };
+    window.go = function(page){ _origGo.apply(this, arguments); if (page==="overview"){ setTimeout(function(){ try{ loadBrief(); }catch(e){} }, 60); } };
   }
 
   /* expose a small namespace for inline handlers */
@@ -4857,9 +4989,9 @@ document.addEventListener("DOMContentLoaded", function() {
     go:function(p){ (window.go||function(){})(p); }
   };
 
-  /* boot: run triage if overview is the initial active page */
+  /* boot: The Brief renders via loadOverview() in the normal boot sequence */
   document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(function(){ if (document.getElementById("ddsTriage")) runTriage(); }, 700);
+    setTimeout(function(){ if (document.getElementById("briefRoot") && !BRIEF.data) { try{ loadBrief(); }catch(e){} } }, 700);
   });
 })();
 
