@@ -3348,6 +3348,25 @@ function bfGo(go, refId, kind){
   if(go==='prospects' && refId){ setTimeout(function(){ try{ var el=document.getElementById('prSearch'); }catch(e){} },140); }
 }
 
+// the all-clear reassurance footer: only shows stats that are TRUE and never
+// contradict each other (e.g. won't claim "waiting on a client" when there are
+// no clients). A brand-new studio gets an honest first-run line instead.
+function bfClearFooter(ctx){
+  ctx=ctx||{};
+  var ac=ctx.active_clients||0, wo=ctx.waiting_on_others||0;
+  var stat=function(n,label){ return '<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">'+n+'</span>'+label+'</div>'; };
+  var cells=[];
+  if(ac>0){
+    cells.push(stat(ac, ac===1?'active client, current':'active clients, all current'));
+    if(wo>0) cells.push(stat(wo, wo===1?'project waiting on a client':'projects waiting on clients'));
+    cells.push(stat(0,'things overdue anywhere'));
+  } else {
+    // no clients yet — don't fabricate a portfolio; speak to the real moment
+    return '<div style="margin-top:30px;padding-top:18px;border-top:1px solid var(--bf-line);font-size:12.5px;color:var(--muted);line-height:1.6;">No active clients yet. When you bring one on, this is where you\u2019ll see what\u2019s on track and what needs a nudge.</div>';
+  }
+  return '<div style="margin-top:30px;padding-top:18px;border-top:1px solid var(--bf-line);display:flex;gap:26px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">'+cells.join('')+'</div>';
+}
+
 function bfRender(root, d){
   if(!d){ return bfRenderError(root, null); }
   var needs=d.needs_you||[];
@@ -3365,11 +3384,7 @@ function bfRender(root, d){
           +'<button class="bf-act" onclick="go(\'growth\')">Review partnerships</button>'
         +'</div>'
       +'</div>'
-      +'<div style="margin-top:30px;padding-top:18px;border-top:1px solid var(--bf-line);display:flex;gap:26px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">'
-        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">'+(ctx.active_clients||0)+'</span>active clients, all current</div>'
-        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">'+(ctx.waiting_on_others||0)+'</span>waiting on a client, not you</div>'
-        +'<div><span class="serif" style="font-family:var(--serif);font-size:17px;color:var(--ink);display:block;">0</span>things overdue anywhere</div>'
-      +'</div>';
+      +bfClearFooter(ctx);
     return;
   }
 
@@ -4238,12 +4253,12 @@ function previewQuote() {
        worthy of the Analytics benchmark. Uses the shared token system. */
     #briefRoot{ --bf-line:#ece8f1; --bf-line2:#ddd6ea; }
     .bf-eyebrow{ font-family:var(--mono,'Geist Mono',monospace); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-    .bf-headline{ font-family:var(--serif); font-size:30px; font-weight:500; line-height:1.22; letter-spacing:-.01em; margin:0 0 4px; color:var(--ink); }
+    .bf-headline{ font-family:var(--serif); font-size:29px; font-weight:400; line-height:1.24; letter-spacing:-.015em; margin:0 0 4px; color:var(--ink); }
     .bf-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; }
     .bf-start{ background:linear-gradient(135deg,#2a1f47,#43306b); border-radius:16px; padding:18px 20px; color:#fff; margin-bottom:26px; }
     .bf-start-l{ font-family:var(--mono,monospace); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:7px; }
     .bf-start-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-    .bf-start-action{ font-size:16px; font-weight:550; letter-spacing:-.01em; }
+    .bf-start-action{ font-size:16px; font-weight:500; letter-spacing:-.01em; }
     .bf-start-btn{ background:#fff; color:#2a1f47; border:none; font-family:inherit; font-size:13px; font-weight:600; padding:9px 18px; border-radius:100px; white-space:nowrap; cursor:pointer; transition:transform .12s; }
     .bf-start-btn:hover{ transform:translateY(-1px); }
     .bf-secl{ font-family:var(--mono,monospace); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
@@ -4254,22 +4269,22 @@ function previewQuote() {
     .bf-cdot{ width:7px; height:7px; border-radius:50%; flex:none; margin-top:7px; }
     .bf-rmain{ flex:1; min-width:0; }
     .bf-rtop{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
-    .bf-subj{ font-size:15px; font-weight:550; letter-spacing:-.01em; color:var(--ink); }
+    .bf-subj{ font-size:15px; font-weight:500; letter-spacing:-.01em; color:var(--ink); }
     .bf-mod{ font-family:var(--mono,monospace); font-size:10.5px; color:var(--muted); white-space:nowrap; }
     .bf-changed{ font-size:13.5px; color:var(--ink-2,#574d68); margin-top:2px; line-height:1.5; }
     .bf-why{ overflow:hidden; max-height:0; opacity:0; transition:max-height .22s ease,opacity .18s ease,margin .22s ease; font-size:12.5px; color:var(--muted); line-height:1.55; border-left:2px solid var(--bf-line2); padding-left:10px; }
     .bf-row.open .bf-why{ max-height:120px; opacity:1; margin-top:7px; }
     .bf-ractions{ margin-top:9px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .bf-act{ background:var(--surface,#fff); color:var(--ink); border:1px solid var(--bf-line2); font-family:inherit; font-size:12px; font-weight:550; padding:6px 13px; border-radius:100px; cursor:pointer; transition:background .14s; }
+    .bf-act{ background:var(--surface,#fff); color:var(--ink); border:1px solid var(--bf-line2); font-family:inherit; font-size:12px; font-weight:500; padding:6px 13px; border-radius:100px; cursor:pointer; transition:background .14s; }
     .bf-act:hover{ background:var(--surface-2,#faf9fc); }
     .bf-act.primary{ background:var(--p); color:#fff; border-color:transparent; }
     .bf-act.primary:hover{ background:var(--p-600,#4a3286); }
     .bf-impact{ font-size:11.5px; color:var(--muted); }
     .bf-whymore{ background:none; border:none; color:var(--muted); font-family:inherit; font-size:11.5px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; }
     .bf-handled{ margin-top:20px; padding:14px 16px; background:var(--surface-3,#f3f0f9); border-radius:12px; display:flex; align-items:flex-start; gap:10px; }
-    .bf-handled b{ color:var(--ink); font-weight:550; }
+    .bf-handled b{ color:var(--ink); font-weight:500; }
     .bf-conf{ margin-top:16px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
-    .bf-conf-pill{ display:inline-flex; align-items:center; gap:5px; font-weight:550; padding:3px 10px; border-radius:100px; }
+    .bf-conf-pill{ display:inline-flex; align-items:center; gap:5px; font-weight:500; padding:3px 10px; border-radius:100px; }
     .bf-skel{ height:14px; background:linear-gradient(90deg,var(--bf-line) 0%,var(--surface-2,#faf9fc) 50%,var(--bf-line) 100%); background-size:200% 100%; border-radius:6px; animation:bfShimmer 1.3s infinite; }
     @keyframes bfShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     @media (prefers-reduced-motion: reduce){ .bf-skel{ animation:none } .bf-why{ transition:none } .bf-start-btn:hover{ transform:none } }
