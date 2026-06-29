@@ -721,6 +721,19 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
     .bf-pattern svg{ color:var(--p,#5b3fa0); }
     .op-score{ font-family:var(--serif); font-size:21px; line-height:1; font-weight:400; }
     .op-row .bf-rtop{ align-items:center; }
+    .dds-act-bg{ position:fixed; inset:0; background:rgba(26,21,35,0.44); backdrop-filter:blur(3px); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; animation:ddsFade .15s ease; }
+    @keyframes ddsFade{ from{opacity:0} to{opacity:1} }
+    .dds-act{ background:#fff; border-radius:18px; max-width:560px; width:100%; max-height:86vh; overflow:auto; padding:24px 26px; box-shadow:0 24px 70px rgba(26,21,35,0.3); }
+    .dds-act-eyebrow{ font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted,#7a6d8e); margin-bottom:8px; }
+    .dds-act-title{ font-family:var(--serif,Georgia); font-size:21px; line-height:1.25; color:var(--ink,#1a1523); }
+    .dds-act-why{ font-size:13px; color:var(--muted,#7a6d8e); margin-top:6px; line-height:1.5; }
+    .dds-act-drafting{ font-size:12.5px; color:var(--p,#5b3fa0); margin-top:12px; }
+    .dds-act-skel-wrap{ margin-bottom:6px; }
+    .dds-act-label{ display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#7a6d8e); margin:14px 0 5px; }
+    .dds-act-input,.dds-act-textarea{ width:100%; border:1px solid var(--line,#e5e0ee); border-radius:10px; padding:11px 13px; font-family:inherit; font-size:14px; color:var(--ink,#1a1523); box-sizing:border-box; resize:vertical; line-height:1.55; }
+    .dds-act-input:focus,.dds-act-textarea:focus{ outline:none; border-color:var(--p,#5b3fa0); }
+    .dds-act-meta{ font-size:12px; color:var(--muted,#7a6d8e); margin-top:8px; line-height:1.45; }
+    .dds-act-foot{ display:flex; gap:9px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
     .bf-start{ background:linear-gradient(135deg,#2a1f47,#43306b); border-radius:16px; padding:18px 20px; color:#fff; margin-bottom:26px; }
     .bf-start-l{ font-family:var(--mono,monospace); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:7px; }
     .bf-start-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
@@ -3458,8 +3471,8 @@ function bfRender(root, d){
   var na=d.next_action;
   var startCard='';
   if(na){
-    var startBtn = na.canDraft
-      ? '<button class="bf-start-btn" onclick="bfDraftFromBrief(\''+escAttr(na.refId)+'\')">Draft a reply \u2192</button>'
+    var startBtn = bfActionable(na)
+      ? '<button class="bf-start-btn" onclick="bfDraftItem(\'na\')">Draft it \u2192</button>'
       : '<button class="bf-start-btn" onclick="bfGo(\''+escAttr(na.go)+'\',\''+escAttr(na.refId||'')+'\',\''+escAttr(na.kind||'')+'\')">Take me there \u2192</button>';
     startCard=
       '<div class="bf-start">'
@@ -3470,8 +3483,8 @@ function bfRender(root, d){
 
   var rows=needs.map(function(it,i){
     var cf=bfConfStyle(it.confidence);
-    var actionBtn = it.canDraft
-      ? '<button class="bf-act primary" onclick="event.stopPropagation();bfDraftFromBrief(\''+escAttr(it.refId)+'\')">Draft a reply</button>'
+    var actionBtn = bfActionable(it)
+      ? '<button class="bf-act primary" onclick="event.stopPropagation();bfDraftItem(\''+i+'\')">Draft it</button>'
       : '<button class="bf-act" onclick="event.stopPropagation();bfGo(\''+escAttr(it.go)+'\',\''+escAttr(it.refId||'')+'\',\''+escAttr(it.kind||'')+'\')">Open '+escHtml((it.module||'').toLowerCase())+' \u2192</button>';
     return '<div class="bf-row exp" tabindex="0" role="button" aria-expanded="false" data-bi="'+i+'">'
       +'<span class="bf-cdot" style="background:'+bfDot(it.confidence)+';" title="'+cf.w+'"></span>'
@@ -3543,6 +3556,114 @@ function bfDraftFromBrief(refId){
   // leads page if that pipeline isn't present.
   try{ if(window.DDS && typeof DDS.briefDraft==='function'){ return DDS.briefDraft(refId); } }catch(e){}
   window.go('leads');
+}
+
+// an item is "draftable" when its next move is a communication. The engine's
+// actions are overwhelmingly comms (reply, nudge, follow up, pitch, check in),
+// so we offer Draft it whenever the signal is one the Actions route can phrase.
+var BF_DRAFT_SIGNALS = { revenue_at_risk:1, waiting_on_eric:1, churn_risk:1, review_due:1, renewal_window:1, blocked_approval:1, high_opportunity:1, proposal_stale:1 };
+function bfActionable(it){ return !!(it && (it.canDraft || (it.signal && BF_DRAFT_SIGNALS[it.signal]))); }
+function bfDraftItem(ref){
+  var d=BRIEF.data; if(!d) return;
+  var item = ref==='na' ? d.next_action : (d.needs_you||[])[parseInt(ref,10)];
+  if(!item) return;
+  // next_action carries title not action; normalize to the engine item shape
+  var normalized = {
+    subject:item.subject, subjectId:item.subjectId||item.refId||'', signal:item.signal,
+    action:item.action||item.title, why:item.why, changed:item.changed, module:item.module,
+    go:item.go, refId:item.refId, canDraft:item.canDraft
+  };
+  ddsDraftAction(normalized);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ACTIONS LAYER — turn any reasoning-engine recommendation into a sent message.
+//  The engine decides WHAT to do; this opens a calm composer with the message
+//  already drafted (via the draft_action route), grounded in that item's facts.
+//  Reused by the Brief, Clients, and Opportunities — wherever the engine speaks.
+//  It adds no intelligence: it phrases and sends the doing the engine decided.
+// ════════════════════════════════════════════════════════════════════════════
+var DDS_ACT = { open:false };
+
+// item shape (from any engine result): { subject, subjectId, signal, action,
+// why, changed, module, go, refId, canDraft }. channel inferred from signal.
+function ddsDraftAction(item){
+  if(!item) return;
+  item = (typeof item === 'string') ? { action:item } : item;
+  // billing/proposal/review/opportunity reads as email; quick replies as message
+  var emailSignals = { revenue_at_risk:1, proposal_stale:1, renewal_window:1, review_due:1, high_opportunity:1 };
+  var channel = emailSignals[item.signal] ? 'email' : 'message';
+  ddsOpenComposer(item, channel);
+}
+
+function ddsCloseComposer(){ var b=document.getElementById('ddsActBg'); if(b) b.remove(); DDS_ACT.open=false; }
+
+function ddsOpenComposer(item, channel){
+  if(DDS_ACT.open) ddsCloseComposer();
+  DDS_ACT.open=true;
+  var bg=document.createElement('div');
+  bg.id='ddsActBg'; bg.className='dds-act-bg';
+  bg.onclick=function(e){ if(e.target===bg) ddsCloseComposer(); };
+  bg.innerHTML=
+    '<div class="dds-act" role="dialog" aria-modal="true">'
+      +'<div class="dds-act-eyebrow">'+escHtml((channel==='email'?'Email':'Message')+(item.subject?(' · '+item.subject):''))+'</div>'
+      +'<div class="dds-act-title">'+escHtml(item.action||'Draft a message')+'</div>'
+      +(item.why?'<div class="dds-act-why">'+escHtml(item.why)+'</div>':'')
+      +'<div id="ddsActForm" style="margin-top:16px;">'
+        +'<div class="dds-act-skel-wrap"><div class="bf-skel" style="height:13px;width:90%;margin-bottom:9px;"></div><div class="bf-skel" style="height:13px;width:96%;margin-bottom:9px;"></div><div class="bf-skel" style="height:13px;width:70%;margin-bottom:9px;"></div><div class="bf-skel" style="height:13px;width:85%;"></div></div>'
+        +'<div class="dds-act-drafting">Drafting from what the engine already knows…</div>'
+      +'</div>'
+    +'</div>';
+  document.body.appendChild(bg);
+
+  // call the Actions route: the engine's facts in, a grounded draft out
+  integApi('draft_action', {
+    subjectId: item.subjectId||'', subject: item.subject||'', signal: item.signal||'',
+    action: item.action||'', why: item.why||'', changed: item.changed||'', module: item.module||'',
+    channel: channel
+  }).then(function(r){
+    var d=(r&&r.data)||null;
+    if(!d){ return ddsComposerError(); }
+    ddsRenderComposer(item, d);
+  }).catch(function(){ ddsComposerError(); });
+}
+
+function ddsComposerError(){
+  var form=document.getElementById('ddsActForm'); if(!form) return;
+  form.innerHTML='<div style="font-size:13px;color:var(--muted);line-height:1.5;">I couldn\u2019t draft that just now. You can still write it yourself, or close this and try again.</div>'
+    +'<div class="dds-act-foot"><button class="bf-act" onclick="ddsCloseComposer()">Close</button></div>';
+}
+
+function ddsRenderComposer(item, d){
+  var form=document.getElementById('ddsActForm'); if(!form) return;
+  var subjField = d.channel==='email'
+    ? '<label class="dds-act-label">Subject</label><input id="ddsActSubj" class="dds-act-input" value="'+escAttr(d.subject_line||'')+'">'
+    : '';
+  form.innerHTML =
+    subjField
+    +'<label class="dds-act-label">'+(d.channel==='email'?'Message':'Message to '+escHtml(item.subject||'them'))+'</label>'
+    +'<textarea id="ddsActBody" class="dds-act-textarea" rows="9">'+escHtml(d.body||'')+'</textarea>'
+    +'<div class="dds-act-meta">'+(d.is_ai?'Drafted by your assistant from the engine\u2019s read. Edit anything before sending.':'A starting template, make it yours before sending.')+'</div>'
+    +'<div class="dds-act-foot">'
+      +'<button class="bf-act" onclick="ddsCloseComposer()">Cancel</button>'
+      +'<button class="bf-act" onclick="ddsCopyDraft()">Copy</button>'
+      +'<button class="bf-act primary" onclick="ddsSendDraft(\''+escAttr(item.go||'')+'\',\''+escAttr(item.refId||'')+'\')">'+(d.channel==='email'?'Open in email':'Go send it')+' \u2192</button>'
+    +'</div>';
+}
+
+function ddsCopyDraft(){
+  var subj=document.getElementById('ddsActSubj'); var bodyEl=document.getElementById('ddsActBody');
+  var text=(subj?('Subject: '+subj.value+'\n\n'):'')+(bodyEl?bodyEl.value:'');
+  try{ navigator.clipboard.writeText(text); if(window.integToast) integToast('Draft copied'); }catch(e){}
+}
+
+// "send" routes the user to the right module to actually send (messages, invoices,
+// growth), carrying nothing but the destination — the engine's refId deep-links.
+function ddsSendDraft(go, refId){
+  ddsCopyDraft();
+  ddsCloseComposer();
+  if(go && window.go){ window.go(go); }
+  if(window.integToast) integToast('Draft copied, paste it where you send.');
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -3849,13 +3970,19 @@ function clRenderDetail(root, name, health, rec){
     : '<div style="padding:16px 2px;border-top:1px solid var(--bf-line);font-size:13px;color:var(--muted);">Nothing active for this client right now. A good moment for a proactive, value-add touch.</div>';
 
   // the recommendation card (only when the brain has a concrete next move)
+  var recDraftBtn = (recItem && bfActionable(recItem))
+    ? '<button class="bf-start-btn" style="margin-right:8px;background:#fff;color:#2a1f47;" onclick="clDraftRec()">Draft it \u2192</button>'
+    : '';
   var recCard = recItem
     ? '<div class="bf-start">'
         +'<div class="bf-start-l">Recommended next action</div>'
         +'<div class="bf-start-row"><div class="bf-start-action">'+escHtml(recItem.action||recAction)+'</div>'
-        +'<button class="bf-start-btn" onclick="clActOn(\''+escAttr(recItem.go||'hub')+'\',\''+escAttr(recItem.refId||'')+'\')">'+clActLabel(recItem.go)+' \u2192</button></div>'
+        +'<div style="display:flex;gap:0;flex-wrap:wrap;">'+recDraftBtn
+        +'<button class="bf-start-btn" onclick="clActOn(\''+escAttr(recItem.go||'hub')+'\',\''+escAttr(recItem.refId||'')+'\')">'+clActLabel(recItem.go)+' \u2192</button></div></div>'
       +'</div>'
     : '<div class="bf-start" style="background:#3f7d5b;"><div class="bf-start-l" style="color:rgba(255,255,255,.6);">Recommended next action</div><div class="bf-start-action" style="margin-top:4px;">'+escHtml(recAction||'No pressing move. A proactive check-in is never wasted.')+'</div></div>';
+  // stash the rec item so the composer can draft from its full context
+  CLIENTS._rec = recItem;
 
   root.innerHTML =
     '<button class="cl-back" onclick="clBack()" style="background:none;border:none;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px;margin-bottom:16px;padding:0;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> All clients</button>'
@@ -3878,7 +4005,7 @@ function clActLabel(go){
   return ({invoices:'Open billing',messages:'Open messages',approvals:'Open approvals',growth:'Open partnership',hub:'Open record',timeline:'Open timeline'})[go]||'Take me there';
 }
 function clActOn(go, refId){ if(go) window.go(go); }
-function clBack(){ CLIENTS.detail=null; loadClients(); }
+function clDraftRec(){ if(CLIENTS._rec) ddsDraftAction(CLIENTS._rec); }function clBack(){ CLIENTS.detail=null; loadClients(); }
 function clOpenRecord(){ go('hub'); }
 // ── MESSAGES ──
 async function loadMessages(client) {
