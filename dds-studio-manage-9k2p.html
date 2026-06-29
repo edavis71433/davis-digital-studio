@@ -710,6 +710,49 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 .sidebar .sn.sn-sub svg{opacity:.7;}
 .sidebar .sn.sn-sub:hover,.sidebar .sn.sn-sub.active{color:var(--p);}
 .sidebar .sdiv{height:1px;background:rgba(91,63,160,0.08);margin:8px 14px;}
+
+    /* ════ THE BRIEF ════ the narrated morning read. Calm, intentional,
+       worthy of the Analytics benchmark. Uses the shared token system. */
+    #briefRoot{ --bf-line:#ece8f1; --bf-line2:#ddd6ea; }
+    .bf-eyebrow{ font-family:var(--mono,'Geist Mono',monospace); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    #briefRoot .bf-headline, .bf-headline{ font-family:var(--serif),"DM Serif Display",Georgia,"Times New Roman",serif; font-size:29px; font-weight:400; font-synthesis:none; line-height:1.24; letter-spacing:-.015em; margin:0 0 4px; color:var(--ink); }
+    .bf-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; }
+    .bf-pattern{ display:flex; gap:8px; align-items:flex-start; margin:-12px 0 22px; padding:11px 14px; background:var(--p-soft,#f1ecf9); border-radius:10px; font-size:13px; color:var(--p,#5b3fa0); line-height:1.5; }
+    .bf-pattern svg{ color:var(--p,#5b3fa0); }
+    .bf-start{ background:linear-gradient(135deg,#2a1f47,#43306b); border-radius:16px; padding:18px 20px; color:#fff; margin-bottom:26px; }
+    .bf-start-l{ font-family:var(--mono,monospace); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:7px; }
+    .bf-start-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    .bf-start-action{ font-size:16px; font-weight:500; letter-spacing:-.01em; }
+    .bf-start-btn{ background:#fff; color:#2a1f47; border:none; font-family:inherit; font-size:13px; font-weight:600; padding:9px 18px; border-radius:100px; white-space:nowrap; cursor:pointer; transition:transform .12s; }
+    .bf-start-btn:hover{ transform:translateY(-1px); }
+    .bf-secl{ font-family:var(--mono,monospace); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+    .bf-row{ padding:16px 2px; border-top:1px solid var(--bf-line); display:flex; gap:14px; align-items:flex-start; transition:background .15s,padding .15s; border-radius:10px; }
+    .bf-row.exp{ cursor:pointer; }
+    .bf-row.exp:hover{ background:var(--surface-2,#faf9fc); padding-left:10px; padding-right:10px; }
+    .bf-row:focus-visible{ outline:2px solid var(--p); outline-offset:2px; }
+    .bf-cdot{ width:7px; height:7px; border-radius:50%; flex:none; margin-top:7px; }
+    .bf-rmain{ flex:1; min-width:0; }
+    .bf-rtop{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+    .bf-subj{ font-size:15px; font-weight:500; letter-spacing:-.01em; color:var(--ink); }
+    .bf-mod{ font-family:var(--mono,monospace); font-size:10.5px; color:var(--muted); white-space:nowrap; }
+    .bf-changed{ font-size:13.5px; color:var(--ink-2,#574d68); margin-top:2px; line-height:1.5; }
+    .bf-why{ overflow:hidden; max-height:0; opacity:0; transition:max-height .22s ease,opacity .18s ease,margin .22s ease; font-size:12.5px; color:var(--muted); line-height:1.55; border-left:2px solid var(--bf-line2); padding-left:10px; }
+    .bf-row.open .bf-why{ max-height:120px; opacity:1; margin-top:7px; }
+    .bf-ractions{ margin-top:9px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .bf-act{ background:var(--surface,#fff); color:var(--ink); border:1px solid var(--bf-line2); font-family:inherit; font-size:12px; font-weight:500; padding:6px 13px; border-radius:100px; cursor:pointer; transition:background .14s; }
+    .bf-act:hover{ background:var(--surface-2,#faf9fc); }
+    .bf-act.primary{ background:var(--p); color:#fff; border-color:transparent; }
+    .bf-act.primary:hover{ background:var(--p-600,#4a3286); }
+    .bf-impact{ font-size:11.5px; color:var(--muted); }
+    .bf-whymore{ background:none; border:none; color:var(--muted); font-family:inherit; font-size:11.5px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; }
+    .bf-handled{ margin-top:20px; padding:14px 16px; background:var(--surface-3,#f3f0f9); border-radius:12px; display:flex; align-items:flex-start; gap:10px; }
+    .bf-handled b{ color:var(--ink); font-weight:500; }
+    .bf-conf{ margin-top:16px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+    .bf-conf-pill{ display:inline-flex; align-items:center; gap:5px; font-weight:500; padding:3px 10px; border-radius:100px; }
+    .bf-skel{ height:14px; background:linear-gradient(90deg,var(--bf-line) 0%,var(--surface-2,#faf9fc) 50%,var(--bf-line) 100%); background-size:200% 100%; border-radius:6px; animation:bfShimmer 1.3s infinite; }
+    @keyframes bfShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    @media (prefers-reduced-motion: reduce){ .bf-skel{ animation:none } .bf-why{ transition:none } .bf-start-btn:hover{ transform:none } }
+    @media(max-width:640px){ .bf-headline{ font-size:25px } .bf-start-btn{ width:100%; margin-top:4px } .bf-start-row{ flex-direction:column; align-items:stretch } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -3440,10 +3483,15 @@ function bfRender(root, d){
 
   var aiTag = d.headline_is_ai ? '' : '';
 
+  var patternLine = d.pattern
+    ? '<div class="bf-pattern"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(d.pattern)+'</span></div>'
+    : '';
+
   root.innerHTML =
     '<div class="bf-eyebrow">'+escHtml(bfDateLine())+'</div>'
     +'<h1 class="bf-headline" aria-live="polite">'+escHtml(d.headline||'')+'</h1>'
     +'<div class="bf-sub">Your morning read across the whole studio.</div>'
+    +patternLine
     +startCard
     +'<div class="bf-secl">What needs you</div>'
     +rows
@@ -4249,46 +4297,6 @@ function previewQuote() {
     .notes-box { background:#f7f4fd;border-radius:12px;padding:16px 20px;font-size:13px;color:#7a6d8e;line-height:1.7;margin-bottom:32px; }
     .quote-footer { font-size:11px;color:#c4bdd8;text-align:center;border-top:1px solid #f0ecf8;padding-top:20px; }
 
-    /* ════ THE BRIEF ════ the narrated morning read. Calm, intentional,
-       worthy of the Analytics benchmark. Uses the shared token system. */
-    #briefRoot{ --bf-line:#ece8f1; --bf-line2:#ddd6ea; }
-    .bf-eyebrow{ font-family:var(--mono,'Geist Mono',monospace); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-    .bf-headline{ font-family:var(--serif); font-size:29px; font-weight:400; line-height:1.24; letter-spacing:-.015em; margin:0 0 4px; color:var(--ink); }
-    .bf-sub{ font-size:13px; color:var(--muted); margin-bottom:22px; }
-    .bf-start{ background:linear-gradient(135deg,#2a1f47,#43306b); border-radius:16px; padding:18px 20px; color:#fff; margin-bottom:26px; }
-    .bf-start-l{ font-family:var(--mono,monospace); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:7px; }
-    .bf-start-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-    .bf-start-action{ font-size:16px; font-weight:500; letter-spacing:-.01em; }
-    .bf-start-btn{ background:#fff; color:#2a1f47; border:none; font-family:inherit; font-size:13px; font-weight:600; padding:9px 18px; border-radius:100px; white-space:nowrap; cursor:pointer; transition:transform .12s; }
-    .bf-start-btn:hover{ transform:translateY(-1px); }
-    .bf-secl{ font-family:var(--mono,monospace); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
-    .bf-row{ padding:16px 2px; border-top:1px solid var(--bf-line); display:flex; gap:14px; align-items:flex-start; transition:background .15s,padding .15s; border-radius:10px; }
-    .bf-row.exp{ cursor:pointer; }
-    .bf-row.exp:hover{ background:var(--surface-2,#faf9fc); padding-left:10px; padding-right:10px; }
-    .bf-row:focus-visible{ outline:2px solid var(--p); outline-offset:2px; }
-    .bf-cdot{ width:7px; height:7px; border-radius:50%; flex:none; margin-top:7px; }
-    .bf-rmain{ flex:1; min-width:0; }
-    .bf-rtop{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
-    .bf-subj{ font-size:15px; font-weight:500; letter-spacing:-.01em; color:var(--ink); }
-    .bf-mod{ font-family:var(--mono,monospace); font-size:10.5px; color:var(--muted); white-space:nowrap; }
-    .bf-changed{ font-size:13.5px; color:var(--ink-2,#574d68); margin-top:2px; line-height:1.5; }
-    .bf-why{ overflow:hidden; max-height:0; opacity:0; transition:max-height .22s ease,opacity .18s ease,margin .22s ease; font-size:12.5px; color:var(--muted); line-height:1.55; border-left:2px solid var(--bf-line2); padding-left:10px; }
-    .bf-row.open .bf-why{ max-height:120px; opacity:1; margin-top:7px; }
-    .bf-ractions{ margin-top:9px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .bf-act{ background:var(--surface,#fff); color:var(--ink); border:1px solid var(--bf-line2); font-family:inherit; font-size:12px; font-weight:500; padding:6px 13px; border-radius:100px; cursor:pointer; transition:background .14s; }
-    .bf-act:hover{ background:var(--surface-2,#faf9fc); }
-    .bf-act.primary{ background:var(--p); color:#fff; border-color:transparent; }
-    .bf-act.primary:hover{ background:var(--p-600,#4a3286); }
-    .bf-impact{ font-size:11.5px; color:var(--muted); }
-    .bf-whymore{ background:none; border:none; color:var(--muted); font-family:inherit; font-size:11.5px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; padding:0; }
-    .bf-handled{ margin-top:20px; padding:14px 16px; background:var(--surface-3,#f3f0f9); border-radius:12px; display:flex; align-items:flex-start; gap:10px; }
-    .bf-handled b{ color:var(--ink); font-weight:500; }
-    .bf-conf{ margin-top:16px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
-    .bf-conf-pill{ display:inline-flex; align-items:center; gap:5px; font-weight:500; padding:3px 10px; border-radius:100px; }
-    .bf-skel{ height:14px; background:linear-gradient(90deg,var(--bf-line) 0%,var(--surface-2,#faf9fc) 50%,var(--bf-line) 100%); background-size:200% 100%; border-radius:6px; animation:bfShimmer 1.3s infinite; }
-    @keyframes bfShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-    @media (prefers-reduced-motion: reduce){ .bf-skel{ animation:none } .bf-why{ transition:none } .bf-start-btn:hover{ transform:none } }
-    @media(max-width:640px){ .bf-headline{ font-size:25px } .bf-start-btn{ width:100%; margin-top:4px } .bf-start-row{ flex-direction:column; align-items:stretch } }
   </style></head><body>
   <div class="quote-wrap">
     <div class="quote-header">
