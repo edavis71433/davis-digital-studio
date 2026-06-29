@@ -6928,7 +6928,7 @@ function integToast(msg){
 //  with interpretation (what changed / why / what to do), then shows the chart.
 //  Charts are lightweight inline SVG — no dependency.
 // ════════════════════════════════════════════════════════════════════════════
-var ANALYTICS = { clientId: null, clients: [], data: null, months: null };
+var ANALYTICS = { clientId: null, clients: [], data: null, months: null, engine: null };
 
 async function loadAnalytics(){
   var host = document.getElementById('analyticsBody'); if(!host) return;
@@ -6992,7 +6992,21 @@ function anExportCsv(){
 async function refreshAnalytics(){
   var body = document.getElementById('anBody');
   if(body) body.innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px;">Loading…</div>';
-  try{ var r = await integApi('admin_analytics',{clientId:ANALYTICS.clientId,months:ANALYTICS.months}); ANALYTICS.data=(r&&r.data)||null; }catch(e){ ANALYTICS.data=null; }
+  // Analytics keeps its own trend-interpretation brief (admin_analytics) — that
+  // reasons over time-series metrics, which the engine deliberately doesn't do.
+  // We ALSO ask the reasoning engine for this client's cross-module context
+  // (relationship_health), so Analytics can show what the numbers can't see: an
+  // overdue invoice, a review due, a churn signal. The engine call is additive
+  // and isolated — if it fails, Analytics is completely unaffected.
+  ANALYTICS.engine = null;
+  try{
+    var pair = await Promise.all([
+      integApi('admin_analytics',{clientId:ANALYTICS.clientId,months:ANALYTICS.months}),
+      integApi('reasoning_query',{question:'relationship_health', subjectId:ANALYTICS.clientId, polish:false}).catch(function(){ return null; })
+    ]);
+    ANALYTICS.data = (pair[0]&&pair[0].data)||null;
+    ANALYTICS.engine = (pair[1]&&pair[1].data)||null;
+  }catch(e){ ANALYTICS.data=null; }
   renderAnalytics();
 }
 
@@ -7074,7 +7088,7 @@ function renderAnalytics(){
       + '<div style="color:var(--muted);font-size:13px;">Connect a data source in Integrations, or run a sync. Internal signals (approvals, requests, project progress) populate as the client engages.</div></div>';
     return;
   }
-  var html = anBriefBanner(d.executive_brief) + anFreshnessBar(d.executive_brief);
+  var html = anBriefBanner(d.executive_brief) + anFreshnessBar(d.executive_brief) + anEngineNote(ANALYTICS.engine);
   // grid: two columns on wide screens
   html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;margin-top:16px;">';
   html += anGroup('Website analytics', d.website_analytics, d.website_analytics.interpretation, 'sessions');
@@ -7128,6 +7142,41 @@ function anFreshnessBar(brief){
   return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);">'
     + '<div>Data freshness: <b style="color:var(--ink,#2a2433);">'+when+'</b> · Sources: '+sources+'</div>'
     + '<div style="font-size:11px;background:#f3f0fa;color:#5b3fa0;padding:3px 10px;border-radius:100px;font-weight:600;">Operator view · not client-facing</div>'
+    + '</div>';
+}
+
+// ── "Beyond the numbers" — the reasoning engine's cross-module context ──
+// Analytics' own brief reasons over metric trends. This note adds what the
+// metrics can't see: relationship signals from billing, partnerships, and
+// messaging that the engine surfaced for this same client. It renders only when
+// there's genuinely something to add, and it never duplicates the metric story
+// (it filters out Analytics' own engagement/delivery signals). If the engine
+// returned nothing or failed, this renders nothing — Analytics stands alone.
+function anEngineNote(eng){
+  if(!eng || !eng.items || !eng.items.length) return '';
+  // keep only cross-module signals the analytics metrics don't already cover
+  var crossModules = { Billing:1, Partnerships:1, Clients:1, Proposals:1 };
+  var items = eng.items.filter(function(it){ return crossModules[it.module]; });
+  if(!items.length) return '';
+
+  var dot = function(kind){ return kind==='risk' ? '#a8443a' : (kind==='owed'||kind==='unblock') ? '#b5781d' : '#3f7d5b'; };
+  var rows = items.slice(0,4).map(function(it){
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid rgba(91,63,160,0.08);">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:'+dot(it.kind)+';flex:none;margin-top:6px;"></span>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:13px;color:var(--ink,#2a2433);font-weight:500;">'+escHtml(it.changed||'')+'</div>'
+      + (it.why ? '<div style="font-size:12px;color:var(--muted);margin-top:1px;line-height:1.45;">'+escHtml(it.why)+'</div>' : '')
+      + '</div>'
+      + (it.go ? '<button onclick="go(\''+escAttr(it.go)+'\')" style="background:none;border:none;color:#5b3fa0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none;">Open '+escHtml(it.module.toLowerCase())+' →</button>' : '')
+      + '</div>';
+  }).join('');
+
+  return '<div style="margin-top:14px;background:#faf9fc;border:1px solid rgba(91,63,160,0.12);border-radius:14px;padding:14px 16px;">'
+    + '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+      + '<span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5b3fa0;">Beyond the numbers</span>'
+    + '</div>'
+    + '<div style="font-size:12.5px;color:var(--muted);margin-bottom:4px;line-height:1.5;">The metrics above don\u2019t capture everything. Your reasoning engine also sees this about the relationship:</div>'
+    + rows
     + '</div>';
 }
 
