@@ -252,3 +252,20 @@ footer.site .fbase a{color:rgba(255,255,255,.5)}
   .wrap{padding:0 20px}
   .nav-actions .btn{padding:8px 12px;font-size:12.5px}
 }
+
+/* hero signature — small face + one honest credential at the "keep reading?" moment */
+.hero-sig{display:flex;align-items:center;gap:13px;margin-top:34px}
+.hero-sig img{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:center top;border:1px solid var(--hair);flex-shrink:0}
+.hero-sig-txt{font-size:13.5px;line-height:1.45;color:var(--muted)}
+.hero-sig-txt strong{display:block;color:var(--ink);font-weight:550;font-size:14px}
+
+/* how-we-work process shot — a real person runs the process */
+.hww-shot{margin:36px 0 0;border-radius:14px;overflow:hidden}
+.hww-shot img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--hair)}
+.hww-shot figcaption{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);margin-top:12px;text-align:center}
+
+/* about — portrait anchors "who am I hiring?"; life photo is one human note */
+.about-portrait{margin:8px 0 0;border-radius:16px;overflow:hidden;max-width:460px}
+.about-portrait img{display:block;width:100%;height:auto;border-radius:16px;border:1px solid var(--hair)}
+.about-life{margin:28px 0 0;max-width:340px;border-radius:14px;overflow:hidden}
+.about-life img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--hair)}
