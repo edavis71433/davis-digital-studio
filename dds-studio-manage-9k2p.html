@@ -4962,6 +4962,24 @@ function toggleProspectExpand(id) {
   }
 }
 
+// Search the REAL case-file content (industry, research, contact log, tags,
+// location, owner) — not the raw JSON blob in p.notes. (Friction fix: search
+// was blind to everything captured.)
+function prospectMatchesQuery(p, q) {
+  if (!q) return true;
+  var cf = caseFile(p);
+  var hay = [
+    p.business_name, p.email, p.phone, p.website, p.contact_name,
+    cf.info.industry, cf.info.owner, cf.info.location, cf.info.gbp, cf.info.social, cf.info.opportunity,
+    (Array.isArray(cf.info.tags) ? cf.info.tags.join(' ') : cf.info.tags),
+    (cf.next && cf.next.action) ? cf.next.action : '',
+    cf.summary
+  ];
+  cf.research.forEach(function(r){ hay.push(r.cat); hay.push(r.body); });
+  cf.log.forEach(function(l){ hay.push(l.kind); hay.push(l.body); });
+  return hay.join(' \u0001 ').toLowerCase().indexOf(q) !== -1;
+}
+
 // ── Warmth / cooling-off: pure date math on REAL signals. Never fabricated. ──
 // Returns {state, days, label, why} where state is one of:
 //   'new'      never contacted
@@ -5002,7 +5020,7 @@ function renderProspects() {
   var rows = allProspects.filter(p => {
     if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
     if (priorityFilter !== 'all' && (p.priority || 'Medium') !== priorityFilter) return false;
-    if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    if (q && !prospectMatchesQuery(p, q)) return false;
     return true;
   });
   // Attention-based sort: the list order IS the recommendation (blueprint rule —
@@ -5273,7 +5291,7 @@ function toggleSelectAllProspects(checked) {
   var vis = allProspects.filter(function(p){
     if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
     if (priorityFilter !== 'all' && (p.priority || 'Medium') !== priorityFilter) return false;
-    if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    if (q && !prospectMatchesQuery(p, q)) return false;
     return true;
   });
   if (checked) vis.forEach(function(p){ _selectedProspects.add(p.id); });
