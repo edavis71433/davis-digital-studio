@@ -1420,6 +1420,12 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
               <button class="prpf" onclick="setPriorityFilter('Medium')" id="prpf-Medium" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Medium</button>
               <button class="prpf" onclick="setPriorityFilter('Low')" id="prpf-Low" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Low</button>
             </div>
+            <div id="prospectSelectBar" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 18px 0;padding:10px 14px;background:var(--p-soft,#f1ecf9);border:1px solid rgba(91,63,160,0.2);border-radius:10px;">
+              <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--p);cursor:pointer;"><input type="checkbox" id="prospectSelectAll" onchange="toggleSelectAllProspects(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--p);"> Select all shown</label>
+              <span id="prospectSelectCount" style="font-size:12px;color:var(--muted);">0 selected</span>
+              <button onclick="deleteSelectedProspects()" id="prospectDeleteSelBtn" style="margin-left:auto;background:var(--red);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Delete selected</button>
+              <button onclick="clearProspectSelection()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Clear</button>
+            </div>
             <div id="prospectsList" style="padding:14px 18px;"></div>
           </div>
         </div>
@@ -1526,6 +1532,17 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 // not a secret. The Edge Function verifies this session server-side and checks
 // the `admins` allowlist table before running any privileged action. There is no
 // admin secret or service-role token in this file anymore.
+if (typeof supabase === "undefined" || !supabase.createClient) {
+  // The Supabase library (loaded from CDN) didn't load. Without this guard the
+  // next line throws and halts the ENTIRE script, blanking the whole panel.
+  document.addEventListener("DOMContentLoaded", function () {
+    var n = document.createElement("div");
+    n.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0392b;color:#fff;font:14px/1.5 system-ui,sans-serif;padding:12px 18px;text-align:center;";
+    n.innerHTML = "Couldn't load a required library (network/CDN issue). Please refresh the page. If this keeps happening, check your connection.";
+    document.body.appendChild(n);
+  });
+  throw new Error("Supabase library failed to load from CDN");
+}
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // Returns the current admin's access token (JWT) to send on privileged calls,
@@ -4902,6 +4919,7 @@ function renderProspects() {
       'background:'+pcol.bg+';color:'+pcol.fg+';">'+prio+'</button>';
     return '<div style="border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+        '<input type="checkbox" onclick="event.stopPropagation();toggleProspectSelect(\''+p.id+'\',this.checked)" '+(_selectedProspects.has(p.id)?'checked':'')+' title="Select prospect" style="flex-shrink:0;width:17px;height:17px;margin-top:3px;cursor:pointer;accent-color:var(--p);">' +
         '<div style="flex:1;min-width:200px;">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
             '<span style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</span>' +
@@ -4926,6 +4944,51 @@ function renderProspects() {
       '</div>' +
     '</div>';
   }).join('');
+  updateProspectSelectBar();
+}
+
+var _selectedProspects = new Set();
+function toggleProspectSelect(id, checked) {
+  if (checked) _selectedProspects.add(id); else _selectedProspects.delete(id);
+  updateProspectSelectBar();
+}
+function clearProspectSelection() {
+  _selectedProspects.clear();
+  var sa = document.getElementById('prospectSelectAll'); if (sa) sa.checked = false;
+  renderProspects();
+}
+function toggleSelectAllProspects(checked) {
+  var q = (document.getElementById('prSearch').value || '').toLowerCase();
+  var vis = allProspects.filter(function(p){
+    if (prospectFilter !== 'all' && p.status !== prospectFilter) return false;
+    if (priorityFilter !== 'all' && (p.priority || 'Medium') !== priorityFilter) return false;
+    if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if (checked) vis.forEach(function(p){ _selectedProspects.add(p.id); });
+  else vis.forEach(function(p){ _selectedProspects.delete(p.id); });
+  renderProspects();
+}
+function updateProspectSelectBar() {
+  var bar = document.getElementById('prospectSelectBar');
+  var count = document.getElementById('prospectSelectCount');
+  if (!bar) return;
+  var n = _selectedProspects.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  if (count) count.textContent = n + ' selected';
+}
+async function deleteSelectedProspects() {
+  var ids = Array.from(_selectedProspects);
+  if (!ids.length) { alert('Nothing selected'); return; }
+  if (!confirm('Delete ' + ids.length + ' selected prospect' + (ids.length>1?'s':'') + '? This cannot be undone.')) return;
+  var btn = document.getElementById('prospectDeleteSelBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  var listParam = ids.map(function(x){ return '"' + x + '"'; }).join(',');
+  var res = await api('prospects?id=in.(' + listParam + ')', 'DELETE');
+  _selectedProspects.clear();
+  var sa = document.getElementById('prospectSelectAll'); if (sa) sa.checked = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Delete selected'; }
+  await loadProspects();
 }
 
 async function addProspect() {
