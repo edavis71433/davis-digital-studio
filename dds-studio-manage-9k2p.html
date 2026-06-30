@@ -4900,6 +4900,63 @@ function setPriorityFilter(f) {
   renderProspects();
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// PROSPECT CASE FILE — rich data stored as JSON inside the existing `notes`
+// column (no schema change). Shape:
+//   { v:1, info:{phone,owner,location,industry,gbp,social,opportunity,tags[]},
+//     research:[{t,cat,body}], log:[{t,kind,body}], next:{action,due},
+//     starred:bool, summary:'' }
+// Old plain-text notes are migrated into research[0] so nothing is lost.
+// ─────────────────────────────────────────────────────────────────────────
+function caseFile(p) {
+  var raw = p.notes;
+  if (raw && typeof raw === 'string') {
+    var s = raw.trim();
+    if (s.charAt(0) === '{') {
+      try { var o = JSON.parse(s); if (o && o.v) return normalizeCase(o); } catch(e){}
+    }
+    // legacy plain text → seed as first research note
+    return normalizeCase({ v:1, research:[{ t:null, cat:'Note', body:s }] });
+  }
+  return normalizeCase({ v:1 });
+}
+function normalizeCase(o) {
+  o.v = 1;
+  o.info = o.info || {};
+  o.research = Array.isArray(o.research) ? o.research : [];
+  o.log = Array.isArray(o.log) ? o.log : [];
+  o.next = o.next || { action:'', due:'' };
+  o.starred = !!o.starred;
+  o.summary = o.summary || '';
+  return o;
+}
+async function saveCase(id, cf) {
+  var p = allProspects.find(function(x){ return x.id === id; });
+  if (p) p.notes = JSON.stringify(cf);
+  await api('prospects?id=eq.' + id, 'PATCH', { notes: JSON.stringify(cf), updated_at: new Date().toISOString() });
+}
+function nowStamp() {
+  var d = new Date();
+  return d.toISOString();
+}
+function fmtStamp(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' + d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+}
+var _expandedProspect = null;
+function toggleProspectExpand(id) {
+  _expandedProspect = (_expandedProspect === id) ? null : id;
+  renderProspects();
+  if (_expandedProspect) {
+    setTimeout(function(){
+      var el = document.getElementById('pcase-' + id);
+      if (el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 30);
+  }
+}
+
 function renderProspects() {
   var listEl = document.getElementById('prospectsList');
   if (!listEl) return;
@@ -4924,37 +4981,195 @@ function renderProspects() {
     var sc = statusColors[p.status] || 'var(--muted)';
     var prio = p.priority || 'Medium';
     var pcol = PRIORITY_COLORS[prio] || PRIORITY_COLORS.Medium;
-    var badge = '<button onclick="cyclePriority(\''+p.id+'\')" title="Click to change priority" '+
+    var cf = caseFile(p);
+    var expanded = (_expandedProspect === p.id);
+    var badge = '<button onclick="event.stopPropagation();cyclePriority(\''+p.id+'\')" title="Click to change priority" '+
       'style="font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 9px;border-radius:100px;border:none;cursor:pointer;'+
       'background:'+pcol.bg+';color:'+pcol.fg+';">'+prio+'</button>';
-    return '<div style="border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+    var star = '<button onclick="event.stopPropagation();toggleStar(\''+p.id+'\')" title="Star" style="background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:'+(cf.starred?'#e0a92e':'rgba(91,63,160,0.25)')+';">'+(cf.starred?'★':'☆')+'</button>';
+    // meta line
+    var meta = (p.email ? p.email : 'no email') + (p.website ? ' · '+p.website : ' · No website');
+    if (cf.info.industry) meta = cf.info.industry + ' · ' + meta;
+    // next action chip
+    var nextChip = '';
+    if (cf.next && cf.next.action) {
+      var overdue = cf.next.due && new Date(cf.next.due) < new Date(new Date().toDateString());
+      nextChip = '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:'+(overdue?'rgba(224,85,85,0.1)':'rgba(91,63,160,0.08)')+';color:'+(overdue?'var(--red)':'var(--p)')+';">→ '+cf.next.action+(cf.next.due?' · '+cf.next.due:'')+'</span>';
+    }
+    // counts
+    var rc = cf.research.length, lc = cf.log.length;
+    var countChips = (rc?'<span style="font-size:10.5px;color:var(--muted);">'+rc+' research</span>':'') +
+                     (lc?'<span style="font-size:10.5px;color:var(--muted);">'+lc+' logged</span>':'');
+
+    var collapsed = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
         '<input type="checkbox" onclick="event.stopPropagation();toggleProspectSelect(\''+p.id+'\',this.checked)" '+(_selectedProspects.has(p.id)?'checked':'')+' title="Select prospect" style="flex-shrink:0;width:17px;height:17px;margin-top:3px;cursor:pointer;accent-color:var(--p);">' +
-        '<div style="flex:1;min-width:200px;">' +
+        '<div style="flex:1;min-width:200px;cursor:pointer;" onclick="toggleProspectExpand(\''+p.id+'\')">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+            star +
             '<span style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</span>' +
             badge +
+            '<span style="font-size:11px;color:var(--muted);">'+(expanded?'▾':'▸')+'</span>' +
           '</div>' +
-          '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+
-            (p.email ? p.email : 'no email') +
-            (p.website ? ' · '+p.website : '') +
-            ' · '+(p.site_status||'') +
-          '</div>' +
-          (p.notes ? '<div style="font-size:12px;color:var(--ink);margin-top:6px;background:var(--cream);padding:6px 10px;border-radius:7px;">'+p.notes+'</div>' : '') +
+          '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+meta+'</div>' +
+          '<div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;">'+nextChip+countChips+'</div>' +
         '</div>' +
-        '<select onchange="updateProspect(\''+p.id+'\',\'status\',this.value)" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;border:1px solid '+sc+';color:'+sc+';background:#fff;cursor:pointer;outline:none;">' +
-          ['New','Emailed','Replied','Client','Dead'].map(s => '<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('') +
+        '<select onclick="event.stopPropagation();" onchange="updateProspect(\''+p.id+'\',\'status\',this.value)" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;border:1px solid '+sc+';color:'+sc+';background:#fff;cursor:pointer;outline:none;">' +
+          ['New','Emailed','Replied','Client','Dead'].map(function(s){return '<option'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('') +
         '</select>' +
-      '</div>' +
-      '<div style="display:flex;gap:16px;margin-top:10px;align-items:center;flex-wrap:wrap;">' +
-        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.emailed?'checked':'')+' onchange="toggleEmailed(\''+p.id+'\',this.checked)"> Emailed'+(p.emailed_date?' ('+p.emailed_date+')':'')+'</label>' +
-        '<label style="font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" '+(p.replied?'checked':'')+' onchange="toggleReplied(\''+p.id+'\',this.checked)"> Replied</label>' +
-        (p.follow_up_date ? '<span style="font-size:12px;color:var(--muted);">Follow up: '+p.follow_up_date+'</span>' : '') +
-        '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete</button>' +
-      '</div>' +
+      '</div>';
+
+    var body = expanded ? renderCaseFile(p, cf) : '';
+
+    return '<div id="pcase-'+p.id+'" style="border:1px solid '+(expanded?'rgba(91,63,160,0.35)':'rgba(91,63,160,0.1)')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;'+(expanded?'box-shadow:0 8px 30px -16px rgba(91,63,160,0.4);':'')+'">' +
+      collapsed + body +
     '</div>';
   }).join('');
   updateProspectSelectBar();
+}
+
+// ── Full case-file workspace (rendered when a card is expanded) ──
+function renderCaseFile(p, cf) {
+  var i = cf.info;
+  function field(label, key, val, ph) {
+    return '<div style="margin-bottom:8px;"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">'+label+'</label>'+
+      '<input value="'+(val||'').replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" onchange="updateCaseInfo(\''+p.id+'\',\''+key+'\',this.value)" style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>';
+  }
+  // real-column fields (email/phone/website) write to actual columns; info fields write to JSON
+  var overview =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+      field('Industry','industry',i.industry,'e.g. Med spa') +
+      field('Owner / decision maker','owner',i.owner,'Name') +
+      '<div style="margin-bottom:8px;"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">Email</label><input value="'+((p.email||'').replace(/"/g,'&quot;'))+'" placeholder="email@business.com" onchange="updateProspect(\''+p.id+'\',\'email\',this.value)" style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>' +
+      '<div style="margin-bottom:8px;"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">Phone</label><input value="'+((p.phone||'').replace(/"/g,'&quot;'))+'" placeholder="(555) 555-5555" onchange="updateProspect(\''+p.id+'\',\'phone\',this.value)" style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>' +
+      '<div style="margin-bottom:8px;"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">Website</label><input value="'+((p.website||'').replace(/"/g,'&quot;'))+'" placeholder="business.com" onchange="updateProspect(\''+p.id+'\',\'website\',this.value)" style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>' +
+      field('Location','location',i.location,'City / neighborhood') +
+      field('Google Business','gbp',i.gbp,'GBP link or rating') +
+      field('Social links','social',i.social,'Instagram, FB…') +
+      field('Est. opportunity','opportunity',i.opportunity,'$5,000–$8,000') +
+      field('Tags','tags',(Array.isArray(i.tags)?i.tags.join(', '):i.tags),'comma, separated') +
+    '</div>';
+
+  // NEXT ACTION
+  var next = '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">' +
+      '<div style="flex:1;min-width:180px;"><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">Next action</label>'+
+        '<input id="pnext-'+p.id+'" value="'+((cf.next.action||'').replace(/"/g,'&quot;'))+'" placeholder="e.g. Email Friday" onchange="updateNextAction(\''+p.id+'\')" style="width:100%;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>'+
+      '<div><label style="display:block;font-size:10.5px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">Due</label>'+
+        '<input id="pnextdue-'+p.id+'" type="date" value="'+(cf.next.due||'')+'" onchange="updateNextAction(\''+p.id+'\')" style="font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;"></div>'+
+    '</div>';
+
+  // RESEARCH log
+  var researchEntries = cf.research.slice().reverse().map(function(r, idx){
+    var realIdx = cf.research.length - 1 - idx;
+    return '<div style="background:var(--cream,#faf7f2);border-radius:8px;padding:8px 10px;margin-bottom:6px;">'+
+      '<div style="display:flex;justify-content:space-between;gap:8px;">'+
+        '<span style="font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--p);">'+(r.cat||'Note')+'</span>'+
+        '<span style="font-size:10px;color:var(--muted);">'+(fmtStamp(r.t)||'')+' <button onclick="deleteResearch(\''+p.id+'\','+realIdx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;">×</button></span>'+
+      '</div>'+
+      '<div style="font-size:12.5px;color:var(--ink);margin-top:3px;white-space:pre-wrap;">'+(r.body||'')+'</div>'+
+    '</div>';
+  }).join('') || '<p style="font-size:11.5px;color:var(--muted);">No research yet. Capture what you notice — site issues, review patterns, pain points, sales angles.</p>';
+  var research =
+    '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">'+
+      '<select id="rcat-'+p.id+'" style="font-size:11.5px;padding:5px 8px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;">'+
+        ['Observation','SEO issue','Reviews','Competitor','Pain point','Sales angle','Objection','Idea'].map(function(c){return '<option>'+c+'</option>';}).join('')+
+      '</select>'+
+      '<input id="rbody-'+p.id+'" placeholder="What did you notice?" onkeydown="if(event.key===\'Enter\')addResearch(\''+p.id+'\')" style="flex:1;min-width:160px;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;">'+
+      '<button onclick="addResearch(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:7px;border:none;background:var(--p);color:#fff;cursor:pointer;">Add</button>'+
+    '</div>'+researchEntries;
+
+  // CONTACT HISTORY / activity log
+  var logEntries = cf.log.slice().reverse().map(function(l){
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(91,63,160,0.06);">'+
+      '<span style="font-size:10px;font-weight:700;color:var(--p);min-width:64px;">'+(l.kind||'Note')+'</span>'+
+      '<span style="font-size:12px;color:var(--ink);flex:1;">'+(l.body||'')+'</span>'+
+      '<span style="font-size:10px;color:var(--muted);white-space:nowrap;">'+(fmtStamp(l.t)||'')+'</span>'+
+    '</div>';
+  }).join('') || '<p style="font-size:11.5px;color:var(--muted);">No contact logged yet.</p>';
+  var log =
+    '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">'+
+      '<select id="lkind-'+p.id+'" style="font-size:11.5px;padding:5px 8px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;">'+
+        ['Cold email','Call','Voicemail','Walk-in','LinkedIn','Reply','Meeting','Proposal'].map(function(c){return '<option>'+c+'</option>';}).join('')+
+      '</select>'+
+      '<input id="lbody-'+p.id+'" placeholder="What happened?" onkeydown="if(event.key===\'Enter\')addLog(\''+p.id+'\')" style="flex:1;min-width:160px;font-size:12.5px;padding:6px 9px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;outline:none;">'+
+      '<button onclick="addLog(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:7px;border:none;background:var(--p);color:#fff;cursor:pointer;">Log</button>'+
+    '</div>'+logEntries;
+
+  function section(title, content) {
+    return '<div style="margin-top:14px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink);margin-bottom:8px;">'+title+'</div>'+content+'</div>';
+  }
+
+  return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(91,63,160,0.12);">' +
+    '<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'+
+      '<button onclick="analyzeProspect(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid var(--p);background:rgba(91,63,160,0.06);color:var(--p);cursor:pointer;">✨ Analyze prospect</button>'+
+      '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete prospect</button>'+
+    '</div>'+
+    '<div id="pai-'+p.id+'"></div>'+
+    section('Next action', next) +
+    section('Business overview', overview) +
+    section('Research', research) +
+    section('Contact history', log) +
+  '</div>';
+}
+
+// ── case-file actions ──
+async function updateCaseInfo(id, key, val) {
+  var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
+  var cf = caseFile(p);
+  if (key === 'tags') cf.info.tags = val.split(',').map(function(t){return t.trim();}).filter(Boolean);
+  else cf.info[key] = val;
+  await saveCase(id, cf);
+}
+async function updateNextAction(id) {
+  var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
+  var cf = caseFile(p);
+  cf.next = { action: (document.getElementById('pnext-'+id).value||'').trim(), due: document.getElementById('pnextdue-'+id).value||'' };
+  await saveCase(id, cf);
+  var p2 = allProspects.find(function(x){return x.id===id;}); if(p2) p2.notes = JSON.stringify(cf);
+  renderProspects();
+}
+async function addResearch(id) {
+  var bodyEl = document.getElementById('rbody-'+id); var body=(bodyEl.value||'').trim(); if(!body) return;
+  var cat = document.getElementById('rcat-'+id).value;
+  var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
+  cf.research.push({ t: nowStamp(), cat: cat, body: body });
+  await saveCase(id, cf); renderProspects();
+}
+async function deleteResearch(id, idx) {
+  var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
+  cf.research.splice(idx,1); await saveCase(id, cf); renderProspects();
+}
+async function addLog(id) {
+  var bodyEl = document.getElementById('lbody-'+id); var body=(bodyEl.value||'').trim(); if(!body) return;
+  var kind = document.getElementById('lkind-'+id).value;
+  var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
+  cf.log.push({ t: nowStamp(), kind: kind, body: body });
+  await saveCase(id, cf); renderProspects();
+}
+async function toggleStar(id) {
+  var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
+  cf.starred = !cf.starred; await saveCase(id, cf); renderProspects();
+}
+function analyzeProspect(id) {
+  var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
+  var cf = caseFile(p);
+  var out = document.getElementById('pai-'+id);
+  var biz = p.business_name||'this business';
+  var ind = cf.info.industry||'';
+  var site = p.website ? p.website : 'no website found';
+  // Local heuristic draft (uses what you know; no external call so it always works)
+  var research = cf.research.map(function(r){return '• '+r.cat+': '+r.body;}).join('\n');
+  var angle = ind ? ind.toLowerCase() : 'local business';
+  var draft =
+    'Subject: A quick thought on '+biz+"'s website\n\n"+
+    'Hi'+(cf.info.owner?(' '+cf.info.owner.split(' ')[0]):'')+',\n\n'+
+    'I came across '+biz+' while looking at '+angle+'s in '+(cf.info.location||'the area')+'. '+
+    (p.website ? 'I took a quick look at '+p.website+' and noticed a couple of things that might be quietly costing you customers.' : "I couldn't find a website for you, and for a "+angle+" that usually means real customers are going to competitors who show up first.")+'\n\n'+
+    'No pitch — I run a small studio and I help '+angle+'s get found and convert. Happy to send a free, honest review if useful. Worth a quick look?\n\nEric';
+  out.innerHTML = '<div style="background:rgba(91,63,160,0.05);border:1px solid rgba(91,63,160,0.15);border-radius:10px;padding:12px;margin-bottom:8px;">'+
+    '<div style="font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--p);margin-bottom:6px;">Suggested outreach draft</div>'+
+    '<textarea style="width:100%;min-height:150px;font-size:12.5px;padding:8px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;font-family:inherit;">'+draft+'</textarea>'+
+    (research?'<div style="font-size:11px;color:var(--muted);margin-top:6px;">Built from your research:\n'+research+'</div>':'')+
+    '</div>';
 }
 
 var _selectedProspects = new Set();
