@@ -1347,39 +1347,44 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
           <div class="ch"><div class="ct">＋ Add a prospect</div></div>
           <div class="cb">
             <div class="two-col">
-              <div class="fg"><label class="fl">Business name</label><input class="fi" id="pr-name" placeholder="e.g. Joe's Taco Spot"></div>
-              <div class="fg"><label class="fl">Contact name</label><input class="fi" id="pr-contact" placeholder="e.g. Joe Martinez (optional)"></div>
-              <div class="fg"><label class="fl">Email</label><input class="fi" id="pr-email" type="email" placeholder="owner@business.com"></div>
-              <div class="fg"><label class="fl">Phone</label><input class="fi" id="pr-phone" placeholder="(optional)"></div>
-              <div class="fg"><label class="fl">Website</label><input class="fi" id="pr-website" placeholder="theirsite.com (or blank)"></div>
-              <div class="fg"><label class="fl">Site status</label>
-                <select class="fi" id="pr-sitestatus">
-                  <option>No website</option>
-                  <option>Facebook page only</option>
-                  <option>Outdated site</option>
-                  <option>Decent site</option>
-                  <option>Good site</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Source</label>
-                <select class="fi" id="pr-source">
-                  <option>Google Maps</option>
-                  <option>Yelp</option>
-                  <option>Referral</option>
-                  <option>Walk-by</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Follow-up date</label><input class="fi" id="pr-followup" type="date"></div>
-              <div class="fg"><label class="fl">Priority</label>
-                <select class="fi" id="pr-priority">
-                  <option>High</option>
-                  <option selected>Medium</option>
-                  <option>Low</option>
-                </select>
-              </div>
-              <div class="fg" style="grid-column:span 2;"><label class="fl">Notes</label><input class="fi" id="pr-notes" placeholder="e.g. ran AI review, scored 41, slow on mobile, no menu page"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Business name</label><input class="fi" id="pr-name" placeholder="e.g. Joe's Taco Spot" onkeydown="if(event.key==='Enter')addProspect()"></div>
             </div>
+            <details style="margin-top:4px;">
+              <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--p);margin-bottom:8px;">+ More details (optional)</summary>
+              <div class="two-col">
+                <div class="fg"><label class="fl">Contact name</label><input class="fi" id="pr-contact" placeholder="e.g. Joe Martinez (optional)"></div>
+                <div class="fg"><label class="fl">Email</label><input class="fi" id="pr-email" type="email" placeholder="owner@business.com"></div>
+                <div class="fg"><label class="fl">Phone</label><input class="fi" id="pr-phone" placeholder="(optional)"></div>
+                <div class="fg"><label class="fl">Website</label><input class="fi" id="pr-website" placeholder="theirsite.com (or blank)"></div>
+                <div class="fg"><label class="fl">Site status</label>
+                  <select class="fi" id="pr-sitestatus">
+                    <option>No website</option>
+                    <option>Facebook page only</option>
+                    <option>Outdated site</option>
+                    <option>Decent site</option>
+                    <option>Good site</option>
+                  </select>
+                </div>
+                <div class="fg"><label class="fl">Source</label>
+                  <select class="fi" id="pr-source">
+                    <option>Google Maps</option>
+                    <option>Yelp</option>
+                    <option>Referral</option>
+                    <option>Walk-by</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="fg"><label class="fl">Follow-up date</label><input class="fi" id="pr-followup" type="date"></div>
+                <div class="fg"><label class="fl">Priority</label>
+                  <select class="fi" id="pr-priority">
+                    <option>High</option>
+                    <option selected>Medium</option>
+                    <option>Low</option>
+                  </select>
+                </div>
+                <div class="fg" style="grid-column:span 2;"><label class="fl">Notes</label><input class="fi" id="pr-notes" placeholder="e.g. ran AI review, scored 41, slow on mobile, no menu page"></div>
+              </div>
+            </details>
             <button class="sbtn" onclick="addProspect()" style="margin-top:6px;">Add prospect →</button>
             <div class="result-box" id="pr-result"></div>
             <details style="margin-top:14px;border-top:1px solid rgba(91,63,160,0.12);padding-top:12px;">
