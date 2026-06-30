@@ -202,6 +202,14 @@ footer.site .fbase a{color:rgba(255,255,255,.5)}
   .pad{padding:72px 0}.hero{padding:60px 0 56px}
   .mobile-open .nav-links{display:flex;position:absolute;top:70px;left:0;right:0;flex-direction:column;
     background:var(--paper);padding:20px 32px;gap:18px;border-bottom:1px solid var(--hair)}
+  /* mobile submenu: stack links cleanly instead of collapsing into one line */
+  .mobile-open .nav-has-sub{display:flex;flex-direction:column;gap:14px}
+  .mobile-open .nav-sub{position:static;opacity:1;visibility:visible;transform:none;
+    display:flex;flex-direction:column;gap:2px;box-shadow:none;border:none;padding:0 0 0 14px;
+    margin-top:6px;background:transparent;min-width:0}
+  .mobile-open .nav-sub a{padding:7px 0}
+  .mobile-open .nav-sub a small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+  .mobile-open .nav-sub-toggle .caret{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 
