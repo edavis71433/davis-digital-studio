@@ -5362,7 +5362,22 @@ async function addProspect() {
   ['pr-name','pr-contact','pr-email','pr-phone','pr-website','pr-followup','pr-notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pr-priority').value = 'Medium';
   resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
-  loadProspects();
+  await loadProspects();
+  // Flow straight from "added" into "researching": find the new prospect and open it.
+  // Match by name + most-recent, so you don't have to hunt for it in the sorted list.
+  var match = allProspects.filter(function(p){ return (p.business_name||'') === name; });
+  if (match.length) {
+    match.sort(function(a,b){
+      var ta = a.created_at || a.updated_at || '', tb = b.created_at || b.updated_at || '';
+      return tb < ta ? -1 : (tb > ta ? 1 : 0);
+    });
+    _expandedProspect = match[0].id;
+    renderProspects();
+    setTimeout(function(){
+      var el = document.getElementById('pcase-' + match[0].id);
+      if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 40);
+  }
 }
 
 async function bulkImportProspects() {
