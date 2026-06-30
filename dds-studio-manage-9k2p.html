@@ -1382,6 +1382,16 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
             </div>
             <button class="sbtn" onclick="addProspect()" style="margin-top:6px;">Add prospect →</button>
             <div class="result-box" id="pr-result"></div>
+            <details style="margin-top:14px;border-top:1px solid rgba(91,63,160,0.12);padding-top:12px;">
+              <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--p);">Bulk import &mdash; paste a list of leads</summary>
+              <p style="font-size:11.5px;color:var(--muted);margin:8px 0;">One lead per line. Use commas: <strong>Business name, website, notes</strong> (website and notes optional). Example:<br><code style="font-size:11px;">G A Public Adjusters, , Public adjuster &mdash; SEO refresh could capture claim searches</code></p>
+              <textarea id="pr-bulk" placeholder="Glow Med Spa, glowmedspa.com, dated site, strong rebuild candidate&#10;Smile Design Dental, , booking-driven, likely template site&#10;Valley Injury Attorneys, , high-value PI cases" style="width:100%;min-height:120px;font-size:12px;padding:10px;border:1px solid rgba(91,63,160,0.15);border-radius:8px;font-family:monospace;outline:none;resize:vertical;"></textarea>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+                <select id="pr-bulk-priority" class="fi" style="max-width:130px;font-size:12px;"><option>High</option><option selected>Medium</option><option>Low</option></select>
+                <button class="sbtn" onclick="bulkImportProspects()" id="pr-bulk-btn">Import all →</button>
+              </div>
+              <div class="result-box" id="pr-bulk-result" style="display:none;"></div>
+            </details>
           </div>
         </div>
 
@@ -4989,14 +4999,19 @@ async function deleteSelectedProspects() {
   if (!confirm('Delete ' + ids.length + ' selected prospect' + (ids.length>1?'s':'') + '? This cannot be undone.')) return;
   var btn = document.getElementById('prospectDeleteSelBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; btn.style.opacity = '1'; }
-  var listParam = ids.map(function(x){ return '"' + x + '"'; }).join(',');
-  var res = await api('prospects?id=in.(' + listParam + ')', 'DELETE');
-  var ok = res !== null;
+  // The api() layer only understands single "id=eq.value" filters, so delete one by one.
+  var failed = 0;
+  for (var i = 0; i < ids.length; i++) {
+    var res = await api('prospects?id=eq.' + ids[i], 'DELETE');
+    if (res === null) failed++;
+  }
+  var deleted = ids.length - failed;
   _selectedProspects.clear();
   var sa = document.getElementById('prospectSelectAll'); if (sa) sa.checked = false;
   await loadProspects();
   if (typeof toast === 'function') {
-    toast(ok ? (ids.length + ' prospect' + (ids.length>1?'s':'') + ' deleted') : 'Delete failed — please try again');
+    if (failed === 0) toast(deleted + ' prospect' + (deleted>1?'s':'') + ' deleted');
+    else toast(deleted + ' deleted, ' + failed + ' failed — please try again');
   }
 }
 // Keyboard: Escape clears selection when prospects are selected
@@ -5029,6 +5044,46 @@ async function addProspect() {
   document.getElementById('pr-priority').value = 'Medium';
   resultEl.style.display='block'; resultEl.style.color='var(--green)'; resultEl.textContent='Added '+name+'.';
   loadProspects();
+}
+
+async function bulkImportProspects() {
+  var ta = document.getElementById('pr-bulk');
+  var out = document.getElementById('pr-bulk-result');
+  var btn = document.getElementById('pr-bulk-btn');
+  var priority = document.getElementById('pr-bulk-priority').value || 'Medium';
+  var raw = (ta.value || '').trim();
+  out.style.display = 'block';
+  if (!raw) { out.style.color = 'var(--red)'; out.textContent = 'Paste at least one line first.'; return; }
+
+  var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length; });
+  if (!lines.length) { out.style.color = 'var(--red)'; out.textContent = 'Nothing to import.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Importing…';
+  var added = 0, failed = 0;
+  for (var i = 0; i < lines.length; i++) {
+    var parts = lines[i].split(',');
+    var business = (parts[0] || '').trim();
+    if (!business) { failed++; continue; }
+    var website = (parts[1] || '').trim();
+    var notes = parts.slice(2).join(',').trim();
+    var body = {
+      business_name: business,
+      website: website || null,
+      notes: notes || null,
+      priority: priority,
+      source: 'Other',
+      status: 'New'
+    };
+    out.style.color = 'var(--muted)';
+    out.textContent = 'Importing ' + (i+1) + ' of ' + lines.length + '…';
+    var r = await api('prospects', 'POST', body);
+    if (r === null) failed++; else added++;
+  }
+  btn.disabled = false; btn.textContent = 'Import all →';
+  ta.value = '';
+  out.style.color = failed ? 'var(--red)' : 'var(--green)';
+  out.textContent = 'Imported ' + added + ' lead' + (added===1?'':'s') + (failed ? (', ' + failed + ' failed (check for blank lines or duplicates)') : '') + '.';
+  await loadProspects();
 }
 
 // Minimal CSV parser that handles quoted fields, commas inside quotes, and escaped quotes.
