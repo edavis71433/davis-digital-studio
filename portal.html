@@ -4173,6 +4173,27 @@ function renderHQ(b){
     html+='</div></div>';
   }
 
+  // Anxiety floor: if the brief existed but produced nothing meaningful (e.g. a
+  // heads-down week with no client-facing events logged), never leave the client
+  // staring at an empty home — silence reads as "stalled" to someone paying
+  // thousands. Show an honest, non-fabricated reassurance instead.
+  var meaningful = !!(
+    (b.headline && b.headline.text) ||
+    (b.going && b.going.text) ||
+    (b.changed && b.changed.length) ||
+    (b.done && b.done.length) ||
+    (b.todo && b.todo.length) ||
+    (b.next && b.next.length)
+  );
+  if (!meaningful) {
+    html += '<div class="hq-anim"><div class="hq-card" style="text-align:center;padding:28px 20px;">'
+      + '<div class="hq-pill" style="margin:0 auto 12px;"><span class="hq-dot"></span>on track</div>'
+      + '<div style="font-size:15px;color:var(--ink);font-weight:600;margin-bottom:6px;">Eric is heads-down on your project.</div>'
+      + '<div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:380px;margin:0 auto;">No action is needed from you right now. The next update will appear here the moment there\u2019s something to show \u2014 and you can always reach Eric in your conversation.</div>'
+      + '<button onclick="nav(\'messages\')" style="margin-top:16px;background:transparent;color:var(--p);border:1px solid var(--p);border-radius:100px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;">Message Eric</button>'
+      + '</div></div>';
+  }
+
   html+='<div class="hq-foot">This is your Digital Headquarters.<br>We\u2019re always here, working on your business.</div></div>';
   document.getElementById('hqHost').innerHTML=html;
 }
