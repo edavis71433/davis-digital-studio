@@ -1420,11 +1420,11 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
               <button class="prpf" onclick="setPriorityFilter('Medium')" id="prpf-Medium" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Medium</button>
               <button class="prpf" onclick="setPriorityFilter('Low')" id="prpf-Low" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Low</button>
             </div>
-            <div id="prospectSelectBar" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 18px 0;padding:10px 14px;background:var(--p-soft,#f1ecf9);border:1px solid rgba(91,63,160,0.2);border-radius:10px;">
-              <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--p);cursor:pointer;"><input type="checkbox" id="prospectSelectAll" onchange="toggleSelectAllProspects(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--p);"> Select all shown</label>
-              <span id="prospectSelectCount" style="font-size:12px;color:var(--muted);">0 selected</span>
-              <button onclick="deleteSelectedProspects()" id="prospectDeleteSelBtn" style="margin-left:auto;background:var(--red);color:#fff;font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;">Delete selected</button>
-              <button onclick="clearProspectSelection()" style="background:transparent;color:var(--muted);font-size:12px;padding:7px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Clear</button>
+            <div id="prospectSelectBar" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 18px 0;padding:10px 14px;background:var(--p-soft,#f4f0fb);border:1px solid rgba(91,63,160,0.18);border-radius:10px;">
+              <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--p);cursor:pointer;"><input type="checkbox" id="prospectSelectAll" onchange="toggleSelectAllProspects(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--p);"> Select all shown</label>
+              <span id="prospectSelectCount" style="font-size:12.5px;color:var(--muted);">0 selected</span>
+              <button onclick="deleteSelectedProspects()" id="prospectDeleteSelBtn" disabled style="margin-left:auto;background:var(--red);color:#fff;font-size:12.5px;font-weight:600;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;opacity:0.45;transition:opacity .15s;">Delete selected</button>
+              <button onclick="clearProspectSelection()" id="prospectClearBtn" style="display:none;background:transparent;color:var(--muted);font-size:12.5px;padding:7px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);cursor:pointer;">Clear</button>
             </div>
             <div id="prospectsList" style="padding:14px 18px;"></div>
           </div>
@@ -4970,26 +4970,41 @@ function toggleSelectAllProspects(checked) {
   renderProspects();
 }
 function updateProspectSelectBar() {
-  var bar = document.getElementById('prospectSelectBar');
   var count = document.getElementById('prospectSelectCount');
-  if (!bar) return;
+  var btn = document.getElementById('prospectDeleteSelBtn');
+  var clearBtn = document.getElementById('prospectClearBtn');
   var n = _selectedProspects.size;
-  bar.style.display = n > 0 ? 'flex' : 'none';
   if (count) count.textContent = n + ' selected';
+  if (btn) {
+    btn.disabled = n === 0;
+    btn.style.opacity = n === 0 ? '0.45' : '1';
+    btn.style.cursor = n === 0 ? 'default' : 'pointer';
+    btn.textContent = n > 1 ? ('Delete selected (' + n + ')') : 'Delete selected';
+  }
+  if (clearBtn) clearBtn.style.display = n > 0 ? 'inline-block' : 'none';
 }
 async function deleteSelectedProspects() {
   var ids = Array.from(_selectedProspects);
-  if (!ids.length) { alert('Nothing selected'); return; }
+  if (!ids.length) { return; }
   if (!confirm('Delete ' + ids.length + ' selected prospect' + (ids.length>1?'s':'') + '? This cannot be undone.')) return;
   var btn = document.getElementById('prospectDeleteSelBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; btn.style.opacity = '1'; }
   var listParam = ids.map(function(x){ return '"' + x + '"'; }).join(',');
   var res = await api('prospects?id=in.(' + listParam + ')', 'DELETE');
+  var ok = res !== null;
   _selectedProspects.clear();
   var sa = document.getElementById('prospectSelectAll'); if (sa) sa.checked = false;
-  if (btn) { btn.disabled = false; btn.textContent = 'Delete selected'; }
   await loadProspects();
+  if (typeof toast === 'function') {
+    toast(ok ? (ids.length + ' prospect' + (ids.length>1?'s':'') + ' deleted') : 'Delete failed — please try again');
+  }
 }
+// Keyboard: Escape clears selection when prospects are selected
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && _selectedProspects && _selectedProspects.size > 0) {
+    clearProspectSelection();
+  }
+});
 
 async function addProspect() {
   var name = (document.getElementById('pr-name').value || '').trim();
