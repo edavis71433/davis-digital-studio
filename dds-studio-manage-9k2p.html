@@ -729,6 +729,65 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
     @keyframes bfShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     @media (prefers-reduced-motion: reduce){ .bf-skel{ animation:none } .bf-why{ transition:none } .bf-start-btn:hover{ transform:none } }
     @media(max-width:640px){ .bf-headline{ font-size:25px } .bf-start-btn{ width:100%; margin-top:4px } .bf-start-row{ flex-direction:column; align-items:stretch } }
+
+    /* ── OUTREACH COMPOSE MODAL ─────────────────────────────────────────── */
+    .oc-scrim{ position:fixed; inset:0; background:rgba(26,21,35,0.32); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; animation:ocFade .18s ease forwards; }
+    @keyframes ocFade{ to{opacity:1} }
+    .oc-modal{ background:var(--cream,#faf8f5); width:100%; max-width:560px; max-height:92vh; border-radius:20px; box-shadow:0 24px 70px rgba(26,21,35,0.28),0 2px 8px rgba(26,21,35,0.12); display:flex; flex-direction:column; overflow:hidden; transform:translateY(8px) scale(.99); animation:ocRise .22s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes ocRise{ to{transform:translateY(0) scale(1)} }
+    .oc-head{ display:flex; align-items:center; gap:12px; padding:18px 20px 14px; border-bottom:1px solid rgba(91,63,160,0.10); }
+    .oc-head-ic{ width:34px; height:34px; border-radius:10px; background:rgba(91,63,160,0.10); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .oc-head-tt{ font-family:var(--serif,'Fraunces',serif); font-size:17px; font-weight:500; color:var(--ink); line-height:1.2; }
+    .oc-head-sub{ font-size:11.5px; color:var(--muted); margin-top:1px; }
+    .oc-x{ margin-left:auto; width:30px; height:30px; border-radius:8px; border:none; background:none; color:var(--muted); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+    .oc-x:hover{ background:rgba(91,63,160,0.08); }
+    .oc-body{ padding:16px 20px; overflow-y:auto; }
+    .oc-field{ margin-bottom:14px; }
+    .oc-label{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .oc-to{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); background:rgba(91,63,160,0.05); border:1px solid rgba(91,63,160,0.12); border-radius:9px; padding:9px 11px; }
+    .oc-to b{ font-weight:600; }
+    .oc-input,.oc-textarea{ width:100%; font-family:inherit; font-size:13.5px; color:var(--ink); background:#fff; border:1px solid rgba(91,63,160,0.16); border-radius:9px; padding:10px 12px; outline:none; transition:border-color .15s,box-shadow .15s; }
+    .oc-input:focus,.oc-textarea:focus{ border-color:var(--p); box-shadow:0 0 0 3px rgba(91,63,160,0.10); }
+    .oc-textarea{ min-height:208px; line-height:1.6; resize:vertical; white-space:pre-wrap; }
+    .oc-meta{ display:flex; align-items:center; gap:10px; margin-top:6px; font-size:11px; color:var(--muted); }
+    .oc-count{ margin-left:auto; font-variant-numeric:tabular-nums; }
+    .oc-gen{ display:inline-flex; align-items:center; gap:5px; }
+    .oc-foot{ display:flex; align-items:center; gap:10px; padding:14px 20px 18px; border-top:1px solid rgba(91,63,160,0.10); flex-wrap:wrap; }
+    .oc-btn{ font-family:inherit; font-size:13.5px; font-weight:600; padding:11px 20px; border-radius:100px; border:none; cursor:pointer; transition:opacity .15s,transform .05s,background .15s; }
+    .oc-btn:active{ transform:translateY(1px); }
+    .oc-btn-primary{ background:var(--p); color:#fff; display:inline-flex; align-items:center; gap:8px; }
+    .oc-btn-primary:disabled{ opacity:.55; cursor:default; }
+    .oc-btn-ghost{ background:rgba(91,63,160,0.07); color:var(--p); }
+    .oc-btn-ghost:hover{ background:rgba(91,63,160,0.12); }
+    .oc-regen{ margin-right:auto; background:none; border:none; color:var(--p); font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:8px 6px; border-radius:8px; }
+    .oc-regen:hover{ background:rgba(91,63,160,0.06); }
+    .oc-regen:disabled{ opacity:.5; cursor:default; }
+    .oc-spin{ width:15px; height:15px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:ocSpin .7s linear infinite; }
+    .oc-spin-p{ width:15px; height:15px; border:2px solid rgba(91,63,160,0.25); border-top-color:var(--p); border-radius:50%; animation:ocSpin .7s linear infinite; }
+    @keyframes ocSpin{ to{transform:rotate(360deg)} }
+    .oc-err{ font-size:12.5px; color:var(--red); background:rgba(214,69,69,0.07); border:1px solid rgba(214,69,69,0.2); border-radius:9px; padding:9px 11px; margin-top:2px; line-height:1.5; display:none; }
+    .oc-skel-wrap{ padding:4px 0; }
+    .oc-skel{ height:13px; border-radius:6px; background:linear-gradient(90deg,rgba(91,63,160,0.08) 0%,rgba(91,63,160,0.03) 50%,rgba(91,63,160,0.08) 100%); background-size:200% 100%; animation:ocShim 1.3s infinite; margin-bottom:9px; }
+    @keyframes ocShim{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    /* success + followup-conflict overlays inside modal */
+    .oc-state{ padding:30px 24px; text-align:center; }
+    .oc-state-ic{ width:54px; height:54px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:26px; }
+    .oc-state-ic.ok{ background:rgba(106,191,105,0.16); }
+    .oc-state-tt{ font-family:var(--serif,'Fraunces',serif); font-size:19px; color:var(--ink); margin-bottom:5px; }
+    .oc-state-sub{ font-size:13px; color:var(--muted); line-height:1.55; max-width:340px; margin:0 auto; }
+    .oc-conflict{ background:rgba(196,115,26,0.07); border:1px solid rgba(196,115,26,0.22); border-radius:11px; padding:14px; margin-top:6px; }
+    /* toast */
+    .oc-toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(12px); background:var(--ink,#1a1523); color:#fff; font-size:13.5px; font-weight:500; padding:12px 18px; border-radius:100px; box-shadow:0 10px 34px rgba(26,21,35,0.34); z-index:1100; display:flex; align-items:center; gap:9px; opacity:0; pointer-events:none; transition:opacity .22s,transform .22s; max-width:90vw; }
+    .oc-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+    .oc-toast-ic{ color:#9be29b; flex-shrink:0; }
+    @media(max-width:560px){
+      .oc-scrim{ padding:0; align-items:flex-end; }
+      .oc-modal{ max-width:100%; max-height:94vh; border-radius:20px 20px 0 0; }
+      .oc-foot{ position:sticky; bottom:0; background:var(--cream,#faf8f5); }
+      .oc-btn{ flex:1; text-align:center; justify-content:center; }
+      .oc-regen{ flex-basis:100%; order:-1; justify-content:center; margin:0 0 2px; }
+    }
+    @media (prefers-reduced-motion: reduce){ .oc-scrim,.oc-modal{ animation:none } .oc-spin,.oc-spin-p,.oc-skel{ animation:none } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -5192,6 +5251,7 @@ function renderCaseFile(p, cf) {
 
   return '<div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(91,63,160,0.12);">' +
     '<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'+
+      '<button onclick="openOutreach(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg> Send email</button>'+
       '<button onclick="analyzeProspect(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid var(--p);background:rgba(91,63,160,0.06);color:var(--p);cursor:pointer;">✨ Analyze prospect</button>'+
       '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete prospect</button>'+
     '</div>'+
@@ -5275,6 +5335,387 @@ function analyzeProspect(id) {
     (research?'<div style="font-size:11px;color:var(--muted);margin-top:6px;">Built from your research:\n'+research+'</div>':'')+
     '</div>';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  OUTREACH COMPOSE MODAL — premium send workflow
+//  Extends the existing prospect caseFile architecture: a successful send
+//  appends to cf.log (the same array addLog() uses) via saveCase(), so the
+//  email becomes a first-class Contact-history event with no parallel system.
+//  Sending uses two edge routes (prospect_email_draft / prospect_email_send)
+//  so no Resend/Anthropic key is ever in the browser.
+// ═══════════════════════════════════════════════════════════════════════════
+var _outreach = null; // { id, prospect, cf, subject, body, generator, sending }
+
+// Call a non-CRUD clever-api route directly (mirrors how lead AI draft calls it).
+async function outreachApi(payload) {
+  var jwt = await adminJwt();
+  if (!jwt) { showLogin(); return { error: 'not_signed_in' }; }
+  try {
+    var r = await fetch(SB_URL + '/functions/v1/clever-api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_KEY, 'x-dds-user-jwt': jwt },
+      body: JSON.stringify(payload)
+    });
+    if (r.status === 401) { showLogin(); return { error: 'unauthorized' }; }
+    return await r.json();
+  } catch (e) {
+    return { error: 'network', detail: String(e) };
+  }
+}
+
+function _ocEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function openOutreach(id) {
+  var p = allProspects.find(function(x){ return x.id === id; });
+  if (!p) return;
+  var cf = caseFile(p);
+  var to = (p.email || '').trim();
+  _outreach = { id: id, prospect: p, cf: cf, subject: '', body: '', generator: 'template', sending: false, to: to };
+
+  // Build modal shell in the loading/draft state.
+  var existing = document.getElementById('ocScrim');
+  if (existing) existing.remove();
+  var scrim = document.createElement('div');
+  scrim.className = 'oc-scrim';
+  scrim.id = 'ocScrim';
+  scrim.addEventListener('mousedown', function(e){ if (e.target === scrim && !_outreach.sending) closeOutreach(); });
+  scrim.innerHTML = _ocShell(p, to);
+  document.body.appendChild(scrim);
+  document.addEventListener('keydown', _ocKeyHandler);
+
+  if (!to) { _ocShowRecipientError(); return; }
+  await _ocGenerate(false);
+}
+
+function _ocShell(p, to) {
+  var biz = _ocEsc(p.business_name || 'this prospect');
+  var toRow = to
+    ? '<div class="oc-to"><span style="color:var(--muted);">To</span> <b>'+_ocEsc(to)+'</b></div>'
+    : '<div class="oc-to" style="background:rgba(214,69,69,0.06);border-color:rgba(214,69,69,0.25);"><span style="color:var(--red);">No email on file for this prospect</span></div>';
+  return ''+
+  '<div class="oc-modal" id="ocModal" role="dialog" aria-modal="true" aria-label="Compose outreach email">'+
+    '<div class="oc-head">'+
+      '<div class="oc-head-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>'+
+      '<div><div class="oc-head-tt">Email '+biz+'</div><div class="oc-head-sub" id="ocSub">Preparing a draft…</div></div>'+
+      '<button class="oc-x" onclick="closeOutreach()" aria-label="Close">&times;</button>'+
+    '</div>'+
+    '<div class="oc-body" id="ocBody">'+
+      '<div class="oc-field">'+toRow+'</div>'+
+      '<div class="oc-field">'+
+        '<label class="oc-label">Subject</label>'+
+        '<input id="ocSubject" class="oc-input" placeholder="Subject line" oninput="_ocSync()" '+(to?'':'disabled')+'>'+
+      '</div>'+
+      '<div class="oc-field">'+
+        '<label class="oc-label">Message</label>'+
+        '<div id="ocDraftSkel" class="oc-skel-wrap" style="display:none;">'+
+          '<div class="oc-skel" style="width:96%"></div><div class="oc-skel" style="width:88%"></div><div class="oc-skel" style="width:92%"></div><div class="oc-skel" style="width:70%"></div><div class="oc-skel" style="width:84%"></div>'+
+        '</div>'+
+        '<textarea id="ocMessage" class="oc-textarea" placeholder="Your message" oninput="_ocSync()" '+(to?'':'disabled')+'></textarea>'+
+        '<div class="oc-meta">'+
+          '<span class="oc-gen" id="ocGen"></span>'+
+          '<span class="oc-count" id="ocCount">0 characters</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="oc-err" id="ocErr"></div>'+
+    '</div>'+
+    '<div class="oc-foot" id="ocFoot">'+
+      '<button class="oc-regen" id="ocRegen" onclick="_ocGenerate(true)" '+(to?'':'disabled')+'><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg> Regenerate</button>'+
+      '<button class="oc-btn oc-btn-ghost" onclick="closeOutreach()">Cancel</button>'+
+      '<button class="oc-btn oc-btn-primary" id="ocSend" onclick="_ocSend()" '+(to?'':'disabled')+'>'+
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg> Send email'+
+      '</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function _ocShowRecipientError() {
+  var sub = document.getElementById('ocSub'); if (sub) sub.textContent = 'Add an email to send';
+  var err = document.getElementById('ocErr');
+  if (err) { err.style.display = 'block'; err.textContent = 'This prospect has no email address. Add one in Business overview, then try again.'; }
+}
+
+async function _ocGenerate(isRegen) {
+  if (!_outreach) return;
+  var p = _outreach.prospect, cf = _outreach.cf;
+  // Protect user edits: if regenerating and the current text differs from what
+  // we last generated, confirm before discarding their changes.
+  if (isRegen) {
+    var curBody = (document.getElementById('ocMessage') || {}).value || '';
+    var curSubj = (document.getElementById('ocSubject') || {}).value || '';
+    var edited = (curBody.trim() !== (_outreach.body || '').trim()) || (curSubj.trim() !== (_outreach.subject || '').trim());
+    if (edited && !confirm('Regenerate will replace your current draft. Keep going?')) return;
+  }
+  var skel = document.getElementById('ocDraftSkel');
+  var ta = document.getElementById('ocMessage');
+  var subEl = document.getElementById('ocSubject');
+  var sub = document.getElementById('ocSub');
+  var regen = document.getElementById('ocRegen');
+  var sendBtn = document.getElementById('ocSend');
+  // Don't blow away an edited draft on regenerate without confirate intent — the
+  // button itself is the intent, so we proceed, but we guard the very first load.
+  if (skel) skel.style.display = 'block';
+  if (ta) ta.style.display = 'none';
+  if (sub) sub.textContent = isRegen ? 'Rewriting…' : 'Writing a personalized draft…';
+  if (regen) regen.disabled = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  var payload = {
+    type: 'prospect_email_draft',
+    prospect: {
+      business: p.business_name || '',
+      website: p.website || '',
+      owner: cf.info.owner || p.contact_name || '',
+      industry: cf.info.industry || '',
+      location: cf.info.location || '',
+      research: Array.isArray(cf.research) ? cf.research.map(function(r){ return { body: r.body }; }) : []
+    }
+  };
+  var res = await outreachApi(payload);
+  // The modal may have been closed (Esc) while the draft was generating. If so,
+  // _outreach is null or points at a different prospect — drop this stale result.
+  if (!_outreach || _outreach.id !== p.id) return;
+  if (skel) skel.style.display = 'none';
+  if (ta) ta.style.display = '';
+  if (regen) regen.disabled = false;
+  if (sendBtn) sendBtn.disabled = false;
+
+  if (res && res.data && typeof res.data.body === 'string') {
+    _outreach.subject = res.data.subject || '';
+    _outreach.body = res.data.body || '';
+    _outreach.generator = res.data.generator === 'ai' ? 'ai' : 'template';
+    if (subEl) subEl.value = _outreach.subject;
+    if (ta) ta.value = _outreach.body;
+    if (sub) sub.textContent = 'Ready to review and send';
+    _ocSync();
+  } else {
+    // Even on a total failure the user must never see an empty window.
+    if (sub) sub.textContent = 'Draft something to send';
+    if (subEl && !subEl.value) subEl.value = 'A quick thought on ' + (p.business_name || 'your site');
+    if (ta && !ta.value) ta.value = 'Hi,\n\nI came across ' + (p.business_name || 'your business') + ' and wanted to reach out.\n\nEric\nDavis Digital Studio';
+    _ocSync();
+  }
+}
+
+function _ocSync() {
+  if (!_outreach) return;
+  var subEl = document.getElementById('ocSubject');
+  var ta = document.getElementById('ocMessage');
+  var count = document.getElementById('ocCount');
+  var gen = document.getElementById('ocGen');
+  if (subEl) _outreach.subject = subEl.value;
+  if (ta) _outreach.body = ta.value;
+  if (count && ta) count.textContent = ta.value.length.toLocaleString() + ' characters';
+  if (gen) {
+    if (_outreach.generator === 'ai') gen.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5b3fa0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 13.9 8.6 19.5 8.6 15 12.1 16.5 17.6 12 14.3 7.5 17.6 9 12.1 4.5 8.6 10.1 8.6z"/></svg> <span style="color:var(--p);">Personalized</span>';
+    else gen.innerHTML = '';
+  }
+}
+
+function _ocKeyHandler(e) {
+  if (!_outreach) return;
+  if (e.key === 'Escape' && !_outreach.sending) { closeOutreach(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !_outreach.sending) { _ocSend(); }
+}
+
+function closeOutreach() {
+  if (_outreach && _outreach.sending) return; // never close mid-send
+  var scrim = document.getElementById('ocScrim');
+  if (scrim) scrim.remove();
+  document.removeEventListener('keydown', _ocKeyHandler);
+  _outreach = null;
+}
+
+async function _ocSend() {
+  if (!_outreach || _outreach.sending) return; // one click = one send
+  _ocSync();
+  var subject = (_outreach.subject || '').trim();
+  var bodyText = (_outreach.body || '').trim();
+  var to = (_outreach.to || '').trim();
+  var err = document.getElementById('ocErr');
+  function showErr(msg){ if (err){ err.style.display='block'; err.textContent=msg; } }
+  if (err) err.style.display = 'none';
+
+  if (!to) { _ocShowRecipientError(); return; }
+  if (!subject) { showErr('Add a subject line before sending.'); return; }
+  if (bodyText.length < 5) { showErr('The message looks empty. Add a few words before sending.'); return; }
+
+  // Lock the UI — disable send + inputs so one click equals one send.
+  _outreach.sending = true;
+  var sendBtn = document.getElementById('ocSend');
+  var regen = document.getElementById('ocRegen');
+  var subEl = document.getElementById('ocSubject');
+  var ta = document.getElementById('ocMessage');
+  var origSendHtml = sendBtn ? sendBtn.innerHTML : '';
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<span class="oc-spin"></span> Sending…'; }
+  if (regen) regen.disabled = true;
+  if (subEl) subEl.disabled = true;
+  if (ta) ta.disabled = true;
+
+  var res = await outreachApi({ type: 'prospect_email_send', to: to, subject: subject, body: bodyText });
+
+  // FAILURE: restore the draft exactly, no log written, allow retry.
+  if (!res || res.error || !(res.data && res.data.ok)) {
+    _outreach.sending = false;
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = origSendHtml; }
+    if (regen) regen.disabled = false;
+    if (subEl) subEl.disabled = false;
+    if (ta) ta.disabled = false;
+    var detail = (res && (res.detail || res.error)) ? (res.detail || res.error) : 'Something went wrong.';
+    var friendly = 'The email didn’t send, so nothing went out. ' +
+      (res && res.error === 'email_not_configured' ? 'Email isn’t configured on the server yet.' :
+       res && res.error === 'bad_recipient' ? 'That email address looks invalid.' :
+       'You can edit and try again.');
+    showErr(friendly);
+    return;
+  }
+
+  // SUCCESS: write history through the SAME architecture every other event uses.
+  var sentId = res.data.id || '';
+  await _ocOnSent(subject, bodyText, sentId);
+}
+
+// Decide a natural, human Contact-history label (per the timeline spec).
+// A prospect is on a "follow-up" if any prior outreach was logged OR the
+// pipeline already considers them contacted (Emailed/Replied).
+function _ocOutreachLabel(cf, p) {
+  var priorEmails = (cf.log || []).filter(function(l){
+    var k = (l.kind || '').toLowerCase();
+    return k.indexOf('outreach') !== -1 || k.indexOf('follow-up email') !== -1 || k.indexOf('email sent') !== -1;
+  }).length;
+  var alreadyContacted = p && (p.status === 'Emailed' || p.status === 'Replied');
+  return (priorEmails === 0 && !alreadyContacted) ? 'Initial outreach sent' : 'Follow-up email sent';
+}
+
+async function _ocOnSent(subject, bodyText, sentId) {
+  var id = _outreach.id;
+  var p = _outreach.prospect;
+  var cf = _outreach.cf;
+  var generator = _outreach.generator;
+  var nowIso = new Date().toISOString();
+
+  // 1) Append a first-class Contact-history event (same shape addLog uses: t,kind,body).
+  var label = _ocOutreachLabel(cf, p);
+  cf.log = Array.isArray(cf.log) ? cf.log : [];
+  cf.log.push({ t: nowIso, kind: label, body: subject, meta: { channel: 'email', generator: generator, sent_id: sentId } });
+
+  // 2) Outreach counter + last-outreach metadata.
+  cf.outreach_count = (typeof cf.outreach_count === 'number' ? cf.outreach_count : 0) + 1;
+  cf.last_outreach = { t: nowIso, subject: subject, generator: generator };
+
+  // 3) Follow-up scheduling with overwrite guard. A FUTURE existing follow-up
+  //    is never silently replaced — we ask. Past/empty due dates are safe to set.
+  var followUpConflict = false;
+  var existingDue = cf.next && cf.next.due ? new Date(cf.next.due) : null;
+  var hasFutureNext = existingDue && !isNaN(existingDue) && existingDue >= new Date(new Date().toDateString());
+  if (!hasFutureNext) {
+    var d = new Date(); d.setDate(d.getDate() + 4);
+    cf.next = { action: 'Follow up', due: d.toISOString().slice(0, 10) };
+  } else {
+    followUpConflict = true; // keep theirs for now; offer to replace after save
+  }
+
+  // 4) Status: only advance New/empty -> Emailed (this CRM's "Contacted").
+  //    Never overwrite Replied / Client / Dead.
+  var patch = { notes: JSON.stringify(cf), updated_at: nowIso };
+  var advancedStatus = false;
+  if (!p.status || p.status === 'New') { patch.status = 'Emailed'; advancedStatus = true; }
+  // boolean column the stats card reads
+  if (!p.emailed) patch.emailed = true;
+
+  // 5) Persist via the existing admin_write path (api helper). Single write.
+  var saved = await api('prospects?id=eq.' + id, 'PATCH', patch);
+
+  if (saved === null) {
+    // The send already succeeded, but the local record didn't persist. Be honest:
+    // don't claim it's logged. Offer retry of the LOG only (not the email).
+    _outreach.sending = false;
+    var err = document.getElementById('ocErr');
+    if (err) { err.style.display = 'block'; err.textContent = 'The email sent, but saving it to this record failed. Refresh and check Contact history; the email did go out.'; }
+    var sendBtn = document.getElementById('ocSend');
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = 'Done'; sendBtn.onclick = function(){ closeOutreach(); loadProspects(); }; }
+    return;
+  }
+
+  // 6) Reflect locally so UI refresh is instant and consistent with the DB.
+  p.notes = patch.notes;
+  if (patch.status) p.status = patch.status;
+  if (patch.emailed) p.emailed = true;
+  p.updated_at = nowIso;
+
+  // 7) Success screen inside the modal, then toast + refresh.
+  _outreach.sending = false;
+  _ocSuccessScreen(p, advancedStatus, followUpConflict);
+
+  // Refresh the pipeline + the open card's Contact history immediately.
+  renderProspectStats();
+  renderProspects();
+  refreshOpenCard(id);
+}
+
+function _ocSuccessScreen(p, advancedStatus, followUpConflict) {
+  var modal = document.getElementById('ocModal');
+  if (!modal) { _ocToast('Email sent to ' + (p.business_name || 'prospect')); return; }
+  var bits = [];
+  bits.push('Logged to Contact history');
+  if (advancedStatus) bits.push('moved to Emailed');
+  if (!followUpConflict) bits.push('follow-up set for 4 days out');
+  var sub = bits.join(' · ');
+
+  var conflictHtml = followUpConflict ? (
+    '<div class="oc-conflict">'+
+      '<div style="font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:4px;">A follow-up is already scheduled</div>'+
+      '<div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">You already have "'+_ocEsc((_outreach&&_outreach.cf&&_outreach.cf.next&&_outreach.cf.next.action)||'a follow-up')+'" set for '+_ocEsc((_outreach&&_outreach.cf&&_outreach.cf.next&&_outreach.cf.next.due)||'')+'. Want to replace it with a new one 4 days out?</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button class="oc-btn oc-btn-ghost" style="font-size:12.5px;padding:8px 14px;" onclick="_ocKeepFollowUp()">Keep existing</button>'+
+        '<button class="oc-btn oc-btn-primary" style="font-size:12.5px;padding:8px 14px;" onclick="_ocReplaceFollowUp()">Replace with 4 days</button>'+
+      '</div>'+
+    '</div>'
+  ) : '';
+
+  modal.innerHTML =
+    '<div class="oc-state">'+
+      '<div class="oc-state-ic ok"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a7e49" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
+      '<div class="oc-state-tt">Email sent</div>'+
+      '<div class="oc-state-sub">Your message is on its way to '+_ocEsc(p.business_name||'the prospect')+'. '+_ocEsc(sub)+'.</div>'+
+      conflictHtml+
+      '<div style="margin-top:18px;"><button class="oc-btn oc-btn-primary" onclick="closeOutreach()">Done</button></div>'+
+    '</div>';
+  if (!followUpConflict) _ocToast('Email sent to ' + (p.business_name || 'prospect'));
+}
+
+async function _ocKeepFollowUp() {
+  _ocToast('Email sent · existing follow-up kept');
+  closeOutreach();
+}
+async function _ocReplaceFollowUp() {
+  if (!_outreach) { closeOutreach(); return; }
+  var id = _outreach.id, cf = _outreach.cf;
+  var d = new Date(); d.setDate(d.getDate() + 4);
+  cf.next = { action: 'Follow up', due: d.toISOString().slice(0, 10) };
+  var saved = await api('prospects?id=eq.' + id, 'PATCH', { notes: JSON.stringify(cf), updated_at: new Date().toISOString() });
+  if (saved !== null) {
+    var p = allProspects.find(function(x){ return x.id === id; });
+    if (p) p.notes = JSON.stringify(cf);
+    refreshOpenCard(id);
+    _ocToast('Follow-up rescheduled for 4 days out');
+  } else {
+    _ocToast('Could not update the follow-up');
+  }
+  closeOutreach();
+}
+
+function _ocToast(msg) {
+  var existing = document.getElementById('ocToast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.className = 'oc-toast';
+  t.id = 'ocToast';
+  t.innerHTML = '<span class="oc-toast-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' + _ocEsc(msg);
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.classList.add('show'); });
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ if (t.parentNode) t.remove(); }, 260); }, 3200);
+}
+
 
 var _selectedProspects = new Set();
 function toggleProspectSelect(id, checked) {
