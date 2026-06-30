@@ -4957,6 +4957,39 @@ function toggleProspectExpand(id) {
   }
 }
 
+// ── Warmth / cooling-off: pure date math on REAL signals. Never fabricated. ──
+// Returns {state, days, label, why} where state is one of:
+//   'new'      never contacted
+//   'fresh'    contacted recently
+//   'cooling'  contacted, no resolution, going quiet
+//   'cold'     long silence
+//   'waiting'  they replied and the ball is in your court (most urgent)
+function prospectWarmth(p, cf) {
+  var DAY = 86400000;
+  var now = Date.now();
+  // last contact = newest log entry timestamp, else updated_at, else null
+  var lastTouch = null;
+  if (cf.log && cf.log.length) {
+    for (var i = cf.log.length - 1; i >= 0; i--) {
+      if (cf.log[i].t) { lastTouch = new Date(cf.log[i].t).getTime(); break; }
+    }
+  }
+  if (!lastTouch && p.updated_at) { var u = new Date(p.updated_at).getTime(); if (!isNaN(u)) lastTouch = u; }
+  var contacted = (p.status === 'Emailed' || p.status === 'Replied') || (cf.log && cf.log.length > 0);
+  var days = lastTouch ? Math.floor((now - lastTouch) / DAY) : null;
+
+  if (p.status === 'Replied') {
+    return { state:'waiting', days:days, label:'Waiting on you', why:'They replied — the ball is in your court' };
+  }
+  if (!contacted) {
+    return { state:'new', days:null, label:'Not contacted', why:'No outreach logged yet' };
+  }
+  if (days === null) return { state:'fresh', days:null, label:'', why:'' };
+  if (days >= 30) return { state:'cold', days:days, label:days+'d cold', why:'No contact in '+days+' days' };
+  if (days >= 14) return { state:'cooling', days:days, label:days+'d quiet', why:'No contact in '+days+' days, no reply yet' };
+  return { state:'fresh', days:days, label:'', why:'' };
+}
+
 function renderProspects() {
   var listEl = document.getElementById('prospectsList');
   if (!listEl) return;
@@ -4967,11 +5000,29 @@ function renderProspects() {
     if (q && !((p.business_name||'').toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
     return true;
   });
-  rows.sort(function(a,b){
-    var ra = PRIORITY_RANK[a.priority] != null ? PRIORITY_RANK[a.priority] : 1;
-    var rb = PRIORITY_RANK[b.priority] != null ? PRIORITY_RANK[b.priority] : 1;
-    return ra - rb;
-  });
+  // Attention-based sort: the list order IS the recommendation (blueprint rule —
+  // not a second view). Every input is a real signal; ties fall back to priority.
+  function attentionScore(p) {
+    var cf = caseFile(p);
+    var w = prospectWarmth(p, cf);
+    var s = 0;
+    // they replied and you owe them a response — most urgent
+    if (w.state === 'waiting') s += 1000;
+    // overdue next action
+    if (cf.next && cf.next.due && new Date(cf.next.due) < new Date(new Date().toDateString())) s += 600;
+    // active prospect with no next step = drifting, needs attention
+    if (!(cf.next && cf.next.action) && p.status !== 'Client' && p.status !== 'Dead') s += 400;
+    // cold / cooling
+    if (w.state === 'cold') s += 300;
+    else if (w.state === 'cooling') s += 200;
+    // starred nudges up
+    if (cf.starred) s += 120;
+    // priority as the tiebreaker
+    var pr = PRIORITY_RANK[p.priority] != null ? PRIORITY_RANK[p.priority] : 1;
+    s += (2 - pr) * 30; // High(0)->60, Medium(1)->30, Low(2)->0
+    return s;
+  }
+  rows.sort(function(a,b){ return attentionScore(b) - attentionScore(a); });
   if (rows.length === 0) {
     listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:8px 0;">No prospects here yet. Add one above to get started.</p>';
     return;
@@ -4983,18 +5034,35 @@ function renderProspects() {
     var pcol = PRIORITY_COLORS[prio] || PRIORITY_COLORS.Medium;
     var cf = caseFile(p);
     var expanded = (_expandedProspect === p.id);
+    var warmth = prospectWarmth(p, cf);
     var badge = '<button onclick="event.stopPropagation();cyclePriority(\''+p.id+'\')" title="Click to change priority" '+
       'style="font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 9px;border-radius:100px;border:none;cursor:pointer;'+
       'background:'+pcol.bg+';color:'+pcol.fg+';">'+prio+'</button>';
     var star = '<button onclick="event.stopPropagation();toggleStar(\''+p.id+'\')" title="Star" style="background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:'+(cf.starred?'#e0a92e':'rgba(91,63,160,0.25)')+';">'+(cf.starred?'★':'☆')+'</button>';
-    // meta line
-    var meta = (p.email ? p.email : 'no email') + (p.website ? ' · '+p.website : ' · No website');
-    if (cf.info.industry) meta = cf.info.industry + ' · ' + meta;
+    // warmth chip — real signal, self-explaining via title
+    var warmColors = {
+      waiting: {bg:'rgba(46,125,50,0.12)', fg:'#2e7d32'},
+      cold:    {bg:'rgba(224,85,85,0.1)',  fg:'var(--red)'},
+      cooling: {bg:'rgba(196,115,26,0.12)', fg:'#c4731a'},
+      'new':   {bg:'rgba(91,63,160,0.07)',  fg:'var(--muted)'},
+      fresh:   {bg:'transparent', fg:'var(--muted)'}
+    };
+    var wc = warmColors[warmth.state] || warmColors.fresh;
+    var warmChip = warmth.label ? '<span title="'+warmth.why+'" style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px;background:'+wc.bg+';color:'+wc.fg+';">'+warmth.label+'</span>' : '';
+    // meta line: lead with industry (signal), keep it light; absence-noise removed
+    var bits = [];
+    if (cf.info.industry) bits.push(cf.info.industry);
+    if (p.email) bits.push(p.email);
+    if (p.website) bits.push(p.website);
+    var meta = bits.length ? bits.join(' · ') : 'No details yet — click to add';
     // next action chip
     var nextChip = '';
     if (cf.next && cf.next.action) {
       var overdue = cf.next.due && new Date(cf.next.due) < new Date(new Date().toDateString());
       nextChip = '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:'+(overdue?'rgba(224,85,85,0.1)':'rgba(91,63,160,0.08)')+';color:'+(overdue?'var(--red)':'var(--p)')+';">→ '+cf.next.action+(cf.next.due?' · '+cf.next.due:'')+'</span>';
+    } else if (p.status !== 'Client' && p.status !== 'Dead') {
+      // blueprint rule: no next action = a visible drifting state, not a silent absence
+      nextChip = '<span title="No next step set — this prospect is drifting" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:rgba(224,85,85,0.08);color:var(--red);">⚠ No next action</span>';
     }
     // counts
     var rc = cf.research.length, lc = cf.log.length;
@@ -5008,6 +5076,7 @@ function renderProspects() {
             star +
             '<span style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</span>' +
             badge +
+            warmChip +
             '<span style="font-size:11px;color:var(--muted);">'+(expanded?'▾':'▸')+'</span>' +
           '</div>' +
           '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+meta+'</div>' +
