@@ -162,7 +162,7 @@ header.nav{position:sticky;top:0;z-index:50;background:rgba(251,250,247,.82);
 .field input,.field textarea,.field select{width:100%;font-family:var(--sans);font-size:15px;
   padding:13px 15px;border:1px solid var(--hair);border-radius:2px;background:var(--paper);color:var(--ink);
   transition:.15s}
-.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--p)}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(91,63,160,.25)}
 .field textarea{min-height:130px;resize:vertical}
 .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
 

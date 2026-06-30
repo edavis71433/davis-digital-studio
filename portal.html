@@ -1088,7 +1088,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 <body>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- SITE BANNER -->
 <header style="background:#fff;border-bottom:1px solid rgba(91,63,160,0.08);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10;">
@@ -3929,7 +3929,7 @@ function spineEventLine(ev){
   var p = ev.payload || {};
   if (ev.type === "project.stage_advanced") {
     var to = spineStageLabel(p.to_stage);
-    if (p.note) return "Moved to " + to + ". " + p.note;
+    if (p.note) return "Moved to " + to + ". " + esc(p.note);
     return "Moved to " + to + ".";
   }
   if (ev.type === "project.launched") return "Your site launched. Congratulations!";
@@ -3938,11 +3938,11 @@ function spineEventLine(ev){
   // each line describes an event that genuinely happened.
   if (ev.type === "file.shared") {
     var fn = p.name || p.filename || p.title;
-    return fn ? ("Shared a new file with you: " + fn + ".") : "Shared a new file with you.";
+    return fn ? ("Shared a new file with you: " + esc(fn) + ".") : "Shared a new file with you.";
   }
   if (ev.type === "approval.requested") {
     var an = p.title || p.name;
-    return an ? ("Sent \u201C" + an + "\u201D over for your review.") : "Sent new work over for your review.";
+    return an ? ("Sent \u201C" + esc(an) + "\u201D over for your review.") : "Sent new work over for your review.";
   }
   if (ev.type === "invoice.sent") {
     return "Sent a new invoice \u2014 you\u2019ll find it under Billing.";
@@ -4281,7 +4281,7 @@ function renderHQFallback(){
 
 <!-- MORE SHEET (mobile) -->
 <div class="more-scrim" id="moreScrim" onclick="closeMoreSheet()"></div>
-<div class="more-sheet" id="moreSheet" role="dialog" aria-label="More sections">
+<div class="more-sheet" id="moreSheet" role="dialog" aria-modal="true" aria-label="More sections">
   <div class="more-sheet-handle"></div>
   <div class="more-sheet-title">Go to</div>
   <div class="more-grid">

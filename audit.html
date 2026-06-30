@@ -1231,7 +1231,7 @@ function showResults(d) {
         '<div class="gate-title">' + (issues.length - 2) + ' more issues found</div>' +
         '<div class="gate-desc">Your full report includes all ' + issues.length + ' findings with specific fixes, Core Web Vitals breakdown, and a personalized action plan, sent to your inbox instantly.</div>' +
         '<div class="gate-form">' +
-          '<input type="email" class="gate-input" id="gateEmail" value="'+(d.email||'')+'" placeholder="Your email address">' +
+          '<input type="email" class="gate-input" id="gateEmail" aria-label="Email address" value="'+(d.email||'')+'" placeholder="Your email address">' +
           '<button class="gate-btn" onclick="unlockReport()">Email me the full report →</button>' +
           '<div class="gate-msg" id="gateMsg">No spam. Unsubscribe anytime.</div>' +
         '</div>';

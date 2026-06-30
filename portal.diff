@@ -1,5 +1,14 @@
 --- dds/davis-digital-studio-main/portal.html	2026-06-30 13:27:58.000000000 +0000
-+++ deliver-p1/portal.html	2026-06-30 16:20:31.448695957 +0000
++++ out/portal.html	2026-06-30 16:47:03.952287886 +0000
+@@ -1088,7 +1088,7 @@
+ <body>
+ 
+ <!-- TOAST -->
+-<div class="toast" id="toast"></div>
++<div class="toast" id="toast" role="status" aria-live="polite"></div>
+ 
+ <!-- SITE BANNER -->
+ <header style="background:#fff;border-bottom:1px solid rgba(91,63,160,0.08);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10;">
 @@ -1775,10 +1775,27 @@
    var items = computeActionItems();
    renderStatusChip();
@@ -32,3 +41,35 @@
      return;
    }
    var arrow = '<svg class="turn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+@@ -3912,7 +3929,7 @@
+   var p = ev.payload || {};
+   if (ev.type === "project.stage_advanced") {
+     var to = spineStageLabel(p.to_stage);
+-    if (p.note) return "Moved to " + to + ". " + p.note;
++    if (p.note) return "Moved to " + to + ". " + esc(p.note);
+     return "Moved to " + to + ".";
+   }
+   if (ev.type === "project.launched") return "Your site launched. Congratulations!";
+@@ -3921,11 +3938,11 @@
+   // each line describes an event that genuinely happened.
+   if (ev.type === "file.shared") {
+     var fn = p.name || p.filename || p.title;
+-    return fn ? ("Shared a new file with you: " + fn + ".") : "Shared a new file with you.";
++    return fn ? ("Shared a new file with you: " + esc(fn) + ".") : "Shared a new file with you.";
+   }
+   if (ev.type === "approval.requested") {
+     var an = p.title || p.name;
+-    return an ? ("Sent \u201C" + an + "\u201D over for your review.") : "Sent new work over for your review.";
++    return an ? ("Sent \u201C" + esc(an) + "\u201D over for your review.") : "Sent new work over for your review.";
+   }
+   if (ev.type === "invoice.sent") {
+     return "Sent a new invoice \u2014 you\u2019ll find it under Billing.";
+@@ -4264,7 +4281,7 @@
+ 
+ <!-- MORE SHEET (mobile) -->
+ <div class="more-scrim" id="moreScrim" onclick="closeMoreSheet()"></div>
+-<div class="more-sheet" id="moreSheet" role="dialog" aria-label="More sections">
++<div class="more-sheet" id="moreSheet" role="dialog" aria-modal="true" aria-label="More sections">
+   <div class="more-sheet-handle"></div>
+   <div class="more-sheet-title">Go to</div>
+   <div class="more-grid">

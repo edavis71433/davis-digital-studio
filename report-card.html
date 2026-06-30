@@ -448,11 +448,11 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 
 <div class="rc-form" id="rcForm">
         <div class="rc-field">
-          <label class="rc-label">Business name</label>
+          <label class="rc-label" for="rcName">Business name</label>
           <input class="rc-input" id="rcName" type="text" placeholder="Joe's Coffee Shop" />
         </div>
         <div class="rc-field">
-          <label class="rc-label">Business type</label>
+          <label class="rc-label" for="rcType">Business type</label>
           <select class="rc-select" id="rcType">
             <option value="">Select category...</option>
             <option value="Restaurant / Bar / Café">Restaurant / Bar / Café</option>
@@ -467,15 +467,15 @@ html, body { overflow-x: hidden; max-width: 100vw; }
           </select>
         </div>
         <div class="rc-field">
-          <label class="rc-label">City</label>
+          <label class="rc-label" for="rcCity">City</label>
           <input class="rc-input" id="rcCity" type="text" placeholder="Los Angeles" />
         </div>
         <div class="rc-field">
-          <label class="rc-label">Website URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <label class="rc-label" for="rcUrl">Website URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
           <input class="rc-input" id="rcUrl" type="url" placeholder="https://yourbusiness.com" />
         </div>
         <div class="rc-field">
-          <label class="rc-label">Your email address</label>
+          <label class="rc-label" for="rcEmail">Your email address</label>
           <input class="rc-input" id="rcEmail" type="email" placeholder="you@yourbusiness.com" />
         </div>
         <div class="rc-error" id="rcError"></div>
@@ -493,7 +493,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(91,63,160,0.1);">
         <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Get weekly tips on improving your online presence. No spam.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;" id="nlWrap">
-          <input type="email" id="nlEmail" placeholder="your@email.com" style="flex:1;min-width:180px;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;color:#1a1523;">
+          <input type="email" id="nlEmail" aria-label="Email address for newsletter" placeholder="your@email.com" style="flex:1;min-width:180px;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;color:#1a1523;">
           <button onclick="subscribeNL()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Subscribe</button>
         </div>
         <div id="nlThanks" style="display:none;font-size:13px;color:#1e8449;margin-top:8px;font-weight:600;">You're in. Talk soon.</div>
