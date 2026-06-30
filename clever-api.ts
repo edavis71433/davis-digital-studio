@@ -6530,8 +6530,43 @@ Rules: at most 5 items. "go" and "kind" must match the source. "refId" must be a
         } catch (_e) { /* ignore */ }
       }
 
+      // ── Pipeline entry: also create a `leads` row so discovery intakes land
+      // in the unified Studio OS pipeline (alongside contact + audit leads),
+      // not just the standalone discovery_intake table. The rich structured
+      // payload stays in discovery_intake; this is the pipeline-visible record.
+      let leadId: string | null = null;
+      if (SB_SERVICE && (name || email)) {
+        try {
+          const r = await fetch(`${SB_URL}/rest/v1/leads`, {
+            method: 'POST',
+            headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+            body: JSON.stringify({
+              name: name || null,
+              email: email || null,
+              source: 'website_form',
+              tag: 'discovery',
+              subject: subject || `Discovery intake: ${name || email || 'a visitor'}`,
+              message: message || null,
+              status: 'new',
+              unread: true,
+              last_message: (message || subject || '').slice(0, 160),
+              last_actor: 'them',
+            }),
+          });
+          if (r.ok) { const rows = await r.json(); leadId = Array.isArray(rows) && rows[0] ? String(rows[0].id) : null; }
+          else { console.error('[discovery_intake] leads insert failed', r.status, (await r.text()).slice(0, 200)); }
+          if (leadId) {
+            await fetch(`${SB_URL}/rest/v1/lead_messages`, {
+              method: 'POST',
+              headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+              body: JSON.stringify({ lead_id: leadId, who: 'them', body: message || subject || '' }),
+            });
+          }
+        } catch (e) { console.error('[discovery_intake] pipeline entry threw', String(e)); }
+      }
+
       // ok:true means the request was handled; emailed reflects the Eric notify
-      return json({ ok: true, emailed: ericEmailed });
+      return json({ ok: true, emailed: ericEmailed, lead_id: leadId });
     }
 
     // ── PROJECT SURVEY (project-survey.html) ──
