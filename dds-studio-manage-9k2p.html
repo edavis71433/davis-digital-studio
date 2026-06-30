@@ -5087,7 +5087,7 @@ function renderProspects() {
         '</select>' +
       '</div>';
 
-    var body = expanded ? renderCaseFile(p, cf) : '';
+    var body = expanded ? ('<div id="pcasebody-'+p.id+'">' + renderCaseFile(p, cf) + '</div>') : '';
 
     return '<div id="pcase-'+p.id+'" style="border:1px solid '+(expanded?'rgba(91,63,160,0.35)':'rgba(91,63,160,0.1)')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;'+(expanded?'box-shadow:0 8px 30px -16px rgba(91,63,160,0.4);':'')+'">' +
       collapsed + body +
@@ -5188,35 +5188,47 @@ async function updateCaseInfo(id, key, val) {
   else cf.info[key] = val;
   await saveCase(id, cf);
 }
+// Re-render ONLY the expanded card's inner body in place. No list re-sort, so the
+// card never jumps under the cursor while you're working in it. (Friction fix #1.)
+function refreshOpenCard(id) {
+  var p = allProspects.find(function(x){ return x.id === id; });
+  if (!p) return;
+  var cf = caseFile(p);
+  var holder = document.getElementById('pcasebody-' + id);
+  if (holder) { holder.innerHTML = renderCaseFile(p, cf); }
+  else { renderProspects(); } // card not open (e.g. star toggled from collapsed) — full render is fine
+}
+
 async function updateNextAction(id) {
   var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
   var cf = caseFile(p);
   cf.next = { action: (document.getElementById('pnext-'+id).value||'').trim(), due: document.getElementById('pnextdue-'+id).value||'' };
   await saveCase(id, cf);
-  var p2 = allProspects.find(function(x){return x.id===id;}); if(p2) p2.notes = JSON.stringify(cf);
-  renderProspects();
+  refreshOpenCard(id);
 }
 async function addResearch(id) {
   var bodyEl = document.getElementById('rbody-'+id); var body=(bodyEl.value||'').trim(); if(!body) return;
   var cat = document.getElementById('rcat-'+id).value;
   var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
   cf.research.push({ t: nowStamp(), cat: cat, body: body });
-  await saveCase(id, cf); renderProspects();
+  await saveCase(id, cf); refreshOpenCard(id);
+  setTimeout(function(){ var nb=document.getElementById('rbody-'+id); if(nb) nb.focus(); }, 0); // keep focus for fast capture (#4)
 }
 async function deleteResearch(id, idx) {
   var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
-  cf.research.splice(idx,1); await saveCase(id, cf); renderProspects();
+  cf.research.splice(idx,1); await saveCase(id, cf); refreshOpenCard(id);
 }
 async function addLog(id) {
   var bodyEl = document.getElementById('lbody-'+id); var body=(bodyEl.value||'').trim(); if(!body) return;
   var kind = document.getElementById('lkind-'+id).value;
   var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
   cf.log.push({ t: nowStamp(), kind: kind, body: body });
-  await saveCase(id, cf); renderProspects();
+  await saveCase(id, cf); refreshOpenCard(id);
+  setTimeout(function(){ var nb=document.getElementById('lbody-'+id); if(nb) nb.focus(); }, 0); // keep focus (#4)
 }
 async function toggleStar(id) {
   var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
-  cf.starred = !cf.starred; await saveCase(id, cf); renderProspects();
+  cf.starred = !cf.starred; await saveCase(id, cf); refreshOpenCard(id);
 }
 function analyzeProspect(id) {
   var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
