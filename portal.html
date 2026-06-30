@@ -3916,6 +3916,25 @@ function spineEventLine(ev){
     return "Moved to " + to + ".";
   }
   if (ev.type === "project.launched") return "Your site launched. Congratulations!";
+  // Real work the system already captures — translated into plain English so an
+  // ordinary week of activity reads as progress, not silence. Nothing invented;
+  // each line describes an event that genuinely happened.
+  if (ev.type === "file.shared") {
+    var fn = p.name || p.filename || p.title;
+    return fn ? ("Shared a new file with you: " + fn + ".") : "Shared a new file with you.";
+  }
+  if (ev.type === "approval.requested") {
+    var an = p.title || p.name;
+    return an ? ("Sent \u201C" + an + "\u201D for your review.") : "Sent new work for your review.";
+  }
+  if (ev.type === "invoice.sent") {
+    return "Sent you an invoice. You can review it in Billing.";
+  }
+  if (ev.type === "message.sent") {
+    // only Eric→client messages should read as an update; client's own don't
+    if (p.from === "client" || p.who === "client") return "";
+    return "Posted an update in your conversation.";
+  }
   // generic fallback
   return (ev.type || "Update").replace(/[._]/g," ");
 }
@@ -4003,13 +4022,17 @@ async function loadProjectSpine(){
 
   // Activity feed
   var feedEl = document.getElementById("spineFeed");
-  if (!feed.length) { feedEl.innerHTML = ''; try { mirrorSpineToProjectTab(project, feed); } catch(e){} return; }
+  // Translate first, drop events that produce no client-facing line (e.g. the
+  // client's own messages), so the feed only shows real updates from Eric.
+  var feedLines = feed.map(function(ev){ return { ev: ev, line: spineEventLine(ev) }; })
+                      .filter(function(x){ return x.line && x.line.trim(); });
+  if (!feedLines.length) { feedEl.innerHTML = ''; try { mirrorSpineToProjectTab(project, feed); } catch(e){} return; }
   var head = '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
-  var items = feed.map(function(ev){
+  var items = feedLines.map(function(x){
     return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">' +
              '<span style="width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:6px;flex-shrink:0;"></span>' +
-             '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">' + spineEventLine(ev) + '</div>' +
-             '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + spineTimeAgo(ev.created_at) + '</div></div>' +
+             '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">' + x.line + '</div>' +
+             '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + spineTimeAgo(x.ev.created_at) + '</div></div>' +
            '</div>';
   }).join("");
   feedEl.innerHTML = head + items;
