@@ -3925,15 +3925,15 @@ function spineEventLine(ev){
   }
   if (ev.type === "approval.requested") {
     var an = p.title || p.name;
-    return an ? ("Sent \u201C" + an + "\u201D for your review.") : "Sent new work for your review.";
+    return an ? ("Sent \u201C" + an + "\u201D over for your review.") : "Sent new work over for your review.";
   }
   if (ev.type === "invoice.sent") {
-    return "Sent you an invoice. You can review it in Billing.";
+    return "Sent a new invoice \u2014 you\u2019ll find it under Billing.";
   }
   if (ev.type === "message.sent") {
     // only Eric→client messages should read as an update; client's own don't
     if (p.from === "client" || p.who === "client") return "";
-    return "Posted an update in your conversation.";
+    return "Left you a new update in your conversation.";
   }
   // generic fallback
   return (ev.type || "Update").replace(/[._]/g," ");
@@ -4028,14 +4028,21 @@ async function loadProjectSpine(){
                       .filter(function(x){ return x.line && x.line.trim(); });
   if (!feedLines.length) { feedEl.innerHTML = ''; try { mirrorSpineToProjectTab(project, feed); } catch(e){} return; }
   var head = '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Recent updates</div>';
-  var items = feedLines.map(function(x){
+  // Keep the home calm: show only the most recent few. Everything stays available
+  // in the full history, one tap away — so a busy week reads as momentum, not noise.
+  var FEED_MAX = 5;
+  var shown = feedLines.slice(0, FEED_MAX);
+  var items = shown.map(function(x){
     return '<div style="display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);">' +
              '<span style="width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:6px;flex-shrink:0;"></span>' +
              '<div><div style="font-size:13px;color:var(--ink);line-height:1.5;">' + x.line + '</div>' +
              '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + spineTimeAgo(x.ev.created_at) + '</div></div>' +
            '</div>';
   }).join("");
-  feedEl.innerHTML = head + items;
+  var moreLink = (feedLines.length > FEED_MAX)
+    ? '<div onclick="nav(\'timeline\')" style="margin-top:10px;font-size:12.5px;font-weight:600;color:var(--p);cursor:pointer;">View all updates \u2192</div>'
+    : '';
+  feedEl.innerHTML = head + items + moreLink;
   try { mirrorSpineToProjectTab(project, feed); } catch(e){}
 }
 
