@@ -1,0 +1,100 @@
+--- /home/claude/work/dds/davis-digital-studio-main/dds-studio-manage-9k2p.html	2026-06-30 13:27:58.000000000 +0000
++++ dds-studio-manage-9k2p.html	2026-06-30 15:33:59.732777267 +0000
+@@ -3150,7 +3150,7 @@
+   try {
+     await api("messages", "POST", {client_id:c.id, from_who:"eric", sender_name:"Eric", text:text});
+     try { await api("notifications","POST",{client_id:c.id,type:"message",title:"New message from Eric",body:text.slice(0,90),link_tab:"messages"}); } catch(e){}
+-    try { await notify("eric_message", text, "", c); } catch(e){}
++    try { await emitClientMessageToFeed(c, text); } catch(e){}
+     toast("Message sent + client notified");
+     openHubClient(c.id);
+   } catch (e) {
+@@ -4123,7 +4123,6 @@
+   if (!text) { toast("Enter a message."); return; }
+   await api("messages", "POST", {client_id:ctx.id, from_who:"eric", sender_name:"Eric", text:text});
+   try { await api("notifications","POST",{client_id:ctx.id,type:"message",title:"New message from Eric",body:text.slice(0,90),link_tab:"messages"}); } catch(e){}
+-  await notify("eric_message", text, "", ctx);
+   document.getElementById("msgText").value = "";
+   toast("✓ Message sent + client notified");
+   // Also surface this message in the client's project feed (best-effort).
+@@ -4136,21 +4135,32 @@
+ // email to their contact). Reused by approvals/files/invoices. Best-effort.
+ async function emitClientEventByCtx(ctx, eventType, payload){
+   try {
+-    if (!ctx) return;
++    if (!ctx) return { emailed:false, reason:"no_ctx" };
+     var email = (ctx.contact_email || ctx.email || "").toLowerCase();
+-    if (!email) return;
++    if (!email) {
++      if (typeof toast === "function") toast("⚠ Saved, but client has no email on file — they were not notified.");
++      return { emailed:false, reason:"no_email" };
++    }
+     if (!window.__ddsContactsByEmail || !Object.keys(window.__ddsContactsByEmail).length) {
+       if (typeof loadContactsMap === "function") await loadContactsMap();
+     }
+     var contactId = (window.__ddsContactsByEmail || {})[email];
+-    if (!contactId) return;
+-    var jwt = await adminJwt(); if (!jwt) return;
+-    await fetch(SB_URL + "/functions/v1/clever-api", {
++    if (!contactId) {
++      if (typeof toast === "function") toast("⚠ Saved, but this client's contact isn't linked — they were not emailed. Link their contact to enable notifications.");
++      return { emailed:false, reason:"contact_not_linked" };
++    }
++    var jwt = await adminJwt(); if (!jwt) return { emailed:false, reason:"no_jwt" };
++    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+       method: "POST",
+       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+       body: JSON.stringify({ type: "emit_event", eventType: eventType, actor: "admin", contact: contactId, payload: payload || {}, clientVisible: true })
+     });
+-  } catch(e){}
++    var j = {}; try { j = await r.json(); } catch(e){}
++    if (j && j.emailed === false && typeof toast === "function") {
++      toast("⚠ Saved, but the notification email did not send" + (j.notify_reason ? " ("+j.notify_reason+")" : "") + ".");
++    }
++    return { emailed: !!(j && j.emailed), reason: j && j.notify_reason };
++  } catch(e){ return { emailed:false, reason:"exception" }; }
+ }
+ 
+ // Drops a client_visible "message" event into the spine feed for this client,
+@@ -4209,7 +4219,6 @@
+     var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
+     await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:file.name.split(".").pop().toUpperCase(),from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
+     try { await api("notifications","POST",{client_id:ctx.id,type:"file",title:"New file: "+file.name,body:"Eric uploaded a new file for you to review.",link_tab:"files"}); } catch(e){}
+-    await notify("eric_file",file.name+" ("+size+")","",ctx);
+     try { await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
+     toast("✓ "+file.name+" uploaded");
+   }
+@@ -4232,7 +4241,6 @@
+   await api("approvals","POST",{client_id:ctx.id,title:title,description:desc,status:"pending"});
+   // In-portal notification for the client's notification bell
+   try { await api("notifications","POST",{client_id:ctx.id,type:"approval",title:"New item to review: "+title,body:desc||"",link_tab:"approvals"}); } catch(e){}
+-  await notify("approval_needed",desc,title,ctx);
+   document.getElementById("apprTitle").value="";
+   document.getElementById("apprDesc").value="";
+   try { await emitClientEventByCtx(ctx, "approval.requested", { title: title }); } catch(e){}
+@@ -4400,7 +4408,6 @@
+   } else {
+     await api("invoices","POST",payload);
+     try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
+-    await notify("invoice",payload.amount,payload.name,ctx);
+     try { await emitClientEventByCtx(ctx, "invoice.sent", { amount: payload.amount, name: payload.name }); } catch(e){}
+     toast("✓ Invoice added + client notified");
+   }
+@@ -4434,7 +4441,7 @@
+   var ctx = selectedClients["contracts"];
+   if (!ctx) { toast("Select a client first."); return; }
+   await api("messages","POST",{client_id:ctx.id,from_who:"eric",sender_name:"Eric",text:"Your project agreement is ready to review and sign. Head to the Agreement tab in your portal, give it a read, and acknowledge at the bottom to get us started."});
+-  await notify("eric_message","Your project agreement is ready in the Agreement tab of your portal.","",ctx);
++  try { await emitClientEventByCtx(ctx, "message.sent", { preview: "Your project agreement is ready in the Agreement tab of your portal." }); } catch(e){}
+   toast("✓ Contract notification sent to "+ctx.name);
+ }
+ async function resetClientPassword(cid, email, name) {
+@@ -4537,7 +4544,7 @@
+     var pubUrl = SB_URL+"/storage/v1/object/public/client-files/"+path;
+     var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
+     await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:"PDF",from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
+-    await notify("eric_file",file.name,"",ctx);
++    try { await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
+     toast("✓ "+file.name+" sent to "+ctx.name);
+   }
+ }
