@@ -59,6 +59,9 @@ body[data-page="home"] .final-cta a:focus-visible{
 }
 body[data-page="home"] .btn:focus-visible{ border-radius:100px; }
 
+body[data-page="home"] .hero-sig img{
+  box-shadow:0 6px 16px -6px rgba(27,21,37,.28);
+}
 body[data-page="home"] .hero h1{ max-width:15ch; }
 
 body[data-page="home"] .hero-card.reply-card{
@@ -242,6 +245,11 @@ body[data-page="home"] .quiet-line .sub{
 body[data-page="home"] .founder-grid{
   display:grid; grid-template-columns:.85fr 1.15fr; gap:64px; align-items:center;
 }
+body[data-page="home"] .about-portrait{
+  box-shadow:0 24px 48px -32px rgba(27,21,37,.24);
+  border-radius:18px;
+}
+body[data-page="home"] .about-portrait img{ border-radius:18px; border:none; }
 body[data-page="home"] .founder-bio p{ font-size:15.5px; color:var(--muted); line-height:1.7; margin-top:16px; }
 body[data-page="home"] .philosophy{ position:relative; padding-left:28px; }
 body[data-page="home"] .philosophy::before{
