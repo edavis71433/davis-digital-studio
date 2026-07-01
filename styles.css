@@ -180,7 +180,7 @@ footer.site .fwrap{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:40px;pad
   border-bottom:1px solid var(--hair-dk)}
 footer.site .brand{color:var(--paper);font-size:22px;margin-bottom:14px}
 footer.site p{font-size:14px;max-width:34ch;line-height:1.7}
-footer.site h5{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+footer.site .fcol-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:rgba(255,255,255,.4);margin-bottom:16px}
 footer.site .fcol a{display:block;font-size:14px;color:rgba(255,255,255,.62);padding:6px 0;transition:.15s}
 footer.site .fcol a:hover{color:var(--paper)}
