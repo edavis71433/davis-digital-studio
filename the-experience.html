@@ -9,23 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<style>
-/* The Experience — the story of becoming a client, told from their chair */
-.xp-lead{max-width:760px}
-.xp-beats{margin-top:8px}
-.xp-beat{display:grid;grid-template-columns:48px 1fr;gap:20px;padding:34px 0;border-top:1px solid var(--hair)}
-.xp-beat:first-child{border-top:none}
-.xp-beat-n{font-family:var(--mono);font-size:13px;color:var(--brass);padding-top:6px}
-.xp-beat h3{font-family:var(--serif);font-size:clamp(21px,2.6vw,26px);font-weight:400;color:var(--ink);letter-spacing:-0.3px;line-height:1.25;margin-bottom:10px}
-.xp-beat p{font-size:16px;line-height:1.7;color:var(--muted);max-width:54ch}
-.xp-beat .xp-felt{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink);background:var(--cream);border:1px solid var(--hair);border-radius:100px;padding:6px 14px}
-/* portal-as-proof frame (space designed; fill with a CURRENT capture) */
-.xp-proof{margin:14px 0 0;border-radius:16px;overflow:hidden;border:1px solid var(--hair);background:#fff}
-.xp-proof img{display:block;width:100%;height:auto}
-.xp-proof-ph{display:flex;align-items:center;justify-content:center;text-align:center;min-height:240px;padding:40px;background:linear-gradient(180deg,#faf8f5,#fff);color:var(--muted);font-size:14px;line-height:1.6}
-.xp-proof-cap{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);margin-top:12px;text-align:center}
-@media(max-width:640px){.xp-beat{grid-template-columns:1fr;gap:6px}.xp-beat-n{padding-top:0}}
-</style>
+<link rel="stylesheet" href="the-experience.css">
 </head>
 <body data-page="experience"><a href="#main-content" class="skip-link">Skip to main content</a>
 <header class="nav">
@@ -67,8 +51,8 @@
 </div>
 </section>
 
-<section class="pad">
-<div class="wrap" style="max-width:820px">
+<section class="pad xp-beats-section">
+<div class="wrap" style="max-width:1080px">
   <div class="xp-beats">
 
     <div class="xp-beat reveal">
@@ -125,15 +109,6 @@
       </div>
     </div>
 
-    <div class="xp-beat reveal">
-      <div class="xp-beat-n">07</div>
-      <div>
-        <h3>After launch, I'm still here.</h3>
-        <p>Launch day isn't goodbye. Your space stays open, your history stays intact, and I'm still your point of contact. When you need an update, a fix, or help getting found by more customers, you're picking up with someone who already knows your business &mdash; not starting over with a stranger.</p>
-        <span class="xp-felt">You feel: like you have a partner</span>
-      </div>
-    </div>
-
   </div>
 </div>
 </section>
@@ -150,6 +125,7 @@
     </picture>
   </figure>
   <p class="xp-proof-cap reveal">This is what you see when you log in &mdash; included with every project.</p>
+  <p class="lead-muted mt-m reveal" style="max-width:60ch">And it doesn't close down at launch. <a href="monthly-retainer.html" class="textlink">See what happens after &rarr;</a></p>
 </div>
 </section>
 

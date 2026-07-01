@@ -9,23 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<style>
-/* Minimal, page-scoped styling for one native <details> element — the
-   signature moment. Built entirely from existing tokens (brass, hair,
-   serif, mono); no new design language, just applying the existing one
-   to an unstyled native element. */
-body[data-page="work"] .decision-reveal summary{
-  cursor:pointer; list-style:none; display:flex; align-items:center;
-  justify-content:space-between; gap:16px;
-}
-body[data-page="work"] .decision-reveal summary::-webkit-details-marker{ display:none; }
-body[data-page="work"] .decision-reveal summary::marker{ content:""; }
-body[data-page="work"] .decision-reveal .toggle-icon{
-  font-family:var(--mono); font-size:14px; color:#836539;
-  flex-shrink:0; transition:transform .2s ease;
-}
-body[data-page="work"] .decision-reveal[open] .toggle-icon{ transform:rotate(45deg); }
-</style>
+<link rel="stylesheet" href="work.css">
 </head>
 <body data-page="work"><a href="#main-content" class="skip-link">Skip to main content</a>
 <header class="nav">
@@ -73,40 +57,46 @@ body[data-page="work"] .decision-reveal[open] .toggle-icon{ transform:rotate(45d
      station is a real, standing judgment call, not a claim tied to
      a specific fabricated project.
      ============================================================ -->
-<section class="pad-sm">
-<div class="wrap" style="max-width:720px">
+<section class="pad-sm wk-decisions-section">
+<div class="wrap" style="max-width:920px">
   <h2 class="kicker reveal">Four decisions I make on every project.</h2>
   <p class="lead-muted mt-s reveal">Not a portfolio. A look at the reasoning underneath one.</p>
 
-  <div class="spine mt-l">
-    <div class="spine-line" aria-hidden="true"></div>
-
-    <div class="station reveal">
-      <span class="num" aria-hidden="true">01</span>
-      <span class="eyebrow" style="margin-bottom:8px">What gets fixed first</span>
-      <h3 class="serif">Not everything imperfect is costing you customers.</h3>
-      <p>There's always more that could be improved than time allows. I start with what's actually losing you business today &mdash; a confusing homepage, a broken contact form, a page that takes eight seconds to load &mdash; before I touch anything that's merely imperfect. Polish comes after the bleeding stops.</p>
+  <div class="wk-decisions mt-l">
+    <div class="wk-decision wk-decision-a reveal">
+      <span class="wk-decision-num" aria-hidden="true">01</span>
+      <div class="wk-decision-body">
+        <span class="eyebrow" style="margin-bottom:10px">What gets fixed first</span>
+        <h3 class="serif">Not everything imperfect is costing you customers.</h3>
+        <p>There's always more that could be improved than time allows. I start with what's actually losing you business today &mdash; a confusing homepage, a broken contact form, a page that takes eight seconds to load &mdash; before I touch anything that's merely imperfect. Polish comes after the bleeding stops.</p>
+      </div>
     </div>
 
-    <div class="station reveal">
-      <span class="num" aria-hidden="true">02</span>
-      <span class="eyebrow" style="margin-bottom:8px">When simple beats impressive</span>
-      <h3 class="serif">A hand-built animation only earns its place if it helps someone understand something faster.</h3>
-      <p>Otherwise it's decoration slowing down your page load. I've talked clients out of effects they were excited about because the honest answer was that it would cost them speed and clarity for very little in return. The best decision is sometimes the invisible one.</p>
+    <div class="wk-decision wk-decision-b reveal">
+      <span class="wk-decision-num" aria-hidden="true">02</span>
+      <div class="wk-decision-body">
+        <span class="eyebrow" style="margin-bottom:10px">When simple beats impressive</span>
+        <h3 class="serif">A hand-built animation only earns its place if it helps someone understand something faster.</h3>
+        <p>Otherwise it's decoration slowing down your page load. I've talked clients out of effects they were excited about because the honest answer was that it would cost them speed and clarity for very little in return. The best decision is sometimes the invisible one.</p>
+      </div>
     </div>
 
-    <div class="station reveal">
-      <span class="num" aria-hidden="true">03</span>
-      <span class="eyebrow" style="margin-bottom:8px">What &ldquo;done&rdquo; actually means</span>
-      <h3 class="serif">I don't call a site finished because it looks good. I call it finished when a stranger gets it in five seconds.</h3>
-      <p>Looking good is necessary, not sufficient. Before anything ships, I ask one question: could someone who's never heard of this business land on the homepage and know what it does, who it's for, and what to do next &mdash; in five seconds? If not, it's not done, no matter how polished it looks.</p>
+    <div class="wk-decision wk-decision-a reveal">
+      <span class="wk-decision-num" aria-hidden="true">03</span>
+      <div class="wk-decision-body">
+        <span class="eyebrow" style="margin-bottom:10px">What &ldquo;done&rdquo; actually means</span>
+        <h3 class="serif">I don't call a site finished because it looks good. I call it finished when a stranger gets it in five seconds.</h3>
+        <p>Looking good is necessary, not sufficient. Before anything ships, I ask one question: could someone who's never heard of this business land on the homepage and know what it does, who it's for, and what to do next &mdash; in five seconds? If not, it's not done, no matter how polished it looks.</p>
+      </div>
     </div>
 
-    <div class="station reveal">
-      <span class="num" aria-hidden="true">04</span>
-      <span class="eyebrow" style="margin-bottom:8px">When the honest answer costs me the sale</span>
-      <h3 class="serif">Sometimes what a business needs isn't a redesign. It's three things fixed.</h3>
-      <p>I'll say that on a call even when a full rebuild would pay more &mdash; because a site that actually gets fixed serves both of us better than one that got oversold.</p>
+    <div class="wk-decision wk-decision-b reveal">
+      <span class="wk-decision-num" aria-hidden="true">04</span>
+      <div class="wk-decision-body">
+        <span class="eyebrow" style="margin-bottom:10px">When the honest answer costs me the sale</span>
+        <h3 class="serif">Sometimes what a business needs isn't a redesign. It's three things fixed.</h3>
+        <p>I'll say that on a call even when a full rebuild would pay more &mdash; because a site that actually gets fixed serves both of us better than one that got oversold.</p>
+      </div>
     </div>
   </div>
 </div>
