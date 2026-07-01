@@ -1,6 +1,5 @@
-# Free Site Review: the retired tools hub now points to the real diagnostic
-/tools             /audit              301
-/free-tools        /audit              301
+# Free Site Review maps to the real diagnostic tool specifically
+# (matches the nav label "Free site review" -> audit.html)
 /free-site-review  /audit              301
 
 # Deleted page: contact notice folded into Privacy
@@ -16,3 +15,7 @@
 /roi-calculator    /roi-calculator.html 200
 /pricing-estimator /pricing-estimator.html 200
 /local-visibility  /local-visibility.html 200
+
+# Resources hub — permanent as of V2 (previously retired to /audit; that
+# redirect is removed, this clean-URL rewrite added in its place)
+/tools             /tools.html         200
