@@ -66,7 +66,7 @@ body[data-page="how"] .hww-step-card{
   padding:28px 26px 24px;
   box-shadow:0 22px 46px -32px rgba(27,21,37,.2);
 }
-body[data-page="how"] .hww-step-card h3{ font-size:21px; margin-bottom:10px; }
+body[data-page="how"] .hww-step-card h2{ font-size:21px; margin-bottom:10px; }
 body[data-page="how"] .hww-step-card p{ color:var(--muted); font-size:15px; }
 body[data-page="how"] .hww-step-card .feel{
   display:inline-flex; align-items:center; gap:8px; margin-top:14px;

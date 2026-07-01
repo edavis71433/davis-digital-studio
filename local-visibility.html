@@ -60,7 +60,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
 .opt.selected{border-color:var(--p);background:var(--pxxxl);}
 .opt-icon{width:36px;height:36px;border-radius:10px;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .opt.selected .opt-icon{background:var(--p);}
-.opt-text h4{font-size:14px;font-weight:600;margin-bottom:2px;}
+.opt-text h3{font-size:14px;font-weight:600;margin-bottom:2px;}
 .opt-text p{font-size:12px;color:var(--muted);line-height:1.4;}
 .text-input{width:100%;border:1.5px solid rgba(91,63,160,0.2);border-radius:12px;padding:14px 18px;font-size:15px;font-family:var(--sans);color:var(--ink);background:#fff;transition:border-color 0.15s;outline:none;margin-bottom:8px;}
 .text-input:focus{border-color:var(--p);}
@@ -192,6 +192,7 @@ body{}
   <button class="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
 </div>
 </header>
+<main id="main-content" tabindex="-1">
 <section class="page-hero-v2" style="padding:64px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;position:relative;z-index:1;">
     <div>
@@ -215,7 +216,6 @@ body{}
   </div>
 </section>
 
-<main id="main-content" tabindex="-1">
 <div class="tool-wrap">
 
   <div class="step-indicator" id="stepIndicator" aria-label="Progress">
@@ -240,27 +240,27 @@ body{}
     <div class="options">
       <div class="opt" onclick="selectOpt(1,'restaurant')" id="q1_restaurant">
         <div class="opt-icon">🍽️</div>
-        <div class="opt-text"><h4>Restaurant or Bar</h4><p>Food service, cafe, wine bar, brewery</p></div>
+        <div class="opt-text"><h3>Restaurant or Bar</h3><p>Food service, cafe, wine bar, brewery</p></div>
       </div>
       <div class="opt" onclick="selectOpt(1,'service')" id="q1_service">
         <div class="opt-icon">🔧</div>
-        <div class="opt-text"><h4>Home Services</h4><p>Plumber, electrician, landscaper, cleaner</p></div>
+        <div class="opt-text"><h3>Home Services</h3><p>Plumber, electrician, landscaper, cleaner</p></div>
       </div>
       <div class="opt" onclick="selectOpt(1,'salon')" id="q1_salon">
         <div class="opt-icon">✂️</div>
-        <div class="opt-text"><h4>Salon or Spa</h4><p>Hair, nails, massage, skincare</p></div>
+        <div class="opt-text"><h3>Salon or Spa</h3><p>Hair, nails, massage, skincare</p></div>
       </div>
       <div class="opt" onclick="selectOpt(1,'retail')" id="q1_retail">
         <div class="opt-icon">🛍️</div>
-        <div class="opt-text"><h4>Retail or Boutique</h4><p>Clothing, gifts, specialty shop</p></div>
+        <div class="opt-text"><h3>Retail or Boutique</h3><p>Clothing, gifts, specialty shop</p></div>
       </div>
       <div class="opt" onclick="selectOpt(1,'health')" id="q1_health">
         <div class="opt-icon">🏥</div>
-        <div class="opt-text"><h4>Health or Wellness</h4><p>Gym, yoga, chiropractor, therapist</p></div>
+        <div class="opt-text"><h3>Health or Wellness</h3><p>Gym, yoga, chiropractor, therapist</p></div>
       </div>
       <div class="opt" onclick="selectOpt(1,'other')" id="q1_other">
         <div class="opt-icon">💼</div>
-        <div class="opt-text"><h4>Other Local Business</h4><p>Professional services, creative, etc.</p></div>
+        <div class="opt-text"><h3>Other Local Business</h3><p>Professional services, creative, etc.</p></div>
       </div>
     </div>
     <div class="nav-btns"><button class="next-btn" id="q1next" onclick="nextStep(1)" disabled>Next</button></div>
@@ -274,15 +274,15 @@ body{}
     <div class="options">
       <div class="opt" onclick="selectOpt(2,'yes_claimed')" id="q2_yes_claimed">
         <div class="opt-icon">✅</div>
-        <div class="opt-text"><h4>Yes, and I manage it actively</h4><p>I post updates, respond to reviews, and keep it current</p></div>
+        <div class="opt-text"><h3>Yes, and I manage it actively</h3><p>I post updates, respond to reviews, and keep it current</p></div>
       </div>
       <div class="opt" onclick="selectOpt(2,'yes_unclaimed')" id="q2_yes_unclaimed">
         <div class="opt-icon">⚠️</div>
-        <div class="opt-text"><h4>Yes, but I don't really manage it</h4><p>It exists but I rarely update it</p></div>
+        <div class="opt-text"><h3>Yes, but I don't really manage it</h3><p>It exists but I rarely update it</p></div>
       </div>
       <div class="opt" onclick="selectOpt(2,'no')" id="q2_no">
         <div class="opt-icon">❌</div>
-        <div class="opt-text"><h4>No, I don't have one</h4><p>Or I'm not sure if I do</p></div>
+        <div class="opt-text"><h3>No, I don't have one</h3><p>Or I'm not sure if I do</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -299,19 +299,19 @@ body{}
     <div class="options">
       <div class="opt" onclick="selectOpt(3,'great')" id="q3_great">
         <div class="opt-icon">⭐</div>
-        <div class="opt-text"><h4>50+ reviews, 4.5 stars or above</h4><p>Strong review presence</p></div>
+        <div class="opt-text"><h3>50+ reviews, 4.5 stars or above</h3><p>Strong review presence</p></div>
       </div>
       <div class="opt" onclick="selectOpt(3,'decent')" id="q3_decent">
         <div class="opt-icon">🌟</div>
-        <div class="opt-text"><h4>10-50 reviews, 4.0 or above</h4><p>Decent but room to grow</p></div>
+        <div class="opt-text"><h3>10-50 reviews, 4.0 or above</h3><p>Decent but room to grow</p></div>
       </div>
       <div class="opt" onclick="selectOpt(3,'few')" id="q3_few">
         <div class="opt-icon">💫</div>
-        <div class="opt-text"><h4>Fewer than 10 reviews</h4><p>Just getting started</p></div>
+        <div class="opt-text"><h3>Fewer than 10 reviews</h3><p>Just getting started</p></div>
       </div>
       <div class="opt" onclick="selectOpt(3,'bad')" id="q3_bad">
         <div class="opt-icon">😬</div>
-        <div class="opt-text"><h4>Reviews are mixed or below 4.0</h4><p>Needs attention</p></div>
+        <div class="opt-text"><h3>Reviews are mixed or below 4.0</h3><p>Needs attention</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -328,15 +328,15 @@ body{}
     <div class="options">
       <div class="opt" onclick="selectOpt(4,'optimized')" id="q4_optimized">
         <div class="opt-icon">🎯</div>
-        <div class="opt-text"><h4>City and service mentioned throughout</h4><p>My site clearly mentions where I am and what I do</p></div>
+        <div class="opt-text"><h3>City and service mentioned throughout</h3><p>My site clearly mentions where I am and what I do</p></div>
       </div>
       <div class="opt" onclick="selectOpt(4,'partial')" id="q4_partial">
         <div class="opt-icon">📄</div>
-        <div class="opt-text"><h4>I have a website but it's basic</h4><p>It exists but probably isn't optimized for local search</p></div>
+        <div class="opt-text"><h3>I have a website but it's basic</h3><p>It exists but probably isn't optimized for local search</p></div>
       </div>
       <div class="opt" onclick="selectOpt(4,'none')" id="q4_none">
         <div class="opt-icon">🚫</div>
-        <div class="opt-text"><h4>No website or it's very outdated</h4><p>I rely mainly on social media or word of mouth</p></div>
+        <div class="opt-text"><h3>No website or it's very outdated</h3><p>I rely mainly on social media or word of mouth</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -353,15 +353,15 @@ body{}
     <div class="options">
       <div class="opt" onclick="selectOpt(5,'many')" id="q5_many">
         <div class="opt-icon">📋</div>
-        <div class="opt-text"><h4>Yes, on Yelp, Apple Maps, Bing, and more</h4><p>Multiple consistent listings</p></div>
+        <div class="opt-text"><h3>Yes, on Yelp, Apple Maps, Bing, and more</h3><p>Multiple consistent listings</p></div>
       </div>
       <div class="opt" onclick="selectOpt(5,'some')" id="q5_some">
         <div class="opt-icon">📌</div>
-        <div class="opt-text"><h4>A few, maybe Yelp or one or two others</h4><p>Limited directory presence</p></div>
+        <div class="opt-text"><h3>A few, maybe Yelp or one or two others</h3><p>Limited directory presence</p></div>
       </div>
       <div class="opt" onclick="selectOpt(5,'none')" id="q5_none">
         <div class="opt-icon">🔍</div>
-        <div class="opt-text"><h4>I'm not sure, or probably not many</h4><p>Haven't focused on this</p></div>
+        <div class="opt-text"><h3>I'm not sure, or probably not many</h3><p>Haven't focused on this</p></div>
       </div>
     </div>
     <div class="nav-btns">

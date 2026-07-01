@@ -150,7 +150,7 @@ header.nav{position:sticky;top:0;z-index:50;background:rgba(251,250,247,.82);
   transition:transform .3s cubic-bezier(.32,.72,0,1), box-shadow .3s cubic-bezier(.32,.72,0,1)}
 .svc:hover{transform:translateY(-4px);box-shadow:0 30px 56px -30px rgba(27,21,37,.26)}
 .svc .tier{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass-deep)}
-.svc h3{font-size:26px;margin:16px 0 6px}
+.svc h2{font-size:26px;margin:16px 0 6px}
 .svc .price{font-family:var(--serif);font-size:34px;color:var(--ink);margin:8px 0 4px}
 .svc .price small{font-size:14px;color:var(--muted);font-family:var(--sans)}
 .svc p{color:var(--muted);font-size:15px;margin:12px 0 22px;flex:1}

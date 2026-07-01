@@ -59,7 +59,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
 .opt.selected{border-color:var(--p);background:var(--pxxxl);}
 .opt-icon{width:36px;height:36px;border-radius:10px;background:var(--pxxxl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .opt.selected .opt-icon{background:rgba(91,63,160,0.15);}
-.opt-text h4{font-size:14px;font-weight:600;margin-bottom:2px;}
+.opt-text h3{font-size:14px;font-weight:600;margin-bottom:2px;}
 .opt-text p{font-size:12px;color:var(--muted);line-height:1.4;}
 .opt-price{font-size:12px;font-weight:700;color:var(--p);margin-left:auto;white-space:nowrap;padding-left:12px;}
 
@@ -178,6 +178,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
   <button class="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
 </div>
 </header>
+<main id="main-content" tabindex="-1">
 <section class="page-hero-v2" style="padding:64px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;position:relative;z-index:1;">
     <div>
@@ -186,7 +187,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
       <p style="font-size:16px;line-height:1.6;color:var(--muted);max-width:480px;">Answer 5 questions and get a real price range in under a minute. No signup, no sales call unless you want one.</p>
     </div>
     <div style="background:#fff;border-radius:22px;padding:28px 26px;box-shadow:0 34px 64px -36px rgba(43,27,74,.26);" aria-hidden="true">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">5 quick questions</div>
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Example &middot; 5 quick questions</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="width:20px;height:20px;border-radius:50%;background:var(--p);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10003;</span>
@@ -209,7 +210,6 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
   </div>
 </section>
 
-<main id="main-content" tabindex="-1">
 <div class="tool-wrap">
 
   <div id="progressWrap">
@@ -225,19 +225,19 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="opts">
       <div class="opt" onclick="pick(1,'new')" id="q1_new">
         <div class="opt-icon">✨</div>
-        <div class="opt-text"><h4>Brand new website</h4><p>Starting from scratch, no existing site</p></div>
+        <div class="opt-text"><h3>Brand new website</h3><p>Starting from scratch, no existing site</p></div>
       </div>
       <div class="opt" onclick="pick(1,'redesign')" id="q1_redesign">
         <div class="opt-icon">🔄</div>
-        <div class="opt-text"><h4>Redesign an existing site</h4><p>I have a site but it needs a full overhaul</p></div>
+        <div class="opt-text"><h3>Redesign an existing site</h3><p>I have a site but it needs a full overhaul</p></div>
       </div>
       <div class="opt" onclick="pick(1,'additions')" id="q1_additions">
         <div class="opt-icon">➕</div>
-        <div class="opt-text"><h4>Add pages or features to my site</h4><p>My site is decent but needs specific improvements</p></div>
+        <div class="opt-text"><h3>Add pages or features to my site</h3><p>My site is decent but needs specific improvements</p></div>
       </div>
       <div class="opt" onclick="pick(1,'ecommerce')" id="q1_ecommerce">
         <div class="opt-icon">🛒</div>
-        <div class="opt-text"><h4>E-commerce or online store</h4><p>I need to sell products or services online</p></div>
+        <div class="opt-text"><h3>E-commerce or online store</h3><p>I need to sell products or services online</p></div>
       </div>
     </div>
     <div class="nav-btns"><button class="next-btn" id="q1next" onclick="go(1,2)" disabled>Next</button></div>
@@ -251,22 +251,22 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="opts">
       <div class="opt" onclick="pick(2,'1-3')" id="q2_1-3">
         <div class="opt-icon">📄</div>
-        <div class="opt-text"><h4>1 to 3 pages</h4><p>One-pager or very simple site</p></div>
+        <div class="opt-text"><h3>1 to 3 pages</h3><p>One-pager or very simple site</p></div>
         <span class="opt-price">Starter</span>
       </div>
       <div class="opt" onclick="pick(2,'4-7')" id="q2_4-7">
         <div class="opt-icon">📑</div>
-        <div class="opt-text"><h4>4 to 7 pages</h4><p>Most small business sites</p></div>
+        <div class="opt-text"><h3>4 to 7 pages</h3><p>Most small business sites</p></div>
         <span class="opt-price">Growth</span>
       </div>
       <div class="opt" onclick="pick(2,'8-15')" id="q2_8-15">
         <div class="opt-icon">📚</div>
-        <div class="opt-text"><h4>8 to 15 pages</h4><p>Larger site with multiple services or locations</p></div>
+        <div class="opt-text"><h3>8 to 15 pages</h3><p>Larger site with multiple services or locations</p></div>
         <span class="opt-price">Studio</span>
       </div>
       <div class="opt" onclick="pick(2,'15+')" id="q2_15+">
         <div class="opt-icon">🗂️</div>
-        <div class="opt-text"><h4>15+ pages</h4><p>Complex site, blog, or large catalog</p></div>
+        <div class="opt-text"><h3>15+ pages</h3><p>Complex site, blog, or large catalog</p></div>
         <span class="opt-price">Studio+</span>
       </div>
     </div>
@@ -284,19 +284,19 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="opts">
       <div class="opt" onclick="pick(3,'custom')" id="q3_custom">
         <div class="opt-icon">⚡</div>
-        <div class="opt-text"><h4>Custom HTML/CSS (fastest, no monthly fees)</h4><p>Built from scratch, no platform dependency, fastest load times</p></div>
+        <div class="opt-text"><h3>Custom HTML/CSS (fastest, no monthly fees)</h3><p>Built from scratch, no platform dependency, fastest load times</p></div>
       </div>
       <div class="opt" onclick="pick(3,'squarespace')" id="q3_squarespace">
         <div class="opt-icon">🟦</div>
-        <div class="opt-text"><h4>Squarespace or Wix</h4><p>Easy to update yourself, monthly platform fee</p></div>
+        <div class="opt-text"><h3>Squarespace or Wix</h3><p>Easy to update yourself, monthly platform fee</p></div>
       </div>
       <div class="opt" onclick="pick(3,'wordpress')" id="q3_wordpress">
         <div class="opt-icon">🔵</div>
-        <div class="opt-text"><h4>WordPress</h4><p>Most flexible, good for blogs and larger sites</p></div>
+        <div class="opt-text"><h3>WordPress</h3><p>Most flexible, good for blogs and larger sites</p></div>
       </div>
       <div class="opt" onclick="pick(3,'unsure')" id="q3_unsure">
         <div class="opt-icon">🤔</div>
-        <div class="opt-text"><h4>Not sure, help me decide</h4><p>I'll recommend the right fit after we chat</p></div>
+        <div class="opt-text"><h3>Not sure, help me decide</h3><p>I'll recommend the right fit after we chat</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -313,27 +313,27 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="opts" id="q4opts">
       <div class="opt" onclick="toggleMulti(4,'seo')" id="q4_seo">
         <div class="opt-icon">🔍</div>
-        <div class="opt-text"><h4>SEO setup</h4><p>Keyword research, on-page optimization, Google Search Console</p></div>
+        <div class="opt-text"><h3>SEO setup</h3><p>Keyword research, on-page optimization, Google Search Console</p></div>
         <span class="opt-price">+$800</span>
       </div>
       <div class="opt" onclick="toggleMulti(4,'copy')" id="q4_copy">
         <div class="opt-icon">✍️</div>
-        <div class="opt-text"><h4>Copywriting</h4><p>I need help writing the actual words on the site</p></div>
+        <div class="opt-text"><h3>Copywriting</h3><p>I need help writing the actual words on the site</p></div>
         <span class="opt-price">+$400/pg</span>
       </div>
       <div class="opt" onclick="toggleMulti(4,'brand')" id="q4_brand">
         <div class="opt-icon">🎨</div>
-        <div class="opt-text"><h4>Brand identity</h4><p>Logo, colors, fonts, visual identity package</p></div>
+        <div class="opt-text"><h3>Brand identity</h3><p>Logo, colors, fonts, visual identity package</p></div>
         <span class="opt-price">+$500</span>
       </div>
       <div class="opt" onclick="toggleMulti(4,'booking')" id="q4_booking">
         <div class="opt-icon">📅</div>
-        <div class="opt-text"><h4>Booking or reservations</h4><p>Online scheduling, reservations, or appointment booking</p></div>
+        <div class="opt-text"><h3>Booking or reservations</h3><p>Online scheduling, reservations, or appointment booking</p></div>
         <span class="opt-price">+$300</span>
       </div>
       <div class="opt" onclick="toggleMulti(4,'none')" id="q4_none">
         <div class="opt-icon">👍</div>
-        <div class="opt-text"><h4>None of the above</h4><p>Just the website is fine for now</p></div>
+        <div class="opt-text"><h3>None of the above</h3><p>Just the website is fine for now</p></div>
       </div>
     </div>
     <div class="nav-btns">
@@ -350,19 +350,19 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="opts">
       <div class="opt" onclick="pick(5,'flexible')" id="q5_flexible">
         <div class="opt-icon">😌</div>
-        <div class="opt-text"><h4>Flexible, no hard deadline</h4><p>Standard timeline of 4-8 weeks is fine</p></div>
+        <div class="opt-text"><h3>Flexible, no hard deadline</h3><p>Standard timeline of 4-8 weeks is fine</p></div>
       </div>
       <div class="opt" onclick="pick(5,'2months')" id="q5_2months">
         <div class="opt-icon">📅</div>
-        <div class="opt-text"><h4>Within 2 months</h4><p>Moderate urgency</p></div>
+        <div class="opt-text"><h3>Within 2 months</h3><p>Moderate urgency</p></div>
       </div>
       <div class="opt" onclick="pick(5,'1month')" id="q5_1month">
         <div class="opt-icon">⚡</div>
-        <div class="opt-text"><h4>Within 1 month</h4><p>May include a 25% rush surcharge</p></div>
+        <div class="opt-text"><h3>Within 1 month</h3><p>May include a 25% rush surcharge</p></div>
       </div>
       <div class="opt" onclick="pick(5,'asap')" id="q5_asap">
         <div class="opt-icon">🚨</div>
-        <div class="opt-text"><h4>ASAP, under 2 weeks</h4><p>Rush surcharge applies, limited availability</p></div>
+        <div class="opt-text"><h3>ASAP, under 2 weeks</h3><p>Rush surcharge applies, limited availability</p></div>
       </div>
     </div>
     <div class="nav-btns">
