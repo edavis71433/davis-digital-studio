@@ -123,7 +123,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
 </style>
 <link rel="stylesheet" href="/enhance.css">
 </head>
-<body>
+<body data-page="pricing-estimator">
 <a href="#main-content" class="skip-link">Skip to main content</a>
 <header class="nav">
 <div class="wrap nav-in">
@@ -638,21 +638,6 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 </script>
 
 
-<div id="ddsStickyCta" style="position:fixed;bottom:24px;right:24px;z-index:9990;opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease;pointer-events:none;">
-  <a href="/audit#free-audit" style="display:inline-flex;align-items:center;gap:8px;background:#5b3fa0;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 22px;border-radius:100px;text-decoration:none;box-shadow:0 8px 24px rgba(91,63,160,0.32);">Get your free site score →</a>
-</div>
-<style>@media(max-width:640px){#ddsStickyCta{display:none;}}</style>
-<script>
-(function(){
-  var c=document.getElementById('ddsStickyCta');
-  if(!c)return;
-  function onScroll(){
-    if(window.scrollY>600){c.style.opacity='1';c.style.transform='translateY(0)';c.style.pointerEvents='auto';}
-    else{c.style.opacity='0';c.style.transform='translateY(12px)';c.style.pointerEvents='none';}
-  }
-  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
-})();
-</script>
   <script src="/concierge.js" defer></script>
 <script src="/enhance.js" defer></script>
 <script src="nav.js" defer></script>
