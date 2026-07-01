@@ -131,9 +131,10 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
 <circle cx="16" cy="16" r="15" stroke="#B08D57" stroke-width="1"/>
 <path d="M10 21V11h4.2c3 0 4.8 1.9 4.8 5s-1.8 5-4.8 5H10z" stroke="#1B1525" stroke-width="1.4" fill="none"/>
 <circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
-  <nav class="nav-links">
+  <nav class="nav-links" aria-label="Primary">
     <a href="how-we-work.html">How we work</a>
-    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle">Services <i class="caret" aria-hidden="true"></i></a>
+    <a href="the-experience.html">The experience</a>
+    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle" aria-haspopup="true" aria-expanded="false">Services <i class="caret" aria-hidden="true"></i></a>
       <span class="nav-sub">
         <a href="services.html">All services<small>Pricing and the full picture</small></a>
         <a href="web-design.html">Web design<small>Strategy-led sites that convert</small></a>
@@ -142,13 +143,13 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
       </span></span>
     <a href="industries.html">Industries</a>
     <a href="about.html">About</a>
-    <a href="tools.html" class="active">Free tools</a>
+    <a href="audit.html">Free site review</a>
   </nav>
   <div class="nav-actions">
     <a href="portal.html" class="nav-login">Client login</a>
     <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="burger" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')"><span></span><span></span></button>
+  <button class="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
 </div>
 </header>
 <section class="page-hero-v2" style="padding:48px 24px 56px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
@@ -165,7 +166,7 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
   </div>
 </section>
 
-<main id="main-content">
+<main id="main-content" tabindex="-1">
 <div class="tool-wrap">
 
   <div id="progressWrap">
@@ -404,7 +405,6 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     <div class="fcol">
       <h5>Studio</h5>
       <a href="how-we-work.html">How we work</a>
-      <a href="the-experience.html">The experience</a>
       <a href="services.html">Services</a>
       <a href="industries.html">Industries</a>
       <a href="about.html">About</a>
@@ -412,10 +412,10 @@ html{overflow-x:hidden;}body{font-family:var(--sans);background:#faf8f5;color:#1
     </div>
     <div class="fcol">
       <h5>Start</h5>
-      <a href="tools.html">Free site review</a>
+      <a href="audit.html">Free site review</a>
+      <a href="tools.html">Free tools</a>
       <a href="contact.html">Book a free call</a>
       <a href="portal.html">Client login</a>
-      <a href="contact.html">Contact</a>
     </div>
   </div>
   <div class="fbase">
@@ -655,5 +655,6 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 </script>
   <script src="/concierge.js" defer></script>
 <script src="/enhance.js" defer></script>
+<script src="nav.js" defer></script>
 </body>
 </html>
