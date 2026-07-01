@@ -1,0 +1,22 @@
+/* ============================================================
+   Davis Digital Studio — services.css
+   SOLUTIONS-PAGE-ONLY layer, scoped under body[data-page="services"].
+   Loaded after styles.css.
+
+   Visual pass finding: this page is almost entirely single-column
+   text at a consistent measure, with one real visual device (the
+   .spine/.station component). That's correct, not a flaw — the
+   page's job is serious, undistracted diagnosis, and a magazine-
+   style consistent column reads right for sustained argument.
+   Manufacturing width variation or imagery here would be novelty,
+   not craftsmanship.
+
+   The one genuine gap: the spine's numbered badges were completely
+   flat while a calibrated shadow scale now exists elsewhere on the
+   site. This extends that scale's smallest, quietest tier here —
+   consistent dimensional language, not a new one.
+   ============================================================ */
+
+body[data-page="services"] .station .num{
+  box-shadow:0 6px 16px -6px rgba(27,21,37,.22);
+}
