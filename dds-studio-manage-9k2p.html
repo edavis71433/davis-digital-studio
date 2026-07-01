@@ -4583,11 +4583,20 @@ async function inviteClient() {
   // 1a) AUTO-LINK: create a matching contact (new CRM model) with the SAME email
   // and the auth user id, plus a project, so the spine works from day one and we
   // never get the old client/contact/login email mismatch again. Best-effort.
+  //
+  // FIX: this block previously referenced `authJson` and `jwt`, neither of which
+  // is defined at this point in inviteClient() (authJson only exists in the
+  // separate createClient() function; jwt isn't assigned until step 2 below).
+  // That threw a ReferenceError on every call, silently swallowed by the catch
+  // below — so the contacts row was never created via the invite flow. No auth
+  // user exists yet at this point anyway (the invite flow creates one lazily
+  // when the client accepts it), so auth_user_id is correctly null here.
   try {
-    var authUid = (authJson && authJson.user_id) ? authJson.user_id : null;
+    var authUid = null;
+    var inviteJwt = await adminJwt();
     var contactRow = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
-      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":inviteJwt},
       body: JSON.stringify({
         type: "admin_write", table: "contacts", op: "insert",
         payload: { name: name, email: cemail.toLowerCase(), stage: "active", source: "created", auth_user_id: authUid }
@@ -4598,7 +4607,7 @@ async function inviteClient() {
     if (newContactId) {
       await fetch(SB_URL + "/functions/v1/clever-api", {
         method: "POST",
-        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":inviteJwt},
         body: JSON.stringify({
           type: "admin_write", table: "projects", op: "insert",
           payload: { contact_id: newContactId, name: proj || (name + " — Project"), stage: "kickoff", ball_in_court: "agency", progress: 0 }
