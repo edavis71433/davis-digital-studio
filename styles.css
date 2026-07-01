@@ -213,6 +213,52 @@ footer.site .fbase a{color:rgba(255,255,255,.5)}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 
+/* ---------------------------------------------------------------
+   GLOBAL CHROME — skip link, focus visibility, current-page state.
+   Added as part of the nav/footer baseline pass. Additive only;
+   nothing here changes existing layout or palette.
+   --------------------------------------------------------------- */
+.skip-link{
+  position:absolute; left:-9999px; top:auto;
+  background:var(--ink); color:var(--paper); padding:12px 20px;
+  font-family:var(--sans); font-size:14px; font-weight:550;
+  border-radius:0 0 8px 0; z-index:200;
+}
+.skip-link:focus{ left:0; top:0; }
+
+/* styles.css previously styled :focus only on form fields; nav and
+   footer links fell back to the bare browser default outline. One
+   consistent, on-brand ring for primary navigation and footer links. */
+.nav a:focus-visible,
+.nav button:focus-visible{
+  outline:none; box-shadow:0 0 0 3px rgba(91,63,160,.35); border-radius:4px;
+}
+.nav .btn:focus-visible{ border-radius:100px; }
+footer.site a:focus-visible{
+  outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.55); border-radius:4px;
+}
+
+/* Current-page indicator. Replaces the old `.active` class, which had
+   no associated styling anywhere in this file and was therefore
+   invisible to sighted and assistive-tech users alike. aria-current
+   is both the semantic and the visual signal now — one mechanism. */
+.nav-links a[aria-current="page"]{
+  color:var(--ink); font-weight:600;
+}
+.nav-links a[aria-current="page"]::after{
+  content:""; position:absolute; left:0; right:0; bottom:-4px; height:2px;
+  background:var(--brass);
+}
+
+/* Mega-menu escape-to-close: JS adds .closed on Escape and removes it
+   on the next focus/hover, overriding the CSS-only :hover/:focus-within
+   reveal so keyboard users get a working Escape key. No-JS: this class
+   is simply never added, and :hover/:focus-within continue to work
+   exactly as before. */
+.nav-has-sub.closed .nav-sub{
+  opacity:0 !important; visibility:hidden !important;
+}
+
 /* ---------- hero grid + project card ---------- */
 .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
 .hero-card{background:var(--paper);border:1px solid var(--hair);border-radius:3px;padding:24px 24px 20px;

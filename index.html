@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="home.css">
 </head>
 <body data-page="home">
-<a class="skip-link" href="#main">Skip to main content</a>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <header class="nav">
 <div class="wrap nav-in">
   <a href="index.html" class="brand"><svg class="mark" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -21,7 +21,8 @@
 <circle cx="22" cy="11" r="1.5" fill="#B08D57"/></svg>Davis Digital Studio</a>
   <nav class="nav-links" aria-label="Primary">
     <a href="how-we-work.html">How we work</a>
-    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle">Services <i class="caret" aria-hidden="true"></i></a>
+    <a href="the-experience.html">The experience</a>
+    <span class="nav-has-sub"><a href="services.html" class="nav-sub-toggle" aria-haspopup="true" aria-expanded="false">Services <i class="caret" aria-hidden="true"></i></a>
       <span class="nav-sub">
         <a href="services.html">All services<small>Pricing and the full picture</small></a>
         <a href="web-design.html">Web design<small>Strategy-led sites that convert</small></a>
@@ -36,11 +37,11 @@
     <a href="portal.html" class="nav-login">Client login</a>
     <a href="contact.html" class="btn btn-primary" style="padding:11px 20px">Book a free call</a>
   </div>
-  <button class="burger" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('mobile-open');this.setAttribute('aria-expanded',document.body.classList.contains('mobile-open'))"><span></span><span></span></button>
+  <button class="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
 </div>
 </header>
 
-<main id="main" tabindex="-1">
+<main id="main-content" tabindex="-1">
 
 <!-- ============================================================
      HERO — headline + lede + CTA + founder signature, paired with
@@ -61,7 +62,7 @@
     </div>
     <div class="hero-sig reveal">
       <img src="eric-davis-hero-avatar.jpg" alt="Eric Davis, founder of Davis Digital Studio" width="46" height="46" loading="eager">
-      <div class="hero-sig-txt"><strong>Eric Davis</strong> Founder &middot; M.S. Business Analytics candidate, CSUN</div>
+      <div class="hero-sig-txt"><strong>Eric Davis</strong> Founder &middot; Nearly a decade in enterprise digital systems</div>
     </div>
   </div>
 
@@ -79,7 +80,7 @@
 <!-- Credibility whisper — one honest line, no section chrome, no invented numbers. -->
 <section class="credibility">
 <div class="wrap">
-  <p>I'm currently accepting a small number of new projects &middot; Los Angeles, working nationwide</p>
+  <p>Based in Los Angeles &middot; working with small businesses nationwide</p>
 </div>
 </section>
 
@@ -130,7 +131,7 @@
       <p class="lead-muted mt-m reveal">From our first call onward, you get one private space to follow progress, review work, find files, and see invoices. The person you hire is the person doing the work.</p>
       <ul class="xp-list reveal">
         <li><span class="from">Instead of lost email threads</span> &mdash; one home for every message and file.</li>
-        <li><span class="from">Instead of &ldquo;did you get my file?&rdquo;</span> &mdash; you upload it and see it land.</li>
+        <li><span class="from">Instead of re-sending a file twice because you're not sure it landed</span> &mdash; you upload it and see it land.</li>
         <li><span class="from">Instead of confusing invoices</span> &mdash; what you owe stays clear the whole way through.</li>
       </ul>
       <a href="the-experience.html" class="textlink mt-m" style="display:inline-block">See what it's like to work with me &rarr;</a>
@@ -165,8 +166,8 @@
 <div class="wrap">
   <span class="eyebrow reveal" style="justify-content:center">Why I keep this small</span>
   <h2 class="serif mt-s reveal">I take on a small number of clients &mdash; on purpose.</h2>
-  <p class="lead-muted mt-m reveal" style="margin-inline:auto">Agencies scale by adding people. I scale by saying no more than I say yes. Every client gets my direct attention, not a rotating account team &mdash; which means fewer businesses can work with me at once, and the ones who do get everything I've got.</p>
-  <p class="fine reveal">Featured work goes up only with a client's permission &mdash; none is published yet. The best way to see how I work is a conversation about your business.</p>
+  <p class="lead-muted mt-m reveal" style="margin-inline:auto">Nearly a decade running digital systems at enterprise scale taught me what happens to a good project once it's buried under too many accounts. I don't let that happen here. Every client gets my direct attention, not a rotating team &mdash; which means only a few businesses can work with me at once.</p>
+  <p class="fine reveal">I only publish work with a client's clear permission, so what's shown here grows slowly and honestly instead of all at once. The free call tells you more about how I work than a portfolio would anyway.</p>
   <a href="contact.html" class="textlink mt-m reveal" style="display:inline-block">Book a free call &rarr;</a>
 </div>
 </section>
@@ -242,9 +243,9 @@
     <div class="fcol">
       <h5>Start</h5>
       <a href="audit.html">Free site review</a>
+      <a href="tools.html">Free tools</a>
       <a href="contact.html">Book a free call</a>
       <a href="portal.html">Client login</a>
-      <a href="contact.html">Contact</a>
     </div>
   </div>
   <div class="fbase">
@@ -264,4 +265,6 @@ els.forEach(el=>io.observe(el));
 // safety net: if anything is still hidden after load, show it
 window.addEventListener('load',()=>setTimeout(()=>els.forEach(el=>el.classList.add('in')),1200));
 </script>
-</body></html>
+<script src="nav.js" defer></script>
+</body>
+</html>

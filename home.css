@@ -25,16 +25,10 @@ body[data-page="home"]{
 }
 
 /* ---------------------------------------------------------------
-   SKIP LINK — visible on keyboard focus only. Homepage-scoped since
-   this file only loads on index.html; other templates are untouched.
+   SKIP LINK — now defined sitewide in styles.css as part of the global
+   chrome pass; the homepage-specific copy that used to live here has
+   been removed to avoid two sources of truth for the same rule.
    --------------------------------------------------------------- */
-.skip-link{
-  position:absolute; left:-9999px; top:auto;
-  background:var(--ink); color:var(--paper); padding:12px 20px;
-  font-family:var(--sans); font-size:14px; font-weight:550;
-  border-radius:0 0 8px 0; z-index:200;
-}
-.skip-link:focus{ left:0; top:0; }
 
 /* Standard visually-hidden pattern: present for screen-reader heading
    navigation, removed from visual flow without affecting layout. */
