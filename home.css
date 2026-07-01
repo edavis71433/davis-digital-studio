@@ -135,14 +135,10 @@ body[data-page="home"] .promise-chip:hover{ color:var(--ink); border-color:var(-
 body[data-page="home"] .xp-grid{
   display:grid; grid-template-columns:.72fr 1fr; gap:56px; align-items:start;
 }
-/* Pre-existing sitewide contrast gap: .eyebrow (brass-deep, #8A6B3C) on
-   .panel-warm (#F4F0E9) measures 4.35:1, just under AA's 4.5:1 floor. This
-   combination already ships on other pages; fixing the shared .eyebrow rule
-   is out of scope here (would touch every page that uses it), so this
-   overrides color for the one instance on this page — a 5% darkening,
-   visually identical, that clears AA at 4.76:1. Worth revisiting sitewide
-   in a future pass. */
-body[data-page="home"] .panel-warm .eyebrow{ color:#836539; }
+/* The eyebrow-on-panel-warm contrast fix that used to be scoped here was
+   promoted to styles.css's shared .eyebrow rule during the Solutions page
+   build, once the same gap was confirmed to recur sitewide rather than
+   being homepage-specific. Nothing to override here anymore. */
 body[data-page="home"] .xp-list{ list-style:none; margin-top:28px; }
 body[data-page="home"] .xp-list li{
   position:relative; padding:14px 0 14px 26px; font-size:15px; color:var(--ink);

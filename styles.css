@@ -29,8 +29,15 @@ img{max-width:100%;display:block}
 /* ---------- type ---------- */
 .serif{font-family:var(--serif)}
 h1,h2,h3{font-family:var(--serif);font-weight:380;letter-spacing:-.02em;line-height:1.04}
+/* Color is a 5% darkening of --brass-deep, not the token itself — .eyebrow is the
+   only component of the ~12 that use --brass-deep which regularly sits on
+   .panel-warm (#F4F0E9), where the token's own value measures 4.35:1, just under
+   AA's 4.5:1 floor. This passes there (4.76:1) and everywhere else the token
+   already passed (5.18:1 on paper, vs. 4.74:1 before) — a strict improvement,
+   not a trade-off. Found on the homepage, confirmed recurring on Solutions;
+   fixed at the source instead of patching per-page from here on. */
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--brass-deep);font-weight:500;display:inline-flex;align-items:center;gap:10px}
+  color:#836539;font-weight:500;display:inline-flex;align-items:center;gap:10px}
 .eyebrow::before{content:"";width:22px;height:1px;background:var(--brass)}
 
 /* ---------- layout ---------- */
@@ -342,6 +349,16 @@ footer.site a:focus-visible{
   .hero .lede{font-size:16.5px;line-height:1.6;margin:18px 0 26px;max-width:none}
   .kicker{font-size:clamp(26px,7vw,32px) !important;line-height:1.15;letter-spacing:-0.4px;text-wrap:balance}
   h2,.section h2{text-wrap:balance}
+
+  /* — Journey spine: the 48px numbered circle + 76px left padding was tuned
+       for desktop and never had a mobile pass (first live use is the
+       Solutions page). Smaller circle, tighter padding, so the text column
+       isn't squeezed to ~200px on a 375px phone. — */
+  .station{padding:0 0 40px 56px}
+  .station .num{width:36px;height:36px;font-size:12px}
+  .station h3{font-size:21px}
+  .station p{font-size:15px}
+  .spine-line{left:17px}
 
   /* — Spacing rhythm: a real mobile scale, not desktop padding — */
   .hero{padding:32px 0 40px}
