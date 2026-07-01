@@ -4,11 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Work — Davis Digital Studio</title>
-<meta name="description" content="Real businesses, real problems solved. See how Davis Digital Studio approaches web design and discoverability strategy-first.">
+<meta name="description" content="Not a portfolio. A look at how I actually make decisions — what gets fixed first, when simple beats impressive, and what 'done' really means.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..480&family=Inter:wght@400;450;500;550;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+/* Minimal, page-scoped styling for one native <details> element — the
+   signature moment. Built entirely from existing tokens (brass, hair,
+   serif, mono); no new design language, just applying the existing one
+   to an unstyled native element. */
+body[data-page="work"] .decision-reveal summary{
+  cursor:pointer; list-style:none; display:flex; align-items:center;
+  justify-content:space-between; gap:16px;
+}
+body[data-page="work"] .decision-reveal summary::-webkit-details-marker{ display:none; }
+body[data-page="work"] .decision-reveal summary::marker{ content:""; }
+body[data-page="work"] .decision-reveal .toggle-icon{
+  font-family:var(--mono); font-size:14px; color:#836539;
+  flex-shrink:0; transition:transform .2s ease;
+}
+body[data-page="work"] .decision-reveal[open] .toggle-icon{ transform:rotate(45deg); }
+</style>
 </head>
 <body data-page="work"><a href="#main-content" class="skip-link">Skip to main content</a>
 <header class="nav">
@@ -44,19 +61,64 @@
 <section class="hero">
 <div class="wrap" style="max-width:820px">
   <span class="eyebrow reveal">Work</span>
-  <h1 class="reveal mt-m">A small number of clients, <em>each one fully handled.</em></h1>
-  <p class="lede reveal">I take on a small number of clients at a time so each one gets senior-level attention and an experience that feels completely handled. Featured projects are on the way, shared here as clients approve being showcased.</p>
+  <h1 class="reveal mt-m">You can't see every project. You can judge exactly how I think.</h1>
+  <p class="lede reveal">Client work goes up here only with permission, so what's shown will always be less than what's true. That's fine &mdash; this page isn't proof of volume. It's proof of judgment. Here's how I actually make decisions.</p>
 </div>
 </section>
 
-<section class="pad">
-<div class="wrap" style="max-width:840px">
+<!-- ============================================================
+     DECISIONS — reuses the same .spine/.station component as
+     Solutions and Growth Partnership, on purpose (fourth use
+     sitewide; explicitly no new components for this page). Each
+     station is a real, standing judgment call, not a claim tied to
+     a specific fabricated project.
+     ============================================================ -->
+<section class="pad-sm">
+<div class="wrap" style="max-width:720px">
+  <h2 class="kicker reveal">Four decisions I make on every project.</h2>
+  <p class="lead-muted mt-s reveal">Not a portfolio. A look at the reasoning underneath one.</p>
 
-  <!-- ============================================================
-       CASE STUDY TEMPLATE — designed to scale.
-       To add an approved client case study, copy this <article> block,
-       fill in the details, and remove the .cases-empty block below.
-       Keep newest first. Only publish with the client's clear permission.
+  <div class="spine mt-l">
+    <div class="spine-line" aria-hidden="true"></div>
+
+    <div class="station reveal">
+      <span class="num" aria-hidden="true">01</span>
+      <span class="eyebrow" style="margin-bottom:8px">What gets fixed first</span>
+      <h3 class="serif">Not everything imperfect is costing you customers.</h3>
+      <p>There's always more that could be improved than time allows. I start with what's actually losing you business today &mdash; a confusing homepage, a broken contact form, a page that takes eight seconds to load &mdash; before I touch anything that's merely imperfect. Polish comes after the bleeding stops.</p>
+    </div>
+
+    <div class="station reveal">
+      <span class="num" aria-hidden="true">02</span>
+      <span class="eyebrow" style="margin-bottom:8px">When simple beats impressive</span>
+      <h3 class="serif">A hand-built animation only earns its place if it helps someone understand something faster.</h3>
+      <p>Otherwise it's decoration slowing down your page load. I've talked clients out of effects they were excited about because the honest answer was that it would cost them speed and clarity for very little in return. The best decision is sometimes the invisible one.</p>
+    </div>
+
+    <div class="station reveal">
+      <span class="num" aria-hidden="true">03</span>
+      <span class="eyebrow" style="margin-bottom:8px">What &ldquo;done&rdquo; actually means</span>
+      <h3 class="serif">I don't call a site finished because it looks good. I call it finished when a stranger gets it in five seconds.</h3>
+      <p>Looking good is necessary, not sufficient. Before anything ships, I ask one question: could someone who's never heard of this business land on the homepage and know what it does, who it's for, and what to do next &mdash; in five seconds? If not, it's not done, no matter how polished it looks.</p>
+    </div>
+
+    <div class="station reveal">
+      <span class="num" aria-hidden="true">04</span>
+      <span class="eyebrow" style="margin-bottom:8px">When the honest answer costs me the sale</span>
+      <h3 class="serif">Sometimes what a business needs isn't a redesign. It's three things fixed.</h3>
+      <p>I'll say that on a call even when a full rebuild would pay more &mdash; because a site that actually gets fixed serves both of us better than one that got oversold.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================
+     APPROVED CASE STUDY TEMPLATE — for future use.
+     When a client gives clear permission to feature their project,
+     copy this <article> block in above the signature-moment section
+     below, fill in the details, keep newest first. Only publish
+     with the client's clear permission — see the honesty statement
+     in the signature moment below; do not undercut it.
 
   <article class="reveal case-study" style="border-top:1px solid var(--hair);padding-top:40px">
     <span class="eyebrow">CLIENT NAME &middot; INDUSTRY &middot; YEAR</span>
@@ -66,28 +128,35 @@
     <p class="by" style="font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:22px">RESULT OR STATUS LINE.</p>
   </article>
 
-       ============================================================ -->
+     ============================================================ -->
 
-  <div class="cases-empty reveal">
-    <h2 class="kicker">Featured work is on the way.</h2>
-    <p class="lead-muted mt-m">I take on a small number of clients at a time, and I only showcase a project once the client has given clear permission to feature it. A few are in progress now, and I'll share them here as they go live and get the green light.</p>
-    <p class="lead-muted mt-m">In the meantime, the best way to see how I work is to talk through your own project. I'll tell you honestly what I'd do and whether I'm the right fit.</p>
-    <div class="hero-cta mt-l">
-      <a href="contact.html" class="btn btn-primary">Book a free call <span class="arr">&rarr;</span></a>
-      <a href="how-we-work.html" class="btn btn-ghost">See how I work</a>
-    </div>
-  </div>
-
+<!-- ============================================================
+     SIGNATURE MOMENT — reveals reasoning, not a visual effect.
+     Native <details>/<summary>: fully keyboard-accessible and
+     functional with zero JavaScript, no custom script needed.
+     Answers the exact tension this page exists to resolve, using
+     the page itself as the evidence.
+     ============================================================ -->
+<section class="pad-sm panel-warm">
+<div class="wrap" style="max-width:720px">
+  <details class="decision-reveal reveal" style="border-left:1px solid var(--brass);padding-left:28px">
+    <summary>
+      <span class="serif" style="font-size:22px;color:var(--ink)">Notice something? There's no portfolio grid on this page.</span>
+      <span class="toggle-icon" aria-hidden="true">+</span>
+    </summary>
+    <p class="lead-muted mt-m">A grid of thumbnails is easy to fill with placeholder work, stock photography, or old projects that don't reflect how I work now. It's also the fastest way to imply more volume than is true. I'd rather show you a few decisions I stand behind than forty screenshots that don't tell you anything about how I think. When client work is ready to share &mdash; with permission &mdash; it'll live on this page. Until then, this is the honest version.</p>
+  </details>
 </div>
 </section>
+
 <section class="pad panel-dark">
 <div class="wrap center">
   <span class="eyebrow" style="color:var(--brass);justify-content:center">Let's talk</span>
-  <h2 class="kicker mt-s" style="margin-inline:auto;color:var(--paper)">Want this kind of attention on your business?</h2>
+  <h2 class="kicker mt-s" style="margin-inline:auto;color:var(--paper)">Want this kind of thinking on your business?</h2>
   <p class="lead-muted mt-m" style="margin-inline:auto;color:rgba(255,255,255,.6)">I only take a few clients at a time. If the fit is right, let's talk about what your business actually needs.</p>
   <div class="hero-cta mt-l" style="justify-content:center">
     <a href="contact.html" class="btn btn-light">Book a free call <span class="arr">&rarr;</span></a>
-    <a href="tools.html" class="btn btn-ghost" style="color:var(--paper);border-color:rgba(255,255,255,.3)">See what your site needs</a>
+    <a href="how-we-work.html" class="btn btn-ghost" style="color:var(--paper);border-color:rgba(255,255,255,.3)">See how I work</a>
   </div>
 </div>
 </section></main>
