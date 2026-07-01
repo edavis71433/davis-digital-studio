@@ -89,6 +89,41 @@ body[data-page="home"] .reply-foot{
   color:var(--brass-deep); text-transform:uppercase;
 }
 
+/* ---------------------------------------------------------------
+   PROMISE TRIO — elevated to match the hero card's premium treatment.
+   Same tokens (--r-card, --sh-card, --ease-moment) already used above;
+   this just extends that language instead of inventing a new one.
+   Was a flat, shadowless, hairline-divided list; becomes three
+   distinct cards with real breathing room between them.
+   --------------------------------------------------------------- */
+body[data-page="home"] .trio{
+  border-top:none;
+  gap:24px;
+}
+body[data-page="home"] .promise{
+  background:var(--paper);
+  border-right:none;
+  border-radius:var(--r-card);
+  box-shadow:0 20px 44px -30px rgba(27,21,37,.22);
+  padding:36px 32px 34px;
+  transition:transform .35s var(--ease-moment), box-shadow .35s var(--ease-moment);
+}
+body[data-page="home"] .promise:first-child,
+body[data-page="home"] .promise:last-child{
+  padding:36px 32px 34px; /* override styles.css's asymmetric first/last padding — every card now matches */
+}
+body[data-page="home"] .promise:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--sh-card);
+}
+@media(max-width:880px){
+  body[data-page="home"] .trio{ grid-template-columns:1fr; gap:18px; }
+  body[data-page="home"] .promise{
+    border-bottom:none !important;
+    padding:30px 26px !important;
+  }
+}
+
 /* Default (no JS, or reduced motion): everything visible, fully resolved. */
 body[data-page="home"] .reply-a,
 body[data-page="home"] .reply-foot{ opacity:1; transform:none; }
