@@ -1221,6 +1221,20 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
             </div>
           </div>
         </div>
+
+        <!-- ONE-OFF: fixes a single existing client (Hettie Orange Designs) whose
+             contact record was never created, due to a bug in the client-creation
+             flow that's since been fixed for all future clients. Safe to remove
+             this card once used — it only touches this one client, checks for an
+             existing contact first, and will not create a duplicate if run twice. -->
+        <div class="card" style="border:1.5px dashed var(--p);">
+          <div class="ch"><div class="ct">🔧 One-off: fix Hettie Orange Designs' missing contact</div></div>
+          <div class="cb">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Her client record exists, but no matching contact was created for her, which is why she wasn't showing up in the Contact dropdown on "Start a partnership." This looks up her existing client record, checks whether a contact already exists for her email, and only creates one if it's genuinely missing. Safe to click more than once.</p>
+            <button class="sbtn" id="nc-fix-hettie-btn" onclick="fixHettieContactOneOff()">Run this fix</button>
+            <div class="result-box" id="nc-fix-hettie-result"></div>
+          </div>
+        </div>
       </div>
 
       <!-- TEAM -->
@@ -4705,6 +4719,36 @@ async function createClient() {
   // than tearing everything down.
   var warnings = [];
 
+  // STEP 2a — AUTO-LINK: create a matching contact (new CRM model), same as the
+  // invite flow. This path never had this step at all (distinct gap from the
+  // inviteClient() bug fixed separately) — a client created with a password had
+  // no corresponding contacts row, so they never appeared in the Contact picker
+  // when starting a partnership. Best-effort: a failure here doesn't undo the
+  // client, which already exists and is usable.
+  try {
+    var authUid = (authJson && authJson.user_id) ? authJson.user_id : null;
+    var contactRow = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({
+        type: "admin_write", table: "contacts", op: "insert",
+        payload: { name: name, email: cemail.toLowerCase(), stage: "active", source: "created", auth_user_id: authUid }
+      })
+    });
+    var cjson2 = {}; try { cjson2 = await contactRow.json(); } catch(e){}
+    var newContactId = (cjson2 && cjson2.data && cjson2.data[0] && cjson2.data[0].id) ? cjson2.data[0].id : null;
+    if (newContactId) {
+      await fetch(SB_URL + "/functions/v1/clever-api", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+        body: JSON.stringify({
+          type: "admin_write", table: "projects", op: "insert",
+          payload: { contact_id: newContactId, name: proj || (name + " — Project"), stage: "kickoff", ball_in_court: "agency", progress: 0 }
+        })
+      });
+    } else { warnings.push("contact link"); }
+  } catch(e){ warnings.push("contact link"); }
+
   // STEP 3 — default timeline (best-effort, per-row).
   var phases = [
     {title:"Discovery & Strategy",description:"Goals, SEO roadmap, brand audit",status:"active",date_label:"Week 1",icon:"🎨",sort_order:1},
@@ -4733,6 +4777,89 @@ async function createClient() {
   document.getElementById("nc-welcome").value = "";
   cleanup();
   await loadOverview();
+}
+
+// ── ONE-OFF: fix Hettie Orange Designs' missing contact record ──
+// See the card on the New Client page for context. Safe to run more than
+// once — checks for an existing contact by email before creating anything,
+// and only reads (never writes to) the clients table.
+async function fixHettieContactOneOff() {
+  var box = document.getElementById("nc-fix-hettie-result");
+  var btn = document.getElementById("nc-fix-hettie-btn");
+  var lines = [];
+  function log(msg) { lines.push(msg); if (box) { box.style.display = "block"; box.innerHTML = lines.join("<br>"); } }
+
+  if (btn) btn.disabled = true;
+  log("Checking sign-in…");
+  var jwt = await adminJwt();
+  if (!jwt) { log("❌ Not signed in — please sign in again, then click this again."); if (btn) btn.disabled = false; return; }
+
+  async function call(body) {
+    var res = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
+      body: JSON.stringify(body),
+    });
+    var json = {};
+    try { json = await res.json(); } catch (e) {}
+    return { ok: res.ok, json: json };
+  }
+
+  log("Step 1 — looking up the existing Hettie Orange Designs client record…");
+  var clientLookup = await call({ type: "admin_query", path: "clients?select=id,name,contact_email,email&name=ilike.*Hettie*&limit=5" });
+  var clientRows = (clientLookup.ok && clientLookup.json.data) ? clientLookup.json.data : [];
+  if (!clientRows.length) {
+    log("❌ Could not find a client matching \u201cHettie\u201d. Nothing was changed.");
+    if (btn) btn.disabled = false; return;
+  }
+  if (clientRows.length > 1) {
+    log("⚠️ More than one client matched \u201cHettie\u201d — stopping so nothing ambiguous gets written. Matches: " + escHtml(JSON.stringify(clientRows)));
+    if (btn) btn.disabled = false; return;
+  }
+  var client = clientRows[0];
+  var clientEmail = (client.contact_email || client.email || "").trim();
+  log("Found client: <b>" + escHtml(client.name) + "</b> (" + escHtml(clientEmail || "no email on file") + ")");
+  if (!clientEmail) {
+    log("❌ This client record has no contact_email or email on file — nothing to match a contact to. Nothing was changed.");
+    if (btn) btn.disabled = false; return;
+  }
+
+  log("Step 2 — checking whether a contact already exists for this email…");
+  var existing = await call({ type: "admin_query", path: "contacts?select=id,name,email,stage,source&email=eq." + encodeURIComponent(clientEmail.toLowerCase()) + "&limit=1" });
+  if (existing.ok && existing.json.data && existing.json.data.length) {
+    log("✓ A contact already exists for this email — not creating a duplicate.");
+    log("Existing contact: " + escHtml(JSON.stringify(existing.json.data[0])));
+    log("If she still isn't showing in the Start Partnership dropdown, the issue isn't a missing row — let's look at that separately.");
+    if (btn) btn.disabled = false; return;
+  }
+  log("No existing contact found. Creating one now…");
+
+  log("Step 3 — inserting the contact…");
+  var insertResult = await call({
+    type: "admin_write", table: "contacts", op: "insert",
+    payload: { name: client.name, email: clientEmail.toLowerCase(), stage: "active", source: "created", auth_user_id: null },
+  });
+  var newContact = (insertResult.ok && insertResult.json.data && insertResult.json.data[0]) ? insertResult.json.data[0] : null;
+  if (!newContact) {
+    log("❌ Insert failed. Nothing else was touched. " + escHtml(JSON.stringify(insertResult.json)));
+    if (btn) btn.disabled = false; return;
+  }
+  log("✓ Contact created: " + escHtml(JSON.stringify(newContact)));
+
+  log("Step 4 — verifying…");
+  var vC = await call({ type: "admin_query", path: "clients?select=id,name,contact_email,email&id=eq." + client.id + "&limit=1" });
+  var vK = await call({ type: "admin_query", path: "contacts?select=id,name,email,stage,source&id=eq." + newContact.id + "&limit=1" });
+  var c = vC.json.data && vC.json.data[0];
+  var k = vK.json.data && vK.json.data[0];
+  var emailsMatch = c && k && (c.contact_email || c.email || "").toLowerCase() === (k.email || "").toLowerCase();
+
+  log("──────────────────────────");
+  log((c ? "✅" : "❌") + " Hettie client still exists");
+  log((k ? "✅" : "❌") + " Hettie contact now exists");
+  log((emailsMatch ? "✅" : "❌") + " Client email matches contact email");
+  log("👉 Last step: open \u201cStart a partnership,\u201d pick Hettie Orange Designs as the Client, and confirm she now appears in the Contact dropdown and auto-selects.");
+  toast(newContact ? "Contact created for " + client.name : "Done — see details above.");
+  if (btn) btn.disabled = false;
 }
 
 // ── NOTIFY ──
