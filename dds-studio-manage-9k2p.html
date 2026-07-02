@@ -5595,25 +5595,44 @@ async function toggleStar(id) {
   var p = allProspects.find(function(x){return x.id===id;}); var cf = caseFile(p);
   cf.starred = !cf.starred; await saveCase(id, cf); refreshOpenCard(id);
 }
-function analyzeProspect(id) {
+async function analyzeProspect(id) {
   var p = allProspects.find(function(x){return x.id===id;}); if(!p) return;
   var cf = caseFile(p);
   var out = document.getElementById('pai-'+id);
-  var biz = p.business_name||'this business';
-  var ind = cf.info.industry||'';
-  var site = p.website ? p.website : 'no website found';
-  // Local heuristic draft (uses what you know; no external call so it always works)
   var research = cf.research.map(function(r){return '• '+r.cat+': '+r.body;}).join('\n');
-  var angle = ind ? ind.toLowerCase() : 'local business';
-  var draft =
-    'Subject: A quick thought on '+biz+"'s website\n\n"+
-    'Hi'+(cf.info.owner?(' '+cf.info.owner.split(' ')[0]):'')+',\n\n'+
-    'I came across '+biz+' while looking at '+angle+'s in '+(cf.info.location||'the area')+'. '+
-    (p.website ? 'I took a quick look at '+p.website+' and noticed a couple of things that might be quietly costing you customers.' : "I couldn't find a website for you, and for a "+angle+" that usually means real customers are going to competitors who show up first.")+'\n\n'+
-    'No pitch — I run a small studio and I help '+angle+'s get found and convert. Happy to send a free, honest review if useful. Worth a quick look?\n\nEric';
+
+  // Loading state while the edge function writes the draft.
+  out.innerHTML = '<div style="background:rgba(91,63,160,0.05);border:1px solid rgba(91,63,160,0.15);border-radius:10px;padding:12px;margin-bottom:8px;font-size:12.5px;color:var(--muted);">Writing a draft from what you know about this prospect…</div>';
+
+  // Single source of truth: the same edge route the Send email modal uses
+  // (prospect_email_draft). The old local template here had drifted from the
+  // server copy — spam-trigger wording, a pluralization bug — so the browser
+  // no longer keeps its own copy of the outreach language.
+  var draft = '';
+  try {
+    var res = await outreachApi({
+      type: 'prospect_email_draft',
+      prospect: {
+        business: p.business_name || '',
+        website: p.website || '',
+        owner: cf.info.owner || p.contact_name || '',
+        industry: cf.info.industry || '',
+        location: cf.info.location || '',
+        research: Array.isArray(cf.research) ? cf.research.map(function(r){ return { body: r.body }; }) : []
+      }
+    });
+    if (res && res.data && typeof res.data.body === 'string' && res.data.body.trim()) {
+      draft = 'Subject: ' + (res.data.subject || '') + '\n\n' + res.data.body;
+    }
+  } catch (_) { /* fall through to minimal fallback */ }
+  if (!draft) {
+    // Offline/failed fallback: minimal and safe, never templated junk.
+    draft = 'Subject: Reaching out to ' + (p.business_name && p.business_name.length >= 3 ? p.business_name : 'your business') + '\n\nHi' + (cf.info.owner ? (' ' + cf.info.owner.split(' ')[0]) : '') + ',\n\n(The draft writer could not be reached. Write a short personal note here, or add details in Business overview and click Analyze prospect again.)\n\nEric\nDavis Digital Studio';
+  }
+  var esc = draft.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   out.innerHTML = '<div style="background:rgba(91,63,160,0.05);border:1px solid rgba(91,63,160,0.15);border-radius:10px;padding:12px;margin-bottom:8px;">'+
     '<div style="font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--p);margin-bottom:6px;">Suggested outreach draft</div>'+
-    '<textarea style="width:100%;min-height:150px;font-size:12.5px;padding:8px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;font-family:inherit;">'+draft+'</textarea>'+
+    '<textarea style="width:100%;min-height:150px;font-size:12.5px;padding:8px;border:1px solid rgba(91,63,160,0.15);border-radius:7px;font-family:inherit;">'+esc+'</textarea>'+
     (research?'<div style="font-size:11px;color:var(--muted);margin-top:6px;">Built from your research:\n'+research+'</div>':'')+
     '</div>';
 }
