@@ -4202,9 +4202,15 @@ async function sendMsg() {
   await api("messages", "POST", {client_id:ctx.id, from_who:"eric", sender_name:"Eric", text:text});
   try { await api("notifications","POST",{client_id:ctx.id,type:"message",title:"New message from Eric",body:text.slice(0,90),link_tab:"messages"}); } catch(e){}
   document.getElementById("msgText").value = "";
-  toast("✓ Message sent + client notified");
-  // Also surface this message in the client's project feed (best-effort).
-  try { await emitClientMessageToFeed(ctx, text); } catch(e){}
+  // Surface this message in the client's project feed AND find out whether it actually emailed
+  // before saying so — the old code toasted "client notified" before this even ran.
+  var result = { emailed:false, reason:"exception" };
+  try { result = await emitClientMessageToFeed(ctx, text); } catch(e){}
+  if (result.emailed) {
+    toast("✓ Message sent + client notified");
+  } else {
+    toast("⚠ Message saved, but client was not emailed (" + (result.reason || "unknown") + ")");
+  }
   await loadMessages(ctx);
 }
 
@@ -4246,14 +4252,14 @@ async function emitClientEventByCtx(ctx, eventType, payload){
 async function emitClientMessageToFeed(client, text) {
   try {
     const email = (client.contact_email || client.email || "").toLowerCase();
-    if (!email) return;
+    if (!email) return { emailed:false, reason:"no_email" };
     if (!window.__ddsContactsByEmail || !Object.keys(window.__ddsContactsByEmail).length) {
       if (typeof loadContactsMap === "function") await loadContactsMap();
     }
     const contactId = (window.__ddsContactsByEmail || {})[email];
-    if (!contactId) return;
-    const jwt = await adminJwt(); if (!jwt) return;
-    await fetch(SB_URL + "/functions/v1/clever-api", {
+    if (!contactId) return { emailed:false, reason:"contact_not_linked" };
+    const jwt = await adminJwt(); if (!jwt) return { emailed:false, reason:"no_jwt" };
+    const r = await fetch(SB_URL + "/functions/v1/clever-api", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY, "x-dds-user-jwt": jwt },
       body: JSON.stringify({
@@ -4265,7 +4271,9 @@ async function emitClientMessageToFeed(client, text) {
         clientVisible: true
       })
     });
-  } catch(e){}
+    let j = {}; try { j = await r.json(); } catch(e){}
+    return { emailed: !!(j && j.emailed), reason: j && j.notify_reason };
+  } catch(e){ return { emailed:false, reason:"exception" }; }
 }
 
 // ── FILES ──
@@ -4298,8 +4306,9 @@ async function uploadFiles(files) {
     var fsaved = await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:file.name.split(".").pop().toUpperCase(),from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
     if (fsaved === null) { continue; } // failed write already toasted; skip notify for this file
     try { await api("notifications","POST",{client_id:ctx.id,type:"file",title:"New file: "+file.name,body:"Eric uploaded a new file for you to review.",link_tab:"files"}); } catch(e){}
-    try { await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
-    toast("✓ "+file.name+" uploaded");
+    var fnotify = { emailed:false, reason:"exception" };
+    try { fnotify = await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
+    toast(fnotify.emailed ? "✓ "+file.name+" uploaded + client notified" : "✓ "+file.name+" uploaded, but client was not emailed ("+(fnotify.reason||"unknown")+")");
   }
   await loadFiles(ctx);
 }
@@ -4323,8 +4332,9 @@ async function addApproval() {
   try { await api("notifications","POST",{client_id:ctx.id,type:"approval",title:"New item to review: "+title,body:desc||"",link_tab:"approvals"}); } catch(e){}
   document.getElementById("apprTitle").value="";
   document.getElementById("apprDesc").value="";
-  try { await emitClientEventByCtx(ctx, "approval.requested", { title: title }); } catch(e){}
-  toast("✓ Approval added + client notified");
+  var anotify = { emailed:false, reason:"exception" };
+  try { anotify = await emitClientEventByCtx(ctx, "approval.requested", { title: title }); } catch(e){}
+  toast(anotify.emailed ? "✓ Approval added + client notified" : "✓ Approval added, but client was not emailed ("+(anotify.reason||"unknown")+")");
 }
 
 // ── TIMELINE ──
@@ -4490,8 +4500,9 @@ async function saveInvoice() {
     var ins = await api("invoices","POST",payload);
     if (ins === null) return; // failed write already toasted; don't claim success
     try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
-    try { await emitClientEventByCtx(ctx, "invoice.sent", { amount: payload.amount, name: payload.name }); } catch(e){}
-    toast("✓ Invoice added + client notified");
+    var inotify = { emailed:false, reason:"exception" };
+    try { inotify = await emitClientEventByCtx(ctx, "invoice.sent", { amount: payload.amount, name: payload.name }); } catch(e){}
+    toast(inotify.emailed ? "✓ Invoice added + client notified" : "✓ Invoice added, but client was not emailed ("+(inotify.reason||"unknown")+")");
   }
   cancelEditInvoice();
   await loadInvoices(ctx);
@@ -4523,8 +4534,9 @@ async function pushContract() {
   var ctx = selectedClients["contracts"];
   if (!ctx) { toast("Select a client first."); return; }
   await api("messages","POST",{client_id:ctx.id,from_who:"eric",sender_name:"Eric",text:"Your project agreement is ready to review and sign. Head to the Agreement tab in your portal, give it a read, and acknowledge at the bottom to get us started."});
-  try { await emitClientEventByCtx(ctx, "message.sent", { preview: "Your project agreement is ready in the Agreement tab of your portal." }); } catch(e){}
-  toast("✓ Contract notification sent to "+ctx.name);
+  var cnotify = { emailed:false, reason:"exception" };
+  try { cnotify = await emitClientEventByCtx(ctx, "message.sent", { preview: "Your project agreement is ready in the Agreement tab of your portal." }); } catch(e){}
+  toast(cnotify.emailed ? "✓ Contract notification sent to "+ctx.name : "✓ Contract added, but "+ctx.name+" was not emailed ("+(cnotify.reason||"unknown")+")");
 }
 async function resetClientPassword(cid, email, name) {
   if (!email) { toast("This client has no email on file."); return; }
@@ -4626,8 +4638,9 @@ async function uploadDoc(files) {
     var pubUrl = SB_URL+"/storage/v1/object/public/client-files/"+path;
     var size = file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" MB":(file.size/1024).toFixed(0)+" KB";
     await api("files","POST",{client_id:ctx.id,name:file.name,size:size,type:"PDF",from_who:"eric",status:"pending",storage_path:path,url:pubUrl});
-    try { await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
-    toast("✓ "+file.name+" sent to "+ctx.name);
+    var dnotify = { emailed:false, reason:"exception" };
+    try { dnotify = await emitClientEventByCtx(ctx, "file.shared", { name: file.name }); } catch(e){}
+    toast(dnotify.emailed ? "✓ "+file.name+" sent to "+ctx.name : "✓ "+file.name+" saved, but "+ctx.name+" was not emailed ("+(dnotify.reason||"unknown")+")");
   }
 }
 
