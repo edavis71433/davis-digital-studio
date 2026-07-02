@@ -1093,8 +1093,8 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
             </div>
         
             <!-- Progress -->
-            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Progress: <span id="as-progress-val" style="color:var(--p);">35</span>%</label>
-            <input id="as-progress" type="range" min="0" max="100" step="5" value="35" style="width:100%;margin-bottom:14px;accent-color:var(--p);" oninput="document.getElementById('as-progress-val').textContent=this.value;">
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Progress: <span id="as-progress-val" style="color:var(--p);">35</span>%<span id="as-progress-hint" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);"></span></label>
+            <input id="as-progress" type="range" min="0" max="100" step="5" value="35" style="width:100%;margin-bottom:14px;accent-color:var(--p);" oninput="document.getElementById('as-progress-val').textContent=this.value;var h=document.getElementById('as-progress-hint');if(h)h.textContent='';">
         
             <!-- Optional note shown to the client -->
             <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Note to client <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional, shows in their feed)</span></label>
@@ -6713,6 +6713,34 @@ async function loadAdvanceStageProjects() {
   }
 }
 
+// Stage -> default progress map. Picking a stage auto-fills the slider to
+// these values; dragging the slider afterwards overrides for that advance.
+const STAGE_PROGRESS = {
+  kickoff:  10,
+  content:  25,
+  design:   45,
+  build:    65,
+  review:   85,
+  launch:   95,
+  complete: 100
+};
+
+function autoFillProgressForStage() {
+  const stageSel = document.getElementById('as-stage');
+  if (!stageSel) return;
+  const def = STAGE_PROGRESS[stageSel.value];
+  if (def == null) return;
+  const slider = document.getElementById('as-progress');
+  const val = document.getElementById('as-progress-val');
+  if (slider) slider.value = def;
+  if (val) val.textContent = def;
+  const hint = document.getElementById('as-progress-hint');
+  if (hint) {
+    const label = stageSel.options[stageSel.selectedIndex] ? stageSel.options[stageSel.selectedIndex].text : stageSel.value;
+    hint.textContent = ' (auto for ' + label + ', drag to adjust)';
+  }
+}
+
 function syncAdvanceStageForm() {
   const sel = document.getElementById('as-project');
   const opt = sel && sel.options[sel.selectedIndex];
@@ -6722,6 +6750,9 @@ function syncAdvanceStageForm() {
   const prog = opt.getAttribute('data-progress') || '0';
   document.getElementById('as-progress').value = prog;
   document.getElementById('as-progress-val').textContent = prog;
+  // Showing the project's current state, not an auto-filled default.
+  const hint = document.getElementById('as-progress-hint');
+  if (hint) hint.textContent = '';
 }
 
 async function advanceStage() {
@@ -6808,6 +6839,8 @@ async function focusAdvanceStageOnSelected() {
     sel.addEventListener('focus', function () {
       if (sel.options.length && /Not signed in|Loading|Could not|Error|Load failed/.test(sel.options[0].text)) loadAdvanceStageProjects();
     });
+    const st = document.getElementById('as-stage');
+    if (st) st.addEventListener('change', autoFillProgressForStage);
   }
   if (document.readyState !== 'loading') wire();
   else document.addEventListener('DOMContentLoaded', wire);
