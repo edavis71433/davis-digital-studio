@@ -160,6 +160,13 @@ body{}
 @media(max-width:760px){.tool-switch-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:480px){.tool-switch-grid{grid-template-columns:1fr;}}
 
+
+/* Tool-hero two-column grid — was inline-only with zero mobile breakpoint,
+   causing horizontal overflow on phones (confirmed via screenshot: the
+   sample card was spilling off-screen). Now a real class with a real
+   breakpoint. */
+.tool-hero-grid{display:grid;grid-template-columns:1.1fr .9fr;}
+@media(max-width:860px){.tool-hero-grid{grid-template-columns:1fr;}}
 </style>
 <link rel="stylesheet" href="/enhance.css">
 </head>
@@ -194,7 +201,7 @@ body{}
 </header>
 <main id="main-content" tabindex="-1">
 <section class="page-hero-v2" style="padding:64px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
-  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;position:relative;z-index:1;">
+  <div class="tool-hero-grid" style="max-width:1100px;margin:0 auto;gap:56px;align-items:center;position:relative;z-index:1;">
     <div>
       <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:16px;">Free Tool &middot; Local Visibility</div>
       <h1 style="font-family:var(--serif);font-size:clamp(38px,5.5vw,56px);font-weight:400;line-height:1.05;letter-spacing:-1.5px;color:var(--ink);margin-bottom:18px;">How visible is your business in <em style="color:var(--p);font-style:italic;">local search?</em></h1>

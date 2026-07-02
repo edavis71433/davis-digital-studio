@@ -300,6 +300,13 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 @media(max-width:760px){.tool-switch-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:480px){.tool-switch-grid{grid-template-columns:1fr;}}
 
+
+/* Tool-hero two-column grid — was inline-only with zero mobile breakpoint,
+   causing horizontal overflow on phones (confirmed via screenshot: the
+   sample card was spilling off-screen). Now a real class with a real
+   breakpoint. */
+.tool-hero-grid{display:grid;grid-template-columns:1.1fr .9fr;}
+@media(max-width:860px){.tool-hero-grid{grid-template-columns:1fr;}}
 </style>
 
   <meta property="og:locale" content="en_US">
@@ -392,7 +399,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
         ]}
 </script>
 <section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
-  <div style="max-width:1140px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:64px;align-items:center;position:relative;z-index:1;">
+  <div class="tool-hero-grid" style="max-width:1140px;margin:0 auto;gap:64px;align-items:center;position:relative;z-index:1;">
 
     <div>
       <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:16px;">Free Tool</div>
