@@ -33,8 +33,8 @@
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;overflow-x:hidden;}
-body{font-family:var(--sans);background:#faf8f5;color:#1a1523;-webkit-font-smoothing:antialiased;}
-:root{--p:#5b3fa0;--pxl:#c4aee8;--pdark:#1e1338;--ink:#1a1523;--muted:#5e5270;--serif:'Fraunces',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;}
+:root{--p:#5B3FA0;--pxl:#c4aee8;--pdark:#2A1B4A;--ink:#1B1525;--muted:#6B6276;--brass:#B08D57;--paper:#FBFAF7;--serif:'Fraunces',Georgia,serif;--sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;}
 .skip-link{position:absolute;left:-9999px;top:8px;background:var(--p);color:#fff;padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;z-index:99999;text-decoration:none;}
 .skip-link:focus{left:8px;}
 *:focus-visible{outline:2px solid #5b3fa0;outline-offset:3px;}
@@ -149,7 +149,7 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
 </div>
 </header>
 <main id="main-content" tabindex="-1">
-<section class="page-hero-v2" style="padding:64px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
+<section class="page-hero-v2" style="padding:64px 24px 72px;background:linear-gradient(180deg,#FBFAF7 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div class="tool-hero-grid" style="max-width:1100px;margin:0 auto;gap:56px;align-items:center;position:relative;z-index:1;">
     <div>
       <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--p);margin-bottom:16px;">Free Tool &middot; ROI Calculator</div>
@@ -292,7 +292,7 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
 </main>
 
 
-<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#1e1338 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
+<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#2A1B4A 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
   <div aria-hidden="true" style="position:absolute;top:-100px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
   <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;">
     <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
@@ -302,7 +302,7 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
       <h3 style="font-family:var(--serif);font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;line-height:1.2;letter-spacing:-0.5px;color:#fff;">Ready to grow your business online?</h3>
       <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;line-height:1.6;">Let's build a website that works as hard as you do.</p>
     </div>
-    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:var(--sans);transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Book a free call &rarr;</a>
+    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#2A1B4A;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:var(--sans);transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Book a free call &rarr;</a>
   </div>
 </section>
 
@@ -339,7 +339,7 @@ input[type=range]{width:100%;accent-color:var(--p);height:6px;cursor:pointer;mar
 </div>
 </footer>
 
-<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#1e1338;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+<div id="cookieBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#2A1B4A;border-top:1px solid rgba(196,174,232,0.2);padding:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
   <p style="font-size:13px;color:rgba(255,255,255,0.65);margin:0;flex:1;min-width:200px;">We use cookies and Google Analytics to understand how visitors use our site. <a href="/privacy" style="color:#c4aee8;text-decoration:underline;">Privacy Policy</a></p>
   <div style="display:flex;gap:10px;flex-shrink:0;">
     <button onclick="acceptCookies()" style="background:#5b3fa0;color:#fff;border:none;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">Got it</button>

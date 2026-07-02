@@ -17,11 +17,11 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: var(--sans); background: #faf8f5; color: #1a1523; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
 :root {
-  --p: #5b3fa0; --pxl: #c4aee8; --pxxl: #ede8f7; --pxxxl: #f7f4fd;
-  --pdark: #1e1338; --ink: #1a1523; --muted: #7a6d8e;
-  --cream: #faf8f5; --warm: #f5f0e8;
+  --p: #5B3FA0; --pxl: #c4aee8; --pxxl: #EDE8F7; --pxxxl: #f7f4fd;
+  --pdark: #2A1B4A; --ink: #1B1525; --muted: #6B6276;
+  --cream: #FBFAF7; --warm: #f5f0e8; --brass: #B08D57; --paper: #FBFAF7;
   --serif: 'Fraunces', Georgia, serif;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: 'Geist Mono', ui-monospace, monospace;
@@ -59,7 +59,7 @@ body { padding-top: 68px; }
   font-family:var(--sans);
   font-size:14px;
   color:var(--ink);
-  background:#faf8f5;
+  background:var(--paper);
   outline:none;
   transition:border-color 0.15s, box-shadow 0.15s;
   width:100%;
@@ -217,8 +217,7 @@ a:focus-visible, button:focus-visible {
 .skip-link:focus {
   left: 6px;
 }
-/* Fix small text contrast, boost muted color slightly */
-:root { --muted: #6b5f7e; }
+/* Fix small text contrast, boost muted color slightly — now set correctly at the source above */
 
 /* ── 480px breakpoints for pages missing them ── */
 @media (max-width: 480px) {
@@ -384,7 +383,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 
 
 <!-- BREADCRUMBS -->
-<nav aria-label="Breadcrumb" style="background:#faf8f5;padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
+<nav aria-label="Breadcrumb" style="background:var(--paper);padding:14px 24px;border-bottom:1px solid rgba(91,63,160,0.06);">
   <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);opacity:0.5;flex-shrink:0;" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
     <a href="/" style="color:var(--muted);text-decoration:none;">Home</a>
@@ -398,7 +397,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
           {"@type":"ListItem","position":2,"name":"Free Report Card"}
         ]}
 </script>
-<section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#faf8f5 0%,#ede8f7 100%);position:relative;overflow:hidden;">
+<section class="page-hero-v2" style="padding:48px 24px 72px;background:linear-gradient(180deg,#FBFAF7 0%,#ede8f7 100%);position:relative;overflow:hidden;">
   <div class="tool-hero-grid" style="max-width:1140px;margin:0 auto;gap:64px;align-items:center;position:relative;z-index:1;">
 
     <div>
@@ -521,7 +520,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(91,63,160,0.1);">
         <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Get weekly tips on improving your online presence. No spam.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;" id="nlWrap">
-          <input type="email" id="nlEmail" aria-label="Email address for newsletter" placeholder="your@email.com" style="flex:1;min-width:180px;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:#faf8f5;color:#1a1523;">
+          <input type="email" id="nlEmail" aria-label="Email address for newsletter" placeholder="your@email.com" style="flex:1;min-width:180px;padding:10px 14px;border:1px solid rgba(91,63,160,0.2);border-radius:100px;font-family:inherit;font-size:13px;background:var(--paper);color:#1B1525;">
           <button onclick="subscribeNL()" style="background:#5b3fa0;color:#fff;border:none;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Subscribe</button>
         </div>
         <div id="nlThanks" style="display:none;font-size:13px;color:#1e8449;margin-top:8px;font-weight:600;">You're in. Talk soon.</div>
@@ -669,7 +668,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 </div>
 
 
-<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#1e1338 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
+<section class="dds-final-cta" aria-label="Get in touch" style="background:linear-gradient(135deg,#2A1B4A 0%,#5b3fa0 100%);padding:48px 24px;position:relative;overflow:hidden;">
   <div aria-hidden="true" style="position:absolute;top:-100px;right:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(196,174,232,0.18) 0%,transparent 65%);pointer-events:none;"></div>
   <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;">
     <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
@@ -679,7 +678,7 @@ html, body { overflow-x: hidden; max-width: 100vw; }
       <h3 style="font-family:var(--serif);font-size:clamp(22px,3.5vw,28px);font-weight:400;margin:0 0 6px;line-height:1.2;letter-spacing:-0.5px;color:#fff;">Ready to grow your business online?</h3>
       <p style="font-size:14px;color:rgba(255,255,255,0.7);margin:0;line-height:1.6;">Let's build a website that works as hard as you do.</p>
     </div>
-    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1e1338;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:var(--sans);transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Book a free call &rarr;</a>
+    <a href="/contact" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#2A1B4A;font-size:14px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;flex-shrink:0;font-family:var(--sans);transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Book a free call &rarr;</a>
   </div>
 </section>
 
