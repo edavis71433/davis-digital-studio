@@ -12016,5 +12016,240 @@ function anEngineNote(eng){
   window.loadHub=rhxLoad;
 })();
 </script>
+
+<style>
+/* GROWTH & PARTNERSHIPS — growth operating system */
+.grx-band{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 20px;margin-top:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.grx-meta{font-size:11px;color:var(--muted);}
+.grx-metav{font-size:13.5px;font-weight:650;color:var(--ink);margin-top:2px;}
+.grx-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;margin-top:18px;align-items:start;}
+@media(max-width:1000px){.grx-grid{grid-template-columns:1fr;}}
+.grx-card{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:18px 20px;}
+.grx-h{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+.grx-ring{position:relative;width:110px;height:110px;flex:none;}
+.grx-ring svg{transform:rotate(-90deg);}
+.grx-ringn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:var(--ink);}
+.grx-ringl{font-size:9.5px;font-weight:700;color:#1a7e49;}
+.grx-b{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink);padding:4px 0;}
+.grx-b:before{content:'\25CF';color:#1a7e49;font-size:9px;margin-top:3px;}
+.grx-goal{display:flex;align-items:center;gap:12px;padding:9px 0;}
+.grx-gt{flex:1;font-size:13px;font-weight:600;color:var(--ink);min-width:0;}
+.grx-track{flex:1.2;height:7px;border-radius:100px;background:rgba(41,25,66,.06);overflow:hidden;}
+.grx-fill{height:100%;border-radius:100px;background:#1a7e49;}
+.grx-focus{background:#f5f2fc;border:none;border-radius:16px;padding:20px 22px;margin-top:16px;}
+.grx-task{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);padding:6px 0;}
+.grx-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;margin-left:auto;white-space:nowrap;}
+.grx-wins{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:8px;}
+.grx-win{border:1px solid rgba(41,25,66,.07);border-radius:12px;padding:12px;}
+.grx-wt{font-size:12.5px;font-weight:650;color:var(--ink);line-height:1.4;}
+.grx-wd{font-size:11px;color:var(--muted);margin-top:4px;}
+.grx-ok{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink);padding:4px 0;}
+.grx-ok:before{content:'\2713';color:#1a7e49;font-weight:800;}
+.grx-opp{border:1px solid rgba(41,25,66,.07);border-radius:12px;padding:12px 14px;margin-top:10px;cursor:pointer;}
+.grx-opp:hover{border-color:rgba(91,63,160,.3);}
+.grx-ai{background:#e9f7ef;border-radius:14px;padding:14px 18px;margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink);}
+</style>
+<script>
+// ═══ GROWTH & PARTNERSHIPS — "How are we growing this business together?"
+// Rides the existing gpApi routes (partnership_list / partnership_get).
+// Legacy GP module preserved (Classic view). Admin-side build; the client
+// portal mirrors this next. ═══
+(function(){
+  var GRX={list:null, id:null, d:null, inv:null, legacy:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function money(n){ return '$'+Math.round(Number(n)||0).toLocaleString(); }
+  function done(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'||s==='complete'; }
+  function ring(pct,label,color){
+    var r=46,c=2*Math.PI*r,off=c*(1-pct/100);
+    return '<div class="grx-ring"><svg width="110" height="110"><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="rgba(41,25,66,.07)" stroke-width="9"/><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'"/></svg><div class="grx-ringn"><span>'+pct+(label==='%'?'%':'')+'</span>'+(label&&label!=='%'?'<span class="grx-ringl">'+esc(label)+'</span>':'')+'</div></div>';
+  }
+  function ensureRoot(){
+    var page=document.getElementById('page-growth'); if(!page) return null;
+    var root=document.getElementById('grxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._grxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='grxRoot'; root.style.maxWidth='1180px';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+  window.grxClassic=function(){
+    var page=document.getElementById('page-growth'); if(!page) return;
+    Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._grxHidden) ch.style.display=''; });
+    var r=document.getElementById('grxRoot'); if(r) r.style.display='none';
+    GRX.legacy=true;
+    try{ loadGrowthLegacy&&loadGrowthLegacy(); }catch(e){}
+    toast('Classic view \u2014 refresh to return to the new Growth page');
+  };
+
+  async function grxLoad(){
+    var root=ensureRoot(); if(!root||GRX.legacy) return;
+    if(GRX.id) return grxOpen(GRX.id);
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:80px;width:100%;border-radius:16px;"></div>';
+    try{ GRX.list=(await gpApi('partnership_list')).data||[]; }catch(e){ GRX.list=[]; }
+    var rows=GRX.list;
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Growth &amp; Partnerships</div>'
+      +'<div class="ibx-sub">Your shared roadmap for long-term growth.</div></div>'
+      +'<span style="flex:1;"></span><button class="ibx-tab" onclick="grxClassic()">Classic view \u2192</button></div>'
+      +(rows.length?rows.map(function(p){
+        return '<div class="rhx-row" onclick="grxOpen(\''+att(String(p.id))+'\')">'
+          +'<div class="rhx-av">'+esc((p.client_name||p.name||'?').charAt(0).toUpperCase())+'</div>'
+          +'<div class="rhx-col" style="flex:1.4;"><div class="rhx-nm">'+esc(p.client_name||p.name||'Partnership')+'</div><div class="rhx-svc">'+esc(p.plan_label||'Growth partnership')+'</div></div>'
+          +'<span class="ibx-chip" style="'+(String(p.status||'').toLowerCase()==='active'?'color:#0e7a6e;background:#e4f5f2;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc((p.status||'active').toUpperCase())+'</span>'
+          +'<div class="rhx-col"><div class="rhx-kn">'+(p.monthly_amount?money(p.monthly_amount)+'/mo':'\u2014')+'</div><div class="rhx-kl">MRR</div></div>'
+          +'<button class="rhx-open" onclick="event.stopPropagation();grxOpen(\''+att(String(p.id))+'\')">Open partnership \u2192</button>'
+        +'</div>';
+      }).join('')
+      :'<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">No partnerships yet \u2014 start one from a client in the <a href="#" onclick="go(\'clients\');return false;" style="color:var(--p);">Relationship Hub</a>, or use the classic view\u2019s New partnership flow.</div>');
+  }
+
+  window.grxBack=function(){ GRX.id=null; GRX.d=null; grxLoad(); };
+
+  window.grxOpen=async function(id){
+    var root=ensureRoot(); if(!root) return;
+    GRX.id=id;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:180px;width:100%;border-radius:16px;"></div>';
+    var d=null;
+    try{ d=(await gpApi('partnership_get',{id:id})).data; }catch(e){}
+    if(!d||!d.partnership){ root.innerHTML='<div class="ibx-sub" style="margin-top:20px;">Couldn\u2019t load this partnership. <button class="ibx-pill" onclick="grxBack()">\u2190 Back</button></div>'; return; }
+    GRX.d=d;
+    var p=d.partnership;
+    // invoices health for the ✓-list (real)
+    try{ GRX.inv=await api('invoices?client_id=eq.'+encodeURIComponent(p.client_id)+'&select=status,due_date,paid_at&deleted_at=is.null&limit=100'); }catch(e){ GRX.inv=null; }
+    grxDetail();
+  };
+
+  function grxDetail(){
+    var root=document.getElementById('grxRoot'); var d=GRX.d; if(!root||!d) return;
+    var p=d.partnership;
+    var goals=d.goals||[], tasks=d.tasks||[], wins=(d.work_log||[]), recs=d.recommendations||[], reviews=d.reviews||[];
+    var tDone=tasks.filter(done).length, tTot=tasks.length;
+    var pct=tTot?Math.round(tDone/tTot*100):(goals.length?Math.round(goals.filter(done).length/goals.length*100):0);
+    var gOn=goals.filter(function(g){ var s=String(g.status||'').toLowerCase(); return s!=='paused'&&s!=='blocked'; }).length;
+    var overdueInv=(GRX.inv||[]).filter(function(i){ if(String(i.status||'').toLowerCase()==='paid') return false; var t=null; try{ t=invcDue(i.due_date); }catch(e){} return t!=null&&t<Date.now(); }).length;
+
+    // health — disclosed signals
+    var hs=60, oks=[];
+    if(String(p.status||'').toLowerCase()==='active'){ hs+=10; oks.push('Partnership active'); }
+    if(!overdueInv&&(GRX.inv||[]).length){ hs+=10; oks.push('Invoices up to date'); } else if(overdueInv){ hs-=15; oks.push(overdueInv+' invoice'+(overdueInv===1?'':'s')+' overdue'); }
+    if(tDone){ hs+=10; oks.push(tDone+' of '+tTot+' tasks completed'); }
+    if(wins.length){ hs+=8; oks.push('Recent delivered work on record'); }
+    hs=Math.max(10,Math.min(98,hs));
+    var hl=hs>=85?['Excellent','#1a7e49']:hs>=70?['Healthy','#1a7e49']:hs>=50?['Steady','#9a7a1a']:['Needs attention','#c0392b'];
+
+    var sent = pct>=60 ? 'This partnership is on track \u2014 '+tDone+' of '+tTot+' tasks delivered and the roadmap is moving.'
+      : (tTot? 'Foundation work is underway \u2014 '+tDone+' of '+tTot+' tasks complete. The focus below is where momentum builds next.'
+      : 'The roadmap is being drawn \u2014 goals below, first tasks to follow.');
+
+    // current focus: first non-done goal + its open tasks (unlinked tasks shown under it honestly)
+    var focus=goals.find(function(g){ return !done(g); })||goals[0]||null;
+    var openTasks=tasks.filter(function(t){ return !done(t); }).slice(0,4);
+    var doneTasks=tasks.filter(done).slice(0,3);
+
+    var goalRows=goals.length?goals.map(function(g){
+      var gp2=(g.progress!=null&&isFinite(Number(g.progress)))?Math.max(0,Math.min(100,Number(g.progress))):null;
+      var st=String(g.status||'active');
+      return '<div class="grx-goal"><div class="grx-gt">'+esc(g.title||g.name||'Goal')+'</div>'
+        +(gp2!=null?('<div class="grx-track"><div class="grx-fill" style="width:'+gp2+'%;"></div></div><b style="font-size:12.5px;min-width:36px;text-align:right;">'+gp2+'%</b>')
+          :('<span class="grx-chip" style="'+(done(g)?'color:#1a7e49;background:#e7f6ee;':'color:#5b3fa0;background:rgba(91,63,160,.08);')+'">'+esc(done(g)?'Complete':st.replace(/_/g,' '))+'</span>'))
+        +(g.target?'<span style="font-size:11px;color:var(--muted);white-space:nowrap;">'+esc(String(g.target).slice(0,26))+'</span>':'')
+      +'</div>';
+    }).join(''):'<div style="font-size:12.5px;color:var(--muted);">No goals set yet \u2014 add them in Classic view and they render here.</div>';
+
+    var nextRev=reviews.map(function(r){ return r.due_date||r.date||r.scheduled_for||r.created_at; }).filter(Boolean).sort()[0];
+
+    var main=
+      '<div class="grx-card"><div class="grx-h">Partnership progress</div>'
+        +'<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">'+ring(pct,'%','#1a7e49')
+        +'<div style="flex:1;min-width:200px;">'
+          +'<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:8px;">'+esc(sent)+'</div>'
+          +(goals.length?'<div class="grx-b">'+gOn+' of '+goals.length+' goals moving</div>':'')
+          +(tTot?'<div class="grx-b">'+tDone+' of '+tTot+' tasks completed</div>':'')
+          +(!overdueInv&&(GRX.inv||[]).length?'<div class="grx-b">Invoices current</div>':'')
+        +'</div></div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Business goals</div>'+goalRows+'</div>'
+      +(focus?('<div class="grx-focus"><div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--p);">CURRENT FOCUS</div>'
+        +'<div style="font-family:\'Fraunces\',serif;font-size:20px;font-weight:650;color:var(--ink);margin-top:6px;">'+esc(focus.title||focus.name||'This phase')+'</div>'
+        +(focus.target?'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;">Target: '+esc(focus.target)+'</div>':'')
+        +'<div style="margin-top:10px;">'
+          +doneTasks.map(function(t){ return '<div class="grx-task">\u2713 '+esc(t.title||'Task')+'<span class="grx-chip" style="color:#1a7e49;background:#e7f6ee;">Completed</span></div>'; }).join('')
+          +openTasks.map(function(t){ return '<div class="grx-task">\u2192 '+esc(t.title||'Task')+'<span class="grx-chip" style="color:#5b3fa0;background:rgba(91,63,160,.12);">'+esc(String(t.status||'In progress').replace(/_/g,' '))+'</span></div>'; }).join('')
+          +(!tTot?'<div style="font-size:12.5px;color:var(--muted);">Tasks for this phase land here as they\u2019re added.</div>':'')
+        +'</div></div>'):'')
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Recent wins</div>'
+        +(wins.length?('<div class="grx-wins">'+wins.slice(0,4).map(function(w){
+          return '<div class="grx-win"><div class="grx-wt">\u2713 '+esc(w.title||w.summary||w.description||'Delivered work')+'</div><div class="grx-wd">'+esc(agoS(w.created_at||w.date))+'</div></div>';
+        }).join('')+'</div>'):'<div style="font-size:12.5px;color:var(--muted);">Wins appear here as work is logged \u2014 momentum you can point at.</div>')
+      +'</div>'
+      +'<div class="grx-ai">\u2726 <b style="font-weight:700;">AI Insight</b><span style="flex:1;min-width:200px;">'
+        +esc(pct>=60?'This partnership is performing \u2014 a good moment to discuss the next phase of the roadmap.':(tDone?'Steady progress this period. The current focus above is where the next visible win comes from.':'The plan is set; the first completed tasks will start the momentum story.'))
+        +'</span><button class="bf-act primary" onclick="grxUpdate()">Draft the update \u2192</button></div>';
+
+    var rail=
+      '<div class="grx-card"><div class="grx-h">Partnership health</div>'
+        +'<div style="display:flex;gap:16px;align-items:center;">'+ring(hs,hl[0],hl[1])
+        +'<div style="flex:1;">'+oks.map(function(o){ return '<div class="grx-ok">'+esc(o)+'</div>'; }).join('')+'</div></div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Score is a formula over these real signals \u2014 nothing hidden.</div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Next up</div>'
+        +(nextRev?'<div class="grx-ok">Review \u00b7 '+esc(agoS(nextRev)||String(nextRev).slice(0,10))+'</div>':'')
+        +(openTasks[0]?'<div class="grx-ok" style="opacity:.9;">'+esc(openTasks[0].title||'Next task')+'</div>':'')
+        +'<div class="grx-ok" style="opacity:.9;">Monthly update to '+esc(p.client_name||'the client')+'</div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Recommended opportunities</div>'
+        +(recs.length?recs.slice(0,3).map(function(r,ix){
+          return '<div class="grx-opp" onclick="grxRec('+ix+')"><div style="font-size:13px;font-weight:700;color:var(--ink);">'+esc(r.title||r.name||'Opportunity')+'</div>'
+            +'<div style="font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5;">'+esc(String(r.why||r.body||r.impact||'').slice(0,110))+'</div>'
+            +'<div style="font-size:11.5px;color:var(--p);font-weight:600;margin-top:6px;">Discuss \u2192</div></div>';
+        }).join('')
+        :'<div style="font-size:12.5px;color:var(--muted);">No recommendations queued. The engine adds them as it learns this business \u2014 or add one in Classic view.</div>')
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Internal <span style="font-weight:400;font-size:10.5px;color:var(--muted);">Eric only</span></div>'
+        +'<div class="rhx-kv"><span>MRR</span><b>'+(p.monthly_amount?money(p.monthly_amount)+'/mo':'\u2014')+'</b></div>'
+        +(p.monthly_amount?'<div class="rhx-kv"><span>12-month value</span><b>'+money(Number(p.monthly_amount)*12)+'</b></div>':'')
+        +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">= MRR \u00d7 12. Never shown to the client.</div>'
+      +'</div>';
+
+    root.innerHTML=
+      '<button class="iabtn" style="color:var(--muted);font-size:12.5px;" onclick="grxBack()">\u2190 Back to partnerships</button>'
+      +'<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-top:6px;"><div><div class="pt">Growth &amp; Partnerships</div>'
+      +'<div class="ibx-sub">Your shared roadmap for long-term growth.</div></div>'
+      +'<span style="flex:1;"></span><button class="ibx-tab" onclick="grxClassic()">Classic view \u2192</button></div>'
+      +'<div class="grx-band">'
+        +'<div class="rhx-av" style="width:48px;height:48px;font-size:17px;">'+esc((p.client_name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div><div class="rhx-nm" style="font-size:16px;">'+esc(p.client_name||p.name||'Partnership')+'</div><div class="rhx-svc">'+esc(p.plan_label||'Growth partner')+'</div></div>'
+        +'<div><div class="grx-meta">Partnership since</div><div class="grx-metav">'+esc(agoS(p.created_at)||'\u2014')+'</div></div>'
+        +'<div><div class="grx-meta">Plan</div><div class="grx-metav">'+esc(p.plan_label||'\u2014')+'</div></div>'
+        +(nextRev?'<div><div class="grx-meta">Next review</div><div class="grx-metav">'+esc(String(nextRev).slice(0,10))+'</div></div>':'')
+        +'<span style="flex:1;"></span><span class="ibx-chip" style="'+(String(p.status||'').toLowerCase()==='active'?'color:#0e7a6e;background:#e4f5f2;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc((p.status||'active').toUpperCase())+'</span>'
+      +'</div>'
+      +'<div class="grx-grid"><div>'+main+'</div><div>'+rail+'</div></div>';
+  }
+
+  window.grxRec=function(ix){
+    var d=GRX.d; if(!d) return;
+    var r=(d.recommendations||[])[ix]; var p=d.partnership;
+    ddsDraftAction({ subject:p.client_name||'the client', subjectId:String(p.client_id||''), signal:'growth_recommendation', module:'Growth',
+      action:'Discuss '+(r&&(r.title||r.name)||'this opportunity')+' with '+(p.client_name||'them'),
+      why:(r&&(r.why||r.body))||'a consultative next step, framed around their business outcome',
+      changed:'From their growth roadmap', go:'growth', refId:String(GRX.id||''), email:d.client_email||'' });
+  };
+  window.grxUpdate=function(){
+    var d=GRX.d; if(!d) return; var p=d.partnership;
+    var tDone=(d.tasks||[]).filter(function(t){var s=String(t.status||'').toLowerCase();return s==='done'||s==='completed'||s==='complete';}).length;
+    ddsDraftAction({ subject:p.client_name||'the client', subjectId:String(p.client_id||''), signal:'value_recap', module:'Growth',
+      action:'Send '+(p.client_name||'them')+' this month\u2019s partnership update',
+      why:'a short recap of delivered work is the strongest retention message there is',
+      changed:tDone+' tasks completed \u00b7 recent wins on record', go:'growth', refId:String(GRX.id||''), email:d.client_email||'' });
+  };
+
+  window.loadGrowthLegacy=window.loadGrowth;
+  window.loadGrowth=grxLoad;
+})();
+</script>
 </body>
 </html>
