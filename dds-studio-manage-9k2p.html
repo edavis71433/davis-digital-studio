@@ -1169,7 +1169,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <div class="card">
           <div class="ch"><div class="ct">📃 Contract Template</div></div>
           <div class="cb">
-            <div class="fg"><label class="fl">Contract title</label><input aria-label="Cttitle" class="fi" id="ctTitle" value="Davis Digital Studio — Project Agreement"></div>
+            <div class="fg"><label class="fl">Contract title <span id="ctVersion" style="font-weight:400;color:var(--muted);font-size:11px;margin-left:8px;"></span></label><input aria-label="Cttitle" class="fi" id="ctTitle" value="Davis Digital Studio — Project Agreement"></div>
             <div class="fg"><label class="fl">Contract body</label><textarea aria-label="Ctbody" class="fi" id="ctBody" rows="14" style="font-size:12px;line-height:1.7;"></textarea></div>
             <div style="display:flex;gap:10px;margin-top:6px;">
               <button class="sbtn" onclick="saveContract()">Save template</button>
@@ -1757,7 +1757,7 @@ function showAdminApp() {
   document.getElementById("loginWrap").style.display = "none";
   document.getElementById("adminWrap").style.display = "block";
   loadOverview();
-  document.getElementById("ctBody").value = localStorage.getItem("dds_contract") || DEFAULT_CONTRACT;
+  loadContractDoc();
   try { if (typeof loadAdvanceStageProjects === 'function') loadAdvanceStageProjects(); } catch (e) {}
 }
 
@@ -3497,6 +3497,13 @@ async function api(path, method, body) {
       }
       return null;
     }
+    // Verified writes: PostgREST returns the affected rows. An update/delete
+    // that matched ZERO rows "succeeds" while changing nothing — the exact
+    // shape of the silent bugs this platform has produced. Surface it.
+    if ((m === "PATCH" || m === "DELETE") && Array.isArray(j.data) && j.data.length === 0 && typeof toast === "function") {
+      toast("⚠ No records matched — nothing was actually changed.");
+      console.warn("api: zero-row " + m + " on", path);
+    }
     return j.data;
   } catch (e) {
     console.error("api fetch failed:", e);
@@ -3634,6 +3641,61 @@ async function loadBrief(){
   }finally{
     BRIEF.loading=false;
   }
+  loadTodayVitals(); // revenue + system health cards render below The Brief
+}
+
+// ── TODAY VITALS: revenue at a glance + system health. Appended below The
+// Brief so the morning read ends with money and whether anything broke. ──
+async function loadTodayVitals(){
+  var root=document.getElementById('briefRoot');
+  if(!root) return;
+  var wrap=document.getElementById('todayVitals');
+  if(!wrap){ wrap=document.createElement('div'); wrap.id='todayVitals'; wrap.style.cssText='margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;'; root.parentNode.insertBefore(wrap, root.nextSibling); }
+  wrap.innerHTML='<div class="bf-skel" style="height:120px;border-radius:16px;"></div><div class="bf-skel" style="height:120px;border-radius:16px;"></div>';
+  var money=function(n){ return '$'+(Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}); };
+  try{
+    var jwt=await adminJwt(); if(!jwt){ wrap.innerHTML=''; return; }
+    var call=function(type){ return fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:type})}).then(function(r){return r.json();}); };
+    var res=await Promise.all([call('revenue_vitals'), call('ops_errors_list')]);
+    var rv=(res[0]&&res[0].data)||null, ops=(res[1]&&res[1].data)||null;
+    var html='';
+    if(rv){
+      var fc=(rv.forecast&&rv.forecast.months)||[];
+      html+='<div style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;padding:18px;">'
+        +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--p);margin-bottom:12px;">Revenue</div>'
+        +'<div style="display:flex;gap:22px;flex-wrap:wrap;">'
+        +'<div><div style="font-size:22px;font-weight:600;color:var(--ink);">'+money(rv.collectedThisMonth)+'</div><div style="font-size:11px;color:var(--muted);">collected this month</div></div>'
+        +'<div><div style="font-size:22px;font-weight:600;color:'+(rv.outstanding>0?'#a96a00':'var(--ink)')+';">'+money(rv.outstanding)+'</div><div style="font-size:11px;color:var(--muted);">outstanding'+(rv.over30>0?' · '+money(rv.over30)+' 30d+':(rv.over7>0?' · '+money(rv.over7)+' 7d+':''))+'</div></div>'
+        +'<div><div style="font-size:22px;font-weight:600;color:var(--ink);">'+money(rv.recurring)+'<span style="font-size:12px;color:var(--muted);">/mo</span></div><div style="font-size:11px;color:var(--muted);">recurring base</div></div>'
+        +'</div>'
+        +(fc.length?('<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,63,160,0.08);font-size:12px;color:var(--muted);">Next 3 months on current commitments: '+fc.map(function(mm){return mm.label+' '+money(mm.projected);}).join(' · ')+(rv.outstanding>0?' <span style="color:#a96a00;">(+'+money(rv.outstanding)+' if outstanding collects)</span>':'')+'</div>'):'')
+        +'</div>';
+    }
+    if(ops){
+      var n=Number(ops.last24)||0;
+      var recent=(ops.errors||[]).slice(0,4);
+      html+='<div style="background:#fff;border:1px solid '+(n>0?'rgba(192,57,43,0.3)':'rgba(91,63,160,0.12)')+';border-radius:16px;padding:18px;">'
+        +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:'+(n>0?'#c0392b':'var(--p)')+';margin-bottom:12px;">System health '+(n>0?'<span style="display:inline-block;width:8px;height:8px;background:#c0392b;border-radius:50%;margin-left:6px;"></span>':'')+'</div>'
+        +(n===0
+          ? '<div style="font-size:14px;color:var(--ink);">All quiet. No server errors in the last 24 hours.</div>'
+          : '<div style="font-size:14px;color:var(--ink);margin-bottom:10px;">'+n+' error'+(n===1?'':'s')+' in the last 24 hours:</div>'
+            + recent.map(function(e){ return '<div style="font-size:11.5px;color:var(--muted);padding:3px 0;border-top:1px solid rgba(0,0,0,0.04);"><strong style="color:#c0392b;">'+escHtml(e.kind)+'</strong> · '+escHtml(String(e.detail||'').slice(0,90))+'</div>'; }).join(''))
+        +'</div>';
+    }
+    wrap.innerHTML=html || '';
+  }catch(e){ wrap.innerHTML=''; }
+}
+
+// Suppress an opted-out prospect: server refuses all future sends to them.
+async function markOptedOut(prospectId, email){
+  if(!confirm('Mark '+email+' as opted out? The system will permanently refuse to send outreach to this address.')) return;
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'suppress_email',op:'add',email:email,source:'manual'})});
+    var j=await r.json();
+    if(j&&j.ok){ toast('✓ '+email+' opted out — sends to this address are now blocked.'); try{ await api('prospects?id=eq.'+prospectId,'PATCH',{status:'Opted out'}); }catch(e){} try{ loadProspects(); }catch(e){} }
+    else{ toast('Could not save opt-out: '+((j&&j.error)||'unknown')); }
+  }catch(e){ toast('Could not save opt-out: '+e.message); }
 }
 
 // ── loading: a skeleton that mirrors the final shape, never a blank spinner ──
@@ -4682,19 +4744,49 @@ async function delInvoice(id) {
   if (ctx) await loadInvoices(ctx);
 }
 
-// ── CONTRACTS ──
-function saveContract() {
-  localStorage.setItem("dds_contract", document.getElementById("ctBody").value);
-  localStorage.setItem("dds_contract_title", document.getElementById("ctTitle").value);
-  toast("✓ Contract saved");
+// ── CONTRACTS — single source of truth is the studio_documents table.
+// The editor reads/writes the SERVER copy, which is the same copy the client
+// portal renders. Saving here changes what clients see and sign, versioned.
+// localStorage is retired: it let a stale browser copy mask the real document.
+async function loadContractDoc() {
+  try {
+    var jwt = await adminJwt(); if (!jwt) return;
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type: "contract_get" })
+    });
+    var j = await r.json();
+    if (j && j.data && j.data.body) {
+      document.getElementById("ctBody").value = j.data.body;
+      if (j.data.title) document.getElementById("ctTitle").value = j.data.title;
+      var vEl = document.getElementById("ctVersion");
+      if (vEl) vEl.textContent = "v" + j.data.version + " · saved " + new Date(j.data.updated_at).toLocaleDateString();
+    } else {
+      document.getElementById("ctBody").value = DEFAULT_CONTRACT;
+    }
+  } catch(e) { document.getElementById("ctBody").value = DEFAULT_CONTRACT; }
+  localStorage.removeItem("dds_contract"); localStorage.removeItem("dds_contract_title");
+}
+async function saveContract() {
+  var body = document.getElementById("ctBody").value;
+  var title = document.getElementById("ctTitle").value;
+  if (!confirm("Save this as the LIVE agreement? Clients will see and sign this exact text in their portal.")) return;
+  try {
+    var jwt = await adminJwt(); if (!jwt) { showLogin(); return; }
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type: "contract_save", title: title, body: body })
+    });
+    var j = await r.json();
+    if (j && j.ok) { toast("✓ Contract saved as v" + j.version + " — this is now what clients sign."); var vEl=document.getElementById("ctVersion"); if(vEl) vEl.textContent="v"+j.version+" · just saved"; }
+    else { toast("Could not save: " + ((j && (j.error||"")) || "unknown")); }
+  } catch(e) { toast("Could not save: " + e.message); }
 }
 function resetContract() {
-  if (!confirm("Reset to default?")) return;
+  if (!confirm("Load the built-in default into the editor? (Nothing is saved until you click Save.)")) return;
   document.getElementById("ctBody").value = DEFAULT_CONTRACT;
   document.getElementById("ctTitle").value = "Davis Digital Studio — Project Agreement";
-  localStorage.removeItem("dds_contract");
-  localStorage.removeItem("dds_contract_title");
-  toast("Reset to default");
+  toast("Default loaded into editor — click Save to make it live");
 }
 async function pushContract() {
   var ctx = selectedClients["contracts"];
@@ -5568,6 +5660,7 @@ function renderCaseFile(p, cf) {
     '<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'+
       '<button onclick="openOutreach(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg> Send email</button>'+
       '<button onclick="analyzeProspect(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid var(--p);background:rgba(91,63,160,0.06);color:var(--p);cursor:pointer;">✨ Analyze prospect</button>'+
+      (p.email ? '<button onclick="markOptedOut(\''+p.id+'\',\''+String(p.email).replace(/'/g,"\\'")+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid rgba(192,57,43,0.35);background:rgba(192,57,43,0.05);color:#c0392b;cursor:pointer;margin-left:8px;">Mark opted out</button>' : '')+
       '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete prospect</button>'+
     '</div>'+
     '<div id="pai-'+p.id+'"></div>'+

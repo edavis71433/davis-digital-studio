@@ -1314,6 +1314,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
               <textarea aria-label="Message Eric..." class="msg-input" id="msgInput" placeholder="Message Eric..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
               <button class="msg-send" id="msgSend" onclick="sendMsg()">Send</button>
             </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;">Eric typically replies within one business day.</div>
           </div>
         </div>
       </div>
@@ -1352,8 +1353,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
           <div class="card-body" id="projectSummaryBody" style="font-size:13px;color:var(--muted);line-height:1.9;"></div>
         </div>
         <div class="card" style="margin-bottom:16px;">
-          <div class="card-header"><div class="card-title">📃 Davis Digital Studio — Project Agreement</div></div>
-          <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.9;">
+          <div class="card-header"><div class="card-title" id="contractCardTitle">📃 Davis Digital Studio — Project Agreement</div></div>
+          <div class="card-body" id="contractBodyText" style="font-size:13px;color:var(--muted);line-height:1.9;">
 
                         <p style="margin-bottom:12px;">This Project Agreement ("Agreement") is entered into between Davis Digital Studio ("Studio") and the client identified in the project portal ("Client") (individually and collectively referred to as "Party" or "Parties"). By signing this Agreement in the client portal, Client agrees to be bound by its terms.</p>
                         <p style="margin-bottom:12px;"><strong style="color:var(--ink);">1. SCOPE OF WORK</strong><br>Studio agrees to provide web design, search engine optimization (SEO) strategy, and related digital services as described in the project proposal or scope of work document provided to Client. The proposal specifies the exact page count and deliverables included in the project.<br><br>Included copywriting: Clear, SEO-aware website copy for the number of core pages stated in the proposal (typically up to seven (7) pages for a custom build, such as Home, About, Services, Contact, and related core pages). Copy is written from the Client's intake questionnaire, existing materials, and the discovery conversation.<br><br>Copywriting quoted separately: Blog posts or article programs, long-form sales pages, product descriptions for e-commerce catalogs, email or advertising campaigns, scripts, customer-interview-based case studies, and substantial rewrites of Client-supplied copy beyond light editing.<br><br>Any services, features, or deliverables not expressly included in the agreed scope constitute "out-of-scope work" and will be quoted separately in writing before proceeding. Studio reserves the right to decline out-of-scope requests.</p>
@@ -3230,6 +3231,48 @@ async function loadBriefState() {
   renderActionItems();
 }
 
+// ── Live contract: the portal renders the SAME document the admin editor
+// saves (studio_documents.client_contract). The hardcoded copy below in the
+// HTML remains as the fallback if the server copy doesn't exist or the fetch
+// fails — the client must never see an empty agreement.
+var CONTRACT_VERSION = null;
+function _renderContractText(plain) {
+  // Plain text -> the portal's styled paragraphs. Section headers are lines
+  // like "12. TERMINATION & KILL FEE"; blank lines separate paragraphs.
+  var esc = function(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var blocks = String(plain).replace(/\r\n?/g,'\n').split(/\n{2,}/);
+  var html = '';
+  blocks.forEach(function(b){
+    b = b.trim(); if (!b) return;
+    var m = b.match(/^(\d+\.\s+[A-Z][^\n]*)\n?([\s\S]*)$/);
+    if (m && m[1] === m[1].toUpperCase()) {
+      var rest = m[2] ? esc(m[2]).replace(/\n/g,'<br>') : '';
+      html += '<p style="margin-bottom:12px;"><strong style="color:var(--ink);">'+esc(m[1].trim())+'</strong>'+(rest?'<br>'+rest:'')+'</p>';
+    } else {
+      html += '<p style="margin-bottom:12px;">'+esc(b).replace(/\n/g,'<br>')+'</p>';
+    }
+  });
+  return html;
+}
+async function loadLiveContract() {
+  try {
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SB_KEY },
+      body: JSON.stringify({ type: "contract_get" })
+    });
+    var j = await r.json();
+    if (j && j.data && j.data.body && j.data.body.trim().length > 100) {
+      var el = document.getElementById("contractBodyText");
+      if (el) el.innerHTML = _renderContractText(j.data.body);
+      var t = document.getElementById("contractCardTitle");
+      if (t && j.data.title) t.textContent = "📃 " + j.data.title;
+      CONTRACT_VERSION = j.data.version || null;
+    }
+  } catch (e) { /* fallback: the built-in copy already rendered */ }
+}
+loadLiveContract();
+
 async function acknowledgeContract() {
   if (!document.getElementById("contractCheck").checked) {
     showToast("Please check the box to acknowledge the agreement.");
@@ -3238,7 +3281,9 @@ async function acknowledgeContract() {
   var nowIso = new Date().toISOString();
   var date = new Date().toLocaleDateString("en-US", {month:"long",day:"numeric",year:"numeric"});
   // Save to database first (source of truth for this legal record).
-  var { error } = await sb.from("clients").update({contract_acked_at: nowIso}).eq("id", CLIENT.id);
+  var ackPatch = { contract_acked_at: nowIso };
+  if (CONTRACT_VERSION != null) ackPatch.contract_version = CONTRACT_VERSION; // which text they agreed to
+  var { error } = await sb.from("clients").update(ackPatch).eq("id", CLIENT.id);
   if (error) { showToast("Couldn't save right now — please try again."); return; }
   CLIENT.contract_acked_at = nowIso;
   window._contractDone = true;
