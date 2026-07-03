@@ -13127,7 +13127,7 @@ function anEngineNote(eng){
 .fsx-card{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s, box-shadow .15s;}
 .fsx-card:hover{border-color:rgba(91,63,160,.3);box-shadow:0 2px 12px rgba(41,25,66,.06);}
 .fsx-card.on{border-color:var(--p);}
-.fsx-th{height:110px;background:rgba(91,63,160,.05);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--p);overflow:hidden;}
+.fsx-th{position:relative;height:110px;background:rgba(91,63,160,.05);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--p);overflow:hidden;}
 .fsx-th img{width:100%;height:100%;object-fit:cover;}
 .fsx-fb{padding:10px 12px;}
 .fsx-fn{font-size:12.5px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -13182,6 +13182,10 @@ function anEngineNote(eng){
     FSX.rows=r[0]||[];
     FSX.clients=(r[1]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
     FSX.loaded=true;
+    if(FSX.pubOk===undefined){
+      var probe=FSX.rows.find(function(x){ return x.url&&typeOf(x)==='img'; });
+      if(probe){ try{ var pr=await fetch(probe.url,{method:'HEAD'}); FSX.pubOk=pr.ok; }catch(e){ FSX.pubOk=false; } }
+    }
     fsxRender();
   }
 
@@ -13254,9 +13258,14 @@ function anEngineNote(eng){
       }).join('')
     +'</div>';
 
+    var bucketNote=(FSX.pubOk===false)
+      ? '<div style="font-size:12.5px;color:var(--muted);margin-top:10px;">Previews and Open links can\u2019t load \u2014 the <b>client-files</b> bucket isn\u2019t public. Supabase \u2192 Storage \u2192 client-files \u2192 make bucket public, refresh, and thumbnails appear. (Or ask for the signed-URL upgrade to keep it private.)</div>'
+      : '';
     var cards=list.length?('<div class="fsx-cards">'+list.slice(0,60).map(function(f){
       var t=typeOf(f);
-      var th=(t==='img'&&f.url)?('<img src="'+att(f.url)+'" alt="" loading="lazy">'):iconOf(t);
+      var th=(t==='img'&&f.url&&FSX.pubOk!==false)
+        ? ('<span style="position:absolute;">'+iconOf(t)+'</span><img src="'+att(f.url)+'" alt="" loading="lazy" style="position:relative;" onerror="this.style.display=\'none\'">')
+        : iconOf(t);
       return '<div class="fsx-card'+(FSX.sel===String(f.id)?' on':'')+'" onclick="fsxSel(\''+att(String(f.id))+'\')">'
         +'<div class="fsx-th">'+th+'</div>'
         +'<div class="fsx-fb"><div class="fsx-fn">'+esc(f.name||'File')+'</div>'
@@ -13271,7 +13280,7 @@ function anEngineNote(eng){
     if(f){
       var t=typeOf(f);
       rail='<div class="grx-card"><div class="grx-h">File details</div>'
-        +'<div class="fsx-prev">'+((t==='img'&&f.url)?('<img src="'+att(f.url)+'" alt="">'):iconOf(t))+'</div>'
+        +'<div class="fsx-prev" style="position:relative;">'+((t==='img'&&f.url&&FSX.pubOk!==false)?('<span style="position:absolute;">'+iconOf(t)+'</span><img src="'+att(f.url)+'" alt="" style="position:relative;" onerror="this.style.display=\'none\'">'):iconOf(t))+'</div>'
         +'<div style="font-size:14.5px;font-weight:700;color:var(--ink);">'+esc(f.name||'File')+'</div>'
         +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+'</div>'
         +(f.url?'<a class="bf-act primary" style="display:inline-block;text-decoration:none;margin-top:12px;" target="_blank" rel="noopener" href="'+att(f.url)+'">Open \u2197</a>':'')
@@ -13294,6 +13303,7 @@ function anEngineNote(eng){
       +'<span style="flex:1;"></span><button class="bf-act primary" onclick="fsxPick()">\u2913 Upload</button></div>'
       +stats
       +chips
+      +bucketNote
       +'<div class="fsx-grid">'+side+'<div>'+cards+'</div><div>'+rail+'</div></div>';
   }
 
