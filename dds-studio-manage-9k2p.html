@@ -3894,7 +3894,7 @@ function bfDraftFromBrief(refId){
 // an item is "draftable" when its next move is a communication. The engine's
 // actions are overwhelmingly comms (reply, nudge, follow up, pitch, check in),
 // so we offer Draft it whenever the signal is one the Actions route can phrase.
-var BF_DRAFT_SIGNALS = { revenue_at_risk:1, waiting_on_eric:1, churn_risk:1, review_due:1, renewal_window:1, blocked_approval:1, high_opportunity:1, proposal_stale:1 };
+var BF_DRAFT_SIGNALS = { revenue_at_risk:1, waiting_on_eric:1, churn_risk:1, review_due:1, renewal_window:1, blocked_approval:1, high_opportunity:1, proposal_stale:1, expansion_fit:1, care_plan_gap:1 };
 function bfActionable(it){ return !!(it && (it.canDraft || (it.signal && BF_DRAFT_SIGNALS[it.signal]))); }
 function bfDraftItem(ref){
   var d=BRIEF.data; if(!d) return;
@@ -3924,7 +3924,7 @@ function ddsDraftAction(item){
   if(!item) return;
   item = (typeof item === 'string') ? { action:item } : item;
   // billing/proposal/review/opportunity reads as email; quick replies as message
-  var emailSignals = { revenue_at_risk:1, proposal_stale:1, renewal_window:1, review_due:1, high_opportunity:1 };
+  var emailSignals = { revenue_at_risk:1, proposal_stale:1, renewal_window:1, review_due:1, high_opportunity:1, expansion_fit:1, care_plan_gap:1 };
   var channel = emailSignals[item.signal] ? 'email' : 'message';
   ddsOpenComposer(item, channel);
 }
@@ -4016,7 +4016,9 @@ async function loadOpportunities(){
   OPP.loading=true;
   oppRenderSkeleton(root);
   try{
-    var r=await integApi('reasoning_query',{question:'strongest_opportunity'});
+    // ask the brain for EVERY open opportunity — inbound audits AND expansion
+    // openings on existing clients — ranked together by the deterministic engine.
+    var r=await integApi('reasoning_query',{question:'all_opportunities'});
     OPP.data=(r&&r.data)||null;
     oppRender(root, OPP.data);
   }catch(e){
@@ -4078,34 +4080,71 @@ function oppRender(root, d){
     return;
   }
 
+  // Two kinds of opportunity now flow through here. Split them because the
+  // action differs: "grow existing" is a warm client you offer a service to;
+  // "new inbound" is a stranger who raised a hand and you open a conversation.
+  var GROW = { expansion_fit:1, care_plan_gap:1 };
+  var grow = items.filter(function(it){ return GROW[it.signal]; });
+  var inbound = items.filter(function(it){ return !GROW[it.signal]; });
+
+  // stash the current items so the one-click Draft button can find its item by id
+  OPP.byId = {};
+  items.forEach(function(it){ OPP.byId[it.subjectId||it.refId||it.id] = it; });
+
   var top=items[0];
-  var topScore=oppScore(top);
+  var topIsGrow = !!GROW[top.signal];
+  var topBtn = topIsGrow
+    ? '<button class="bf-start-btn" onclick="oppDraft(\''+escAttr(top.subjectId||top.refId)+'\')">Draft the offer \u2192</button>'
+    : '<button class="bf-start-btn" onclick="oppOpen(\''+escAttr(top.refId)+'\')">See the audit \u2192</button>';
   var startCard=
     '<div class="bf-start">'
       +'<div class="bf-start-l">Start here</div>'
       +'<div class="bf-start-row">'
         +'<div><div class="bf-start-action">'+escHtml(top.action||('Reach out to '+top.subject))+'</div>'
         +'<div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;max-width:440px;line-height:1.5;">'+escHtml(top.why||'')+'</div></div>'
-        +'<button class="bf-start-btn" onclick="oppOpen(\''+escAttr(top.refId)+'\')">See the audit \u2192</button>'
+        +topBtn
       +'</div>'
     +'</div>';
 
-  var rows=items.map(function(it){
+  // one row renderer, aware of which kind it is so the primary action fits.
+  function oppRow(it){
+    var isGrow = !!GROW[it.signal];
     var fit=oppFit(it.confidence);
     var sc=oppScore(it);
-    var scoreCol = sc
+    var idAttr = escAttr(it.subjectId||it.refId||'');
+    // grow-existing rows show impact (e.g. "recurring revenue") where inbound
+    // rows show the audit score — each surfaces the number that actually decides.
+    var leadCol = (!isGrow && sc)
       ? '<div style="text-align:center;flex:none;width:42px;"><div class="op-score" style="color:'+fit.c+';">'+escHtml(sc)+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">score</div></div>'
       : '<span class="bf-cdot" style="background:'+fit.c+';margin-top:7px;"></span>';
+    var primary = isGrow
+      ? '<button class="bf-act primary" onclick="event.stopPropagation();oppDraft(\''+idAttr+'\')">Draft the offer \u2192</button>'
+      : '<button class="bf-act" onclick="event.stopPropagation();oppOpen(\''+escAttr(it.refId)+'\')">See the audit \u2192</button>';
+    var impactTag = (isGrow && it.impact)
+      ? '<span style="font-size:10.5px;font-weight:500;color:'+fit.c+';">'+escHtml(it.impact)+'</span>'
+      : '<span style="font-size:10.5px;font-weight:500;color:'+fit.c+';">'+fit.w+'</span>';
     return '<div class="bf-row exp op-row" tabindex="0" role="button" aria-expanded="false">'
-      +scoreCol
+      +leadCol
       +'<div class="bf-rmain">'
-        +'<div class="bf-rtop"><div class="bf-subj">'+escHtml(it.subject)+'</div><span style="font-size:10.5px;font-weight:500;color:'+fit.c+';">'+fit.w+'</span></div>'
+        +'<div class="bf-rtop"><div class="bf-subj">'+escHtml(it.subject)+'</div>'+impactTag+'</div>'
         +'<div class="bf-changed">'+escHtml(it.changed||'')+'</div>'
         +'<div class="bf-why">'+escHtml(it.why||'')+'</div>'
-        +'<div class="bf-ractions"><button class="bf-act" onclick="event.stopPropagation();oppOpen(\''+escAttr(it.refId)+'\')">See the audit \u2192</button><button class="bf-whymore" onclick="event.stopPropagation();bfToggleRow(this)">why this one?</button></div>'
+        +'<div class="bf-ractions">'+primary+'<button class="bf-whymore" onclick="event.stopPropagation();bfToggleRow(this)">why this one?</button></div>'
       +'</div>'
     +'</div>';
-  }).join('');
+  }
+
+  var growSection = grow.length
+    ? '<div class="bf-secl">Grow clients you already have</div>'
+      +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 12px;line-height:1.55;">Warmer and higher-margin than cold outreach. Each one is a gap the signals already measured on a client who trusts you.</div>'
+      +grow.map(oppRow).join('')
+    : '';
+
+  var inboundSection = inbound.length
+    ? '<div class="bf-secl" style="margin-top:'+(grow.length?'28px':'0')+';">New inbound \u2014 they raised a hand</div>'
+      +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 12px;line-height:1.55;">Businesses that ran your free review and look worth your time, ranked by fit.</div>'
+      +inbound.map(oppRow).join('')
+    : '';
 
   var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[d.confidence]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
   var footer=
@@ -4121,17 +4160,30 @@ function oppRender(root, d){
   root.innerHTML =
     '<div class="bf-eyebrow">Opportunities</div>'
     +'<h1 class="bf-headline" aria-live="polite">'+escHtml(d.answer||'')+'</h1>'
-    +'<div class="bf-sub">Businesses that ran your review and look genuinely worth your time, ranked by fit.</div>'
+    +'<div class="bf-sub">Everything worth pursuing right now \u2014 growing the clients you have, and the new ones reaching toward you.</div>'
     +patternLine
     +startCard
-    +'<div class="bf-secl">Worth your time</div>'
-    +rows
+    +growSection
+    +inboundSection
     +footer;
 
   Array.prototype.forEach.call(root.querySelectorAll('.bf-row.exp'), function(r){
     function toggle(e){ if(e.target && e.target.tagName==='BUTTON')return; bfToggleRow(r); }
     r.addEventListener('click', toggle);
     r.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); bfToggleRow(r); } });
+  });
+}
+
+// One-click: draft the expansion offer for a grow-existing opportunity. Reuses
+// the shared engine composer (draft_action) — same machinery the Brief uses,
+// grounded only in the facts the engine already decided. No new intelligence.
+function oppDraft(id){
+  var it = OPP.byId && OPP.byId[id];
+  if(!it){ return; }
+  ddsDraftAction({
+    subject: it.subject, subjectId: it.subjectId||it.refId||'', signal: it.signal,
+    action: it.action, why: it.why, changed: it.changed, module: it.module||'Opportunities',
+    go: it.go, refId: it.refId
   });
 }
 
