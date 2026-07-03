@@ -4461,7 +4461,7 @@ function oppxRender(){
     high_opportunity:70, proposal_stale:65, expansion_fit:60, draft_unsent:50, onboarding_blocked:49,
     care_delivery_gap:47, review_ask:46, site_issue:45, referral_ready:45, testimonial_ask:44,
     value_recap:43, relationship_touch:40, prospect_bench:0 };
-  function rankOf(x){ if(x.raw==='lead') return x.follow?66:84; if(x.raw==='audit') return x.email?68:25; return RANK[x.signal]!=null?RANK[x.signal]:35; }
+  function rankOf(x){ if(x.bench) return 10; if(x.raw==='lead') return x.follow?66:84; if(x.raw==='audit') return x.email?68:25; return RANK[x.signal]!=null?RANK[x.signal]:35; }
   function valOf(x){ var v=Number(x.estimated_value); return isFinite(v)&&v>0?v:0; }
   var unified=[].concat(S.hot,S.follow,S.grow,S.risk,S.disc).filter(function(x){ return x.signal!=='prospect_bench'; });
   var seen={}; unified=unified.filter(function(x){ var k=(x.raw||'p')+'_'+x.id; if(seen[k])return false; seen[k]=1; return true; });
@@ -4469,16 +4469,20 @@ function oppxRender(){
   OPPX.unified=unified;
 
   function verb(x){
+    if(x.bench) return {label:'Draft outreach', fn:"oppxBenchDraft('"+escAttr(String(x.id))+"')"};
     if(x.raw==='lead')  return {label:(x.follow?'Draft follow-up':'Draft reply'), fn:"oppxRawDraft('lead','"+escAttr(x.id)+"')"};
     if(x.raw==='audit') return x.email?{label:'Draft outreach', fn:"oppxRawDraft('audit','"+escAttr(x.id)+"')"}:{label:'See the audit', fn:"oppOpen('"+escAttr(x.id)+"')"};
     if(x.status==='drafted') return {label:'Send it', fn:"oppxDraft('"+x.id+"')"};
     if(x.status==='sent'||x.status==='followed_up') return {label:'Follow up', fn:"oppxDraft('"+x.id+"')"};
     return {label:'Draft it', fn:"oppxDraft('"+x.id+"')"};
   }
-  function money(x){ var v=valOf(x); return v?('$'+v.toLocaleString()):''; }
-  function line(x){ return x.raw?(x.why||''):(x.summary||''); }
-  function name(x){ return x.raw?x.name:(x.title||''); }
-  function panelFn(x){ return "oppxPanelOpen('"+(x.raw||'p')+"','"+escAttr(String(x.id))+"')"; }
+  function money(x){ if(x.bench) return ''; var v=valOf(x); return v?('$'+v.toLocaleString()):''; }
+  function line(x){ if(x.bench) return 'Researched'+(x.source?' via '+x.source:'')+' \u00b7 never contacted'; return x.raw?(x.why||''):(x.summary||''); }
+  function name(x){ if(x.bench) return x.bname; return x.raw?x.name:(x.title||''); }
+  function panelFn(x){ return "oppxPanelOpen('"+(x.bench?'b':(x.raw||'p'))+"','"+escAttr(String(x.id))+"')"; }
+  function toBenchItem(p){ return {bench:1,id:p.id,bname:p.business_name||p.website||'A business',source:p.source||'',when:p.created_at}; }
+  var benchTop=(OPPX.bench||[]).filter(function(p){var st=String(p.status||'').toLowerCase();return !st||st==='new';})
+    .sort(function(a,b){return new Date(b.created_at||0)-new Date(a.created_at||0);}).map(toBenchItem);
   OPPX._verb=verb; OPPX._money=money; OPPX._line=line; OPPX._name=name; OPPX._valOf=valOf; OPPX._rankOf=rankOf;
 
   var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
@@ -4493,31 +4497,28 @@ function oppxRender(){
   var inMotion=0; unified.forEach(function(x){ inMotion+=valOf(x); });
   var proposals=unified.filter(function(x){ return x.signal==='proposal_stale'||x.signal==='draft_unsent'||x.status==='sent'; }).length;
 
-  if(!unified.length && !S.won.length && !S.lost.length && !q){
-    var srcs=OPPX.sources||[];
-    root.innerHTML='<div class="bf-eyebrow">Opportunities</div>'
-      +'<h1 class="bf-headline">Searched '+(srcs.length||18)+' data sources \u2014 nothing actionable today.</h1>'
-      +'<div class="bf-sub">Every lead is answered, nothing is waiting, no alarms.'+(benchN?' Your bench holds '+uncontacted+' uncontacted prospects if you want to make your own weather.':'')+'</div>'
-      +(srcs.length?'<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:14px;max-width:640px;">Checked: '+srcs.map(escHtml).join(' \u00b7 ')+'</div>':'')
-      +(benchN?('<div class="bf-secl" style="margin-top:26px;">Prospect database <span class="opx2-sub">\u2014 '+benchN+' records</span></div>'+oppxBenchTable()):'')
-      +'<div style="margin-top:14px;">'+lookForm+'</div>'+footerLite();
-    return;
-  }
+  var engineQuiet = !unified.length;
+  var quietNote = engineQuiet
+    ? '<div style="margin-top:10px;font-size:12.5px;color:var(--muted);">Searched '+(((OPPX.sources||[]).length)||18)+' data sources \u2014 no lead or client signals right now, so today runs on your bench.</div>'
+    : '';
 
   // ── 1. DAY AT A GLANCE ──
   var today=unified.slice(0,4);
+  if(today.length<4) today=today.concat(benchTop.slice(0, 4-today.length));
   var glance='<div class="opx3-glance">'
     +'<div class="opx3-gtitle">Your day at a glance</div>'
     +'<div class="opx3-gstats">'
       +'<div class="opx3-g"><div class="opx3-gn">'+today.length+'</div><div class="opx3-gl">high-priority action'+(today.length===1?'':'s')+'</div></div>'
-      +'<div class="opx3-g"><div class="opx3-gn">'+S.hot.length+'</div><div class="opx3-gl">hot lead'+(S.hot.length===1?'':'s')+'</div></div>'
+      +(S.hot.length
+        ? '<div class="opx3-g"><div class="opx3-gn">'+S.hot.length+'</div><div class="opx3-gl">hot lead'+(S.hot.length===1?'':'s')+'</div></div>'
+        : '<div class="opx3-g"><div class="opx3-gn">'+benchTop.length+'</div><div class="opx3-gl">uncontacted prospects</div></div>')
       +'<div class="opx3-g"><div class="opx3-gn">'+proposals+'</div><div class="opx3-gl">proposal'+(proposals===1?'':'s')+' waiting</div></div>'
       +'<div class="opx3-g"><div class="opx3-gn">'+(inMotion?'$'+inMotion.toLocaleString():'\u2014')+'</div><div class="opx3-gl">potential pipeline</div></div>'
       +(today.length?'<button class="bf-act primary opx3-gcta" onclick="'+(function(){var v=verb(today[0]);return v.fn;})()+'">Start today\u2019s outreach \u2192</button>':'')
     +'</div></div>';
 
   // ── 2. TODAY'S TOP ACTIONS (cards: why / do / impact) ──
-  function chipFor(x){ var r=rankOf(x); return r>=75?['HIGH','#c0392b','rgba(192,57,43,0.08)'] : r>=55?['MEDIUM','#9a7a1a','#fdf6e3'] : ['LOW','#2c6fb7','rgba(44,111,183,0.08)']; }
+  function chipFor(x){ if(x.bench) return ['OUTREACH','#5b3fa0','rgba(91,63,160,0.08)']; var r=rankOf(x); return r>=75?['HIGH','#c0392b','rgba(192,57,43,0.08)'] : r>=55?['MEDIUM','#9a7a1a','#fdf6e3'] : ['LOW','#2c6fb7','rgba(44,111,183,0.08)']; }
   var cards=today.map(function(x){
     var v=verb(x), c=chipFor(x), $=money(x);
     var meta=[]; if($)meta.push($+' est.'); var ago=oppxAgo(x.raw?x.when:x.updated_at); if(ago)meta.push(ago);
@@ -4535,7 +4536,7 @@ function oppxRender(){
   var counts={ all:unified.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
   var chips=FILTERS.map(function(f){ var on=OPPX.filter===f[0];
     return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>'; }).join('');
-  var pipeItems = OPPX.filter==='all'?unified : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
+  var pipeItems = OPPX.filter==='all'?(unified.length?unified:benchTop.slice(0,25)) : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
   var tbl='<div style="overflow-x:auto;"><table class="opx-tbl opx3-tbl"><thead><tr><th>Opportunity</th><th>Why it matters</th><th>Value</th><th>Next action</th><th>Last activity</th></tr></thead><tbody>'
     +(pipeItems.length?pipeItems.map(function(x){
       var v=verb(x), $=money(x), ago=oppxAgo(x.raw?x.when:x.updated_at)||'\u2014';
@@ -4556,6 +4557,7 @@ function oppxRender(){
     +'<div class="opx2-meta">AI sales command center \u00b7 '+((OPPX.sources||[]).length||18)+' sources searched</div>'
     +(OPPX.engineDown?'<div style="margin:10px 0 0;padding:9px 13px;border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;font-size:12.5px;">Engine unreachable \u2014 showing your CRM directly. <button class="bf-whymore" onclick="loadOpportunities()">Retry</button></div>':'')
     +glance
+    +quietNote
     +(today.length?('<div class="bf-secl" style="margin-top:22px;">Today\u2019s top actions</div><div class="opx3-cards">'+cards+'</div>'):'')
     +'<div class="opx-toolbar" style="margin-top:24px;"><input class="opx-search" placeholder="Search\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities"><div class="opx-filters">'+chips+'</div></div>'
     +tbl
@@ -4574,6 +4576,42 @@ function oppxPanelEsc(e){ if(e.key==='Escape') oppxPanelClose(); }
 function oppxPanelOpen(kind, id){
   oppxPanelClose();
   var x=null;
+  if(kind==='b'){
+    var p=(OPPX.bench||[]).find(function(b){return String(b.id)===String(id);});
+    if(!p) return;
+    var contact='';
+    if(p.contact_name||p.email||p.phone||p.website){
+      contact='<div class="opx3-ph">Contact</div><div style="font-size:13px;line-height:1.8;">'
+        +(p.contact_name?escHtml(p.contact_name)+'<br>':'')
+        +(p.email?'<a href="mailto:'+escAttr(p.email)+'" style="color:var(--p);">'+escHtml(p.email)+'</a><br>':'')
+        +(p.phone?escHtml(p.phone)+'<br>':'')
+        +(p.website?'<a href="'+escAttr(/^https?:/i.test(p.website)?p.website:'https://'+p.website)+'" target="_blank" rel="noopener" style="color:var(--p);">'+escHtml(String(p.website).replace(/^https?:\/\//,''))+'</a>':'')
+      +'</div>';
+    }
+    var bg2=document.createElement('div');
+    bg2.id='oppxPanelBg'; bg2.className='opx3-panelbg';
+    bg2.onclick=function(ev){ if(ev.target===bg2) oppxPanelClose(); };
+    bg2.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Prospect detail">'
+      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+      +'<div class="opx3-pchip" style="color:#5b3fa0;">OUTREACH</div>'
+      +'<div class="opx3-pt">'+escHtml(p.business_name||p.website||'A business')+'</div>'
+      +'<div class="opx3-pm">'+escHtml(p.source||'Prospect')+' \u00b7 '+escHtml(p.status||'New')+'</div>'
+      +'<div class="opx3-ph">Why this matters</div>'
+      +'<div class="opx3-pw">A real business you already researched'+(p.source?' (via '+escHtml(p.source)+')':'')+' and never contacted. The hardest part \u2014 finding them \u2014 is done.</div>'
+      +'<div class="opx3-ph">Recommended next step</div>'
+      +'<div class="opx3-next">Send the first outreach \u2014 short, specific, about their site, no pitch.</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+        +'<button class="bf-act primary" onclick="oppxBenchDraft(\''+escAttr(String(p.id))+'\')">Draft outreach \u2192</button>'
+        +'<button class="bf-act" onclick="oppxBenchStatus(\''+escAttr(String(p.id))+'\',\'Contacted\');oppxPanelClose();">Contacted</button>'
+        +'<button class="bf-act" onclick="ddsPrefillNewClient(\''+escAttr(p.business_name||'')+'\',\''+escAttr(p.email||'')+'\',\''+escAttr((p.business_name||'')+' \u2014 Website')+'\')">Convert</button>'
+        +'<button class="bf-act" onclick="oppxBenchStatus(\''+escAttr(String(p.id))+'\',\'Dismissed\');oppxPanelClose();">Dismiss</button>'
+      +'</div>'
+      +contact
+    +'</aside>';
+    document.body.appendChild(bg2);
+    document.addEventListener('keydown', oppxPanelEsc);
+    return;
+  }
   if(kind==='p'){ x=(OPPX.rows||[]).find(function(r){return String(r.id)===String(id);}); }
   else { x=(OPPX.unified||[]).find(function(u){return u.raw===kind && String(u.id)===String(id);}); }
   if(!x) return;
