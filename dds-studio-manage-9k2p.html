@@ -4184,7 +4184,7 @@ function ddsSendDraft(go, refId){
 //  (opportunities_list) syncs the engine's read, runs the close-loop
 //  auto-resolve, and returns the workspace.
 // ════════════════════════════════════════════════════════════════════════════
-var OPPX = { rows:[], loading:false, filter:'all', q:'', openId:null, tl:{}, answer:null, pattern:null, conf:'medium', confReason:'', pendingOpen:null };
+var OPPX = { rows:[], inbound:{leads:[],audit_leads:[]}, engineDown:false, loading:false, filter:'all', q:'', openId:null, tl:{}, answer:null, pattern:null, conf:'medium', confReason:'', pendingOpen:null };
 var OPPX_OPEN = { surfaced:1, viewed:1, drafted:1, sent:1, followed_up:1 };
 
 async function loadOpportunities(){
@@ -4197,11 +4197,28 @@ async function loadOpportunities(){
     var r=await integApi('opportunities_list',{});
     var d=(r&&r.data)||{};
     OPPX.rows=d.rows||[];
+    OPPX.inbound=d.inbound||{leads:[],audit_leads:[]};
     OPPX.answer=d.answer; OPPX.pattern=d.pattern;
     OPPX.conf=d.confidence||'medium'; OPPX.confReason=d.confidence_reason||'';
+    OPPX.engineDown=false;
     oppxRender();
   }catch(e){
-    oppRenderError(root, e);
+    // THE CRM IS THE FLOOR: if the engine route fails, read the real records
+    // directly and render them anyway. Never a dead end while leads exist.
+    try{
+      var res=await Promise.all([
+        api('leads?select=id,name,email,subject,status,unread,last_actor,created_at,updated_at&order=updated_at.desc&limit=200'),
+        api('audit_leads?select=id,business_name,url,score,client_email,status,pipeline_stage,created_at&order=created_at.desc&limit=200')
+      ]);
+      OPPX.rows=[];
+      OPPX.inbound={ leads:res[0]||[], audit_leads:res[1]||[] };
+      OPPX.answer=null; OPPX.pattern=null; OPPX.conf='low';
+      OPPX.confReason='engine unreachable \u2014 showing your CRM directly';
+      OPPX.engineDown=true;
+      oppxRender();
+    }catch(e2){
+      oppRenderError(root, e2);
+    }
   }finally{
     OPPX.loading=false;
   }
@@ -4290,82 +4307,182 @@ var OPPX_EMPTY = {
   lost: { h:'Nothing lost or dismissed.', s:'Dismissed items stay quiet for 60 days, then return only if the condition still holds. Lost ones stay put so you can learn from them.' }
 };
 
-// ── the workspace render ──
+// ── the workspace render: six sections around the actual sales job ──
+// 1 Hot leads (they raised a hand — persisted inbound + RAW CRM records)
+// 2 Follow-ups due  3 Grow existing clients  4 At risk
+// 5 AI-discovered (the ONLY home of the site checker)  6 Recently closed
+// The CRM is the floor: raw leads/audits render whether or not the engine
+// surfaced them. "No opportunities" can only appear when the CRM agrees.
+var OPPX_DEAD_STAGES={won:1,dead:1,client:1,closed:1,archived:1,converted:1,spam:1};
+
+function oppxPrep(){
+  var rows=OPPX.rows||[], inb=OPPX.inbound||{leads:[],audit_leads:[]};
+  var covered={};
+  rows.forEach(function(r){ if(r.lead_id)covered['l_'+r.lead_id]=1; if(r.audit_lead_id)covered['a_'+r.audit_lead_id]=1; });
+  var now=Date.now(), D=86400000;
+  var open=rows.filter(oppxIsOpen);
+  var isFollow=function(r){ return (r.next_action_due&&new Date(r.next_action_due).getTime()<=now)||oppxStalled(r)||(r.status==='drafted'&&(now-new Date(r.updated_at||0).getTime())>3*D); };
+  var followRows=open.filter(isFollow);
+  var rest=open.filter(function(r){ return !isFollow(r); });
+
+  var rawHot=[], rawDisc=[], rawFollow=[];
+  (inb.leads||[]).forEach(function(l){
+    if(covered['l_'+l.id]) return;
+    var st=String(l.status||'').toLowerCase();
+    if(OPPX_DEAD_STAGES[st]) return;
+    var t=new Date(l.updated_at||l.created_at||0).getTime();
+    if(!isFinite(t)||now-t>90*D) return;
+    var item={ raw:'lead', id:String(l.id), name:l.name||l.email||'A lead', source:'Contact form',
+      why:(l.subject?('wrote: \u201c'+String(l.subject).slice(0,90)+'\u201d'):'reached out through the site'),
+      status:st||'new', when:l.updated_at||l.created_at };
+    if(l.last_actor==='eric' && (now-t)>4*D){ item.follow=Math.floor((now-t)/D); rawFollow.push(item); }
+    else rawHot.push(item);
+  });
+  (inb.audit_leads||[]).forEach(function(a){
+    if(covered['a_'+a.id]) return;
+    var st=String(a.pipeline_stage||a.status||'').toLowerCase();
+    if(OPPX_DEAD_STAGES[st]) return;
+    var t=new Date(a.created_at||0).getTime();
+    if(!isFinite(t)) return;
+    var sc=Number(a.score);
+    var item={ raw:'audit', id:String(a.id), name:a.business_name||a.url||'A business', source:'Website audit',
+      why:'ran your review'+(isFinite(sc)?(' \u2014 scored '+sc):''), status:st||'new', when:a.created_at, score:sc };
+    if(a.client_email){ if(now-t<=90*D) rawHot.push(item); }
+    else if(now-t<=30*D) rawDisc.push(item);
+  });
+  rawHot.sort(function(x,y){ return new Date(y.when)-new Date(x.when); });
+  rawDisc.sort(function(x,y){ return (isFinite(x.score)?x.score:99)-(isFinite(y.score)?y.score:99); });
+
+  return {
+    hot:    rest.filter(function(r){return r.category==='new_inbound';}).concat(rawHot),
+    follow: followRows.concat(rawFollow),
+    grow:   rest.filter(function(r){return r.category==='expansion'||r.category==='renewal'||r.category==='referral';}),
+    risk:   rest.filter(function(r){return r.category==='retention_risk'||r.category==='billing_recovery';}),
+    disc:   rawDisc.slice(0,6),
+    won:    rows.filter(function(r){return r.status==='won';}),
+    lost:   rows.filter(function(r){return r.status==='lost'||r.status==='dismissed';}),
+  };
+}
+
+function oppxAnyRow(x){ return x.raw ? oppxRawRow(x) : oppxRow(x); }
+function oppxMatchQ(x,q){
+  if(!q) return true;
+  var hay=x.raw ? (x.name+' '+x.why) : (String(x.title||'')+' '+String(x.summary||''));
+  return hay.toLowerCase().indexOf(q)>-1;
+}
+
 function oppxRender(){
   var root=document.getElementById('oppRoot');
   if(!root) return;
-  var rows=OPPX.rows||[];
   var q=OPPX.q;
-  var visible=rows.filter(function(r){
-    if(!oppxMatches(r, OPPX.filter)) return false;
-    if(q && (String(r.title||'')+' '+String(r.summary||'')).toLowerCase().indexOf(q)===-1) return false;
-    return true;
-  });
+  var S=oppxPrep();
+  Object.keys(S).forEach(function(k){ S[k]=S[k].filter(function(x){ return oppxMatchQ(x,q); }); });
 
-  // filter chips with live counts
-  var counts={ all:0,new:0,warm:0,atrisk:0,won:0,lost:0 };
-  rows.forEach(function(r){ Object.keys(counts).forEach(function(f){ if(oppxMatches(r,f)) counts[f]++; }); });
-  var FILTERS=[['all','All'],['new','New'],['warm','Warm'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
+  var FILTERS=[['all','All'],['hot','Hot leads'],['follow','Follow-ups'],['grow','Grow'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
+  var counts={ all:S.hot.length+S.follow.length+S.grow.length+S.risk.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
   var chips=FILTERS.map(function(f){
     var on=OPPX.filter===f[0];
     return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>';
   }).join('');
-
-  var toolbar=
-    '<div class="opx-toolbar">'
-      +'<input class="opx-search" placeholder="Search by client or business\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities">'
-      +'<div class="opx-filters">'+chips+'</div>'
-    +'</div>';
+  var toolbar='<div class="opx-toolbar">'
+    +'<input class="opx-search" placeholder="Search by client or business\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities">'
+    +'<div class="opx-filters">'+chips+'</div></div>';
 
   var patternLine = OPPX.pattern
     ? '<div class="bf-pattern"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(OPPX.pattern)+'</span></div>'
     : '';
 
-  var body='';
-  if(!visible.length){
-    var em=OPPX_EMPTY[OPPX.filter]||OPPX_EMPTY.all;
-    body='<div style="padding:26px 0 8px;">'
-      +'<div style="width:46px;height:46px;border-radius:50%;background:var(--p-soft,#f1ecf9);display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--p,#5b3fa0)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>'
-      +'<div style="font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px;">'+escHtml(em.h)+'</div>'
-      +'<div style="font-size:13.5px;color:var(--ink-2,#574d68);line-height:1.6;max-width:520px;margin-bottom:20px;">'+escHtml(em.s)+'</div>'
-      +'<button class="bf-act primary" onclick="oppxLookFocus()">Look at a business \u2192</button>'
-    +'</div>';
-  } else if(OPPX.filter==='all'){
-    // three sections in the order money moves: protect, grow, new
-    var protect=visible.filter(function(r){ return r.category==='retention_risk'||r.category==='billing_recovery'; });
-    var growS=visible.filter(function(r){ return r.category==='expansion'||r.category==='renewal'||r.category==='referral'; });
-    var inboundS=visible.filter(function(r){ return r.category==='new_inbound'; });
-    if(protect.length) body+='<div class="bf-secl">Protect the money</div>'+protect.map(oppxRow).join('');
-    if(growS.length)   body+='<div class="bf-secl" style="margin-top:'+(protect.length?'26px':'0')+';">Grow clients you already have</div>'+growS.map(oppxRow).join('');
-    if(inboundS.length)body+='<div class="bf-secl" style="margin-top:'+((protect.length||growS.length)?'26px':'0')+';">New inbound \u2014 they raised a hand</div>'+inboundS.map(oppxRow).join('');
-  } else {
-    body=visible.map(oppxRow).join('');
+  function section(title, sub, items, emptyLine, extra){
+    var body=items.length ? items.map(oppxAnyRow).join('') : '<div style="font-size:12.5px;color:var(--muted);padding:8px 2px 4px;">'+escHtml(emptyLine)+'</div>';
+    return '<div class="bf-secl" style="margin-top:24px;">'+escHtml(title)+(sub?' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">\u2014 '+escHtml(sub)+'</span>':'')+'</div>'+body+(extra||'');
   }
+  var lookForm='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">'
+      +'<input id="oppxLookUrl" placeholder="Point the checker at a business website\u2026" aria-label="Business website to review" style="flex:1;min-width:200px;max-width:320px;padding:8px 12px;border:1.5px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;outline:none;" onkeydown="if(event.key===\'Enter\')oppLookAtBusiness()">'
+      +'<button class="bf-act" onclick="oppLookAtBusiness()">Run a check \u2192</button>'
+    +'</div>';
+
+  var body='';
+  if(OPPX.filter==='all'){
+    body+=section('Hot leads','they raised a hand', S.hot, 'No new inbound right now. Contact-form leads, audit runs with an email, and quote requests land here the moment they arrive.');
+    body+=section('Follow-ups due','the ball is in your court', S.follow, 'Nothing waiting on you. Sent offers, drafted-but-unsent replies, and quiet leads surface here when they need a touch.');
+    body+=section('Grow existing clients','real openings on people who already pay you', S.grow, 'No expansion openings measured right now. Slow sites, weak SEO, missing analytics, care-plan gaps, renewals, and happy-client referrals appear here from the nightly signals.');
+    body+=section('At risk','money or relationships that need protecting', S.risk, 'Nothing at risk \u2014 no overdue balances, nobody gone quiet.');
+    body+=section('AI-discovered','businesses the checker found (no contact left)', S.disc, 'Nothing from the checker lately.', lookForm);
+    if(S.won.length||S.lost.length){
+      var closed=S.won.concat(S.lost).sort(function(a,b){return new Date(b.updated_at||0)-new Date(a.updated_at||0);}).slice(0,6);
+      body+=section('Recently closed','use the Won / Lost filters for the full history', closed, '');
+    }
+  } else if(OPPX.filter==='hot'){ body+=section('Hot leads','they raised a hand', S.hot, 'No new inbound right now.'); }
+  else if(OPPX.filter==='follow'){ body+=section('Follow-ups due','the ball is in your court', S.follow, 'Nothing waiting on you.'); }
+  else if(OPPX.filter==='grow'){ body+=section('Grow existing clients','', S.grow, 'No measured expansion openings right now.'); }
+  else if(OPPX.filter==='atrisk'){ body+=section('At risk','', S.risk, 'Nothing at risk.'); }
+  else if(OPPX.filter==='won'){ body+=section('Won','', S.won, 'No wins recorded yet. Paid linked invoices and manual wins land here.'); }
+  else if(OPPX.filter==='lost'){ body+=section('Lost & dismissed','dismissed items stay quiet 60 days, then return only if still true', S.lost, 'Nothing lost or dismissed.'); }
 
   var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
-  var footer=
-    '<div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--bf-line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'
-      +'<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);"><span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>'
-      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
-        +'<input id="oppxLookUrl" placeholder="Paste a business website\u2026" aria-label="Business website to review" style="width:220px;padding:8px 12px;border:1.5px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;outline:none;" onkeydown="if(event.key===\'Enter\')oppLookAtBusiness()">'
-        +'<button class="bf-act primary" onclick="oppLookAtBusiness()">Look at it \u2192</button>'
-      +'</div>'
-    +'</div>';
+  var footer='<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);">'
+    +'<span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>';
 
   root.innerHTML =
     '<div class="bf-eyebrow">Opportunities</div>'
-    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(OPPX.answer||'Your open opportunities, with their state.')+'</h1>'
-    +'<div class="bf-sub">Where the next dollar is, what to say, when to say it \u2014 and whether it worked.</div>'
+    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(OPPX.answer||'Your pipeline \u2014 every lead, every opening, and the next move on each.')+'</h1>'
+    +'<div class="bf-sub">Who to contact today, why now, and what to say \u2014 with your real leads always on the page.</div>'
+    +(OPPX.engineDown?'<div style="margin:10px 0 0;padding:9px 13px;border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;font-size:12.5px;color:var(--ink);">The reasoning engine didn\u2019t answer just now, so this is your CRM directly \u2014 every lead is still here. <button class="bf-whymore" onclick="loadOpportunities()">Retry the engine</button></div>':'')
     +patternLine
     +toolbar
     +body
     +footer;
 
-  // a Sales Move card asked to open a specific row
   if(OPPX.pendingOpen){
     var pid=OPPX.pendingOpen; OPPX.pendingOpen=null;
-    if(rows.some(function(r){ return r.id===pid; })){ oppxToggle(pid); }
+    if((OPPX.rows||[]).some(function(r){ return r.id===pid; })){ oppxToggle(pid); }
   }
+}
+
+// ── raw CRM record row (a lead the engine hasn't ranked — still fully actionable) ──
+function oppxRawRow(it){
+  var chip = it.follow ? '<span class="opx-due over">no reply '+it.follow+'d</span>'
+    : '<span class="opx-chip" style="color:#5b3fa0;background:rgba(91,63,160,0.10);">'+escHtml((it.status||'new').replace(/_/g,' '))+'</span>';
+  var view = it.raw==='audit'
+    ? '<button class="bf-act" onclick="event.stopPropagation();oppOpen(\''+escAttr(it.id)+'\')">See the audit</button>'
+    : '<button class="bf-act" onclick="event.stopPropagation();go(\'leads\')">View record</button>';
+  return '<div class="opx-row" style="cursor:default;">'
+    +'<div class="opx-rmain">'
+      +'<div class="opx-rtop">'+chip
+        +'<span class="opx-cat" style="color:#5b3fa0;">'+escHtml(it.source)+'</span>'
+        +'<span class="opx-title">'+escHtml(it.name)+'</span>'
+      +'</div>'
+      +'<div class="bf-changed" style="margin-top:4px;">'+escHtml(it.why)+'</div>'
+      +'<div class="opx-meta">'+escHtml(oppxAgo(it.when)||'')+'</div>'
+      +'<div class="bf-ractions" style="margin-top:10px;">'
+        +'<button class="bf-act primary" onclick="event.stopPropagation();oppxRawDraft(\''+it.raw+'\',\''+escAttr(it.id)+'\')">'+(it.follow?'Draft follow-up':'Draft reply')+' \u2192</button>'
+        +view
+        +'<button class="bf-act" onclick="event.stopPropagation();oppxRawConvert(\''+it.raw+'\',\''+escAttr(it.id)+'\')">Convert</button>'
+      +'</div>'
+    +'</div>'
+  +'</div>';
+}
+
+function oppxRawFind(kind,id){
+  var pool = kind==='lead' ? ((OPPX.inbound||{}).leads||[]) : ((OPPX.inbound||{}).audit_leads||[]);
+  return pool.find(function(p){ return String(p.id)===String(id); });
+}
+function oppxRawDraft(kind,id){
+  var x=oppxRawFind(kind,id); if(!x) return;
+  var name = kind==='lead' ? (x.name||x.email||'this lead') : (x.business_name||x.url||'this business');
+  ddsDraftAction({ subject:name, subjectId:String(x.id), signal:'high_opportunity',
+    action:'Reach out to '+name,
+    why:(kind==='lead' ? 'they contacted you first \u2014 the warmest a lead ever gets'
+      : 'they ran your review'+(isFinite(Number(x.score))?(' and scored '+x.score):'')+(x.client_email?' and left their email':'')),
+    changed:(kind==='lead' ? ('They wrote'+(x.subject?(': \u201c'+String(x.subject).slice(0,90)+'\u201d'):' through the site'))
+      : ('Review run on '+(x.url||'their site'))),
+    module:'Opportunities', go:'leads', refId:String(x.id) });
+}
+function oppxRawConvert(kind,id){
+  var x=oppxRawFind(kind,id); if(!x) return;
+  var name = kind==='lead' ? (x.name||'') : (x.business_name||'');
+  var email= kind==='lead' ? (x.email||'') : (x.client_email||'');
+  ddsPrefillNewClient(name, email, name?name+' \u2014 Website':'');
 }
 
 // ── one row + its inline drawer ──
