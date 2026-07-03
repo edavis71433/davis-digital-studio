@@ -13111,5 +13111,195 @@ function anEngineNote(eng){
   window.loadMessages=msxLoad;
 })();
 </script>
+
+<style>
+/* FILES — all deliverables, one place. Inherits the OS library; new components
+   justified: file thumbnail card + type icon (no file-grid existed). */
+#page-files #fsxRoot{max-width:1280px;}
+.fsx-grid{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(240px,.8fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1100px){.fsx-grid{grid-template-columns:1fr;}}
+.fsx-side{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:10px;}
+.fsx-cl{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);}
+.fsx-cl:hover{background:rgba(91,63,160,.04);}
+.fsx-cl.on{background:#f5f2fc;color:var(--p);}
+.fsx-cl .n{margin-left:auto;font-size:11px;color:var(--muted);font-weight:500;}
+.fsx-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.fsx-card{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s, box-shadow .15s;}
+.fsx-card:hover{border-color:rgba(91,63,160,.3);box-shadow:0 2px 12px rgba(41,25,66,.06);}
+.fsx-card.on{border-color:var(--p);}
+.fsx-th{height:110px;background:rgba(91,63,160,.05);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--p);overflow:hidden;}
+.fsx-th img{width:100%;height:100%;object-fit:cover;}
+.fsx-fb{padding:10px 12px;}
+.fsx-fn{font-size:12.5px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fsx-fm{font-size:11px;color:var(--muted);margin-top:2px;}
+.fsx-prev{height:150px;border-radius:12px;background:rgba(91,63,160,.05);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--p);overflow:hidden;margin-bottom:12px;}
+.fsx-prev img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+</style>
+<script>
+// ═══ FILES — every deliverable in one place, on the storage pipeline the
+// platform already trusts. Uploads drive the proven legacy uploadFiles()
+// (storage PUT → files row → client email notify) programmatically. ═══
+(function(){
+  var FSX={rows:[], clients:[], cid:'all', type:'all', q:'', sel:null, loaded:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function extOf(f){ var n=String(f.name||f.url||''); var m=n.toLowerCase().match(/\.([a-z0-9]{1,5})(?:\?|$)/); return m?m[1]:''; }
+  function typeOf(f){ var e=extOf(f);
+    if(['png','jpg','jpeg','gif','webp','svg'].indexOf(e)>-1) return 'img';
+    if(['mp4','mov','webm'].indexOf(e)>-1) return 'vid';
+    if(['xls','xlsx','csv'].indexOf(e)>-1) return 'sheet';
+    if(['pdf','doc','docx','txt','ppt','pptx','md'].indexOf(e)>-1) return 'doc';
+    return 'other'; }
+  function iconOf(t){ return t==='img'?'\u25A3':t==='vid'?'\u25B6':t==='sheet'?'\u25A4':t==='doc'?'\u25AF':'\u25C8'; }
+  function labelOf(t,f){ var e=extOf(f).toUpperCase(); return (e?e+' ':'')+({img:'Image',vid:'Video',sheet:'Spreadsheet',doc:'Document',other:'File'})[t]; }
+  function sizeOf(f){ if(f.size&&isNaN(Number(f.size))) return String(f.size); var s=Number(f.size||f.bytes||0); if(!s) return ''; return s>1048576?(s/1048576).toFixed(1)+' MB':Math.max(1,Math.round(s/1024))+' KB'; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-files'); if(!page) return null;
+    var root=document.getElementById('fsxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._fsxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='fsxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function fsxLoad(clientArg){
+    var root=ensureRoot(); if(!root) return;
+    if(clientArg&&clientArg.id) FSX.cid=String(clientArg.id);
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:220px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('files?select=*&order=created_at.desc&limit=500'); }),
+      safe(function(){ return api('clients?select=*&limit=300'); })
+    ]);
+    if(r[0]===null&&r[1]===null){
+      root.innerHTML='<div class="pt">Files</div><div class="ibx-sub">Couldn\u2019t load just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="loadFiles()">Try again</button>';
+      return;
+    }
+    FSX.rows=r[0]||[];
+    FSX.clients=(r[1]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    FSX.loaded=true;
+    fsxRender();
+  }
+
+  window.fsxCl=function(cid){ FSX.cid=cid; FSX.sel=null; fsxRender(); };
+  window.fsxType=function(t){ FSX.type=t; fsxRender(); };
+  window.fsxQ=function(v){ FSX.q=v; fsxRender(); };
+  window.fsxSel=function(id){ FSX.sel=(FSX.sel===id?null:id); fsxRender(); };
+  window.fsxPick=function(){
+    if(FSX.cid==='all'){ toast('Pick a client folder first \u2014 files upload to a client\u2019s portal'); return; }
+    var i=document.createElement('input'); i.type='file'; i.multiple=true;
+    i.onchange=async function(){
+      var files=i.files; if(!files||!files.length) return;
+      // drive the proven legacy pipeline with our chosen client
+      try{
+        var sel=document.getElementById('sel-files');
+        if(sel){ sel.value=FSX.cid; }
+        if(typeof onClientChange==='function') onClientChange(FSX.cid,'files');
+        setTimeout(async function(){
+          try{
+            await uploadFiles(files);
+            toast('\u2713 Uploaded \u2014 client notified');
+          }catch(e){ toast('Upload hit a snag \u2014 try again'); }
+          setTimeout(function(){ fsxLoad(); },800);
+        },350);
+      }catch(e){ toast('Upload path unavailable'); }
+    };
+    i.click();
+  };
+
+  function fsxRender(){
+    var root=document.getElementById('fsxRoot'); if(!root) return;
+    var byClient={}; FSX.rows.forEach(function(f){ var k=String(f.client_id||''); byClient[k]=(byClient[k]||0)+1; });
+    var cName={}; FSX.clients.forEach(function(c){ cName[String(c.id)]=c.name; });
+
+    var q=FSX.q.toLowerCase();
+    var list=FSX.rows.filter(function(f){
+      if(FSX.cid!=='all'&&String(f.client_id)!==FSX.cid) return false;
+      if(FSX.type!=='all'&&typeOf(f)!==FSX.type) return false;
+      if(q&&String(f.name||'').toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    });
+
+    var now=Date.now();
+    var recentN=FSX.rows.filter(function(f){ return (now-new Date(f.created_at))/86400000<=30; }).length;
+    var totalBytes=FSX.rows.reduce(function(s,f){ return s+(Number(f.size||f.bytes)||0); },0);
+    var counts={doc:0,img:0,vid:0,sheet:0,other:0};
+    FSX.rows.forEach(function(f){ counts[typeOf(f)]++; });
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn">'+FSX.rows.length+'</div><div class="ivx-sl">Total files</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+Object.keys(byClient).filter(function(k){return k&&k!=="null";}).length+'</div><div class="ivx-sl">Client portals with files</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+recentN+'</div><div class="ivx-sl">Uploaded last 30 days</div></div>'
+      +(totalBytes?'<div class="ivx-st"><div class="ivx-sn">'+(totalBytes/1048576).toFixed(1)+' MB</div><div class="ivx-sl">Storage used</div></div>':'')
+    +'</div>';
+
+    var CH=[['all','All'],['doc','Documents'],['img','Images'],['vid','Videos'],['sheet','Spreadsheets'],['other','Other']];
+    var chips='<div class="tlx-chips">'+CH.map(function(t){
+      var n=t[0]==='all'?FSX.rows.length:counts[t[0]];
+      return '<button class="tlx-chip'+(FSX.type===t[0]?' on':'')+'" onclick="fsxType(\''+t[0]+'\')">'+t[1]+(n?' \u00b7 '+n:'')+'</button>'; }).join('')
+      +'<span style="flex:1;"></span>'
+      +'<input class="opx-search" style="max-width:220px;" placeholder="Search files\u2026" value="'+att(FSX.q)+'" oninput="fsxQ(this.value)" aria-label="Search files">'
+    +'</div>';
+
+    var side='<div class="fsx-side">'
+      +'<div class="fsx-cl'+(FSX.cid==='all'?' on':'')+'" onclick="fsxCl(\'all\')">\u25A6 All files<span class="n">'+FSX.rows.length+'</span></div>'
+      +'<div class="grx-h" style="margin:12px 8px 4px;font-size:10px;letter-spacing:.1em;color:var(--muted);">CLIENT FOLDERS</div>'
+      +FSX.clients.map(function(c){
+        var n=byClient[String(c.id)]||0;
+        return '<div class="fsx-cl'+(FSX.cid===String(c.id)?' on':'')+'" onclick="fsxCl(\''+att(String(c.id))+'\')">\u25A1 '+esc(c.name||'Client')+'<span class="n">'+n+'</span></div>';
+      }).join('')
+    +'</div>';
+
+    var cards=list.length?('<div class="fsx-cards">'+list.slice(0,60).map(function(f){
+      var t=typeOf(f);
+      var th=(t==='img'&&f.url)?('<img src="'+att(f.url)+'" alt="" loading="lazy">'):iconOf(t);
+      return '<div class="fsx-card'+(FSX.sel===String(f.id)?' on':'')+'" onclick="fsxSel(\''+att(String(f.id))+'\')">'
+        +'<div class="fsx-th">'+th+'</div>'
+        +'<div class="fsx-fb"><div class="fsx-fn">'+esc(f.name||'File')+'</div>'
+        +'<div class="fsx-fm">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+' \u00b7 '+esc(agoS(f.created_at))+'</div>'
+        +(FSX.cid==='all'&&cName[String(f.client_id)]?'<div class="fsx-fm" style="color:var(--p);">'+esc(cName[String(f.client_id)])+'</div>':'')
+        +'</div></div>';
+    }).join('')+'</div>')
+    :'<div class="grx-empty" style="margin-top:16px;">'+(FSX.rows.length?'Nothing matches.':'No files yet \u2014 upload the first deliverable and the client is notified automatically.')+'</div>';
+
+    var rail='';
+    var f=FSX.rows.find(function(x){ return String(x.id)===FSX.sel; });
+    if(f){
+      var t=typeOf(f);
+      rail='<div class="grx-card"><div class="grx-h">File details</div>'
+        +'<div class="fsx-prev">'+((t==='img'&&f.url)?('<img src="'+att(f.url)+'" alt="">'):iconOf(t))+'</div>'
+        +'<div style="font-size:14.5px;font-weight:700;color:var(--ink);">'+esc(f.name||'File')+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+'</div>'
+        +(f.url?'<a class="bf-act primary" style="display:inline-block;text-decoration:none;margin-top:12px;" target="_blank" rel="noopener" href="'+att(f.url)+'">Open \u2197</a>':'')
+        +'<div class="rhx-kv" style="margin-top:12px;"><span>Client</span><b>'+esc(cName[String(f.client_id)]||'\u2014')+'</b></div>'
+        +'<div class="rhx-kv"><span>Uploaded</span><b>'+esc(agoS(f.created_at)||'\u2014')+'</b></div>'
+        +'<div class="rhx-kv"><span>Shared with client</span><b style="color:#1a7e49;">Yes \u2014 in their portal</b></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+          +(f.url?'<button class="ibx-pill" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+att(f.url)+'\');toast(\'\\u2713 Link copied\')">Copy link</button>':'')
+          +'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(f.client_id))+'\')}catch(e){}},400);">Message client</button>'
+          +(cName[String(f.client_id)]?'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(f.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>':'')
+        +'</div>'
+      +'</div>';
+    } else {
+      rail='<div class="grx-card"><div class="grx-h">File details</div><div class="grx-empty" style="padding:6px 0;">Select a file to see its details, link, and client.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Files</div>'
+      +'<div class="ibx-sub">All project files, documents &amp; deliverables in one place.</div></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="fsxPick()">\u2913 Upload</button></div>'
+      +stats
+      +chips
+      +'<div class="fsx-grid">'+side+'<div>'+cards+'</div><div>'+rail+'</div></div>';
+  }
+
+  window.loadFilesLegacy=window.loadFiles;
+  window.loadFiles=fsxLoad;
+})();
+</script>
 </body>
 </html>
