@@ -1599,6 +1599,31 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .opx2-sv{font-size:17px;font-weight:700;color:var(--ink);}
 .opx2-sl{font-size:11.5px;color:var(--muted);margin-top:2px;}
 @media (max-width:640px){ .opx2-act{flex-wrap:wrap;} .opx2-w{white-space:normal;} }
+/* command-center v5: aggressive concept match */
+.opx5-wrap{background:#fff;border:1px solid rgba(41,25,66,0.07);border-radius:18px;padding:26px 30px 30px;box-shadow:0 1px 2px rgba(41,25,66,0.03);}
+.opx4-greet{font-size:23px;}
+.opx3-glance{background:#f5f2fc;border:none;box-shadow:none;border-radius:14px;padding:14px 20px 16px;margin-top:18px;}
+.opx3-gtitle{color:var(--p);font-size:10.5px;margin-bottom:8px;}
+.opx3-gstats{display:flex;align-items:center;gap:36px;flex-wrap:nowrap;overflow-x:auto;}
+.opx3-g{flex:none;}
+.opx3-gn{font-size:21px;font-weight:700;}
+.opx3-gl{font-size:11px;color:var(--muted);white-space:nowrap;max-width:none;margin-top:1px;}
+.opx3-gcta{margin-left:auto;flex:none;padding:8px 16px;font-size:13px;border-radius:100px;}
+.opx3-cards{grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px;}
+.opx3-card, .opx3-card.lead{grid-column:auto !important;padding:14px;border:1px solid rgba(41,25,66,0.09);border-radius:12px;}
+.opx3-card.lead .opx3-ct{font-size:14.5px;}
+.opx3-card .opx3-ct{font-size:14.5px;line-height:1.35;}
+.opx3-card .opx3-cw, .opx3-card.lead .opx3-cw{font-size:12px;color:var(--muted);opacity:1;}
+.opx5-tabs{display:flex;align-items:center;gap:2px;border-bottom:1px solid rgba(41,25,66,0.08);margin-top:10px;}
+.opx5-tab{border:none;background:none;padding:9px 12px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;}
+.opx5-tab.on{color:var(--ink);font-weight:650;border-bottom-color:var(--p);}
+.opx5-tc{color:var(--muted);font-weight:500;font-size:12px;margin-left:3px;}
+.opx5-search{max-width:180px;padding:7px 12px;font-size:12.5px;margin-bottom:6px;}
+.opx5-cell{display:flex;align-items:center;gap:10px;}
+.opx5-av{flex:none;width:30px;height:30px;border-radius:50%;background:rgba(91,63,160,0.09);color:var(--p);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.opx5-pill{border:1px solid rgba(91,63,160,0.3);background:#fff;color:var(--p);font-weight:600;font-size:12px;padding:6px 13px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+.opx5-pill:hover{background:rgba(91,63,160,0.06);}
+.opx3-tbl th{padding-top:14px;}
 /* ── Evidence panel: the AI hands over the work ── */
 .opx-ev{margin:0 2px 8px;padding:14px 14px 16px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
 .opx-ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
@@ -4548,15 +4573,15 @@ function oppxRender(){
   var today=unified.slice(0,4);
   if(today.length<4) today=today.concat(benchTop.slice(0, 4-today.length));
   var glance='<div class="opx3-glance">'
-    +'<div class="opx3-gtitle">Today\u2019s focus</div>'
+    +'<div class="opx3-gtitle">Your day at a glance</div>'
     +'<div class="opx3-gstats">'
-      +'<div class="opx3-g"><div class="opx3-gn">'+today.length+'</div><div class="opx3-gl">conversation'+(today.length===1?'':'s')+' worth having today'+'</div></div>'
+      +'<div class="opx3-g"><div class="opx3-gn">'+today.length+'</div><div class="opx3-gl">High-priority actions</div></div>'
       +(S.hot.length
-        ? '<div class="opx3-g"><div class="opx3-gn">'+S.hot.length+'</div><div class="opx3-gl">hot lead'+(S.hot.length===1?'':'s')+'</div></div>'
-        : '<div class="opx3-g"><div class="opx3-gn">'+benchTop.length+'</div><div class="opx3-gl">researched businesses waiting for first contact</div></div>')
-      +'<div class="opx3-g"><div class="opx3-gn">'+proposals+'</div><div class="opx3-gl">proposal'+(proposals===1?'':'s')+' awaiting an answer</div></div>'
-      +(inMotion?'<div class="opx3-g"><div class="opx3-gn">$'+inMotion.toLocaleString()+'</div><div class="opx3-gl">estimated pipeline identified</div></div>':'')
-      +(today.length?'<button class="bf-act primary opx3-gcta" onclick="'+(function(){var v=verb(today[0]);return v.fn;})()+'">Start today\u2019s outreach \u2192</button>':'')
+        ? '<div class="opx3-g"><div class="opx3-gn">'+S.hot.length+'</div><div class="opx3-gl">Hot leads</div></div>'
+        : '<div class="opx3-g"><div class="opx3-gn">'+benchTop.length+'</div><div class="opx3-gl">Prospects waiting</div></div>')
+      +'<div class="opx3-g"><div class="opx3-gn">'+proposals+'</div><div class="opx3-gl">Proposals waiting</div></div>'
+      +(inMotion?'<div class="opx3-g"><div class="opx3-gn">$'+inMotion.toLocaleString()+'</div><div class="opx3-gl">Potential pipeline</div></div>':'')
+      +(today.length?'<button class="bf-act primary opx3-gcta" onclick="'+(function(){var v=verb(today[0]);return v.fn;})()+'">Start outreach</button>':'')
     +'</div></div>';
 
   // ── 2. TODAY'S TOP ACTIONS (cards: why / do / impact) ──
@@ -4564,7 +4589,7 @@ function oppxRender(){
   var cards=today.map(function(x,ix){
     var v=verb(x), c=chipFor(x), $=money(x);
     var ago=oppxAgo((x.raw||x.bench)?x.when:x.updated_at);
-    return '<div class="opx3-card'+(ix===0?' lead':'')+'" tabindex="0" role="button" onclick="'+panelFn(x)+'" onkeydown="if(event.key===\'Enter\'){'+panelFn(x)+'}">'
+    return '<div class="opx3-card" tabindex="0" role="button" onclick="'+panelFn(x)+'" onkeydown="if(event.key===\'Enter\'){'+panelFn(x)+'}">'
       +'<div class="opx3-crow"><span class="opx3-chip" style="color:'+c[1]+';background:'+c[2]+';">'+c[0]+'</span>'+(ago?'<span class="opx3-ago">'+escHtml(ago)+'</span>':'')+'</div>'
       +'<div class="opx3-ct">'+escHtml(name(x))+'</div>'
       +'<div class="opx3-cw">'+escHtml(line(x))+'</div>'
@@ -4577,37 +4602,43 @@ function oppxRender(){
   var FILTERS=[['all','All opportunities'],['hot','Hot leads'],['follow','Follow-ups'],['grow','Grow'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
   var counts={ all:unified.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
   var chips=FILTERS.map(function(f){ var on=OPPX.filter===f[0];
-    return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>'; }).join('');
-  var pipeItems = OPPX.filter==='all'?(unified.length?unified:benchTop.slice(0,25)) : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
+    return '<button class="opx5-tab'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx5-tc">'+counts[f[0]]+'</span>':'')+'</button>'; }).join('');
+  var pipeAll = OPPX.filter==='all'?(unified.length?unified:benchTop) :
+      OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
+  var pipeItems = OPPX.showAllFeed?pipeAll:pipeAll.slice(0,8);
+  var _unusedPipe = OPPX.filter==='all'?(unified.length?unified:benchTop.slice(0,25)) : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
   var tbl='<div style="overflow-x:auto;"><table class="opx-tbl opx3-tbl"><thead><tr><th>Opportunity</th><th>Why it matters</th><th>Value</th><th>Next action</th><th>Last activity</th></tr></thead><tbody>'
     +(pipeItems.length?pipeItems.map(function(x){
-      var v=verb(x), $=money(x), ago=oppxAgo(x.raw?x.when:x.updated_at)||'\u2014';
-      var closed=!x.raw && !oppxIsOpen(x);
+      var v=verb(x), $=money(x), ago=oppxAgo((x.raw||x.bench)?x.when:x.updated_at)||'\u2014';
+      var closed=!x.raw && !x.bench && !oppxIsOpen(x);
+      var nm=name(x), sub=x.bench?(x.source||'Prospect'):(x.raw?x.source:((OPPX_CAT[x.category]||{}).label||''));
       return '<tr class="opx3-row" onclick="'+panelFn(x)+'">'
-        +'<td style="font-weight:600;white-space:nowrap;">'+escHtml(name(x))+'</td>'
+        +'<td style="white-space:nowrap;"><div class="opx5-cell"><span class="opx5-av">'+escHtml((nm||'?').charAt(0).toUpperCase())+'</span><span><span style="font-weight:600;display:block;">'+escHtml(nm)+'</span><span style="font-size:11px;color:var(--muted);">'+escHtml(sub||'')+'</span></span></div></td>'
         +'<td class="opx3-why">'+escHtml(line(x))+'</td>'
         +'<td style="white-space:nowrap;'+($?'color:#1a7e49;font-weight:700;':'color:var(--muted);')+'">'+($||'\u2014')+'</td>'
-        +'<td>'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>':'<button class="iabtn" style="color:var(--p);font-weight:600;white-space:nowrap;" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>')+'</td>'
+        +'<td>'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>':'<button class="opx5-pill" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>')+'</td>'
         +'<td style="white-space:nowrap;color:var(--muted);">'+escHtml(ago)+'</td>'
       +'</tr>';
     }).join(''):'<tr><td colspan="5" style="color:var(--muted);padding:14px;">Nothing here right now.</td></tr>')
-    +'</tbody></table></div>';
+    +'</tbody></table></div>'
+    +(pipeAll.length>pipeItems.length?'<div style="text-align:center;margin-top:12px;"><button class="bf-whymore" style="font-size:13px;color:var(--p);" onclick="OPPX.showAllFeed=true;oppxRender();">View all '+pipeAll.length+' opportunities \u2192</button></div>':'');
 
   root.innerHTML =
-    '<div class="bf-eyebrow">Opportunities</div>'
-    +'<h1 class="bf-headline opx4-greet" aria-live="polite">'+(function(){var h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening';})()+', Eric.'+'</h1>'
-    +'<div class="opx4-read">AI-powered sales command center</div>'
+    '<div class="opx5-wrap">'
+    +'<h1 class="bf-headline opx4-greet" aria-live="polite" style="margin-top:0;">Opportunities</h1>'
+    +'<div class="opx4-read" style="margin-bottom:2px;">AI-powered sales command center</div>'
     +(OPPX.engineDown?'<div style="margin:10px 0 0;padding:9px 13px;border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;font-size:12.5px;">Engine unreachable \u2014 showing your CRM directly. <button class="bf-whymore" onclick="loadOpportunities()">Retry</button></div>':'')
     +glance
     +quietNote
     +(today.length?('<div class="opx4-h" style="margin-top:30px;">Today\u2019s actions</div><div class="opx3-cards">'+cards+'</div>'):'')
     +'<div class="opx4-h" style="margin-top:44px;">Opportunity feed <span class="opx4-hs">the evidence behind the recommendations</span></div>'
-    +'<div class="opx-toolbar" style="margin-top:10px;"><input class="opx-search" placeholder="Search\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities"><div class="opx-filters">'+chips+'</div></div>'
+    +'<div class="opx5-tabs">'+chips+'<span style="flex:1;"></span><input class="opx-search opx5-search" placeholder="Search\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities"></div>'
     +tbl
     +'<div class="opx4-h" style="margin-top:44px;cursor:pointer;" onclick="oppxBenchToggle()">Prospect database <span class="opx4-hs">\u2014 '+benchN+' records \u00b7 '+(OPPX.ev.open?'hide \u25b4':'open \u25be')+'</span></div>'
     +(OPPX.ev.open?oppxBenchTable():'<div style="font-size:12.5px;color:var(--muted);padding:4px 2px;">'+uncontacted+' uncontacted of '+benchN+' \u2014 fully editable evidence: search, filter, draft, convert, bulk-update.</div>')
     +lookForm
-    +footerLite();
+    +footerLite()
+    +'</div>';
 
   if(OPPX.pendingOpen){ var pid=OPPX.pendingOpen; OPPX.pendingOpen=null;
     if((OPPX.rows||[]).some(function(r){ return r.id===pid; })){ oppxPanelOpen('p', pid); } }
