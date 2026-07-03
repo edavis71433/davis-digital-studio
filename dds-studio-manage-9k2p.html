@@ -12019,6 +12019,19 @@ function anEngineNote(eng){
 
 <style>
 /* GROWTH & PARTNERSHIPS — growth operating system */
+.grx-card{box-shadow:0 1px 2px rgba(41,25,66,.03);}
+.grx-card+.grx-card, .grx-grid .grx-card{margin-top:0;}
+.grx-empty{font-size:12.5px;color:var(--muted);padding:14px 0;line-height:1.6;}
+.grx-band{padding:18px 24px;gap:0;}
+.grx-band>div{padding:0 22px;border-left:1px solid rgba(41,25,66,.07);}
+.grx-band>div:first-child, .grx-band>div:nth-child(2){border-left:none;padding-left:0;}
+.grx-band>div:first-child{padding-right:14px;}
+.grx-tabs2{display:flex;gap:2px;border-bottom:1px solid rgba(41,25,66,.08);margin-top:16px;}
+.grx-grid{gap:20px;margin-top:20px;}
+.grx-grid>div>.grx-card{margin-top:16px;}
+.grx-grid>div>.grx-card:first-child{margin-top:0;}
+.grx-ai{padding:16px 20px;margin-top:20px;}
+.grx-ringsub{font-size:9.5px;font-weight:700;color:#1a7e49;}
 .grx-band{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 20px;margin-top:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
 .grx-meta{font-size:11px;color:var(--muted);}
 .grx-metav{font-size:13.5px;font-weight:650;color:var(--ink);margin-top:2px;}
@@ -12063,7 +12076,8 @@ function anEngineNote(eng){
   function done(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'||s==='complete'; }
   function ring(pct,label,color){
     var r=46,c=2*Math.PI*r,off=c*(1-pct/100);
-    return '<div class="grx-ring"><svg width="110" height="110"><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="rgba(41,25,66,.07)" stroke-width="9"/><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'"/></svg><div class="grx-ringn"><span>'+pct+(label==='%'?'%':'')+'</span>'+(label&&label!=='%'?'<span class="grx-ringl">'+esc(label)+'</span>':'')+'</div></div>';
+    var sub = label==='%' ? (pct>=70?'On track':(pct>0?'In motion':'Starting')) : label;
+    return '<div class="grx-ring"><svg width="110" height="110"><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="rgba(41,25,66,.07)" stroke-width="9"/><circle cx="55" cy="55" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'"/></svg><div class="grx-ringn"><span>'+pct+(label==='%'?'%':'')+'</span><span class="grx-ringsub" style="color:'+color+';">'+esc(sub)+'</span></div></div>';
   }
   function ensureRoot(){
     var page=document.getElementById('page-growth'); if(!page) return null;
@@ -12193,7 +12207,7 @@ function anEngineNote(eng){
           :('<span class="grx-chip" style="'+(done(g)?'color:#1a7e49;background:#e7f6ee;':'color:#5b3fa0;background:rgba(91,63,160,.08);')+'">'+esc(done(g)?'Complete':st.replace(/_/g,' '))+'</span>'))
         +(g.target?'<span style="font-size:11px;color:var(--muted);white-space:nowrap;">'+esc(String(g.target).slice(0,26))+'</span>':'')
       +'</div>';
-    }).join(''):'<div style="font-size:12.5px;color:var(--muted);">No goals set yet \u2014 add them in Classic view and they render here.</div>';
+    }).join(''):'<div class="grx-empty">\u25CB No goals set yet. Open the <b>Goals</b> tab above to define this business\u2019s measurable targets \u2014 they render here with live progress.</div>';
 
     var nextRev=reviews.map(function(r){ return r.due_date||r.date||r.scheduled_for||r.created_at; }).filter(Boolean).sort()[0];
 
@@ -12219,7 +12233,7 @@ function anEngineNote(eng){
       +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Recent wins</div>'
         +(wins.length?('<div class="grx-wins">'+wins.slice(0,4).map(function(w){
           return '<div class="grx-win"><div class="grx-wt">\u2713 '+esc(w.title||w.summary||w.description||'Delivered work')+'</div><div class="grx-wd">'+esc(agoS(w.created_at||w.date))+'</div></div>';
-        }).join('')+'</div>'):'<div style="font-size:12.5px;color:var(--muted);">Wins appear here as work is logged \u2014 momentum you can point at.</div>')
+        }).join('')+'</div>'):'<div class="grx-empty">\u25CB Wins land here automatically as work is logged in the <b>Work log</b> tab \u2014 momentum you can point at in every monthly update.</div>')
       +'</div>'
       +'<div class="grx-ai">\u2726 <b style="font-weight:700;">AI Insight</b><span style="flex:1;min-width:200px;">'
         +esc(pct>=60?'This partnership is performing \u2014 a good moment to discuss the next phase of the roadmap.':(tDone?'Steady progress this period. The current focus above is where the next visible win comes from.':'The plan is set; the first completed tasks will start the momentum story.'))
@@ -12242,7 +12256,7 @@ function anEngineNote(eng){
             +'<div style="font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5;">'+esc(String(r.why||r.body||r.impact||'').slice(0,110))+'</div>'
             +'<div style="font-size:11.5px;color:var(--p);font-weight:600;margin-top:6px;">Discuss \u2192</div></div>';
         }).join('')
-        :'<div style="font-size:12.5px;color:var(--muted);">No recommendations queued. The engine adds them as it learns this business \u2014 or add one in Classic view.</div>')
+        :'<div class="grx-empty">\u25CB No recommendations queued yet. Add one under <b>Recommendations</b>, or let the engine surface them as it learns this business.</div>')
       +'</div>'
       +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Internal <span style="font-weight:400;font-size:10.5px;color:var(--muted);">Eric only</span></div>'
         +'<div class="rhx-kv"><span>MRR</span><b>'+(p.monthly_amount?money(p.monthly_amount)+'/mo':'\u2014')+'</b></div>'
@@ -12263,9 +12277,19 @@ function anEngineNote(eng){
         +(nextRev?'<div><div class="grx-meta">Next review</div><div class="grx-metav">'+esc(String(nextRev).slice(0,10))+'</div></div>':'')
         +'<span style="flex:1;"></span><span class="ibx-chip" style="'+(String(p.status||'').toLowerCase()==='active'?'color:#0e7a6e;background:#e4f5f2;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc((p.status||'active').toUpperCase())+'</span>'
       +'</div>'
+      +'<div class="grx-tabs2">'
+        +'<button class="ibx-tab on">Overview</button>'
+        +[['goals','Goals'],['work','Work log'],['review','Reviews'],['recs','Recommendations']].map(function(t){
+          return '<button class="ibx-tab" onclick="grxTabTo(\''+t[0]+'\')">'+t[1]+'</button>';
+        }).join('')
+      +'</div>'
       +'<div class="grx-grid"><div>'+main+'</div><div>'+rail+'</div></div>';
   }
 
+  window.grxTabTo=function(tab){
+    var id=GRX.id; grxClassic();
+    setTimeout(function(){ try{ if(typeof openDetail==='function') openDetail(id, tab); }catch(e){} },250);
+  };
   window.grxRec=function(ix){
     var d=GRX.d; if(!d) return;
     var r=(d.recommendations||[])[ix]; var p=d.partnership;
