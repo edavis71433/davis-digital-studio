@@ -14655,5 +14655,64 @@ window.ddsFilesCard=async function(mountId, clientId){
   window.loadVisibility=smxLoad;
 })();
 </script>
+
+<script>
+// ═══ ANALYTICS — executive summary enhancement. The existing page (Practice
+// Pulse + per-client trend deep-dive on real admin_analytics series) stays
+// untouched; this prepends the mockup's exec strip built from tables that
+// exist: paid invoices (revenue), leads, conversions (clients created), and a
+// deterministic summary sentence. GA4-style widgets (traffic sources, bounce,
+// engagement) are documented dependencies — no GA4 route exists yet. ═══
+(function(){
+  var _loadAn=window.loadAnalytics;
+  window.loadAnalytics=async function(){
+    var r=_loadAn?await _loadAn.apply(this,arguments):null;
+    try{ await anxExec(); }catch(e){}
+    return r;
+  };
+  async function anxExec(){
+    var host=document.getElementById('analyticsBody'); if(!host) return;
+    var mount=document.getElementById('anxExec');
+    if(!mount){
+      mount=document.createElement('div'); mount.id='anxExec';
+      host.insertBefore(mount, host.firstChild);
+    }
+    mount.innerHTML='<div class="bf-skel" style="height:80px;border-radius:16px;margin-bottom:14px;"></div>';
+    function safe(fn){ return fn().catch(function(){ return null; }); }
+    var now=new Date(); var mStart=new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    var pStart=new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString();
+    var r=await Promise.all([
+      safe(function(){ return api('invoices?select=amount,paid_at,status&deleted_at=is.null&paid_at=gte.'+encodeURIComponent(pStart)+'&limit=300'); }),
+      safe(function(){ return api('leads?select=id,created_at&created_at=gte.'+encodeURIComponent(pStart)+'&limit=400'); }),
+      safe(function(){ return api('clients?select=id,created_at&created_at=gte.'+encodeURIComponent(pStart)+'&limit=100'); })
+    ]);
+    function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
+    function amt(a){ try{ var v=invcAmt(a); return isFinite(v)?v:0; }catch(e){ return Number(String(a||'').replace(/[^0-9.]/g,''))||0; } }
+    function split(rows, dateKey){
+      var cur=0, prev=0;
+      (rows||[]).forEach(function(x){ var d=x[dateKey]; if(!d) return; if(d>=mStart) cur++; else prev++; });
+      return [cur, prev];
+    }
+    var inv=(r[0]||[]).filter(function(i){ return i.paid_at; });
+    var revCur=0, revPrev=0;
+    inv.forEach(function(i){ var v=amt(i.amount); if(i.paid_at>=mStart) revCur+=v; else revPrev+=v; });
+    var L=split(r[1],'created_at'), C=split(r[2],'created_at');
+    function delta(c,p){ if(p<=0) return c>0?'<span style="color:#1a7e49;font-weight:700;">new</span>':''; var d=Math.round((c-p)/p*100); if(!d) return ''; return '<span style="color:'+(d>0?'#1a7e49':'#c0392b')+';font-weight:700;">'+(d>0?'\u2191 ':'\u2193 ')+Math.abs(d)+'%</span> <span style="color:var(--muted);">vs last month</span>'; }
+    var sent = revCur>0&&C[0]>0?'Money and clients both moved this month \u2014 revenue landed and new relationships started. The pulse below says where to push next.'
+      : revCur>0?'Revenue landed this month. Lead flow is the lever \u2014 the pulse below has the moves.'
+      : L[0]>0?'Leads are arriving but no revenue has landed yet this month \u2014 conversion is the focus. Details below.'
+      : 'A quiet month so far \u2014 the operator lists below are where momentum starts.';
+    mount.innerHTML=
+      '<div class="grx-card" style="margin-bottom:16px;"><div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">'
+        +'<div style="flex:1.6;min-width:240px;"><div class="grx-h" style="margin-bottom:6px;">\u2726 Executive summary</div>'
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.65;">'+esc(sent)+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Revenue = paid invoices \u00b7 Leads = contact-form arrivals \u00b7 Conversions = new clients. Traffic sources, bounce, and engagement need GA4 \u2014 not wired yet, documented, never simulated.</div></div>'
+        +'<div style="min-width:130px;"><div style="font-size:22px;font-weight:800;color:var(--ink);">$'+Math.round(revCur).toLocaleString()+'</div><div style="font-size:11px;color:var(--muted);">Revenue this month</div><div style="font-size:11px;margin-top:3px;">'+delta(revCur,revPrev)+'</div></div>'
+        +'<div style="min-width:110px;"><div style="font-size:22px;font-weight:800;color:var(--ink);">'+L[0]+'</div><div style="font-size:11px;color:var(--muted);">New leads</div><div style="font-size:11px;margin-top:3px;">'+delta(L[0],L[1])+'</div></div>'
+        +'<div style="min-width:110px;"><div style="font-size:22px;font-weight:800;color:var(--ink);">'+C[0]+'</div><div style="font-size:11px;color:var(--muted);">New clients</div><div style="font-size:11px;margin-top:3px;">'+delta(C[0],C[1])+'</div></div>'
+      +'</div></div>';
+  }
+})();
+</script>
 </body>
 </html>
