@@ -1653,7 +1653,10 @@ if (typeof supabase === "undefined" || !supabase.createClient) {
   });
   throw new Error("Supabase library failed to load from CDN");
 }
-const sb = supabase.createClient(SB_URL, SB_KEY);
+// Isolated storage key: the admin and the client portal live on the same
+// domain, and with the default key their sessions overwrite each other's
+// refresh tokens — which is exactly what was signing Eric out mid-session.
+const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey: 'dds-admin-auth', persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
 
 // Returns the current admin's access token (JWT) to send on privileged calls,
 // or "" if not signed in. Privileged Edge Function routes reject empty/non-admin.
