@@ -12088,8 +12088,23 @@ function anEngineNote(eng){
     var root=ensureRoot(); if(!root||GRX.legacy) return;
     if(GRX.id) return grxOpen(GRX.id);
     root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:80px;width:100%;border-radius:16px;"></div>';
-    try{ GRX.list=(await gpApi('partnership_list')).data||[]; }catch(e){ GRX.list=[]; }
-    var rows=GRX.list;
+    var rows=[], loadErr='';
+    try{
+      if(typeof gpApi==='function'){ rows=(await gpApi('partnership_list')).data||[]; }
+      else loadErr='partnership service not reachable from this view';
+    }catch(e){ loadErr=String((e&&e.message)||e); }
+    if(!rows.length){
+      try{
+        var pr=await api('partnerships?select=*&order=created_at.desc&limit=200');
+        if(pr&&pr.length){
+          var cm={};
+          try{ (await api('clients?select=id,name&limit=400')||[]).forEach(function(c){ cm[String(c.id)]=c.name; }); }catch(e2){}
+          rows=pr.map(function(p){ var o={}; for(var k in p) o[k]=p[k]; if(!o.client_name) o.client_name=cm[String(p.client_id)]||p.name||''; return o; });
+          loadErr='';
+        }
+      }catch(e3){}
+    }
+    GRX.list=rows;
     root.innerHTML=
       '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Growth &amp; Partnerships</div>'
       +'<div class="ibx-sub">Your shared roadmap for long-term growth.</div></div>'
@@ -12103,9 +12118,12 @@ function anEngineNote(eng){
           +'<button class="rhx-open" onclick="event.stopPropagation();grxOpen(\''+att(String(p.id))+'\')">Open partnership \u2192</button>'
         +'</div>';
       }).join('')
-      :'<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">No partnerships yet \u2014 start one from a client in the <a href="#" onclick="go(\'clients\');return false;" style="color:var(--p);">Relationship Hub</a>, or use the classic view\u2019s New partnership flow.</div>');
+      :(loadErr
+        ? '<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">Couldn\u2019t load partnerships ('+esc(loadErr)+'). <button class="ibx-pill" onclick="grxLoad()">Try again</button> \u00b7 Classic view still works.</div>'
+        : '<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">No partnerships yet \u2014 start one from a client in the <a href="#" onclick="go(\'clients\');return false;" style="color:var(--p);">Relationship Hub</a>, or use the classic view\u2019s New partnership flow.</div>'));
   }
 
+  window.grxLoad=grxLoad;
   window.grxBack=function(){ GRX.id=null; GRX.d=null; grxLoad(); };
 
   window.grxOpen=async function(id){
@@ -12113,7 +12131,25 @@ function anEngineNote(eng){
     GRX.id=id;
     root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:180px;width:100%;border-radius:16px;"></div>';
     var d=null;
-    try{ d=(await gpApi('partnership_get',{id:id})).data; }catch(e){}
+    try{ if(typeof gpApi==='function') d=(await gpApi('partnership_get',{id:id})).data; }catch(e){}
+    if(!d||!d.partnership){
+      // direct assembly fallback: partnership row + tasks + client email, defensively
+      try{
+        var row=(GRX.list||[]).find(function(r){ return String(r.id)===String(id); });
+        if(!row){ var pr2=await api('partnerships?id=eq.'+encodeURIComponent(id)+'&select=*'); row=pr2&&pr2[0]; }
+        if(row){
+          function sf(fn){ return fn().catch(function(){ return null; }); }
+          var extra=await Promise.all([
+            sf(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(id)+'&select=*&limit=200'); }),
+            sf(function(){ return api('partnership_goals?partnership_id=eq.'+encodeURIComponent(id)+'&select=*&limit=100'); }),
+            sf(function(){ return row.client_id?api('clients?id=eq.'+encodeURIComponent(row.client_id)+'&select=name,contact_email,email'):null; })
+          ]);
+          var cRow=(extra[2]&&extra[2][0])||{};
+          if(!row.client_name) row.client_name=cRow.name||row.name||'';
+          d={ partnership:row, tasks:extra[0]||[], goals:extra[1]||[], work_log:[], reviews:[], recommendations:[], client_email:cRow.contact_email||cRow.email||'' };
+        }
+      }catch(e4){}
+    }
     if(!d||!d.partnership){ root.innerHTML='<div class="ibx-sub" style="margin-top:20px;">Couldn\u2019t load this partnership. <button class="ibx-pill" onclick="grxBack()">\u2190 Back</button></div>'; return; }
     GRX.d=d;
     var p=d.partnership;
