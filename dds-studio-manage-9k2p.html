@@ -12695,7 +12695,11 @@ function anEngineNote(eng){
       ev.push({k:'pay', d:i.created_at, title:(i.name||'Invoice')+' sent', body:'Invoice issued'+(i.amount?' \u00b7 '+esc(String(i.amount)):''), icon:'\u29C1', col:'#9a7a1a'});
     });
     notifs.forEach(function(n){ ev.push({k:'note', d:n.created_at, title:esc(n.title||n.type||'Update'), body:esc(String(n.body||'').slice(0,160)), icon:'\u25C8', col:'#7a6d8e'}); });
-    tl.forEach(function(t){ var kind=String(t.kind||t.type||'note').toLowerCase();
+    var phaseRows=tl.filter(function(t){ return !(t.kind||t.type); });
+    phaseRows.filter(function(p){ return String(p.status||'').toLowerCase()==='done'; }).forEach(function(p){
+      ev.push({k:'mile', d:p.updated_at||p.created_at, title:'Phase completed: '+String(p.title||'Phase'), body:'Project phase marked done.', tag:'Milestone', icon:'\u2713', col:'#1a7e49'});
+    });
+    tl.filter(function(t){ return (t.kind||t.type); }).forEach(function(t){ var kind=String(t.kind||t.type||'note').toLowerCase();
       ev.push({k:(kind==='milestone'?'mile':kind==='meeting'?'meet':'note'), d:t.event_date||t.created_at, title:esc(t.title||(kind.charAt(0).toUpperCase()+kind.slice(1))), body:esc(String(t.body||'').slice(0,200)), icon:kind==='milestone'?'\u2605':kind==='meeting'?'\u25A2':'\u270E', col:kind==='milestone'?'#b8860b':'#0e7a6e'}); });
     if(c.launched_at) ev.push({k:'mile', d:c.launched_at, title:'Website launched', body:'The new website is live and accessible to the public.', tag:'Milestone', icon:'\u25B2', col:'#1a7e49'});
     (parts||[]).forEach(function(p){ ev.push({k:'mile', d:p.created_at, title:'Growth partnership started', body:esc(p.plan_label||'Growth partnership'), icon:'\u2726', col:'#5b3fa0'}); });
@@ -12782,11 +12786,12 @@ function anEngineNote(eng){
         +msRow('Website launched', launched)
         +msRow('Growth partnership', partStart)
       +'</div>'
-      +'<div class="grx-card"><div class="grx-h">Files shared</div><div class="grx-empty" style="padding:6px 0;">File storage isn\u2019t wired into the platform yet \u2014 documented as a dependency, not faked here.</div></div>'
+      +'<div id="tlxFilesMount"></div>'
       +'<div class="grx-card"><div class="grx-h">Quick add</div>'
         +'<div class="tlx-qa" onclick="tlxAdd(\'note\')">\u270E Add note<span class="c">\u203A</span></div>'
         +'<div class="tlx-qa" onclick="tlxAdd(\'meeting\')">\u25A2 Log meeting<span class="c">\u203A</span></div>'
         +'<div class="tlx-qa" onclick="tlxAdd(\'milestone\')">\u2605 Add milestone<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="tlxUpload()">\u2913 Upload a file<span class="c">\u203A</span></div>'
         +'<div id="tlxAddForm" style="display:none;margin-top:10px;">'
           +'<input class="fi" id="tlxAddT" placeholder="Title" style="margin-bottom:8px;">'
           +'<textarea class="fi" id="tlxAddB" rows="2" placeholder="Details (optional)"></textarea>'
@@ -12810,6 +12815,7 @@ function anEngineNote(eng){
         +'<div><div class="rhx-nm" style="font-size:16px;">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(c.contact_email||c.email||'')+'</div></div></div>'
         +'<div class="tlx-bm"><div class="grx-meta">Client since</div><div class="grx-metav">'+(function(){try{return new Date(c.created_at).toLocaleDateString('en-US',{month:'short',year:'numeric'});}catch(e){return '\u2014';}})()+'</div></div>'
         +'<div class="tlx-bm"><div class="grx-meta">MRR</div><div class="grx-metav">'+(mrr?money(mrr)+'/mo':'\u2014')+'</div></div>'
+        +(isFinite(Number(c.progress))&&Number(c.progress)>0?'<div class="tlx-bm"><div class="grx-meta">Project progress</div><div class="grx-metav">'+Math.round(Number(c.progress))+'%</div></div>':'')
         +'<span style="flex:1;"></span>'
         +'<div style="text-align:right;"><div class="grx-meta">Relationship health</div></div>'
         +'<div class="rhx-ring" style="border-color:'+hl[1]+';color:'+hl[1]+';margin-left:12px;"><span>'+hs+'</span><span class="rhx-rl">'+esc(hl[0])+'</span></div>'
@@ -12818,8 +12824,25 @@ function anEngineNote(eng){
       +'<div class="tlx-grid"><div>'+stream
         +(list.length>shown.length?'<div style="text-align:center;margin-top:16px;"><button class="ibx-pill" onclick="tlxMore()">\u21BB Load more events</button></div>':'')
       +'</div><div class="tlx-rail">'+rail+'</div></div>';
+    try{ ddsFilesCard('tlxFilesMount', TLX.cid); }catch(e){}
   }
 
+  window.tlxUpload=function(){
+    if(!TLX.cid){ toast('Open a client\u2019s timeline first'); return; }
+    var i=document.createElement('input'); i.type='file'; i.multiple=true;
+    i.onchange=function(){
+      var files=i.files; if(!files||!files.length) return;
+      try{
+        var sel=document.getElementById('sel-files'); if(sel) sel.value=TLX.cid;
+        if(typeof onClientChange==='function') onClientChange(TLX.cid,'files');
+        setTimeout(async function(){
+          try{ await uploadFiles(files); toast('\u2713 Uploaded \u2014 client notified'); }catch(e){ toast('Upload hit a snag'); }
+          setTimeout(function(){ tlxOpen(TLX.cid); },800);
+        },350);
+      }catch(e){ toast('Upload path unavailable'); }
+    };
+    i.click();
+  };
   window.tlxAdd=function(kind){
     TLX._addKind=kind;
     var f=document.getElementById('tlxAddForm'); if(!f) return;
@@ -13061,7 +13084,8 @@ function anEngineNote(eng){
           +'<button class="ibx-pill" onclick="go(\'clients\');setTimeout(function(){try{rhxOpen(\''+att(String(c.id))+'\')}catch(e){}},400);">Relationship \u2192</button>'
         +'</div>'
       +'</div>'
-      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Shared files</div><div class="grx-empty" style="padding:6px 0;">File storage isn\u2019t wired yet \u2014 documented, not faked.</div></div>';
+      +'<div id="msxProjMount"></div>'
+      +'<div id="msxFilesMount"></div>';
     }
 
     root.innerHTML=
@@ -13070,6 +13094,7 @@ function anEngineNote(eng){
       +'<span style="flex:1;"></span></div>'
       +stats
       +'<div class="msx-grid">'+listHtml+threadHtml+'<div>'+rail+'</div></div>';
+    if(c){ try{ ddsProjCtx('msxProjMount', String(c.id), c.progress); }catch(e){} try{ ddsFilesCard('msxFilesMount', String(c.id)); }catch(e){} }
   }
 
   window.msxSend=async function(){
@@ -13271,7 +13296,8 @@ function anEngineNote(eng){
       return '<div class="fsx-card'+(FSX.sel===String(f.id)?' on':'')+'" onclick="fsxSel(\''+att(String(f.id))+'\')">'
         +'<div class="fsx-th">'+th+'</div>'
         +'<div class="fsx-fb"><div class="fsx-fn">'+esc(f.name||'File')+'</div>'
-        +'<div class="fsx-fm">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+' \u00b7 '+esc(agoS(f.created_at))+'</div>'
+        +'<div class="fsx-fm">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+' \u00b7 '+esc(agoS(f.created_at))
+        +(f.status&&String(f.status).toLowerCase()==='pending'?' \u00b7 <span style="color:#9a7a1a;font-weight:700;">AWAITING REVIEW</span>':'')+'</div>'
         +(FSX.cid==='all'&&cName[String(f.client_id)]?'<div class="fsx-fm" style="color:var(--p);">'+esc(cName[String(f.client_id)])+'</div>':'')
         +'</div></div>';
     }).join('')+'</div>')
@@ -13289,6 +13315,7 @@ function anEngineNote(eng){
         +'<div class="rhx-kv" style="margin-top:12px;"><span>Client</span><b>'+esc(cName[String(f.client_id)]||'\u2014')+'</b></div>'
         +'<div class="rhx-kv"><span>Uploaded</span><b>'+esc(agoS(f.created_at)||'\u2014')+'</b></div>'
         +'<div class="rhx-kv"><span>Shared with client</span><b style="color:#1a7e49;">Yes \u2014 in their portal</b></div>'
+        +(f.status?'<div class="rhx-kv"><span>Status</span><b style="'+(String(f.status).toLowerCase()==='pending'?'color:#9a7a1a;':'color:#1a7e49;')+'">'+esc(String(f.status).toUpperCase())+'</b></div>':'')
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
           +(f.url?'<button class="ibx-pill" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+att(f.url)+'\');toast(\'\\u2713 Link copied\')">Copy link</button>':'')
           +'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(f.client_id))+'\')}catch(e){}},400);">Message client</button>'
@@ -13733,7 +13760,8 @@ function anEngineNote(eng){
           +'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(it.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>'
           +'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(it.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>'
         +'</div>'
-      +'</div>';
+      +'</div>'
+      +'<div id="apxProjMount"></div><div id="apxFilesMount"></div>';
     } else {
       detail='<div class="grx-card"><div class="grx-empty">Select an item.</div></div>';
     }
@@ -13746,6 +13774,7 @@ function anEngineNote(eng){
       +tabs
       +newForm
       +'<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>';
+    if(it&&it.client_id){ try{ ddsProjCtx('apxProjMount', String(it.client_id)); }catch(e){} try{ ddsFilesCard('apxFilesMount', String(it.client_id)); }catch(e){} }
   }
 
   window.apxNewSave=async function(){
@@ -13939,13 +13968,14 @@ function anEngineNote(eng){
 
   function tsxRender(){
     var root=document.getElementById('tsxRoot'); if(!root) return;
-    if(TSX.ready===false){
-      root.innerHTML='<div class="pt">Tasks</div><div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div>'
-        +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">One-time setup</div>'
-        +'<div style="font-size:13px;color:var(--ink);line-height:1.7;">The tasks table isn\u2019t reachable yet. Two steps, once:<br>1. Run <b>08-tasks.sql</b> in Supabase<br>2. Redeploy <b>clever-api</b> (it now allowlists studio_tasks)<br>Then <button class="ibx-pill" onclick="tsxLoad()">reload this page</button>.</div></div>';
-      return;
-    }
+    var setupBanner=(TSX.ready===false)
+      ? '<div class="msx-snap" style="margin-top:12px;">\u26A0 <b>One-time setup pending</b> \u00b7 studio tasks aren\u2019t saveable yet: run <b>08-tasks.sql</b> in Supabase, redeploy <b>clever-api</b>, then <button class="ibx-pill" onclick="tsxLoad()">reload</button>. Your Growth roadmap tasks and \u2726 suggestions still work below.</div>'
+      : '';
     var all=allTasks(), sugg=suggestions();
+    if(!TSX.sel){
+      var firstOpen=sortPool(all.filter(function(t){return t.status!=='done';}))[0];
+      if(firstOpen) TSX.sel=firstOpen.key;
+    }
     var todayStr=new Date().toDateString();
     var q=TSX.q.toLowerCase();
     if(q) all=all.filter(function(t){ return t.title.toLowerCase().indexOf(q)>-1||cName(t.client_id).toLowerCase().indexOf(q)>-1; });
@@ -14148,11 +14178,13 @@ function anEngineNote(eng){
       +'<div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div></div>'
       +'<span style="flex:1;"></span><button class="bf-act primary" onclick="tsxNewToggle()">+ New task</button></div>'
       +stats
+      +setupBanner
       +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
       +tabs
       +newForm
-      +(t2?('<div class="msx-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'</div></div>')
+      +(t2?('<div class="msx-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'<div id="tsxProjMount"></div></div></div>')
            :('<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>'));
+    if(t2&&t2.client_id){ try{ ddsProjCtx('tsxProjMount', String(t2.client_id)); }catch(e){} }
   }
 
   window.tsxNewSave=async function(){
@@ -14243,6 +14275,48 @@ function anEngineNote(eng){
   var _go3=window.go;
   window.go=function(dest){ var r=_go3.apply(this,arguments); try{ if(dest==='tasks') tsxLoad(); }catch(e){} return r; };
 })();
+</script>
+
+<script>
+// Shared Project Context widget — real phases (legacy timeline rows) + clients.progress.
+window.ddsProjCtx=async function(mountId, clientId, progressVal){
+  var el=document.getElementById(mountId); if(!el||!clientId) return;
+  try{
+    var rows=await api('timeline?select=*&client_id=eq.'+encodeURIComponent(clientId)+'&order=sort_order&limit=40')||[];
+    var phases=rows.filter(function(t){ return !(t.kind||t.type); });
+    var prog=Number(progressVal);
+    if(!isFinite(prog)){
+      try{ var c=await api('clients?id=eq.'+encodeURIComponent(clientId)+'&select=progress'); prog=Number(c&&c[0]&&c[0].progress); }catch(e){}
+    }
+    if(!phases.length&&!isFinite(prog)){ el.innerHTML=''; return; }
+    el.innerHTML='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Project context</div>'
+      +(isFinite(prog)?('<div class="grx-track" style="flex:none;"><div class="grx-fill" style="width:'+Math.max(0,Math.min(100,prog))+'%;"></div></div><div style="font-size:11.5px;color:var(--muted);margin-top:4px;text-align:right;">'+Math.round(prog)+'% complete</div>'):'')
+      +phases.slice(0,5).map(function(p){
+        var st=String(p.status||'pending');
+        return '<div class="rhx-kv"><span>'+(st==='done'?'\u2713 ':st==='active'?'\u25B8 ':'\u25CB ')+String(p.title||'Phase').replace(/</g,'&lt;').slice(0,30)+'</span><b style="font-size:11px;color:'+(st==='done'?'#1a7e49':st==='active'?'#2c6fb7':'var(--muted)')+';">'+st.toUpperCase()+'</b></div>';
+      }).join('')
+    +'</div>';
+  }catch(e){ el.innerHTML=''; }
+};
+// Shared Files-shared widget — real per-client files with previews.
+window.ddsFilesCard=async function(mountId, clientId){
+  var el=document.getElementById(mountId); if(!el||!clientId) return;
+  try{
+    var fs2=await api('files?select=id,name,url,created_at&client_id=eq.'+encodeURIComponent(clientId)+'&order=created_at.desc&limit=3')||[];
+    el.innerHTML='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Files shared</div>'
+      +(fs2.length?fs2.map(function(f){
+        var img=/\.(png|jpe?g|gif|webp)$/i.test(String(f.name||''));
+        return '<div style="display:flex;gap:9px;align-items:center;padding:6px 0;">'
+          +'<div style="position:relative;width:34px;height:34px;border-radius:8px;background:rgba(91,63,160,.07);display:flex;align-items:center;justify-content:center;color:var(--p);font-size:13px;overflow:hidden;flex:none;"><span style="position:absolute;">'+(img?'\u25A3':'\u25AF')+'</span>'
+          +((img&&f.url)?'<img src="'+String(f.url).replace(/"/g,'&quot;')+'" style="position:relative;width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'" alt="">':'')+'</div>'
+          +'<div style="flex:1;min-width:0;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+String(f.name||'File').replace(/</g,'&lt;')+'</div>'
+          +(f.url?'<a href="'+String(f.url).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener" style="color:var(--p);font-size:11.5px;font-weight:600;text-decoration:none;">Open</a>':'')
+        +'</div>';
+      }).join('')+'<button class="grx-link" style="margin-top:6px;" onclick="go(\'files\');setTimeout(function(){try{fsxCl(\''+String(clientId).replace(/'/g,'')+'\')}catch(e){}},350);">View all files \u2192</button>'
+      :'<div class="grx-empty" style="padding:6px 0;">No files in their portal yet \u2014 upload from the Files page and they\u2019re notified.</div>')
+    +'</div>';
+  }catch(e){ el.innerHTML=''; }
+};
 </script>
 </body>
 </html>
