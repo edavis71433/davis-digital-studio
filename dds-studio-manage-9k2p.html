@@ -11139,5 +11139,200 @@ function anEngineNote(eng){
   window.loadLeads = ibxLoad;
 })();
 </script>
+
+<style>
+/* INVOICES — money command center */
+.ivx-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.ivx-st{flex:1;min-width:160px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;}
+.ivx-sn{font-size:21px;font-weight:750;color:var(--ink);}
+.ivx-sn.red{color:#c0392b;}
+.ivx-sl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.ivx-tabs{display:flex;align-items:center;gap:2px;border-bottom:1px solid rgba(41,25,66,.08);margin-top:22px;flex-wrap:wrap;}
+.ivx-row{display:flex;align-items:center;gap:14px;padding:14px 12px;border-bottom:1px solid rgba(41,25,66,.05);cursor:pointer;border-radius:12px;transition:background .15s;}
+.ivx-row:hover{background:rgba(91,63,160,.03);}
+.ivx-chip{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;}
+.ivx-amt{font-weight:750;color:var(--ink);white-space:nowrap;}
+.ivx-due{font-size:12px;white-space:nowrap;}
+.ivx-big{font-size:30px;font-weight:750;color:var(--ink);font-family:'Fraunces',serif;}
+.ivx-block{border:1px solid rgba(41,25,66,.06);border-radius:12px;padding:12px 14px;margin-top:14px;}
+.ivx-bh{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;}
+.ivx-kv{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;}
+.ivx-kv b{color:var(--ink);font-weight:650;text-align:right;}
+</style>
+<script>
+// ═══ INVOICES — the money, and the move on each. Overrides the page loader;
+// the classic per-client editor stays intact underneath (Classic view). ═══
+(function(){
+  var IVX={tab:'all', rows:[], loading:false, legacy:false};
+  var __legacyCmd=null;
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function amt(i){ try{ var v=invcAmt(i.amount); return isFinite(v)&&v>0 ? '$'+Math.round(v).toLocaleString() : esc(i.amount||'\u2014'); }catch(e){ return esc(i.amount||'\u2014'); } }
+  function dueMs(i){ try{ return invcDue(i.due_date); }catch(e){ return null; } }
+  function isPaid(i){ return String(i.status||'').toLowerCase()==='paid'; }
+  function isDraft(i){ return String(i.status||'').toLowerCase()==='draft'; }
+  function overdueDays(i){ var t=dueMs(i); if(t==null||isPaid(i)) return 0; var d=Math.floor((Date.now()-t)/86400000); return d>0?d:0; }
+  function cName(i){ return (i.clients&&(i.clients.name))||i.client_name||''; }
+  function cEmail(i){ return (i.clients&&(i.clients.contact_email||i.clients.email))||''; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-invoices'); if(!page) return null;
+    var root=document.getElementById('ivxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._ivxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='ivxRoot'; root.style.maxWidth='1120px';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  window.ivxClassic=function(on){
+    var page=document.getElementById('page-invoices'); var root=document.getElementById('ivxRoot');
+    IVX.legacy=!!on;
+    if(on){
+      if(root) root.style.display='none';
+      Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._ivxHidden) ch.style.display=''; });
+      try{ if(__legacyCmd) __legacyCmd(); }catch(e){}
+      toast('Classic view \u2014 pick the client to add or edit an invoice');
+    } else {
+      Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._ivxHidden) ch.style.display='none'; });
+      if(root) root.style.display='';
+      ivxRender();
+    }
+  };
+
+  async function ivxLoad(){
+    var root=ensureRoot(); if(!root) return;
+    if(IVX.legacy){ window.ivxClassic(true); return; }
+    if(IVX.loading) return; IVX.loading=true;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:260px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:14px;"></div>';
+    var rows=null;
+    try{ rows=await api('invoices?select=*,clients(name,contact_email,email)&deleted_at=is.null&order=created_at.desc&limit=400'); }catch(e){}
+    if(rows===null||rows===undefined){ try{ rows=await api('invoices?select=*&deleted_at=is.null&order=created_at.desc&limit=400'); }catch(e){ rows=null; } }
+    IVX.rows=rows||[]; IVX.loading=false;
+    ivxRender();
+  }
+
+  window.ivxTab=function(t){ IVX.tab=t; ivxRender(); };
+
+  function statusChip(i){
+    if(isPaid(i)) return '<span class="ivx-chip" style="color:#1a7e49;background:#e7f6ee;">Paid</span>';
+    if(isDraft(i)) return '<span class="ivx-chip" style="color:#7a6d8e;background:#f3f0fa;">Draft</span>';
+    return '<span class="ivx-chip" style="color:#9a7a1a;background:#fdf6e3;">Outstanding</span>';
+  }
+
+  function ivxRender(){
+    var root=document.getElementById('ivxRoot'); if(!root||IVX.legacy) return;
+    var rows=IVX.rows, now=new Date();
+    var mKey=now.getFullYear()+'-'+now.getMonth();
+    var paidMonth=0, outstanding=0, overdueN=0, dueMonthN=0;
+    rows.forEach(function(i){
+      var v=0; try{ v=invcAmt(i.amount)||0; }catch(e){}
+      if(isPaid(i)){ var pd=new Date(i.paid_at||0); if((pd.getFullYear()+'-'+pd.getMonth())===mKey) paidMonth+=v; }
+      else if(!isDraft(i)){ outstanding+=v; if(overdueDays(i)>0) overdueN++; var t=dueMs(i); if(t!=null){ var dd=new Date(t); if((dd.getFullYear()+'-'+dd.getMonth())===mKey) dueMonthN++; } }
+    });
+    var hasDrafts=rows.some(isDraft);
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn">$'+Math.round(paidMonth).toLocaleString()+'</div><div class="ivx-sl">Paid this month</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">$'+Math.round(outstanding).toLocaleString()+'</div><div class="ivx-sl">Outstanding</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn'+(overdueN?' red':'')+'">'+overdueN+'</div><div class="ivx-sl">Overdue</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+dueMonthN+'</div><div class="ivx-sl">Due this month</div></div>'
+    +'</div>';
+
+    var TABS=[['all','All invoices'],['out','Outstanding'],['over','Overdue'],['paid','Paid']];
+    if(hasDrafts) TABS.push(['draft','Drafts']);
+    var list=rows.filter(function(i){
+      if(IVX.tab==='out') return !isPaid(i)&&!isDraft(i);
+      if(IVX.tab==='over') return overdueDays(i)>0;
+      if(IVX.tab==='paid') return isPaid(i);
+      if(IVX.tab==='draft') return isDraft(i);
+      return true;
+    });
+    var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
+      return '<button class="ibx-tab'+(IVX.tab===t[0]?' on':'')+'" onclick="ivxTab(\''+t[0]+'\')">'+t[1]+'</button>';
+    }).join('')
+    +'<span style="flex:1;"></span>'
+    +'<button class="ibx-tab" onclick="ivxClassic(true)">+ New invoice</button>'
+    +'<button class="ibx-tab" onclick="ivxClassic(true)" title="Per-client editor and form">Classic view \u2192</button>'
+    +'</div>';
+
+    var body=list.length?list.map(function(i){
+      var od=overdueDays(i);
+      var nm=cName(i);
+      var due = isPaid(i) ? ('Paid '+agoS(i.paid_at)) : (dueMs(i)!=null ? ((od>0?'<span style="color:#c0392b;font-weight:650;">'+od+'d overdue</span>':esc(String(i.due_date||'').replace(/^Due\s+/i,'')))) : '\u2014');
+      return '<div class="ivx-row" onclick="ivxPanel(\''+att(String(i.id))+'\')">'
+        +'<div class="ibx-av">'+esc((nm||i.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:650;color:var(--ink);">'+esc(i.name||'Invoice')+'</div>'
+          +'<div style="font-size:12px;color:var(--muted);">'+(nm?esc(nm)+' \u00b7 ':'')+esc(agoS(i.created_at))+'</div></div>'
+        +statusChip(i)
+        +'<span class="ivx-due">'+due+'</span>'
+        +'<span class="ivx-amt">'+amt(i)+'</span>'
+      +'</div>';
+    }).join('')
+    :'<div style="padding:24px 8px;font-size:13.5px;color:var(--muted);">'+(IVX.tab==='over'?'Nothing overdue \u2014 the money is on schedule.':'Nothing here right now.')+'</div>';
+
+    root.innerHTML=
+      '<div class="pt">Invoices</div>'
+      +'<div class="ibx-sub">The money across every client \u2014 what\u2019s outstanding, what\u2019s overdue, and the move on each.</div>'
+      +stats
+      +tabs
+      +'<div style="margin-top:4px;">'+body+'</div>';
+  }
+
+  window.ivxPanel=function(id){
+    try{ oppxPanelClose(); }catch(e){}
+    var i=(IVX.rows||[]).find(function(r){ return String(r.id)===String(id); });
+    if(!i) return;
+    var od=overdueDays(i), nm=cName(i), em=cEmail(i);
+    var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
+    bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
+    var dueLine = isPaid(i) ? '<span style="color:#1a7e49;font-weight:650;">Paid</span> \u00b7 '+esc(agoS(i.paid_at))
+      : (od>0 ? '<span style="color:#c0392b;font-weight:700;">'+od+' day'+(od===1?'':'s')+' overdue</span>'+(i.due_date?' \u00b7 due '+esc(String(i.due_date).replace(/^Due\s+/i,'')):'')
+      : (i.due_date?('Due '+esc(String(i.due_date).replace(/^Due\s+/i,''))):'No due date'));
+    var acts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">'
+      +(!isPaid(i)?'<button class="bf-act primary" onclick="ivxRemind(\''+att(String(i.id))+'\')">Send reminder \u2192</button>':'')
+      +(!isPaid(i)&&typeof invMarkPaid==='function'?'<button class="bf-act" onclick="invMarkPaid(\''+att(String(i.id))+'\');oppxPanelClose();setTimeout(loadInvoiceCommand,600);">Record payment</button>':'')
+      +(i.stripe_url?'<button class="bf-act" onclick="copyPayLink(\''+att(String(i.stripe_url))+'\')">Copy pay link</button>':'')
+      +'<button class="bf-act" onclick="ivxClassic(true)">Edit in classic \u2192</button>'
+    +'</div>';
+    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Invoice detail">'
+      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+      +'<div class="opx3-pchip" style="color:'+(isPaid(i)?'#1a7e49':(od>0?'#c0392b':'#9a7a1a'))+';">'+(isPaid(i)?'PAID':(od>0?'OVERDUE':'OUTSTANDING'))+'</div>'
+      +'<div class="opx3-pt">'+esc(i.name||'Invoice')+'</div>'
+      +'<div class="opx3-pm">'+(nm?esc(nm):'No client linked')+(em?' \u00b7 '+esc(em):'')+'</div>'
+      +'<div class="ivx-big" style="margin-top:14px;">'+amt(i)+'</div>'
+      +'<div style="font-size:12.5px;margin-top:4px;">'+dueLine+'</div>'
+      +acts
+      +'<div class="ivx-block"><div class="ivx-bh">INVOICE SUMMARY</div>'
+        +'<div class="ivx-kv"><span>Created</span><b>'+esc(agoS(i.created_at)||'\u2014')+'</b></div>'
+        +'<div class="ivx-kv"><span>Due date</span><b>'+esc(i.due_date?String(i.due_date).replace(/^Due\s+/i,''):'\u2014')+'</b></div>'
+        +'<div class="ivx-kv"><span>Status</span><b>'+esc(i.status||'\u2014')+'</b></div>'
+        +(i.stripe_url?'<div class="ivx-kv"><span>Pay link</span><b><a href="'+att(i.stripe_url)+'" target="_blank" rel="noopener" style="color:var(--p);">Open \u2192</a></b></div>':'')
+      +'</div>'
+      +(i.description?'<div class="ivx-block"><div class="ivx-bh">DETAILS</div><div style="font-size:13px;color:var(--ink);line-height:1.6;white-space:pre-wrap;">'+esc(String(i.description).slice(0,600))+'</div></div>':'')
+    +'</aside>';
+    document.body.appendChild(bg);
+    document.addEventListener('keydown', oppxPanelEsc);
+  };
+
+  window.ivxRemind=function(id){
+    var i=(IVX.rows||[]).find(function(r){ return String(r.id)===String(id); });
+    if(!i) return;
+    var nm=cName(i)||'this client', em=cEmail(i), od=overdueDays(i);
+    try{ oppxPanelClose(); }catch(e){}
+    ddsDraftAction({ subject:nm, subjectId:String(i.client_id||i.id), signal:'revenue_at_risk', module:'Invoices',
+      action:'Remind '+nm+' about '+(i.name||'their invoice'),
+      why:(od>0?('the balance is '+od+' day'+(od===1?'':'s')+' past due \u2014 gentle and specific beats silence'):'a friendly nudge before the due date keeps it friendly after'),
+      changed:(i.name||'Invoice')+' \u00b7 '+amt(i)+(i.due_date?' \u00b7 due '+String(i.due_date).replace(/^Due\s+/i,''):''),
+      go:'invoices', refId:String(i.id), email:em||'' });
+  };
+
+  __legacyCmd=window.loadInvoiceCommand;
+  window.loadInvoiceCommand=ivxLoad;
+})();
+</script>
 </body>
 </html>
