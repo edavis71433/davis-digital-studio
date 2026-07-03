@@ -906,6 +906,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <!-- 4 · TOOLS -->
       <div class="sdiv"></div>
       <div class="sl">Tools</div>
+      <button class="sn" data-dest="tools" onclick="go('tasks')" id="sn-tasks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Tasks</button>
       <button class="sn" data-dest="tools" onclick="go('visibility')" id="sn-visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Site monitor</button>
       <button class="sn" data-dest="tools" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
       <button class="sn" data-dest="tools" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email templates</button>
@@ -1063,6 +1064,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       </div>
 
       <!-- TIMELINE -->
+      <div class="page" id="page-tasks"><select id="sel-tasks" style="display:none;" aria-hidden="true"></select></div>
       <div class="page" id="page-timeline">
         <div class="pt">Update Timeline</div>
         <div class="ps">Update project phase statuses and progress percentage.</div>
@@ -13810,6 +13812,277 @@ function anEngineNote(eng){
   // nav hook (page had no loader of its own)
   var _go2=window.go;
   window.go=function(dest){ var r=_go2.apply(this,arguments); try{ if(dest==='approvals') apxLoad(); }catch(e){} return r; };
+})();
+</script>
+
+<style>
+/* TASKS — the execution engine. Library assembly; priority/impact pills reuse
+   the Approvals pattern; queue rows reuse apx-item. */
+#page-tasks #tsxRoot{max-width:1180px;}
+.tsx-sec{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin:18px 0 4px;}
+.tsx-sec.red{color:#c0392b;}
+</style>
+<script>
+// ═══ TASKS — everything that moves a relationship forward, ranked by
+// consequence. Real tasks live in studio_tasks (new) + growth_tasks
+// (roadmaps). Suggestions are derived from real signals (overdue invoices,
+// stale approvals) and become tasks only when accepted — attributed, deduped,
+// never silent. Completing a task writes a Timeline event. ═══
+(function(){
+  var TSX={rows:[], growth:[], clients:[], parts:[], inv:[], apps:[], sel:null, tab:'open', dismissed:{}, ready:null, showNew:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function cName(id){ var c=TSX.clients.find(function(x){return String(x.id)===String(id);}); return c?(c.name||'Client'):''; }
+  function done(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-tasks'); if(!page) return null;
+    var root=document.getElementById('tsxRoot');
+    if(!root){ root=document.createElement('div'); root.id='tsxRoot'; page.appendChild(root); }
+    return root;
+  }
+
+  window.tsxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:220px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('studio_tasks?select=*&order=created_at.desc&limit=400'); }),
+      safe(function(){ return api('growth_tasks?select=*&limit=300'); }),
+      safe(function(){ return api('partnerships?select=id,client_id&limit=100'); }),
+      safe(function(){ return api('clients?select=*&limit=300'); }),
+      safe(function(){ return api('invoices?select=id,name,amount,status,due_date,client_id&deleted_at=is.null&limit=200'); }),
+      safe(function(){ return api('approvals?select=id,title,status,created_at,client_id&limit=200'); })
+    ]);
+    TSX.ready=(r[0]!==null);
+    TSX.rows=r[0]||[];
+    TSX.growth=r[1]||[]; TSX.parts=r[2]||[];
+    TSX.clients=(r[3]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    TSX.inv=r[4]||[]; TSX.apps=r[5]||[];
+    tsxRender();
+  };
+  window.tsxTab=function(t){ TSX.tab=t; TSX.sel=null; tsxRender(); };
+  window.tsxSel=function(k){ TSX.sel=(TSX.sel===k?null:k); tsxRender(); };
+  window.tsxNewToggle=function(){ TSX.showNew=!TSX.showNew; tsxRender(); };
+
+  function partClient(pid){ var p=TSX.parts.find(function(x){return String(x.id)===String(pid);}); return p?p.client_id:null; }
+
+  function allTasks(){
+    var out=[];
+    TSX.rows.forEach(function(t){
+      out.push({key:'s:'+t.id, kind:'s', id:t.id, title:t.title||'Task', body:t.body||'', client_id:t.client_id,
+        status:String(t.status||'open').toLowerCase(), priority:String(t.priority||'medium').toLowerCase(),
+        impact:String(t.impact||'none').toLowerCase(), due:t.due_date||null, source:t.source||'manual',
+        source_ref:t.source_ref||'', when:t.created_at, done_at:t.done_at});
+    });
+    TSX.growth.forEach(function(t){
+      out.push({key:'g:'+t.id, kind:'g', id:t.id, title:t.title||'Roadmap task', body:'', client_id:partClient(t.partnership_id),
+        status:done(t)?'done':'open', priority:'medium', impact:'none', due:null, source:'growth roadmap',
+        source_ref:'', when:t.created_at, done_at:null});
+    });
+    return out;
+  }
+  function suggestions(){
+    var refs={}; TSX.rows.forEach(function(t){ if(t.source_ref) refs[t.source_ref]=1; });
+    var out=[];
+    TSX.inv.forEach(function(i){
+      if(String(i.status||'').toLowerCase()==='paid') return;
+      var due=null; try{ due=invcDue(i.due_date); }catch(e){}
+      if(due!=null&&due<Date.now()){
+        var ref='invoice:'+i.id;
+        if(!refs[ref]&&!TSX.dismissed[ref]) out.push({ref:ref, client_id:i.client_id, title:'Follow up on '+(i.name||'overdue invoice'), why:'Invoice is past due \u2014 unpaid work quietly erodes the relationship on both sides.', priority:'high', impact:'revenue', source:'invoice'});
+      }
+    });
+    TSX.apps.forEach(function(a){
+      if(String(a.status||'').toLowerCase()!=='pending') return;
+      if((Date.now()-new Date(a.created_at))/86400000>=2){
+        var ref='approval:'+a.id;
+        if(!refs[ref]&&!TSX.dismissed[ref]) out.push({ref:ref, client_id:a.client_id, title:'Nudge \u201c'+(a.title||'approval')+'\u201d', why:'Approval has been waiting 2+ days \u2014 a friendly reminder keeps the project moving.', priority:'medium', impact:'milestone', source:'approval'});
+      }
+    });
+    return out;
+  }
+
+  function prChip(p){ var m={high:['\u2191 High','#c0392b','rgba(192,57,43,.08)'],medium:['\u25CF Medium','#9a7a1a','#fdf6e3'],low:['\u25CB Low','#7a6d8e','rgba(122,109,142,.08)']}; var v=m[p]||m.medium;
+    return '<span class="ibx-chip" style="color:'+v[1]+';background:'+v[2]+';">'+v[0]+'</span>'; }
+  function imChip(im){ if(im==='launch') return '<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">\u25CF BLOCKS LAUNCH</span>';
+    if(im==='milestone') return '<span class="ibx-chip" style="color:#9a7a1a;background:#fdf6e3;">\u25CF BLOCKS MILESTONE</span>';
+    if(im==='revenue') return '<span class="ibx-chip" style="color:#5b3fa0;background:rgba(91,63,160,.08);">\u25CF REVENUE</span>';
+    return ''; }
+  function rank(t){
+    var im={launch:0,revenue:1,milestone:2,none:3}[t.impact]!==undefined?{launch:0,revenue:1,milestone:2,none:3}[t.impact]:3;
+    var pr={high:0,medium:1,low:2}[t.priority]!==undefined?{high:0,medium:1,low:2}[t.priority]:1;
+    var od=(t.due&&new Date(t.due)<new Date(new Date().toDateString()))?0:1;
+    return od*0+im*10+pr*3+od; // overdue handled in sections; impact dominates
+  }
+
+  function tsxRender(){
+    var root=document.getElementById('tsxRoot'); if(!root) return;
+    if(TSX.ready===false){
+      root.innerHTML='<div class="pt">Tasks</div><div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div>'
+        +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">One-time setup</div>'
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.7;">The tasks table isn\u2019t reachable yet. Two steps, once:<br>1. Run <b>08-tasks.sql</b> in Supabase<br>2. Redeploy <b>clever-api</b> (it now allowlists studio_tasks)<br>Then <button class="ibx-pill" onclick="tsxLoad()">reload this page</button>. Roadmap tasks from Growth still show below once setup completes.</div></div>';
+      return;
+    }
+    var all=allTasks(), sugg=suggestions();
+    var todayStr=new Date().toDateString();
+    var open=all.filter(function(t){ return t.status!=='done'; });
+    var overdue=open.filter(function(t){ return t.due&&new Date(t.due)<new Date(todayStr); });
+    var dueToday=open.filter(function(t){ return t.due&&new Date(t.due).toDateString()===todayStr; });
+    var done7=all.filter(function(t){ return t.status==='done'&&t.done_at&&(Date.now()-new Date(t.done_at))/86400000<=7; });
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn'+(overdue.length?' red':'')+'">'+overdue.length+'</div><div class="ivx-sl">Overdue</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+dueToday.length+'</div><div class="ivx-sl">Due today</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+open.length+'</div><div class="ivx-sl">Open</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+done7.length+'</div><div class="ivx-sl">Completed this week</div></div>'
+      +(sugg.length?'<div class="ivx-st"><div class="ivx-sn">\u2726 '+sugg.length+'</div><div class="ivx-sl">Suggested by the platform</div></div>':'')
+    +'</div>';
+
+    var sentence = overdue.length? overdue.length+' task'+(overdue.length===1?' is':'s are')+' overdue \u2014 the queue below is ranked by consequence, not age.'
+      : open.length? 'The '+open.length+' open task'+(open.length===1?'':'s')+' below are ranked by business impact. Start at the top.'
+      : 'Nothing open \u2014 accept a suggestion below or add the first task.';
+
+    var TABS=[['open','Open'],['done','Completed'],['sugg','\u2726 Suggested']];
+    var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
+      var n=t[0]==='open'?open.length:t[0]==='done'?all.length-open.length:sugg.length;
+      return '<button class="ibx-tab'+(TSX.tab===t[0]?' on':'')+'" onclick="tsxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
+    }).join('')+'<span style="flex:1;"></span><button class="ibx-tab" onclick="tsxNewToggle()">+ New task</button></div>';
+
+    var newForm=TSX.showNew?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">New task</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +'<input class="fi" id="tsxNT" style="margin:0;flex:2;min-width:220px;" placeholder="What needs doing?">'
+        +'<select class="fi" id="tsxNC" style="margin:0;min-width:160px;"><option value="">No client</option>'+TSX.clients.map(function(c){return '<option value="'+att(String(c.id))+'">'+esc(c.name)+'</option>';}).join('')+'</select>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">'
+        +'<select class="fi" id="tsxNP" style="margin:0;"><option value="medium">Medium priority</option><option value="high">High priority</option><option value="low">Low priority</option></select>'
+        +'<select class="fi" id="tsxNI" style="margin:0;"><option value="none">Blocks nothing</option><option value="milestone">Blocks milestone</option><option value="launch">Blocks launch</option><option value="revenue">Revenue</option></select>'
+        +'<input class="fi" type="date" id="tsxND" style="margin:0;">'
+        +'<button class="bf-act primary" onclick="tsxNewSave()">Add task</button>'
+      +'</div></div>'):'';
+
+    function row(t){
+      var od=t.due&&new Date(t.due)<new Date(todayStr)&&t.status!=='done';
+      return '<div class="apx-item'+(TSX.sel===t.key?' on':'')+'" onclick="tsxSel(\''+t.key+'\')">'
+        +'<input type="checkbox" '+(t.status==='done'?'checked':'')+' style="width:18px;height:18px;accent-color:#1a7e49;cursor:pointer;flex:none;margin-top:2px;" onclick="event.stopPropagation();" onchange="tsxDone(\''+t.key+'\',this.checked)">'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);'+(t.status==='done'?'text-decoration:line-through;color:var(--muted);':'')+'">'+esc(t.title)+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(t.client_id?esc(cName(t.client_id))+' \u00b7 ':'')+esc(t.source)+(t.due?' \u00b7 due '+esc(String(t.due).slice(0,10)):'')+'</div>'
+        +'<div style="margin-top:7px;">'+(od?'<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">OVERDUE</span> ':'')+prChip(t.priority)+' '+imChip(t.impact)+'</div></div>'
+      +'</div>';
+    }
+
+    var listHtml='';
+    if(TSX.tab==='sugg'){
+      listHtml=sugg.length?sugg.map(function(s,ix){
+        return '<div class="apx-item"><div style="flex:1;min-width:0;">'
+          +'<div style="font-size:14px;font-weight:700;color:var(--ink);">\u2726 '+esc(s.title)+'</div>'
+          +'<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;">'+esc(cName(s.client_id))+' \u00b7 '+esc(s.why)+'</div>'
+          +'<div style="margin-top:8px;display:flex;gap:8px;">'
+            +'<button class="bf-act primary" style="padding:7px 14px;font-size:12px;" onclick="tsxAccept('+ix+')">Accept \u2192 becomes a task</button>'
+            +'<button class="ibx-pill" onclick="tsxDismiss(\''+att(s.ref)+'\')">Dismiss</button>'
+          +'</div></div></div>';
+      }).join('')
+      :'<div class="grx-empty" style="margin-top:14px;">No suggestions right now \u2014 they appear when real signals fire (overdue invoices, stale approvals).</div>';
+    } else {
+      var pool=(TSX.tab==='done')?all.filter(function(t){return t.status==='done';}):open;
+      pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b); });
+      if(TSX.tab==='open'){
+        var ovs=pool.filter(function(t){return t.due&&new Date(t.due)<new Date(todayStr);});
+        var rest=pool.filter(function(t){return !(t.due&&new Date(t.due)<new Date(todayStr));});
+        listHtml=(ovs.length?'<div class="tsx-sec red">OVERDUE ('+ovs.length+')</div>'+ovs.map(row).join(''):'')
+          +(rest.length?'<div class="tsx-sec">RANKED BY IMPACT</div>'+rest.map(row).join(''):'')
+          ||'';
+        if(!pool.length) listHtml='<div class="grx-empty" style="margin-top:14px;">Nothing open. \u2726 Suggested has candidates when signals fire.</div>';
+      } else {
+        listHtml=pool.length?pool.map(row).join(''):'<div class="grx-empty" style="margin-top:14px;">Nothing completed yet.</div>';
+      }
+    }
+
+    // detail
+    var t2=allTasks().find(function(x){ return x.key===TSX.sel; });
+    var detail='';
+    if(t2){
+      var srcWhy={manual:'You created this yourself.', 'growth roadmap':'This is part of the client\u2019s growth roadmap \u2014 completing it moves their partnership progress ring.',
+        invoice:'Created from an overdue invoice signal.', approval:'Created from a stale approval signal.', message:'Created from a client message.'};
+      detail='<div class="grx-card">'
+        +'<div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc(t2.title)+'</div>'
+        +(t2.client_id?'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">'+esc(cName(t2.client_id))+'</div>':'')
+        +'<div class="msx-snap" style="margin-top:12px;">\u2726 <b>Why this exists</b> \u00b7 '+esc(srcWhy[t2.source]||('Source: '+t2.source))
+        +(t2.impact!=='none'?' Completing it clears a declared '+esc(t2.impact)+' blocker.':'')+'</div>'
+        +(t2.kind==='s'?(
+          '<div class="ivx-block"><div class="ivx-bh">PRIORITY</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          +['high','medium','low'].map(function(p){ return '<button class="ibx-pill" style="'+(t2.priority===p?'color:#fff;background:var(--p);border-color:transparent;':'')+'" onclick="tsxSet(\''+t2.key+'\',\'priority\',\''+p+'\')">'+p.charAt(0).toUpperCase()+p.slice(1)+'</button>'; }).join('')+'</div></div>'
+          +'<div class="ivx-block"><div class="ivx-bh">IMPACT \u2014 what does this block?</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          +[['none','Nothing'],['milestone','Milestone'],['launch','Launch'],['revenue','Revenue']].map(function(o){ return '<button class="ibx-pill" style="'+(t2.impact===o[0]?'color:#fff;background:var(--p);border-color:transparent;':'')+'" onclick="tsxSet(\''+t2.key+'\',\'impact\',\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div></div>'
+          +'<div class="ivx-block"><div class="ivx-bh">DUE DATE</div><input class="fi" type="date" style="margin:0;" value="'+att(t2.due?String(t2.due).slice(0,10):'')+'" onchange="tsxSet(\''+t2.key+'\',\'due_date\',this.value)"></div>'
+        ):'<div class="ivx-block"><div class="ivx-bh">ROADMAP TASK</div><div style="font-size:12.5px;color:var(--muted);">Lives on the Growth roadmap \u2014 priority/impact/due dates apply to studio tasks. Check it off here or there; the progress ring moves either way.</div></div>')
+        +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS WHEN YOU COMPLETE IT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">1. It\u2019s stamped done with today\u2019s date<br>2. A Timeline event is written to the client\u2019s story'+(t2.kind==='g'?'<br>3. Their Growth progress ring moves':'')+'</div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
+          +(t2.status!=='done'?'<button class="bf-act primary" onclick="tsxDone(\''+t2.key+'\',true)">\u2713 Complete</button>':'')
+          +(t2.client_id?'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>':'')
+          +(t2.client_id?'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>':'')
+        +'</div>'
+      +'</div>';
+    } else {
+      detail='<div class="grx-card"><div class="grx-empty">Select a task \u2014 or accept a \u2726 suggestion.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Tasks</div>'
+      +'<div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div></div>'
+      +'<span style="flex:1;"></span></div>'
+      +stats
+      +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
+      +tabs
+      +newForm
+      +'<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>';
+  }
+
+  window.tsxNewSave=async function(){
+    var t=document.getElementById('tsxNT'); if(!t||!t.value.trim()){ toast('Give it a title'); return; }
+    var g=function(i){ var el=document.getElementById(i); return el?el.value:''; };
+    var row={title:t.value.trim(), client_id:g('tsxNC')||null, priority:g('tsxNP')||'medium', impact:g('tsxNI')||'none', status:'open', source:'manual'};
+    if(g('tsxND')) row.due_date=g('tsxND');
+    var r=await api('studio_tasks','POST',row);
+    if(r===null){ toast('Couldn\u2019t save \u2014 finish the one-time setup (08-tasks.sql + clever-api deploy)'); return; }
+    TSX.showNew=false; toast('\u2713 Task added'); tsxLoad();
+  };
+  window.tsxSet=async function(key,field,val){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    var patch={}; patch[field]=val||null;
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',patch);
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row[field==='due_date'?'due_date':field]=val;
+    toast('\u2713 Saved'); tsxRender();
+  };
+  window.tsxDone=async function(key,on){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t) return;
+    if(t.kind==='g'){
+      var r=await api('growth_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{status:on?'done':'open'});
+      if(r===null){ toast('Couldn\u2019t save'); tsxRender(); return; }
+      var gr=TSX.growth.find(function(x){return String(x.id)===String(t.id);}); if(gr) gr.status=on?'done':'open';
+    } else {
+      var r2=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{status:on?'done':'open', done_at:on?new Date().toISOString():null});
+      if(r2===null){ toast('Couldn\u2019t save'); tsxRender(); return; }
+      var sr=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(sr){ sr.status=on?'done':'open'; sr.done_at=on?new Date().toISOString():null; }
+    }
+    if(on&&t.client_id){
+      try{ await api('timeline','POST',{client_id:t.client_id, kind:'task', title:'Task completed: '+t.title, body:''}); }catch(e){}
+    }
+    toast(on?'\u2713 Done \u2014 written to their timeline'+(t.kind==='g'?' \u00b7 their ring moved':''):'Reopened');
+    tsxRender();
+  };
+  window.tsxAccept=async function(ix){
+    var s=suggestions()[ix]; if(!s) return;
+    var r=await api('studio_tasks','POST',{title:s.title, client_id:s.client_id, priority:s.priority, impact:s.impact, status:'open', source:s.source, source_ref:s.ref});
+    if(r===null){ toast('Couldn\u2019t create \u2014 finish the one-time setup'); return; }
+    toast('\u2713 Accepted \u2014 it\u2019s a real task now'); tsxLoad();
+  };
+  window.tsxDismiss=function(ref){ TSX.dismissed[ref]=1; toast('Dismissed for this session'); tsxRender(); };
+
+  var _go3=window.go;
+  window.go=function(dest){ var r=_go3.apply(this,arguments); try{ if(dest==='tasks') tsxLoad(); }catch(e){} return r; };
 })();
 </script>
 </body>
