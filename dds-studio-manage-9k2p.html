@@ -14405,5 +14405,230 @@ window.ddsFilesCard=async function(mountId, clientId){
   }catch(e){ el.innerHTML=''; }
 };
 </script>
+
+<style>
+/* SITE MONITOR — AI website health center. Library assembly; metric cards reuse
+   stat/card patterns; ring reuses grx ring. */
+#page-visibility #smxRoot{max-width:1280px;}
+.smx-grid{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(0,1.4fr) minmax(230px,.75fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1100px){.smx-grid{grid-template-columns:1fr;}}
+.smx-site{display:flex;gap:12px;padding:13px 14px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;margin-top:10px;cursor:pointer;transition:border-color .15s;}
+.smx-site:hover{border-color:rgba(91,63,160,.3);}
+.smx-site.on{border-color:var(--p);}
+.smx-mini{width:44px;height:44px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none;}
+.smx-pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;background:rgba(41,25,66,.05);color:var(--muted);}
+.smx-met{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;}
+.smx-mn{font-size:22px;font-weight:800;}
+.smx-ml{font-size:11px;color:var(--muted);margin-top:2px;}
+.smx-mt{font-size:11.5px;line-height:1.55;color:var(--ink);margin-top:8px;}
+</style>
+<script>
+// ═══ SITE MONITOR — "is this website healthy?" Real PageSpeed scores via the
+// existing visibility engine (visEdge routes). Business language over jargon;
+// no uptime/security/screenshot theater — absent data stays absent. Issues
+// become tasks with one click. ═══
+(function(){
+  var SMX={rows:[], clients:[], sel:null, checking:{}};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function col(v){ return v==null?'#9a9a9a':v<50?'#c0392b':v<80?'#9a7a1a':'#1a7e49'; }
+  function lbl(v){ return v==null?'Unchecked':v<50?'Needs work':v<80?'Fair':'Healthy'; }
+  function host(u){ try{ return String(u||'').replace(/^https?:\/\//,'').replace(/\/$/,'').toLowerCase(); }catch(e){ return ''; } }
+  function clientFor(url){
+    var h=host(url);
+    return SMX.clients.find(function(c){ var w=host(c.website||''); return w&&h&&(w===h||w.indexOf(h)>-1||h.indexOf(w)>-1); })||null;
+  }
+  function metric(L,keys){ if(!L) return null; for(var i=0;i<keys.length;i++){ if(L[keys[i]]!=null) return Number(L[keys[i]]); } return null; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-visibility'); if(!page) return null;
+    var root=document.getElementById('smxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._smxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='smxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function smxLoad(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:240px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var j=null, cs=null;
+    try{ j=await visEdge({type:'visibility_list'}); }catch(e){}
+    try{ cs=await api('clients?select=*&limit=300'); }catch(e){}
+    if(!j||j.error){
+      root.innerHTML='<div class="pt">Site Monitor</div><div class="ibx-sub">Couldn\u2019t reach the monitoring engine'+(j&&j.error?': '+esc(j.error):'')+'.</div><button class="ibx-pill" style="margin-top:12px;" onclick="loadVisibility()">Try again</button>';
+      return;
+    }
+    SMX.rows=j.data||[];
+    SMX.clients=(cs||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    if(!SMX.sel&&SMX.rows.length){
+      var worst=SMX.rows.slice().sort(function(a,b){ return ((a.latest&&a.latest.overall)!=null?a.latest.overall:101)-((b.latest&&b.latest.overall)!=null?b.latest.overall:101); })[0];
+      SMX.sel=String((worst.site&&(worst.site.id||worst.site.url))||'');
+    }
+    smxRender();
+  }
+  function keyOf(r){ return String((r.site&&(r.site.id||r.site.url))||''); }
+
+  window.smxSel=function(k){ SMX.sel=k; smxRender(); };
+  window.smxAdd=function(){
+    var v=prompt&&''; // no prompts — drive the legacy input inline instead
+    var root=document.getElementById('smxRoot'); if(!root) return;
+    var box=document.getElementById('smxAddBox'); if(box){ box.style.display=box.style.display==='none'?'':'none'; var i=document.getElementById('smxAddIn'); if(i) i.focus(); }
+  };
+  window.smxAddGo=function(){
+    var i=document.getElementById('smxAddIn'); var v=i&&i.value.trim(); if(!v){ toast('Enter a site URL'); return; }
+    var legacy=document.getElementById('visAddUrl'); if(legacy) legacy.value=v;
+    try{ visAddSite(); toast('Adding\u2026'); setTimeout(smxLoad, 1200); }catch(e){ toast('Add path unavailable'); }
+  };
+  window.smxSync=function(){ try{ visSyncClients(); toast('Syncing client sites\u2026'); setTimeout(smxLoad, 1500); }catch(e){ toast('Sync unavailable'); } };
+  window.smxCheck=async function(k){
+    var r=SMX.rows.find(function(x){ return keyOf(x)===k; }); if(!r) return;
+    SMX.checking[k]=1; smxRender();
+    try{
+      if(typeof visCheckOne==='function'&&r.site&&r.site.id){ try{ await visCheckOne(String(r.site.id), null); }catch(e0){} smxLoadDone=1; }
+      var res = (typeof smxLoadDone!=='undefined'&&smxLoadDone) ? {ok:1} : await visEdge({type:'visibility_check', site_id:r.site&&r.site.id, url:r.site&&r.site.url});
+      if(res&&!res.error) toast('\u2713 Check complete \u2014 real PageSpeed scores updated');
+      else toast('Check failed'+(res&&res.error?': '+String(res.error).slice(0,60):''));
+    }catch(e){ toast('Check failed'); }
+    delete SMX.checking[k];
+    smxLoad();
+  };
+  window.smxTask=async function(k,metricName){
+    var r=SMX.rows.find(function(x){ return keyOf(x)===k; }); if(!r) return;
+    var c=clientFor(r.site&&r.site.url);
+    var title='Improve '+metricName+' on '+host(r.site&&r.site.url);
+    var body=await api('studio_tasks','POST',{title:title, client_id:c?c.id:null, priority:'medium', impact:'none', status:'open', source:'site', source_ref:'site:'+k+':'+metricName});
+    toast(body===null?'Couldn\u2019t create the task':'\u2713 Task created \u2014 it\u2019s in the queue');
+  };
+
+  function smxRender(){
+    var root=document.getElementById('smxRoot'); if(!root) return;
+    var rows=SMX.rows;
+    var scored=rows.filter(function(r){ return r.latest&&r.latest.overall!=null; });
+    var avg=scored.length?Math.round(scored.reduce(function(s,r){ return s+r.latest.overall; },0)/scored.length):null;
+    var attn=scored.filter(function(r){ return r.latest.overall<80; }).length;
+    var lastChecked=scored.map(function(r){ return r.latest.checked_at||r.latest.created_at; }).filter(Boolean).sort().reverse()[0];
+
+    var stats='<div class="ivx-stats">'
+      +(avg!=null?'<div class="ivx-st"><div class="ivx-sn" style="color:'+col(avg)+';">'+avg+'</div><div class="ivx-sl">Overall health (avg)</div></div>':'')
+      +'<div class="ivx-st"><div class="ivx-sn">'+rows.length+'</div><div class="ivx-sl">Sites monitored</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn'+(attn?' red':'')+'">'+attn+'</div><div class="ivx-sl">Need attention (&lt;80)</div></div>'
+      +(lastChecked?'<div class="ivx-st"><div class="ivx-sn" style="font-size:15px;">'+esc(agoS(lastChecked))+'</div><div class="ivx-sl">Last check</div></div>':'')
+    +'</div>';
+
+    var sentence = !rows.length?'No sites watched yet \u2014 sync your client sites and run the first checks.'
+      : !scored.length?'Sites are watched but unchecked \u2014 run checks to get real PageSpeed scores.'
+      : attn===0?'All '+scored.length+' checked websites are healthy. Nothing needs you.'
+      : attn+' website'+(attn===1?'':'s')+' below 80 \u2014 the workspace explains what it means in business terms and what to do.';
+
+    var listHtml=rows.length?rows.map(function(r){
+      var L=r.latest, o=L&&L.overall!=null?L.overall:null, c=clientFor(r.site&&r.site.url);
+      var tr='';
+      if(L&&r.previous&&L.overall!=null&&r.previous.overall!=null){ var d=L.overall-r.previous.overall;
+        if(d) tr='<span style="font-size:11px;font-weight:700;color:'+(d>0?'#1a7e49':'#c0392b')+';">'+(d>0?'\u25B2 +':'\u25BC ')+d+'</span>'; }
+      return '<div class="smx-site'+(SMX.sel===keyOf(r)?' on':'')+'" onclick="smxSel(\''+att(keyOf(r))+'\')">'
+        +'<div class="smx-mini" style="border-color:'+col(o)+';color:'+col(o)+';">'+(o!=null?o:'\u2014')+'</div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);">'+esc((c&&c.name)||host(r.site&&r.site.url)||'Site')+' '+tr+'</div>'
+        +'<div style="font-size:11.5px;color:var(--muted);margin-top:2px;">'+esc(host(r.site&&r.site.url))+(L&&(L.checked_at||L.created_at)?' \u00b7 '+esc(agoS(L.checked_at||L.created_at)):' \u00b7 unchecked')+'</div>'
+        +'<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">'
+          +[['Perf',metric(L,['perf','performance'])],['SEO',metric(L,['seo'])],['A11y',metric(L,['accessibility','access'])]].map(function(p){
+            return p[1]!=null?'<span class="smx-pill" style="color:'+col(p[1])+';">'+p[0]+' '+p[1]+'</span>':'';
+          }).join('')
+        +'</div></div>'
+      +'</div>';
+    }).join('')
+    :'<div class="grx-empty" style="margin-top:14px;">No sites yet \u2014 Sync client sites pulls every client website in automatically.</div>';
+
+    // workspace
+    var r2=rows.find(function(x){ return keyOf(x)===SMX.sel; });
+    var work='', rail='';
+    if(r2){
+      var L=r2.latest, P=r2.previous, o=L&&L.overall!=null?L.overall:null;
+      var c=clientFor(r2.site&&r2.site.url);
+      var mets=[
+        ['Performance', metric(L,['perf','performance']), 'Visitors wait longer for pages to load \u2014 every extra second raises the chance they leave before contacting you.', 'Optimize images & compress assets'],
+        ['SEO', metric(L,['seo']), 'Google has a harder time understanding and ranking these pages \u2014 fewer people find the business through search.', 'Fix metadata & on-page SEO basics'],
+        ['Accessibility', metric(L,['accessibility','access']), 'Some visitors \u2014 and Google \u2014 struggle to use the site. Accessibility issues quietly cost trust and rankings.', 'Fix accessibility issues']
+      ];
+      var summary = o==null?'This site hasn\u2019t been checked yet \u2014 run the first check for real PageSpeed scores.'
+        : o>=80?'This website is healthy. '+(mets.filter(function(m){return m[1]!=null&&m[1]<80;}).length?('One area below 80 is worth attention \u2014 see the card below.'):'All measured areas are in the green. Nothing customer-facing needs you.')
+        : 'This website needs attention \u2014 the cards below say exactly why it matters and what to do.';
+      var improvements=(L&&P)?mets.map(function(m){
+        var prev=metric(P,[m[0].toLowerCase()==='performance'?'perf':m[0].toLowerCase()==='accessibility'?'accessibility':'seo', m[0].toLowerCase()]);
+        return (m[1]!=null&&prev!=null&&m[1]>prev)?('<div class="grx-ok">'+esc(m[0])+' improved '+(m[1]-prev)+' points since the last check</div>'):'';
+      }).join(''):'';
+
+      work='<div class="grx-card">'
+        +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'
+          +'<div><div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc((c&&c.name)||host(r2.site&&r2.site.url))+'</div>'
+          +'<div style="font-size:12px;color:var(--muted);margin-top:2px;"><a href="'+att((r2.site&&r2.site.url&&(/^https?:/.test(r2.site.url)?r2.site.url:'https://'+r2.site.url))||'#')+'" target="_blank" rel="noopener" style="color:var(--p);">'+esc(host(r2.site&&r2.site.url))+' \u2197</a>'+(L&&(L.checked_at||L.created_at)?' \u00b7 checked '+esc(agoS(L.checked_at||L.created_at)):'')+'</div></div>'
+          +'<span style="flex:1;"></span>'
+          +'<button class="bf-act primary" '+(SMX.checking[SMX.sel]?'disabled':'')+' onclick="smxCheck(\''+att(SMX.sel)+'\')">'+(SMX.checking[SMX.sel]?'Checking\u2026 (\u224820s)':'\u25B6 Run check')+'</button>'
+        +'</div>'
+        +'<div style="display:flex;gap:18px;align-items:center;margin-top:16px;flex-wrap:wrap;">'
+          +'<div class="rhx-ring" style="width:76px;height:76px;border-width:5px;border-color:'+col(o)+';color:'+col(o)+';"><span style="font-size:22px;">'+(o!=null?o:'\u2014')+'</span><span class="rhx-rl">'+esc(lbl(o))+'</span></div>'
+          +'<div style="flex:1;min-width:220px;font-size:13px;color:var(--ink);line-height:1.6;">\u2726 <b>Website summary</b> \u00b7 '+esc(summary)+'</div>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;">'
+          +mets.map(function(m){
+            return '<div class="smx-met"><div class="smx-mn" style="color:'+col(m[1])+';">'+(m[1]!=null?m[1]:'\u2014')+'</div><div class="smx-ml">'+m[0]+' \u00b7 Google PageSpeed</div>'
+              +(m[1]!=null&&m[1]<80?('<div class="smx-mt">'+esc(m[2])+'</div><button class="ibx-pill" style="margin-top:8px;" onclick="smxTask(\''+att(SMX.sel)+'\',\''+m[0]+'\')">'+esc(m[3])+' \u2192 task</button>'):'')
+            +'</div>';
+          }).join('')
+        +'</div>'
+        +(improvements?'<div class="ivx-block"><div class="ivx-bh">RECENT IMPROVEMENTS \u2014 vs previous check</div>'+improvements+'</div>':'')
+        +'<div class="ivx-block"><div class="ivx-bh">STATUS \u2014 what we actually know</div>'
+          +(o!=null?'<div class="grx-ok">Site reachable \u2014 PageSpeed completed a full crawl</div>':'')
+          +(L&&(L.checked_at||L.created_at)?'<div class="grx-ok">Last verified '+esc(agoS(L.checked_at||L.created_at))+'</div>':'<div style="font-size:12.5px;color:var(--muted);padding:4px 0;">\u25CB Not checked yet</div>')
+          +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Uptime pings, SSL expiry, backups, and security scanning aren\u2019t wired yet \u2014 documented as dependencies, never simulated.</div>'
+        +'</div>'
+      +'</div>';
+
+      var lowest=mets.filter(function(m){ return m[1]!=null; }).sort(function(a,b){ return a[1]-b[1]; })[0];
+      rail='<div class="grx-card"><div class="grx-h">\u2726 AI site insight</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'
+        +esc(o==null?'Run the first check \u2014 everything on this page is real PageSpeed data, so it starts blank, not fake.'
+          :lowest&&lowest[1]<80?(lowest[0]+' ('+lowest[1]+') is the biggest lever on this site right now. '+lowest[2]):'Nothing is dragging this site down. A monthly check keeps the trend line honest.')+'</div>'
+        +(lowest&&lowest[1]!=null&&lowest[1]<80?'<button class="bf-act primary" style="margin-top:10px;" onclick="smxTask(\''+att(SMX.sel)+'\',\''+lowest[0]+'\')">Create the fix task \u2192</button>':'')
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Integrations \u2014 honest status</div>'
+        +'<div class="rhx-kv"><span>Google PageSpeed</span><b style="color:#1a7e49;">CONNECTED</b></div>'
+        +'<div class="rhx-kv"><span>Search Console / GA4</span><b>Analytics page</b></div>'
+        +'<div class="rhx-kv"><span>Uptime pings</span><b style="color:var(--muted);">NOT WIRED</b></div>'
+        +'<div class="rhx-kv"><span>SSL / backups</span><b style="color:var(--muted);">NOT WIRED</b></div>'
+      +'</div>'
+      +(c?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Client</div>'
+        +'<div class="rhx-kv"><span>'+esc(c.name)+'</span><b></b></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">'
+          +'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(c.id))+'\')}catch(e){}},300);">Timeline \u2192</button>'
+          +'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(c.id))+'\')}catch(e){}},400);">Message \u2192</button>'
+        +'</div></div>'
+        +'<div id="smxProjMount"></div>'):'');
+    } else {
+      work='<div class="grx-card"><div class="grx-empty">Select a site.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Site Monitor</div>'
+      +'<div class="ibx-sub">Real PageSpeed health for every site you watch \u2014 in business language.</div></div>'
+      +'<span style="flex:1;"></span>'
+      +'<button class="ibx-tab" onclick="smxSync()">\u21BB Sync client sites</button>'
+      +'<button class="bf-act primary" onclick="smxAdd()">+ Add website</button></div>'
+      +'<div id="smxAddBox" style="display:none;margin-top:10px;"><div style="display:flex;gap:8px;"><input class="fi" id="smxAddIn" style="margin:0;flex:1;" placeholder="example.com"><button class="bf-act primary" onclick="smxAddGo()">Add &amp; watch</button></div></div>'
+      +stats
+      +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
+      +'<div class="smx-grid"><div>'+listHtml+'</div><div>'+work+'</div><div>'+rail+'</div></div>';
+    var r3=rows.find(function(x){ return keyOf(x)===SMX.sel; });
+    var c3=r3&&clientFor(r3.site&&r3.site.url);
+    if(c3){ try{ ddsProjCtx('smxProjMount', String(c3.id), c3.progress); }catch(e){} }
+  }
+
+  window.loadVisibilityLegacy=window.loadVisibility;
+  window.loadVisibility=smxLoad;
+})();
+</script>
 </body>
 </html>
