@@ -12848,5 +12848,268 @@ function anEngineNote(eng){
   window.loadTimeline=tlxLoad;
 })();
 </script>
+
+<style>
+/* MESSAGES — all conversations, one place. Inherits the OS component library;
+   the only new components are chat bubbles + quick-reply pills (no thread UI
+   existed anywhere in the library — justified addition, reused nothing lost). */
+#page-messages #msxRoot{max-width:1280px;}
+.msx-grid{display:grid;grid-template-columns:minmax(240px,.85fr) minmax(0,1.5fr) minmax(240px,.85fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1100px){.msx-grid{grid-template-columns:1fr;}}
+.msx-list{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:8px 10px;}
+.msx-conv{display:flex;gap:10px;padding:12px 10px;border-radius:12px;cursor:pointer;transition:background .15s;}
+.msx-conv:hover{background:rgba(91,63,160,.04);}
+.msx-conv.on{background:#f5f2fc;}
+.msx-cn{font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;}
+.msx-cp{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.45;}
+.msx-ct{font-size:10.5px;color:var(--muted);white-space:nowrap;margin-left:auto;}
+.msx-dot{width:8px;height:8px;border-radius:50%;background:var(--p);flex:none;}
+.msx-thread{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;min-height:420px;}
+.msx-snap{background:#f5f2fc;border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--ink);line-height:1.55;margin-top:12px;}
+.msx-day{text-align:center;font-size:11px;color:var(--muted);margin:14px 0 4px;}
+.msx-msg{display:flex;gap:10px;margin-top:10px;max-width:85%;}
+.msx-msg.me{margin-left:auto;flex-direction:row-reverse;}
+.msx-bub{background:#f6f4fa;border-radius:14px;padding:10px 14px;font-size:13px;color:var(--ink);line-height:1.55;}
+.msx-msg.me .msx-bub{background:var(--p);color:#fff;}
+.msx-mm{font-size:10px;color:var(--muted);margin-top:3px;}
+.msx-msg.me .msx-mm{text-align:right;}
+.msx-qr{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.msx-box{margin-top:12px;border-top:1px solid rgba(41,25,66,.06);padding-top:12px;}
+.msx-box textarea{width:100%;border:1px solid rgba(91,63,160,.18);border-radius:12px;padding:11px 13px;font-size:13px;font-family:inherit;box-sizing:border-box;resize:vertical;min-height:70px;}
+.msx-tabs2{display:flex;gap:2px;margin-bottom:8px;}
+</style>
+<script>
+// ═══ MESSAGES — "who said what, and what do I say back?" One stream per
+// client, real send (same messages+notification writes the platform already
+// uses), internal notes save to the client's Timeline. Legacy per-client page
+// dormant beneath. ═══
+(function(){
+  var MSX={cid:null, clients:[], last:{}, unreadish:{}, thread:[], tab:'all', q:'', mode:'reply', loaded:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-messages'); if(!page) return null;
+    var root=document.getElementById('msxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._msxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='msxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function msxLoad(clientArg){
+    var root=ensureRoot(); if(!root) return;
+    if(clientArg&&clientArg.id){ MSX.cid=String(clientArg.id); }
+    if(!MSX.loaded){
+      root.innerHTML='<div class="bf-skel" style="height:26px;width:260px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+      var r=await Promise.all([
+        safe(function(){ return api('clients?select=*&limit=300'); }),
+        safe(function(){ return api('messages?select=client_id,from_who,text,created_at&order=created_at.desc&limit=1200'); })
+      ]);
+      if(r[0]===null){
+        root.innerHTML='<div class="pt">Messages</div><div class="ibx-sub">Couldn\u2019t load just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="loadMessages()">Try again</button>';
+        return;
+      }
+      MSX.clients=(r[0]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+      MSX.last={};
+      (r[1]||[]).forEach(function(m){ var k=String(m.client_id); if(!MSX.last[k]) MSX.last[k]=m; });
+      MSX.loaded=true;
+      if(!MSX.cid){
+        // open the conversation that needs you most, else the most recent
+        var need=MSX.clients.filter(function(c){ var m=MSX.last[String(c.id)]; return m&&m.from_who==='client'; })
+          .sort(function(a,b){ return new Date(MSX.last[String(b.id)].created_at)-new Date(MSX.last[String(a.id)].created_at); });
+        var recent=MSX.clients.filter(function(c){ return MSX.last[String(c.id)]; })
+          .sort(function(a,b){ return new Date(MSX.last[String(b.id)].created_at)-new Date(MSX.last[String(a.id)].created_at); });
+        MSX.cid=(need[0]&&String(need[0].id))||(recent[0]&&String(recent[0].id))||(MSX.clients[0]&&String(MSX.clients[0].id))||null;
+      }
+    }
+    if(MSX.cid){ await msxThread(MSX.cid); }
+    msxRender();
+  }
+
+  async function msxThread(cid){
+    MSX.thread=[];
+    try{ MSX.thread=(await api('messages?select=*&client_id=eq.'+encodeURIComponent(cid)+'&order=created_at.asc&limit=200'))||[]; }catch(e){}
+  }
+
+  window.msxOpen=async function(cid){ MSX.cid=String(cid); await msxThread(cid); MSX.mode='reply'; msxRender();
+    setTimeout(function(){ var t=document.getElementById('msxStream'); if(t) t.scrollTop=t.scrollHeight; },50); };
+  window.msxTab=function(t){ MSX.tab=t; msxRender(); };
+  window.msxQ=function(v){ MSX.q=v; msxRender(); };
+  window.msxMode=function(m){ MSX.mode=m; msxRender(); };
+  window.msxQuick=function(txt){ var ta=document.getElementById('msxTa'); if(ta){ ta.value=(ta.value?ta.value+' ':'')+txt; ta.focus(); } };
+
+  function convState(c){
+    var m=MSX.last[String(c.id)];
+    if(!m) return {s:'none', when:null};
+    var d=(Date.now()-new Date(m.created_at))/86400000;
+    if(m.from_who==='client'&&d<=45) return {s:'needs', when:m.created_at, m:m};
+    if(m.from_who==='eric'&&d>=2&&d<=45) return {s:'waiting', when:m.created_at, m:m};
+    return {s:'quiet', when:m.created_at, m:m};
+  }
+
+  function msxRender(){
+    var root=document.getElementById('msxRoot'); if(!root) return;
+    var convs=MSX.clients.map(function(c){ return {c:c, st:convState(c)}; })
+      .filter(function(x){ return x.st.s!=='none'||true; })
+      .sort(function(a,b){ var r={needs:0,waiting:1,quiet:2,none:3}; return (r[a.st.s]-r[b.st.s])||((b.st.when?new Date(b.st.when):0)-(a.st.when?new Date(a.st.when):0)); });
+    var needsN=convs.filter(function(x){return x.st.s==='needs';}).length;
+    var waitN=convs.filter(function(x){return x.st.s==='waiting';}).length;
+    var activeN=convs.filter(function(x){return x.st.s!=='none';}).length;
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn'+(needsN?' red':'')+'">'+needsN+'</div><div class="ivx-sl">Need your reply</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+waitN+'</div><div class="ivx-sl">Waiting on the client</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+activeN+'</div><div class="ivx-sl">Active conversations</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+MSX.clients.length+'</div><div class="ivx-sl">Clients</div></div>'
+    +'</div>';
+
+    var q=MSX.q.toLowerCase();
+    var list=convs.filter(function(x){
+      if(MSX.tab==='needs'&&x.st.s!=='needs') return false;
+      if(MSX.tab==='waiting'&&x.st.s!=='waiting') return false;
+      if(q&&String(x.c.name||'').toLowerCase().indexOf(q)===-1&&String((x.st.m&&x.st.m.text)||'').toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    });
+
+    var TABS=[['all','All'],['needs','Needs reply'],['waiting','Waiting']];
+    var listHtml='<div class="msx-list">'
+      +'<div class="ivx-tabs" style="margin:2px 4px 6px;">'+TABS.map(function(t){
+        return '<button class="ibx-tab'+(MSX.tab===t[0]?' on':'')+'" style="padding:8px 10px;font-size:12.5px;" onclick="msxTab(\''+t[0]+'\')">'+t[1]+'</button>'; }).join('')+'</div>'
+      +'<input class="opx-search" style="width:calc(100% - 8px);margin:0 4px 6px;box-sizing:border-box;" placeholder="Search conversations\u2026" value="'+att(MSX.q)+'" oninput="msxQ(this.value)" aria-label="Search conversations">'
+      +(list.length?list.map(function(x){
+        var m=x.st.m;
+        return '<div class="msx-conv'+(String(x.c.id)===MSX.cid?' on':'')+'" onclick="msxOpen(\''+att(String(x.c.id))+'\')">'
+          +'<div class="ibx-av">'+esc((x.c.name||'?').charAt(0).toUpperCase())+'</div>'
+          +'<div style="flex:1;min-width:0;"><div class="msx-cn">'+esc(x.c.name||'Client')+(x.st.s==='needs'?'<span class="msx-dot"></span>':'')+'<span class="msx-ct">'+(x.st.when?esc(agoS(x.st.when)):'')+'</span></div>'
+          +'<div class="msx-cp">'+(m?esc(String(m.text||'').slice(0,90)):'No messages yet \u2014 start the thread.')+'</div></div>'
+        +'</div>';
+      }).join(''):'<div class="grx-empty" style="padding:14px 10px;">Nothing here.</div>')
+    +'</div>';
+
+    // ── thread column ──
+    var c=MSX.clients.find(function(x){ return String(x.id)===MSX.cid; });
+    var threadHtml='';
+    if(!c){
+      threadHtml='<div class="msx-thread"><div class="grx-empty">Pick a conversation \u2014 or message a client for the first time from the list.</div></div>';
+    } else {
+      var th=MSX.thread;
+      var lastC=th.slice().reverse().find(function(m){ return m.from_who==='client'; });
+      var lastAny=th[th.length-1];
+      var snap = !th.length ? 'No messages yet \u2014 whatever you send lands in '+esc(c.name||'their')+'\u2019s portal instantly.'
+        : (lastAny.from_who==='client'
+          ? esc(c.name||'They')+' spoke last, '+esc(agoS(lastAny.created_at))+': \u201c'+esc(String(lastAny.text||'').slice(0,140))+'\u201d \u2014 the ball is with you.'
+          : 'You spoke last, '+esc(agoS(lastAny.created_at))+'. '+(lastC?('Their last word: \u201c'+esc(String(lastC.text||'').slice(0,110))+'\u201d'):'Waiting on their first reply.'));
+      var stream=''; var lastDay='';
+      th.forEach(function(m){
+        var dt=new Date(m.created_at);
+        var day=dt.toDateString()===new Date().toDateString()?'Today':dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        if(day!==lastDay){ stream+='<div class="msx-day">'+esc(day)+'</div>'; lastDay=day; }
+        var me=m.from_who==='eric';
+        stream+='<div class="msx-msg'+(me?' me':'')+'">'
+          +(!me?'<div class="ibx-av" style="width:30px;height:30px;font-size:12px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>':'')
+          +'<div><div class="msx-bub">'+esc(String(m.text||''))+'</div><div class="msx-mm">'+(me?'You':esc(c.name||'Client'))+' \u00b7 '+dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+'</div></div>'
+        +'</div>';
+      });
+      var quick=['Sounds good \u2014 on it.','Will do \u2014 I\u2019ll update you by end of day.','Great question \u2014 let me check and get right back to you.'];
+      threadHtml='<div class="msx-thread">'
+        +'<div style="display:flex;align-items:center;gap:12px;">'
+          +'<div class="ibx-av" style="width:40px;height:40px;font-size:15px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+          +'<div style="flex:1;min-width:0;"><div class="msx-cn" style="font-size:15px;">'+esc(c.name||'Client')+'</div>'
+          +'<div style="font-size:11.5px;color:var(--muted);">'+esc(c.contact_email||c.email||'')+' \u00b7 Client portal</div></div>'
+          +'<button class="ibx-pill" onclick="tlxOpen&&(go(\'timeline\'),tlxOpen(\''+att(String(c.id))+'\'))">Timeline \u2192</button>'
+        +'</div>'
+        +'<div class="msx-snap">\u2726 <b>Conversation snapshot</b> \u00b7 '+snap+'</div>'
+        +'<div id="msxStream" style="flex:1;overflow:auto;max-height:420px;padding-right:4px;">'+(stream||'<div class="grx-empty">The thread starts with your first message.</div>')+'</div>'
+        +'<div class="msx-qr">'+quick.map(function(t2){ return '<button class="ibx-pill" onclick="msxQuick(\''+att(t2)+'\')">'+esc(t2.split(' \u2014')[0])+'</button>'; }).join('')+'</div>'
+        +'<div class="msx-box">'
+          +'<div class="msx-tabs2"><button class="grx-tab'+(MSX.mode==='reply'?' on':'')+'" onclick="msxMode(\'reply\')">Reply</button><button class="grx-tab'+(MSX.mode==='note'?' on':'')+'" onclick="msxMode(\'note\')">Internal note</button></div>'
+          +'<textarea id="msxTa" placeholder="'+(MSX.mode==='note'?'Private note \u2014 saves to '+att(c.name||'their')+'\u2019s timeline, never sent':'Type your message \u2014 sends to '+att(c.name||'their')+'\u2019s portal')+'"></textarea>'
+          +'<div style="display:flex;align-items:center;gap:10px;margin-top:10px;"><span style="font-size:11.5px;color:var(--muted);">'+(MSX.mode==='note'?'\u270E Private \u2014 timeline only':'Sends to '+esc(c.name||'the client')+'\u2019s portal + notifies them')+'</span><span style="flex:1;"></span>'
+          +'<button class="bf-act primary" onclick="msxSend()">'+(MSX.mode==='note'?'Save note':'Send')+'</button></div>'
+        +'</div>'
+      +'</div>';
+    }
+
+    // ── right rail: real details only ──
+    var rail='';
+    if(c){
+      var th2=MSX.thread, first=th2[0], last2=th2[th2.length-1];
+      var mrr=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0;
+      rail='<div class="grx-card"><div class="grx-h">Conversation details</div>'
+        +'<div class="rhx-kv"><span>Status</span><b>'+(last2?(last2.from_who==='client'?'Needs your reply':'Waiting on them'):'New')+'</b></div>'
+        +(last2?'<div class="rhx-kv"><span>Last message</span><b>'+esc(agoS(last2.created_at))+'</b></div>':'')
+        +(first?'<div class="rhx-kv"><span>First message</span><b>'+esc(agoS(first.created_at))+'</b></div>':'')
+        +'<div class="rhx-kv"><span>Channel</span><b>Client portal</b></div>'
+        +'<div class="rhx-kv"><span>Messages</span><b>'+th2.length+'</b></div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">\u2726 Suggestions</div>'
+        +'<div class="tlx-qa" onclick="msxDraft()">Draft a response with AI<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="msxTask()">Turn this into a task<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="msxMode(\'note\');document.getElementById(\'msxTa\')&&document.getElementById(\'msxTa\').focus();">Log an internal note<span class="c">\u203A</span></div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Client context</div>'
+        +'<div class="rhx-kv"><span>MRR</span><b>'+(mrr?'$'+Math.round(mrr).toLocaleString()+'/mo':'\u2014')+'</b></div>'
+        +'<div class="rhx-kv"><span>Client since</span><b>'+esc(agoS(c.created_at)||'\u2014')+'</b></div>'
+        +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+          +'<button class="ibx-pill" onclick="go(\'clients\');setTimeout(function(){try{rhxOpen(\''+att(String(c.id))+'\')}catch(e){}},400);">Relationship \u2192</button>'
+        +'</div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Shared files</div><div class="grx-empty" style="padding:6px 0;">File storage isn\u2019t wired yet \u2014 documented, not faked.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Messages</div>'
+      +'<div class="ibx-sub">All conversations in one place. Never miss what matters.</div></div>'
+      +'<span style="flex:1;"></span></div>'
+      +stats
+      +'<div class="msx-grid">'+listHtml+threadHtml+'<div>'+rail+'</div></div>';
+  }
+
+  window.msxSend=async function(){
+    var ta=document.getElementById('msxTa'); var text=ta&&ta.value.trim(); if(!text){ toast('Write something first'); return; }
+    var c=MSX.clients.find(function(x){ return String(x.id)===MSX.cid; }); if(!c) return;
+    if(MSX.mode==='note'){
+      var r=await api('timeline','POST',{client_id:MSX.cid, kind:'note', title:'Internal note', body:text});
+      if(r===null){ toast('Couldn\u2019t save \u2014 is the timeline table created?'); return; }
+      toast('\u270E Saved to their timeline \u2014 never sent'); ta.value=''; return;
+    }
+    var r2=await api('messages','POST',{client_id:MSX.cid, from_who:'eric', sender_name:'Eric', text:text});
+    if(r2===null){ toast('Couldn\u2019t send \u2014 try again'); return; }
+    try{ await api('notifications','POST',{client_id:MSX.cid, type:'message', title:'New message from Eric', body:text.slice(0,90), link_tab:'messages'}); }catch(e){}
+    toast('\u2713 Sent to '+(c.name||'the client')+'\u2019s portal');
+    MSX.last[MSX.cid]={client_id:MSX.cid, from_who:'eric', text:text, created_at:new Date().toISOString()};
+    await msxThread(MSX.cid); msxRender();
+    setTimeout(function(){ var t=document.getElementById('msxStream'); if(t) t.scrollTop=t.scrollHeight; },50);
+  };
+  window.msxDraft=function(){
+    var c=MSX.clients.find(function(x){ return String(x.id)===MSX.cid; }); if(!c) return;
+    var last=MSX.thread.slice().reverse().find(function(m){ return m.from_who==='client'; });
+    ddsDraftAction({ subject:c.name||'the client', subjectId:String(c.id), signal:'waiting_on_eric', module:'Clients',
+      action:'Reply to '+(c.name||'them'), why:'they wrote in their portal and are waiting on you',
+      changed:last?('They said: '+String(last.text||'').slice(0,140)):'Start the conversation warmly',
+      go:'messages', refId:String(c.id) });
+  };
+  window.msxTask=async function(){
+    var c=MSX.clients.find(function(x){ return String(x.id)===MSX.cid; }); if(!c) return;
+    var last=MSX.thread.slice().reverse().find(function(m){ return m.from_who==='client'; });
+    var title=last?String(last.text||'').slice(0,70):('Follow up with '+(c.name||'client'));
+    var pr=null; try{ pr=await api('partnerships?client_id=eq.'+encodeURIComponent(MSX.cid)+'&select=id&limit=1'); }catch(e){}
+    if(pr&&pr[0]){
+      var r=await api('growth_tasks','POST',{partnership_id:pr[0].id, title:title, status:'open'});
+      if(r!==null){ toast('\u2713 Task added to their growth roadmap'); return; }
+    }
+    var r2=await api('timeline','POST',{client_id:MSX.cid, kind:'note', title:'Task: '+title, body:'From a client message.'});
+    toast(r2===null?'Couldn\u2019t save the task':'\u2713 Logged on their timeline (no partnership roadmap yet)');
+  };
+
+  window.loadMessagesLegacy=window.loadMessages;
+  window.loadMessages=msxLoad;
+})();
+</script>
 </body>
 </html>
