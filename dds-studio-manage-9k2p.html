@@ -11757,7 +11757,7 @@ function anEngineNote(eng){
 // disclosed formula over real signals, never a black box. Legacy pages
 // preserved underneath (Classic view). ═══
 (function(){
-  var RHX={rows:[], msgs:{}, inv:{}, eng:{}, q:'', hf:'all', sf:'all', page:1, loaded:false, legacy:false, engSentence:''};
+  var RHX={rows:[], msgs:{}, inv:{}, eng:{}, q:'', hf:'all', sf:'all', page:1, loaded:false, legacy:false, engSentence:'', ptab:'ov'};
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(s){ return esc(s).replace(/'/g,'&#39;'); }
@@ -11892,7 +11892,7 @@ function anEngineNote(eng){
         +'<option value="exc"'+(RHX.hf==='exc'?' selected':'')+'>Excellent</option>'
         +'<option value="onb"'+(RHX.hf==='onb'?' selected':'')+'>Onboarding</option>'
       +'</select>'
-      +'<button class="ibx-tab" onclick="go(\'hub\');rhxClassic();" title="The original Clients + Client Hub pages">Classic view \u2192</button>'
+
     +'</div>';
 
     var body=pageList.length?pageList.map(function(e){
@@ -11930,63 +11930,128 @@ function anEngineNote(eng){
   }
 
   // ── relationship workspace ──
-  window.rhxOpen=async function(id){
+  window.rhxOpen=function(id){
     try{ oppxPanelClose(); }catch(e){}
-    var c=RHX.rows.find(function(x){ return String(x.id)===String(id); }); if(!c) return;
-    var h=health(c), iv=RHX.inv[String(id)]||{list:[],paidSum:0,outSum:0,paid:0,out:0};
-    var eng=RHX.eng[String(id)];
+    RHX.ptab='ov';
     var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
     bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
-    var mrr=mrrOf(c);
-    var next = eng ? {t:eng.action||'Check in', w:eng.why||eng.changed||''}
-      : (RHX.msgs[String(id)]&&(Date.now()-new Date(RHX.msgs[String(id)].created_at))/86400000>14
-        ? {t:'Check in with '+(c.name||'them'), w:'No contact in over two weeks \u2014 a short, genuine note keeps the relationship warm.'}
-        : {t:'Keep the momentum', w:'Recent contact and steady signals \u2014 nothing urgent.'});
-    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Relationship" style="width:min(520px,96vw);">'
-      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
-      +'<div style="display:flex;align-items:center;gap:12px;">'
-        +'<div class="rhx-av" style="width:50px;height:50px;font-size:18px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
-        +'<div style="flex:1;min-width:0;"><div class="opx3-pt" style="margin:0;">'+esc(c.name||'Client')+'</div>'
-        +'<div class="opx3-pm" style="margin-top:2px;">'+esc(c.contact_email||c.email||'')+(c.phone?' \u00b7 '+esc(c.phone):'')+'</div></div>'
-        +'<div class="rhx-ring" style="border-color:'+h.c+';color:'+h.c+';"><span>'+h.n+'</span><span class="rhx-rl">'+esc(h.l)+'</span></div>'
-      +'</div>'
-      +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;">'+esc(h.why)+'</div>'
-      +'<div class="rhx-block" style="background:#f5f2fc;border:none;"><div class="rhx-bh">\u2726 NEXT BEST ACTION</div>'
-        +'<div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(next.t)+'</div>'
-        +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55;">'+esc(next.w)+'</div>'
-        +'<button class="bf-act primary" style="margin-top:12px;" onclick="rhxMsg(\''+att(String(id))+'\')">Do it now \u2192</button>'
-      +'</div>'
-      +'<div class="rhx-block"><div class="rhx-bh">KEY STATS</div>'
-        +'<div class="rhx-kv"><span>Revenue to date</span><b>'+money(iv.paidSum||0)+'</b></div>'
-        +'<div class="rhx-kv"><span>Monthly recurring</span><b>'+(mrr?money(mrr)+'/mo':'\u2014')+'</b></div>'
-        +'<div class="rhx-kv"><span>Invoices paid</span><b>'+(iv.paid||0)+'</b></div>'
-        +'<div class="rhx-kv"><span>Outstanding</span><b>'+(iv.out?money(iv.outSum):'\u2014')+'</b></div>'
-        +(c.website?'<div class="rhx-kv"><span>Website</span><b><a href="'+att(/^https?:/i.test(c.website)?c.website:'https://'+c.website)+'" target="_blank" rel="noopener" style="color:var(--p);">'+esc(String(c.website).replace(/^https?:\/\//,''))+'</a></b></div>':'')
-        +'<div class="rhx-kv"><span>Client since</span><b>'+esc(agoS(c.created_at)||'\u2014')+'</b></div>'
-      +'</div>'
-      +'<div class="rhx-block"><div class="rhx-bh">RELATIONSHIP TIMELINE</div><div id="rhxTl"><div class="bf-skel" style="height:11px;width:80%;margin:5px 0;"></div><div class="bf-skel" style="height:11px;width:55%;"></div></div></div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">'
-        +'<button class="bf-act" onclick="rhxMsg(\''+att(String(id))+'\')">Message</button>'
-        +'<button class="bf-act" onclick="oppxPanelClose();go(\'invoices\');">Invoices</button>'
-        +'<button class="bf-act" onclick="oppxPanelClose();go(\'hub\');rhxClassic();">Full record (classic) \u2192</button>'
-      +'</div>'
-    +'</aside>';
+    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Relationship" style="width:min(540px,96vw);"><div id="rhxPB"></div></aside>';
     document.body.appendChild(bg);
     document.addEventListener('keydown', oppxPanelEsc);
-    // timeline: real events — payments, launch, messages
+    rhxPR(id);
+  };
+  window.rhxPTab=function(t,id){ RHX.ptab=t; rhxPR(id); };
+  async function rhxPR(id){
+    var host=document.getElementById('rhxPB'); if(!host) return;
+    var c=RHX.rows.find(function(x){ return String(x.id)===String(id); }); if(!c) return;
+    var h=health(c), iv=RHX.inv[String(id)]||{list:[],paidSum:0,outSum:0,paid:0,out:0};
+    var eng=RHX.eng[String(id)], mrr=mrrOf(c);
+    var tabs='<div class="ivx-tabs" style="margin-top:16px;">'
+      +[['ov','Overview'],['inv','Invoices'],['msg','Messages'],['nt','Notes']].map(function(t){
+        return '<button class="ibx-tab'+(RHX.ptab===t[0]?' on':'')+'" onclick="rhxPTab(\''+t[0]+'\',\''+att(String(id))+'\')">'+t[1]+'</button>';
+      }).join('')+'</div>';
+    var body='';
+    if(RHX.ptab==='inv'){
+      body='<div class="rhx-block"><div class="rhx-bh">INVOICES</div>'
+        +((iv.list||[]).length?(iv.list||[]).slice(0,10).map(function(i){
+          var paid=String(i.status||'').toLowerCase()==='paid';
+          return '<div class="rhx-kv"><span>'+esc(i.name||'Invoice')+' \u00b7 <span style="'+(paid?'color:#1a7e49;':'color:#9a7a1a;')+'font-weight:600;">'+(paid?'Paid':'Outstanding')+'</span></span><b>'+(function(){try{var v=invcAmt(i.amount);return isFinite(v)&&v>0?'$'+Math.round(v).toLocaleString():esc(i.amount||'\u2014');}catch(e){return esc(i.amount||'\u2014');}})()+'</b></div>';
+        }).join(''):'<div style="font-size:12.5px;color:var(--muted);padding:8px 0;">No invoices yet for this client.</div>')
+        +'<button class="bf-act" style="margin-top:12px;" onclick="oppxPanelClose();go(\'invoices\');">Open Invoices \u2192</button>'
+      +'</div>';
+      host.innerHTML=rhxPH(c,h)+tabs+body;
+    } else if(RHX.ptab==='msg'){
+      host.innerHTML=rhxPH(c,h)+tabs+'<div class="rhx-block"><div class="rhx-bh">MESSAGES</div><div id="rhxMsgT"><div class="bf-skel" style="height:11px;width:70%;"></div></div>'
+        +'<button class="bf-act primary" style="margin-top:12px;" onclick="rhxMsg(\''+att(String(id))+'\')">Reply in composer \u2192</button></div>';
+      try{
+        var ms=await api('messages?client_id=eq.'+encodeURIComponent(id)+'&select=from_who,text,created_at&order=created_at.desc&limit=12')||[];
+        var t2=document.getElementById('rhxMsgT');
+        if(t2) t2.innerHTML=ms.length?ms.reverse().map(function(m){
+          return '<div style="padding:8px 0;border-bottom:1px solid rgba(41,25,66,.05);"><div style="font-size:11px;color:var(--muted);">'+(m.from_who==='eric'?'You':esc(c.name||'Client'))+' \u00b7 '+esc(agoS(m.created_at))+'</div><div style="font-size:13px;color:var(--ink);line-height:1.55;margin-top:2px;">'+esc(String(m.text||'').slice(0,300))+'</div></div>';
+        }).join(''):'<div style="font-size:12.5px;color:var(--muted);padding:8px 0;">No messages yet \u2014 start the thread.</div>';
+      }catch(e){}
+    } else if(RHX.ptab==='nt'){
+      host.innerHTML=rhxPH(c,h)+tabs+'<div class="rhx-block"><div class="rhx-bh">NOTES</div>'
+        +'<textarea id="rhxNoteTa" rows="6" style="width:100%;padding:9px 11px;border:1px solid rgba(91,63,160,.18);border-radius:9px;font-size:13px;font-family:inherit;box-sizing:border-box;">'+esc(c.notes||'')+'</textarea>'
+        +'<button class="bf-act primary" style="margin-top:10px;" onclick="rhxNoteSave(\''+att(String(id))+'\')">Save notes</button></div>'
+        +'<div class="rhx-block"><div class="rhx-bh">EDIT DETAILS</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+          +'<input class="fi" style="margin:0;" id="rhxE_email" placeholder="Email" value="'+att(c.contact_email||c.email||'')+'">'
+          +'<input class="fi" style="margin:0;" id="rhxE_phone" placeholder="Phone" value="'+att(c.phone||'')+'">'
+          +'<input class="fi" style="margin:0;" id="rhxE_web" placeholder="Website" value="'+att(c.website||'')+'">'
+          +'<input class="fi" style="margin:0;" id="rhxE_mrr" placeholder="Monthly amount (e.g. 399)" value="'+att(c.monthly_amount||'')+'">'
+        +'</div><button class="bf-act primary" style="margin-top:10px;" onclick="rhxDetSave(\''+att(String(id))+'\')">Save details</button></div>';
+    } else {
+      var next = eng ? {t:eng.action||'Check in', w:eng.why||eng.changed||''}
+        : (RHX.msgs[String(id)]&&(Date.now()-new Date(RHX.msgs[String(id)].created_at))/86400000>14
+          ? {t:'Check in with '+(c.name||'them'), w:'No contact in over two weeks \u2014 a short, genuine note keeps the relationship warm.'}
+          : {t:'Keep the momentum', w:'Recent contact and steady signals \u2014 nothing urgent.'});
+      host.innerHTML=rhxPH(c,h)+tabs
+        +'<div class="rhx-block" style="background:#f5f2fc;border:none;"><div class="rhx-bh">\u2726 NEXT BEST ACTION</div>'
+          +'<div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(next.t)+'</div>'
+          +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55;">'+esc(next.w)+'</div>'
+          +'<button class="bf-act primary" style="margin-top:12px;" onclick="rhxMsg(\''+att(String(id))+'\')">Do it now \u2192</button></div>'
+        +'<div class="rhx-block"><div class="rhx-bh">KEY STATS</div>'
+          +'<div class="rhx-kv"><span>Revenue to date</span><b>'+money(iv.paidSum||0)+'</b></div>'
+          +'<div class="rhx-kv"><span>Monthly recurring</span><b>'+(mrr?money(mrr)+'/mo':'\u2014')+'</b></div>'
+          +'<div class="rhx-kv"><span>Invoices paid</span><b>'+(iv.paid||0)+'</b></div>'
+          +'<div class="rhx-kv"><span>Outstanding</span><b>'+(iv.out?money(iv.outSum):'\u2014')+'</b></div>'
+          +'<div class="rhx-kv"><span>Client since</span><b>'+esc(agoS(c.created_at)||'\u2014')+'</b></div>'
+        +'</div>'
+        +'<div class="rhx-block"><div class="rhx-bh">RELATIONSHIP TIMELINE</div><div id="rhxTl"><div class="bf-skel" style="height:11px;width:80%;margin:5px 0;"></div></div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+          +'<button class="bf-act" onclick="rhxMsg(\''+att(String(id))+'\')">Message</button>'
+          +'<button class="bf-act" onclick="rhxToGrowth(\''+att(String(id))+'\')">Growth partnership \u2192</button>'
+        +'</div>';
+      try{
+        var ev=[];
+        (iv.list||[]).forEach(function(i){ if(i.paid_at) ev.push({i:'$',t:(i.name||'Invoice')+' paid', d:i.paid_at}); });
+        if(c.launched_at) ev.push({i:'\u25B2',t:'Website launched', d:c.launched_at});
+        var ms2=await api('messages?client_id=eq.'+encodeURIComponent(id)+'&select=from_who,text,created_at&order=created_at.desc&limit=5')||[];
+        ms2.forEach(function(m){ ev.push({i:'\u2709',t:(m.from_who==='eric'?'You wrote: ':(c.name||'They')+' wrote: ')+String(m.text||'').slice(0,50), d:m.created_at}); });
+        ev.push({i:'\u2726',t:'Relationship began', d:c.created_at});
+        ev.sort(function(a,b){ return new Date(b.d)-new Date(a.d); });
+        var tl=document.getElementById('rhxTl');
+        if(tl) tl.innerHTML=ev.slice(0,8).map(function(e2){
+          return '<div class="rhx-tl"><span class="rhx-tli">'+e2.i+'</span><span style="flex:1;color:var(--ink);">'+esc(e2.t)+'</span><span style="color:var(--muted);white-space:nowrap;">'+esc(agoS(e2.d))+'</span></div>';
+        }).join('');
+      }catch(e){}
+    }
+  }
+  function rhxPH(c,h){
+    return '<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+      +'<div style="display:flex;align-items:center;gap:12px;">'
+        +'<div class="rhx-av" style="width:50px;height:50px;font-size:18px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div style="flex:1;min-width:0;"><div class="opx3-pt" style="margin:0;">'+esc(c.name||'Client')
+        +' <span class="ibx-chip" style="'+(c.launched_at?'color:#0e7a6e;background:#e4f5f2;':'color:#9a7a1a;background:#fdf6e3;')+'">'+(c.launched_at?'ACTIVE CLIENT':'ONBOARDING')+'</span></div>'
+        +'<div class="opx3-pm" style="margin-top:2px;">'+esc(c.contact_email||c.email||'')+(c.phone?' \u00b7 '+esc(c.phone):'')+'</div></div>'
+        +'<div class="rhx-ring" style="border-color:'+h.c+';color:'+h.c+';" title="'+att(h.why)+'"><span>'+h.n+'</span><span class="rhx-rl">'+esc(h.l)+'</span></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;">'+esc(h.why)+'</div>';
+  }
+  window.rhxNoteSave=async function(id){
+    var ta=document.getElementById('rhxNoteTa'); if(!ta) return;
+    var r=await api('clients?id=eq.'+encodeURIComponent(id),'PATCH',{notes:ta.value});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var c=RHX.rows.find(function(x){return String(x.id)===String(id);}); if(c) c.notes=ta.value;
+    toast('\u2713 Notes saved');
+  };
+  window.rhxDetSave=async function(id){
+    var g=function(i){ var el=document.getElementById(i); return el?el.value:''; };
+    var patch={contact_email:g('rhxE_email'), phone:g('rhxE_phone'), website:g('rhxE_web'), monthly_amount:g('rhxE_mrr')};
+    var r=await api('clients?id=eq.'+encodeURIComponent(id),'PATCH',patch);
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var c=RHX.rows.find(function(x){return String(x.id)===String(id);}); if(c) Object.assign(c,patch);
+    toast('\u2713 Details saved'); rhxRender();
+  };
+  window.rhxToGrowth=async function(clientId){
+    try{ oppxPanelClose(); }catch(e){}
+    go('growth');
     try{
-      var ev=[];
-      (iv.list||[]).forEach(function(i){ if(i.paid_at) ev.push({i:'$',t:(i.name||'Invoice')+' paid', d:i.paid_at}); });
-      if(c.launched_at) ev.push({i:'\u25B2',t:'Website launched', d:c.launched_at});
-      var ms=await api('messages?client_id=eq.'+encodeURIComponent(id)+'&select=from_who,text,created_at&order=created_at.desc&limit=6')||[];
-      ms.forEach(function(m){ ev.push({i:'\u2709',t:(m.from_who==='eric'?'You wrote: ':(c.name||'They')+' wrote: ')+String(m.text||'').slice(0,60), d:m.created_at}); });
-      ev.push({i:'\u2726',t:'Relationship began', d:c.created_at});
-      ev.sort(function(a,b){ return new Date(b.d)-new Date(a.d); });
-      var host=document.getElementById('rhxTl');
-      if(host) host.innerHTML=ev.slice(0,9).map(function(e){
-        return '<div class="rhx-tl"><span class="rhx-tli">'+e.i+'</span><span style="flex:1;color:var(--ink);">'+esc(e.t)+'</span><span style="color:var(--muted);white-space:nowrap;">'+esc(agoS(e.d))+'</span></div>';
-      }).join('')||'<div style="font-size:12px;color:var(--muted);">The story starts with the first invoice or message.</div>';
+      var pr=await api('partnerships?client_id=eq.'+encodeURIComponent(clientId)+'&select=id&limit=1');
+      if(pr&&pr[0]){ grxOpen(String(pr[0].id)); return; }
     }catch(e){}
+    toast('No partnership for this client yet \u2014 create one with + New partnership');
   };
 
   window.rhxMsg=function(id){
@@ -12133,7 +12198,11 @@ function anEngineNote(eng){
     root.innerHTML=
       '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Growth &amp; Partnerships</div>'
       +'<div class="ibx-sub">Your shared roadmap for long-term growth.</div></div>'
-      +'<span style="flex:1;"></span><button class="ibx-tab" onclick="grxClassic()">Classic view \u2192</button></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="grxNew()">+ New partnership</button></div>'
+      +'<div id="grxNewForm" style="display:none;margin-top:14px;" class="grx-card"><div class="grx-h">New partnership</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;"><select class="fi" id="grxNewC" style="margin:0;flex:1;min-width:200px;"></select>'
+        +'<input class="fi" id="grxNewPlan" style="margin:0;flex:1;min-width:160px;" placeholder="Plan label (e.g. Monthly Growth Partner)">'
+        +'<button class="bf-act primary" onclick="grxNewSave()">Create</button></div></div>'
       +(rows.length?rows.map(function(p){
         return '<div class="rhx-row" onclick="grxOpen(\''+att(String(p.id))+'\')">'
           +'<div class="rhx-av">'+esc((p.client_name||p.name||'?').charAt(0).toUpperCase())+'</div>'
@@ -12144,7 +12213,7 @@ function anEngineNote(eng){
         +'</div>';
       }).join('')
       :(loadErr
-        ? '<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">Couldn\u2019t load partnerships ('+esc(loadErr)+'). <button class="ibx-pill" onclick="grxLoad()">Try again</button> \u00b7 Classic view still works.</div>'
+        ? '<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">Couldn\u2019t load partnerships ('+esc(loadErr)+'). <button class="ibx-pill" onclick="grxLoad()">Try again</button></div>'
         : '<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">No partnerships yet \u2014 start one from a client in the <a href="#" onclick="go(\'clients\');return false;" style="color:var(--p);">Relationship Hub</a>, or use the classic view\u2019s New partnership flow.</div>'));
   }
 
@@ -12213,7 +12282,7 @@ function anEngineNote(eng){
     var TABS=[['ov','Overview'],['goals','Goals'],['tasks','Tasks'],['recs','Recommendations']];
     var tabs='<div class="grx-tabs2">'+TABS.map(function(t){
       return '<button class="ibx-tab'+(GRX.dtab===t[0]?' on':'')+'" onclick="grxDtab(\''+t[0]+'\')">'+t[1]+'</button>';
-    }).join('')+'<span style="flex:1;"></span><button class="ibx-tab" onclick="grxClassic()">Full record \u2192</button></div>';
+    }).join('')+'<span style="flex:1;"></span></div>';
 
     var main='';
     if(GRX.dtab==='goals'){
@@ -12270,6 +12339,7 @@ function anEngineNote(eng){
         }).join('')+'</div>')
         :(doneTasks.length?('<div class="grx-wins">'+doneTasks.slice(0,4).map(function(t){ return '<div class="grx-win"><div class="grx-wt">\u2713 '+esc(t.title||'Task')+'</div><div class="grx-wd">Completed</div></div>'; }).join('')+'</div>')
         :'<div class="grx-empty">Wins appear here as tasks are completed and work is logged \u2014 momentum you can point at in every monthly update.</div>'))
+        +'<div class="grx-add"><input class="fi" id="grxWinIn" placeholder="Log a win (e.g. Homepage redesign launched)"><button class="bf-act" onclick="grxWinAdd()">Log win</button></div>'
       +'</div>'
       +'<div class="grx-ai">\u2726 <b style="font-weight:700;">AI Insight</b><span style="flex:1;min-width:200px;">'
         +esc(pct>=60?'This partnership is performing \u2014 a good moment to discuss the next phase of the roadmap.':(tDone?'Steady progress this period. The current focus above is where the next visible win comes from.':'The plan is set; the first completed tasks will start the momentum story.'))
@@ -12317,10 +12387,46 @@ function anEngineNote(eng){
       +'<div class="grx-grid"><div>'+main+'</div><div>'+rail+'</div></div>';
   }
   window.grxDtab=function(t){ GRX.dtab=t; grxDetail(); };
+  window.grxNew=async function(){
+    var f=document.getElementById('grxNewForm'); if(!f) return;
+    f.style.display=f.style.display==='none'?'':'none';
+    if(f.style.display==='') {
+      try{
+        var cs=await api('clients?select=id,name&limit=300')||[];
+        var sel=document.getElementById('grxNewC');
+        if(sel) sel.innerHTML=cs.map(function(c){ return '<option value="'+att(String(c.id))+'">'+esc(c.name||'Client')+'</option>'; }).join('');
+      }catch(e){}
+    }
+  };
+  window.grxNewSave=async function(){
+    var sel=document.getElementById('grxNewC'), pl=document.getElementById('grxNewPlan');
+    if(!sel||!sel.value){ toast('Pick a client'); return; }
+    var r=await api('partnerships','POST',{client_id:sel.value, status:'active', plan_label:(pl&&pl.value)||'Growth partnership'});
+    if(r===null){ toast('Couldn’t create — the partnerships table refused the write'); return; }
+    toast('✓ Partnership created');
+    GRX.list=null; var row=(Array.isArray(r)&&r[0]);
+    if(row&&row.id){ grxOpen(String(row.id)); } else { grxBack(); }
+  };
+  window.grxWinAdd=async function(){
+    var el=document.getElementById('grxWinIn'); var v=el&&el.value.trim(); if(!v) return;
+    var r=await api('work_log','POST',{partnership_id:GRX.id, title:v});
+    if(r===null) r=await api('partnership_work','POST',{partnership_id:GRX.id, title:v}).catch(function(){return null;});
+    if(r===null){
+      // honest fallback: record it as a completed task so it still shows as a win
+      r=await api('growth_tasks','POST',{partnership_id:GRX.id, title:v, status:'done'});
+      if(r===null){ toast('Couldn’t log it — no writable work table reachable'); return; }
+      var row=(Array.isArray(r)&&r[0])||{id:'tmp_'+Date.now(), title:v, status:'done'};
+      (GRX.d.tasks=GRX.d.tasks||[]).push(row);
+    } else {
+      var row2=(Array.isArray(r)&&r[0])||{title:v, created_at:new Date().toISOString()};
+      (GRX.d.work_log=GRX.d.work_log||[]).unshift(row2);
+    }
+    toast('✓ Win logged'); grxDetail();
+  };
   window.grxTaskAdd=async function(){
     var el=document.getElementById('grxTaskIn'); var v=el&&el.value.trim(); if(!v) return;
     var r=await api('growth_tasks','POST',{partnership_id:GRX.id, title:v, status:'open'});
-    if(r===null){ toast('Couldn\u2019t add \u2014 try the Full record view'); return; }
+    if(r===null){ toast('Couldn\u2019t add \u2014 try again in a moment'); return; }
     var row=(Array.isArray(r)&&r[0])||{id:'tmp_'+Date.now(), title:v, status:'open'};
     (GRX.d.tasks=GRX.d.tasks||[]).push(row);
     toast('\u2713 Task added'); grxDetail();
@@ -12337,7 +12443,7 @@ function anEngineNote(eng){
     var el=document.getElementById('grxGoalIn'); var v=el&&el.value.trim(); if(!v) return;
     var r=await api('partnership_goals','POST',{partnership_id:GRX.id, title:v, status:'active'});
     if(r===null) r=await api('growth_goals','POST',{partnership_id:GRX.id, title:v, status:'active'}).catch(function(){return null;});
-    if(r===null){ toast('Goals table isn\u2019t reachable from here \u2014 add it in Full record for now'); return; }
+    if(r===null){ toast('The goals table refused the write \u2014 flag it next session and it gets a proper route'); return; }
     var row=(Array.isArray(r)&&r[0])||{id:'tmp_'+Date.now(), title:v, status:'active'};
     (GRX.d.goals=GRX.d.goals||[]).push(row);
     toast('\u2713 Goal added'); grxDetail();
