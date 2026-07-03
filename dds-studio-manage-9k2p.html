@@ -5066,6 +5066,10 @@ function oppxBenchTable(){
       +'<input class="opx-search" style="flex:1;min-width:160px;" placeholder="Search '+all.length+' prospects\u2026" value="'+escAttr(OPPX.ev.q)+'" oninput="oppxEvSet(\'q\',this.value)">'
       +'<select class="opx-ev-sel" onchange="oppxEvSet(\'src\',this.value)"><option value="">All sources</option>'+Object.keys(srcs).sort().map(function(s2){return '<option '+(OPPX.ev.src===s2?'selected':'')+'>'+escHtml(s2)+'</option>';}).join('')+'</select>'
       +'<select class="opx-ev-sel" onchange="oppxEvSet(\'st\',this.value)"><option value="">All statuses</option>'+Object.keys(sts).sort().map(function(s2){return '<option '+(OPPX.ev.st===s2?'selected':'')+'>'+escHtml(s2)+'</option>';}).join('')+'</select>'
+      +'<span style="flex:1;"></span>'
+      +'<button class="opx5-pill" onclick="event.stopPropagation();oppxBenchAdd()">+ Add prospect</button>'
+      +'<button class="opx5-pill" onclick="event.stopPropagation();document.getElementById(\'oppxCsvFile\').click()">Import CSV</button>'
+      +'<input type="file" id="oppxCsvFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="oppxCsvImport(this)">'
     +'</div>'
     +bulk
     +'<div style="overflow-x:auto;"><table class="opx-tbl"><thead>'+head+'</thead><tbody>'+(body||'<tr><td colspan="9" style="color:var(--muted);padding:14px;">No prospects match.</td></tr>')+'</tbody></table></div>'
@@ -5084,7 +5088,57 @@ function oppxBenchCase(p){
   o.next=o.next||{action:'',due:''}; o.summary=o.summary||'';
   return o;
 }
-function oppxEvEdit(id){ OPPX.ev.edit=(OPPX.ev.edit===id?null:id); oppxRender(); }
+function oppxEvEdit(id){
+  if(OPPX.ev.edit==='__new' && id==='__new'){ OPPX.bench=(OPPX.bench||[]).filter(function(p){return p.id!=='__new';}); OPPX.ev.edit=null; oppxRender(); return; }
+  OPPX.ev.edit=(OPPX.ev.edit===id?null:id); oppxRender(); }
+function oppxBenchAdd(){
+  if(oppxBenchFind('__new')){ OPPX.ev.edit='__new'; oppxRender(); return; }
+  (OPPX.bench=OPPX.bench||[]).unshift({id:'__new', business_name:'', contact_name:'', email:'', phone:'', website:'', source:'Added manually', priority:'', status:'New', notes:'', created_at:new Date().toISOString()});
+  OPPX.ev.open=true; OPPX.ev.edit='__new'; OPPX.ev.page=1;
+  oppxRender();
+  setTimeout(function(){ var el=document.querySelector('.opx-editrow'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },60);
+}
+async function oppxCsvImport(input){
+  var f=input.files&&input.files[0]; input.value=''; if(!f) return;
+  if(/\.xlsx?$/i.test(f.name)){ toast('Save it as CSV first: in Excel, File \u2192 Save As \u2192 CSV. Then import that.'); return; }
+  var text=await f.text();
+  // quoted-field-aware CSV parse
+  function parseCSV(t){ var rows=[],row=[],cur='',q=false; for(var i2=0;i2<t.length;i2++){ var ch=t[i2];
+    if(q){ if(ch==='"'){ if(t[i2+1]==='"'){cur+='"';i2++;} else q=false; } else cur+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===','){ row.push(cur); cur=''; }
+    else if(ch===String.fromCharCode(10)||ch===String.fromCharCode(13)){ if(cur!==''||row.length){ row.push(cur); rows.push(row); row=[]; cur=''; } if(ch===String.fromCharCode(13)&&t[i2+1]===String.fromCharCode(10)) i2++; }
+    else cur+=ch; }
+    if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+    return rows; }
+  var rows=parseCSV(text);
+  if(rows.length<2){ toast('That file has no data rows.'); return; }
+  var MAP={business_name:'business_name',business:'business_name',name:'business_name',company:'business_name',
+    contact_name:'contact_name',contact:'contact_name',email:'email',phone:'phone',
+    website:'website',url:'website',site:'website',source:'source',priority:'priority',notes:'notes',site_status:'site_status'};
+  var head=rows[0].map(function(h){ return MAP[String(h||'').trim().toLowerCase().replace(/\s+/g,'_')]||null; });
+  if(head.indexOf('business_name')===-1){ toast('Need a business_name (or Business / Name / Company) column.'); return; }
+  var have={}; (OPPX.bench||[]).forEach(function(p){ if(p.business_name) have[String(p.business_name).toLowerCase()]=1; });
+  var toAdd=[], dup=0;
+  rows.slice(1).forEach(function(r){
+    var o={status:'New'};
+    head.forEach(function(k,ix){ if(k&&r[ix]!=null&&String(r[ix]).trim()!=='') o[k]=String(r[ix]).trim(); });
+    if(!o.business_name) return;
+    var key=o.business_name.toLowerCase();
+    if(have[key]){ dup++; return; }
+    have[key]=1; toAdd.push(o);
+  });
+  if(!toAdd.length){ toast(dup?('All '+dup+' rows were already on your bench.'):'No importable rows found.'); return; }
+  toast('Importing '+toAdd.length+' prospects\u2026');
+  var ok=0;
+  for(var i3=0;i3<toAdd.length;i3+=10){
+    var chunk=toAdd.slice(i3,i3+10);
+    var res=await Promise.all(chunk.map(function(o){ return api('prospects','POST',o).then(function(r2){return r2!==null;}).catch(function(){return false;}) }));
+    res.forEach(function(x2){ if(x2) ok++; });
+  }
+  toast('\u2713 '+ok+' imported'+(dup?(' \u00b7 '+dup+' duplicates skipped'):''));
+  loadOpportunities();
+}
 function oppxBenchEditJump(id){
   try{ oppxPanelClose(); }catch(e){}
   OPPX.ev.open=true; OPPX.ev.edit=id;
@@ -5126,7 +5180,17 @@ async function oppxBenchSave(id){
   var patch={ business_name:v('oppxE_bn'), contact_name:v('oppxE_cn'), email:v('oppxE_em'), phone:v('oppxE_ph'),
     website:v('oppxE_ws'), source:v('oppxE_src'), status:v('oppxE_st')||'New',
     notes:JSON.stringify(cf), updated_at:new Date().toISOString() };
-  var r=await api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',patch);
+  var r;
+  if(id==='__new'){
+    if(!patch.business_name){ toast('Give it at least a business name.'); return; }
+    r=await api('prospects','POST',patch);
+    if(r===null){ toast('Couldn\u2019t save \u2014 try again'); return; }
+    var newId=(Array.isArray(r)&&r[0]&&r[0].id)||(r&&r.id)||null;
+    Object.assign(p, patch); p.id=newId||('tmp_'+Date.now());
+    OPPX.ev.edit=null; toast('\u2713 Added'); if(!newId) loadOpportunities(); else oppxRender();
+    return;
+  }
+  r=await api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',patch);
   if(r===null){ toast('Couldn\u2019t save \u2014 try again'); return; }
   Object.assign(p, patch);
   OPPX.ev.edit=null;
