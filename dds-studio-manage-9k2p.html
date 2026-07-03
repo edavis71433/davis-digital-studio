@@ -11163,7 +11163,7 @@ function anEngineNote(eng){
 // ═══ INVOICES — the money, and the move on each. Overrides the page loader;
 // the classic per-client editor stays intact underneath (Classic view). ═══
 (function(){
-  var IVX={tab:'all', rows:[], loading:false, legacy:false};
+  var IVX={tab:'all', rows:[], loading:false, legacy:false, q:'', page:1, sel:{}, ptab:'ov', pays:null};
   var __legacyCmd=null;
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -11244,51 +11244,97 @@ function anEngineNote(eng){
 
     var TABS=[['all','All invoices'],['out','Outstanding'],['over','Overdue'],['paid','Paid']];
     if(hasDrafts) TABS.push(['draft','Drafts']);
-    var list=rows.filter(function(i){
-      if(IVX.tab==='out') return !isPaid(i)&&!isDraft(i);
-      if(IVX.tab==='over') return overdueDays(i)>0;
-      if(IVX.tab==='paid') return isPaid(i);
-      if(IVX.tab==='draft') return isDraft(i);
+    var q=String(IVX.q||'').toLowerCase();
+    var listAll=rows.filter(function(i){
+      if(IVX.tab==='out'&&(isPaid(i)||isDraft(i))) return false;
+      if(IVX.tab==='over'&&overdueDays(i)<=0) return false;
+      if(IVX.tab==='paid'&&!isPaid(i)) return false;
+      if(IVX.tab==='draft'&&!isDraft(i)) return false;
+      if(q){ var hay=(String(i.name||'')+' '+cName(i)+' '+String(i.amount||'')).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
       return true;
     });
+    var PAGE=10, total=listAll.length, maxP=Math.max(1,Math.ceil(total/PAGE));
+    if(IVX.page>maxP) IVX.page=maxP;
+    var start=(IVX.page-1)*PAGE, list=listAll.slice(start,start+PAGE);
+    var pageIds=list.map(function(i){return i.id;}).join(',');
+    var allSel=list.length&&list.every(function(i){return IVX.sel[i.id];});
+    var selN=Object.keys(IVX.sel).length;
+
     var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
       return '<button class="ibx-tab'+(IVX.tab===t[0]?' on':'')+'" onclick="ivxTab(\''+t[0]+'\')">'+t[1]+'</button>';
     }).join('')
     +'<span style="flex:1;"></span>'
+    +'<input class="opx-search" style="max-width:220px;padding:7px 12px;font-size:12.5px;margin-bottom:6px;" placeholder="Search invoices or clients\u2026" value="'+att(IVX.q)+'" oninput="ivxSearch(this.value)" aria-label="Search invoices">'
     +'<button class="ibx-tab" onclick="ivxClassic(true)">+ New invoice</button>'
-    +'<button class="ibx-tab" onclick="ivxClassic(true)" title="Per-client editor and form">Classic view \u2192</button>'
+    +'<button class="ibx-tab" onclick="ivxClassic(true)" title="Per-client editor and form">Classic \u2192</button>'
     +'</div>';
+
+    var bulk=selN?('<div class="opx-bulk">'+selN+' selected \u00b7 '
+      +'<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="ivxBulkPaid()">Record payment</button>'
+      +'<button class="iabtn" onclick="IVX.sel={};ivxRender();">Clear</button></div>'):'';
 
     var body=list.length?list.map(function(i){
       var od=overdueDays(i);
       var nm=cName(i);
       var due = isPaid(i) ? ('Paid '+agoS(i.paid_at)) : (dueMs(i)!=null ? ((od>0?'<span style="color:#c0392b;font-weight:650;">'+od+'d overdue</span>':esc(String(i.due_date||'').replace(/^Due\s+/i,'')))) : '\u2014');
       return '<div class="ivx-row" onclick="ivxPanel(\''+att(String(i.id))+'\')">'
+        +'<input type="checkbox" aria-label="Select" '+(IVX.sel[i.id]?'checked':'')+' onclick="event.stopPropagation();ivxSel(\''+att(String(i.id))+'\',this.checked)">'
         +'<div class="ibx-av">'+esc((nm||i.name||'?').charAt(0).toUpperCase())+'</div>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:650;color:var(--ink);">'+esc(i.name||'Invoice')+'</div>'
           +'<div style="font-size:12px;color:var(--muted);">'+(nm?esc(nm)+' \u00b7 ':'')+esc(agoS(i.created_at))+'</div></div>'
         +statusChip(i)
         +'<span class="ivx-due">'+due+'</span>'
         +'<span class="ivx-amt">'+amt(i)+'</span>'
+        +'<button class="iabtn" style="font-size:16px;line-height:1;padding:4px 8px;" aria-label="More" onclick="event.stopPropagation();ivxPanel(\''+att(String(i.id))+'\')">\u22ee</button>'
       +'</div>';
     }).join('')
     :'<div style="padding:24px 8px;font-size:13.5px;color:var(--muted);">'+(IVX.tab==='over'?'Nothing overdue \u2014 the money is on schedule.':'Nothing here right now.')+'</div>';
 
+    var pager= total>PAGE
+      ? '<div style="display:flex;align-items:center;gap:10px;padding:14px 8px;font-size:12.5px;color:var(--muted);">Showing '+(start+1)+'\u2013'+(start+list.length)+' of '+total
+        +'<span style="flex:1;"></span>'
+        +(IVX.page>1?'<button class="ibx-pill" onclick="ivxPage(-1)">\u2190 Prev</button>':'')
+        +(IVX.page<maxP?'<button class="ibx-pill" onclick="ivxPage(1)">Next \u2192</button>':'')
+        +'</div>'
+      : (total?'<div style="padding:12px 8px;font-size:12px;color:var(--muted);">Showing all '+total+'</div>':'');
+
+    // select-all row header
+    var selHead=list.length?('<div style="display:flex;align-items:center;gap:10px;padding:6px 12px 2px;font-size:11px;color:var(--muted);">'
+      +'<input type="checkbox" aria-label="Select page" '+(allSel?'checked':'')+' onclick="ivxSelPage(this.checked,\''+pageIds+'\')"> Select page</div>'):'';
+
     root.innerHTML=
       '<div class="pt">Invoices</div>'
-      +'<div class="ibx-sub">The money across every client \u2014 what\u2019s outstanding, what\u2019s overdue, and the move on each.</div>'
+      +'<div class="ibx-sub">Track payments, manage invoices, and keep cash flow moving.</div>'
       +stats
       +tabs
-      +'<div style="margin-top:4px;">'+body+'</div>';
+      +bulk
+      +selHead
+      +'<div style="margin-top:2px;">'+body+'</div>'
+      +pager;
   }
 
   window.ivxPanel=function(id){
     try{ oppxPanelClose(); }catch(e){}
+    IVX.ptab='ov'; IVX.pays=null;
+    var i=(IVX.rows||[]).find(function(r){ return String(r.id)===String(id); });
+    if(!i) return;
+    var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
+    bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
+    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Invoice detail"><div id="ivxPanelBody"></div></aside>';
+    document.body.appendChild(bg);
+    document.addEventListener('keydown', oppxPanelEsc);
+    ivxPanelRender(id);
+    // real payments from the Stripe ledger for this invoice
+    api('stripe_payments?invoice_id=eq.'+encodeURIComponent(id)+'&select=amount,currency,status,kind,created_at,stripe_session_id&order=created_at.desc&limit=20')
+      .then(function(r){ IVX.pays=r||[]; ivxPanelRender(id); })
+      .catch(function(){ IVX.pays=[]; ivxPanelRender(id); });
+  };
+  window.ivxPTab=function(t,id){ IVX.ptab=t; ivxPanelRender(id); };
+  function ivxPanelRender(id){
+    var host=document.getElementById('ivxPanelBody'); if(!host) return;
     var i=(IVX.rows||[]).find(function(r){ return String(r.id)===String(id); });
     if(!i) return;
     var od=overdueDays(i), nm=cName(i), em=cEmail(i);
-    var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
-    bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
     var dueLine = isPaid(i) ? '<span style="color:#1a7e49;font-weight:650;">Paid</span> \u00b7 '+esc(agoS(i.paid_at))
       : (od>0 ? '<span style="color:#c0392b;font-weight:700;">'+od+' day'+(od===1?'':'s')+' overdue</span>'+(i.due_date?' \u00b7 due '+esc(String(i.due_date).replace(/^Due\s+/i,'')):'')
       : (i.due_date?('Due '+esc(String(i.due_date).replace(/^Due\s+/i,''))):'No due date'));
@@ -11296,26 +11342,87 @@ function anEngineNote(eng){
       +(!isPaid(i)?'<button class="bf-act primary" onclick="ivxRemind(\''+att(String(i.id))+'\')">Send reminder \u2192</button>':'')
       +(!isPaid(i)&&typeof invMarkPaid==='function'?'<button class="bf-act" onclick="invMarkPaid(\''+att(String(i.id))+'\');oppxPanelClose();setTimeout(loadInvoiceCommand,600);">Record payment</button>':'')
       +(i.stripe_url?'<button class="bf-act" onclick="copyPayLink(\''+att(String(i.stripe_url))+'\')">Copy pay link</button>':'')
+    +'</div>';
+    var ptabs='<div class="ivx-tabs" style="margin-top:18px;">'
+      +[['ov','Overview'],['pay','Payments'],['nt','Notes']].map(function(t){
+        return '<button class="ibx-tab'+(IVX.ptab===t[0]?' on':'')+'" onclick="ivxPTab(\''+t[0]+'\',\''+att(String(id))+'\')">'+t[1]+'</button>';
+      }).join('')+'</div>';
+    var body='';
+    if(IVX.ptab==='ov'){
+      body='<div class="ivx-block"><div class="ivx-bh">INVOICE SUMMARY</div>'
+        +'<div class="ivx-kv"><span>Created</span><b>'+esc(agoS(i.created_at)||'\u2014')+'</b></div>'
+        +'<div class="ivx-kv"><span>Due date</span><b>'+esc(i.due_date?String(i.due_date).replace(/^Due\s+/i,''):'\u2014')+'</b></div>'
+        +'<div class="ivx-kv"><span>Status</span><b>'+esc(i.status||'\u2014')+'</b></div>'
+        +(nm?'<div class="ivx-kv"><span>Client</span><b>'+esc(nm)+'</b></div>':'')
+      +'</div>'
+      +'<div class="ivx-block"><div class="ivx-bh">DETAILS &amp; TOTAL</div>'
+        +(i.description?'<div style="font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap;">'+esc(String(i.description).slice(0,600))+'</div>':'<div style="font-size:12.5px;color:var(--muted);">No line details recorded.</div>')
+        +'<div class="ivx-kv" style="border-top:1px solid rgba(41,25,66,.08);margin-top:10px;padding-top:10px;"><span style="font-weight:700;color:var(--ink);">Total</span><b style="font-size:15px;">'+amt(i)+'</b></div>'
+      +'</div>';
+    } else if(IVX.ptab==='pay'){
+      var ps=IVX.pays;
+      body='<div class="ivx-block"><div class="ivx-bh">PAYMENTS (STRIPE LEDGER)</div>'
+        +(ps===null?'<div class="bf-skel" style="height:12px;width:70%;"></div>'
+          :(ps.length?ps.map(function(p){
+            return '<div class="ivx-kv"><span>'+esc(p.status||'payment')+' \u00b7 '+esc(p.kind||'')+' \u00b7 '+esc(agoS(p.created_at))+'</span><b>$'+Number(p.amount||0).toLocaleString()+'</b></div>';
+          }).join('')
+          :'<div style="font-size:12.5px;color:var(--muted);">No ledger entries for this invoice yet. Payments land here automatically when the pay link is used.</div>'))
+      +'</div>';
+    } else {
+      body='<div class="ivx-block"><div class="ivx-bh">NOTES</div>'
+        +'<textarea id="ivxNoteTa" rows="5" style="width:100%;padding:9px 11px;border:1px solid rgba(91,63,160,.18);border-radius:9px;font-size:13px;font-family:inherit;box-sizing:border-box;">'+esc(i.description||'')+'</textarea>'
+        +'<button class="bf-act primary" style="margin-top:10px;" onclick="ivxNoteSave(\''+att(String(id))+'\')">Save notes</button>'
+      +'</div>';
+    }
+    var footer='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;">'
+      +'<button class="bf-act" onclick="ivxPdf(\''+att(String(id))+'\')">\u2913 Download PDF</button>'
+      +(i.stripe_url?'<a class="bf-act" style="text-decoration:none;" target="_blank" rel="noopener" href="'+att(i.stripe_url)+'">View invoice \u2197</a>':'')
       +'<button class="bf-act" onclick="ivxClassic(true)">Edit in classic \u2192</button>'
     +'</div>';
-    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Invoice detail">'
-      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+    host.innerHTML=
+      '<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
       +'<div class="opx3-pchip" style="color:'+(isPaid(i)?'#1a7e49':(od>0?'#c0392b':'#9a7a1a'))+';">'+(isPaid(i)?'PAID':(od>0?'OVERDUE':'OUTSTANDING'))+'</div>'
       +'<div class="opx3-pt">'+esc(i.name||'Invoice')+'</div>'
       +'<div class="opx3-pm">'+(nm?esc(nm):'No client linked')+(em?' \u00b7 '+esc(em):'')+'</div>'
       +'<div class="ivx-big" style="margin-top:14px;">'+amt(i)+'</div>'
       +'<div style="font-size:12.5px;margin-top:4px;">'+dueLine+'</div>'
       +acts
-      +'<div class="ivx-block"><div class="ivx-bh">INVOICE SUMMARY</div>'
-        +'<div class="ivx-kv"><span>Created</span><b>'+esc(agoS(i.created_at)||'\u2014')+'</b></div>'
-        +'<div class="ivx-kv"><span>Due date</span><b>'+esc(i.due_date?String(i.due_date).replace(/^Due\s+/i,''):'\u2014')+'</b></div>'
-        +'<div class="ivx-kv"><span>Status</span><b>'+esc(i.status||'\u2014')+'</b></div>'
-        +(i.stripe_url?'<div class="ivx-kv"><span>Pay link</span><b><a href="'+att(i.stripe_url)+'" target="_blank" rel="noopener" style="color:var(--p);">Open \u2192</a></b></div>':'')
-      +'</div>'
-      +(i.description?'<div class="ivx-block"><div class="ivx-bh">DETAILS</div><div style="font-size:13px;color:var(--ink);line-height:1.6;white-space:pre-wrap;">'+esc(String(i.description).slice(0,600))+'</div></div>':'')
-    +'</aside>';
-    document.body.appendChild(bg);
-    document.addEventListener('keydown', oppxPanelEsc);
+      +ptabs
+      +body
+      +footer;
+  }
+  window.ivxSearch=function(v){ IVX.q=v; IVX.page=1; ivxRender(); };
+  window.ivxPage=function(d){ IVX.page+=d; ivxRender(); };
+  window.ivxSel=function(id,on){ if(on)IVX.sel[id]=1; else delete IVX.sel[id]; ivxRender(); };
+  window.ivxSelPage=function(on,ids){ ids.split(',').forEach(function(id){ if(!id)return; if(on)IVX.sel[id]=1; else delete IVX.sel[id]; }); ivxRender(); };
+  window.ivxBulkPaid=async function(){
+    var ids=Object.keys(IVX.sel); if(!ids.length) return;
+    for(var k=0;k<ids.length;k++){ try{ if(typeof invMarkPaid==='function') await invMarkPaid(ids[k]); }catch(e){} }
+    IVX.sel={}; toast('\u2713 Recorded'); setTimeout(function(){ loadInvoiceCommand(); },400);
+  };
+  window.ivxNoteSave=async function(id){
+    var ta=document.getElementById('ivxNoteTa'); if(!ta) return;
+    var r=await api('invoices?id=eq.'+encodeURIComponent(id),'PATCH',{description:ta.value});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var i=(IVX.rows||[]).find(function(x){return String(x.id)===String(id);}); if(i) i.description=ta.value;
+    toast('\u2713 Notes saved');
+  };
+  window.ivxPdf=function(id){
+    var i=(IVX.rows||[]).find(function(r){ return String(r.id)===String(id); }); if(!i) return;
+    var nm=cName(i), w=window.open('','_blank');
+    if(!w){ toast('Allow pop-ups to download the PDF'); return; }
+    w.document.write('<html><head><title>'+esc(i.name||'Invoice')+'</title><style>body{font-family:Georgia,serif;color:#1a1028;max-width:640px;margin:48px auto;padding:0 24px;}h1{font-size:26px;margin:0;}h2{font-size:13px;letter-spacing:.1em;color:#9f93b8;margin:34px 0 8px;text-transform:uppercase;}.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1028;padding-bottom:18px;}.amt{font-size:30px;font-weight:700;}.kv{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #eee;}.tot{font-weight:700;font-size:16px;border-top:2px solid #1a1028;margin-top:8px;padding-top:10px;}p{line-height:1.7;font-size:14px;white-space:pre-wrap;}.ft{margin-top:44px;font-size:12px;color:#9f93b8;}</style></head><body>'
+      +'<div class="hd"><div><h1>Davis Digital Studio</h1><div style="font-size:12px;color:#9f93b8;margin-top:4px;">eric@davisdigitalstudio.com</div></div><div style="text-align:right;"><div style="font-size:12px;color:#9f93b8;">INVOICE</div><div style="font-weight:700;">'+esc(i.name||'')+'</div></div></div>'
+      +'<h2>Billed to</h2><div style="font-size:15px;font-weight:600;">'+esc(nm||'\u2014')+'</div>'+(cEmail(i)?'<div style="font-size:13px;color:#9f93b8;">'+esc(cEmail(i))+'</div>':'')
+      +'<h2>Summary</h2>'
+      +'<div class="kv"><span>Status</span><span>'+esc(i.status||'\u2014')+'</span></div>'
+      +'<div class="kv"><span>Due</span><span>'+esc(i.due_date?String(i.due_date).replace(/^Due\s+/i,''):'\u2014')+'</span></div>'
+      +(i.description?'<h2>Details</h2><p>'+esc(String(i.description))+'</p>':'')
+      +'<div class="kv tot"><span>Total due</span><span class="amt">'+amt(i)+'</span></div>'
+      +'<div class="ft">Thank you \u2014 Davis Digital Studio</div>'
+      +'</body></html>');
+    w.document.close();
+    setTimeout(function(){ try{ w.print(); }catch(e){} },350);
   };
 
   window.ivxRemind=function(id){
