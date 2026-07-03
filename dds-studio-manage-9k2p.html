@@ -2903,10 +2903,10 @@ async function openHubClient(id) {
   // ── HISTORY (one merged timeline of everything that happened) ──
   (function(){
     var ev = [];
-    msgs.forEach(function(m){ ev.push({ t:m.created_at, icon:'\ud83d\udcac', text:(m.from_who==='eric'?'You':'Client')+': '+String(m.text||'').slice(0,80) }); });
-    files.forEach(function(f){ ev.push({ t:f.created_at, icon:'\ud83d\udcce', text:(f.from_who==='eric'?'You shared':'Client uploaded')+' '+(f.name||'a file') }); });
-    invs.forEach(function(i){ ev.push({ t:i.created_at, icon:'\ud83d\udcb5', text:'Invoice '+(i.name||'')+' \u00b7 '+(i.status||'') }); });
-    apprs.forEach(function(a){ ev.push({ t:a.created_at, icon:'\u2713', text:'Approval: '+(a.title||'')+' \u00b7 '+(a.status||'') }); });
+    msgs.forEach(function(m){ ev.push({ t:m.created_at, icon:'\ud83d\udcac', text:(m.from_who==='eric'?'You':'Client')+': '+String(m.text||'').slice(0,80), kind:(m.from_who==='eric'?'message':null), id:m.id }); });
+    files.forEach(function(f){ ev.push({ t:f.created_at, icon:'\ud83d\udcce', text:(f.from_who==='eric'?'You shared':'Client uploaded')+' '+(f.name||'a file'), kind:(f.from_who==='eric'?'file':null), id:f.id, sp:(f.storage_path||'') }); });
+    invs.forEach(function(i){ ev.push({ t:i.created_at, icon:'\ud83d\udcb5', text:'Invoice '+(i.name||'')+' \u00b7 '+(i.status||''), kind:(String(i.status||'').toLowerCase()==='paid'?null:'invoice'), id:i.id }); });
+    apprs.forEach(function(a){ ev.push({ t:a.created_at, icon:'\u2713', text:'Approval: '+(a.title||'')+' \u00b7 '+(a.status||''), kind:'approval', id:a.id }); });
     (activity||[]).forEach(function(x){ ev.push({ t:x.created_at, icon:'\u2022', text:(x.action||'activity')+(x.detail?(' \u2014 '+x.detail):'') }); });
     ev = ev.filter(function(e){ return e.t; }).sort(function(a,b){ return new Date(b.t)-new Date(a.t); }).slice(0,40);
     html += '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:24px 0 10px;">History</div>';
@@ -2916,9 +2916,14 @@ async function openHubClient(id) {
       ev.forEach(function(e){
         var d = new Date(e.t);
         var ds = d.toLocaleDateString([], {month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        // Retract: only for things YOU sent that the client can currently see.
+        var retract = '';
+        if (e.kind && e.id) {
+          retract = ' <button onclick="retractItem(\''+e.kind+'\',\''+e.id+'\',\''+c.id+'\',\''+String(e.sp||'').replace(/'/g,"\\'")+'\')" title="Retract — removes this from the client\'s portal" style="font-size:10.5px;color:#c0392b;font-weight:600;background:none;border:none;cursor:pointer;padding:0 0 0 6px;font-family:inherit;">Retract</button>';
+        }
         html += '<div style="position:relative;padding:7px 0;">'+
           '<span style="position:absolute;left:-21px;top:9px;width:9px;height:9px;background:#fff;border:2px solid var(--p);border-radius:50%;"></span>'+
-          '<div style="font-size:12.5px;color:var(--ink);line-height:1.4;">'+e.icon+' '+e.text+'</div>'+
+          '<div style="font-size:12.5px;color:var(--ink);line-height:1.4;">'+e.icon+' '+e.text+retract+'</div>'+
           '<div style="font-size:10.5px;color:var(--muted);margin-top:1px;">'+ds+'</div>'+
         '</div>';
       });
@@ -4409,18 +4414,46 @@ async function loadFiles(client) {
 // row would leave the file still reachable at its public URL forever.
 async function deleteFile(id, storagePath, displayName) {
   if (!confirm('Delete "'+(displayName||'this file')+'"? This removes it from the client\'s portal permanently.')) return;
+  // Row first: if the server refuses, we haven't destroyed the storage object
+  // behind a record that still exists.
+  var r = await api("files?id=eq."+id, "DELETE");
+  if (r === null) { toast("Could not delete the file record."); return; }
   if (storagePath) {
     try {
       await fetch(SB_URL+"/storage/v1/object/client-files/"+storagePath, {
         method: "DELETE",
         headers: { "Authorization": "Bearer "+SB_KEY }
       });
-    } catch(e) { /* storage delete is best-effort; still remove the row below */ }
+    } catch(e) { /* storage delete is best-effort once the row is gone */ }
   }
-  await api("files?id=eq."+id, "DELETE");
   toast("✓ Deleted");
   var ctx = selectedClients["files"];
   if (ctx) await loadFiles(ctx);
+}
+
+// ── RETRACT: remove something you sent from the client's portal ──
+// Works for: messages you sent, files you shared, approval requests, and
+// unpaid invoices (paid invoices are financial records; the server refuses
+// to delete them even if asked). Removes the underlying row, so the item
+// disappears from the client's portal immediately.
+async function retractItem(kind, id, clientId, storagePath) {
+  var labels = { message: 'this message', file: 'this file', approval: 'this approval request', invoice: 'this invoice' };
+  var tables = { message: 'messages', file: 'files', approval: 'approvals', invoice: 'invoices' };
+  var table = tables[kind];
+  if (!table) { toast('Unknown item type.'); return; }
+  if (!confirm('Retract '+(labels[kind]||'this item')+'? It will be removed from the client\'s portal permanently. This cannot be undone.')) return;
+  var r = await api(table+"?id=eq."+id, "DELETE");
+  if (r === null) { toast('Could not retract — the server refused. Check you are signed in; paid invoices cannot be deleted.'); return; }
+  if (kind === 'file' && storagePath) {
+    try {
+      await fetch(SB_URL+"/storage/v1/object/client-files/"+storagePath, {
+        method: "DELETE", headers: { "Authorization": "Bearer "+SB_KEY }
+      });
+    } catch(e) { /* best-effort once the row is gone */ }
+  }
+  try { await api("activity_log","POST",{ client_id: clientId, action: "retracted_"+kind, detail: "Retracted "+(labels[kind]||kind)+" from client portal" }); } catch(e){}
+  toast('✓ Retracted — removed from the client\'s portal.');
+  try { refreshOpenCard(clientId); } catch(e){}
 }
 
 async function uploadFiles(files) {
