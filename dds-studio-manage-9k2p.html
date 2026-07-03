@@ -1509,6 +1509,38 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .opx-ef{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:10px;}
 .opx-ef label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .opx-ef input,.opx-ef select,.opx-ef textarea{width:100%;padding:8px 10px;border:1px solid rgba(91,63,160,0.18);border-radius:8px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff;box-sizing:border-box;}
+/* ── Command center v3 ── */
+.opx3-glance{margin-top:16px;padding:16px 18px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:linear-gradient(135deg, rgba(91,63,160,0.05), rgba(91,63,160,0.02));}
+.opx3-gtitle{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--p);margin-bottom:10px;}
+.opx3-gstats{display:flex;gap:26px;align-items:center;flex-wrap:wrap;}
+.opx3-gn{font-size:22px;font-weight:700;color:var(--ink);line-height:1.1;}
+.opx3-gl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.opx3-gcta{margin-left:auto;}
+.opx3-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:10px;}
+.opx3-card{border:1px solid var(--bf-line);border-radius:14px;background:#fff;padding:14px;cursor:pointer;transition:border-color .12s, box-shadow .12s;display:flex;flex-direction:column;align-items:flex-start;}
+.opx3-card:hover{border-color:rgba(91,63,160,0.35);box-shadow:0 4px 18px rgba(41,25,66,0.06);}
+.opx3-chip{font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:100px;}
+.opx3-ct{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:8px;}
+.opx3-cw{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:4px;}
+.opx3-cm{font-size:11.5px;color:var(--ink-2,#574d68);margin-top:8px;}
+.opx3-tbl td{cursor:pointer;}
+.opx3-why{max-width:340px;}
+.opx3-panelbg{position:fixed;inset:0;background:rgba(20,12,36,0.28);z-index:9000;display:flex;justify-content:flex-end;}
+.opx3-panel{width:min(420px,92vw);height:100%;background:#fff;box-shadow:-12px 0 40px rgba(20,12,36,0.18);padding:26px 24px;overflow-y:auto;position:relative;animation:opx3in .18s ease;}
+@keyframes opx3in{from{transform:translateX(24px);opacity:0;}to{transform:none;opacity:1;}}
+@media (prefers-reduced-motion: reduce){ .opx3-panel{animation:none;} }
+.opx3-x{position:absolute;top:14px;right:14px;border:none;background:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;}
+.opx3-pchip{font-size:10.5px;font-weight:800;letter-spacing:.08em;}
+.opx3-pt{font-size:21px;font-weight:700;color:var(--ink);margin-top:6px;font-family:'Fraunces',serif;}
+.opx3-pm{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.opx3-ph{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px;}
+.opx3-pw{font-size:13.5px;color:var(--ink);line-height:1.6;}
+.opx3-pval{margin-top:14px;padding:12px 14px;border:1px solid var(--bf-line);border-radius:12px;background:rgba(26,126,73,0.04);}
+.opx3-pvn{font-size:19px;font-weight:700;color:#1a7e49;}
+.opx3-pvl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.opx3-next{padding:12px 14px;border:1px solid rgba(91,63,160,0.16);border-radius:12px;background:rgba(91,63,160,0.05);font-size:13px;color:var(--ink);line-height:1.5;}
+.opx3-tl{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+.opx3-tld{flex:none;width:7px;height:7px;border-radius:50%;background:var(--p);margin-top:5px;opacity:.6;}
 /* ── Morning command screen ── */
 .opx2-meta{font-size:12.5px;color:var(--muted);margin-top:6px;}
 .opx2-sub{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);}
@@ -4425,25 +4457,17 @@ function oppxRender(){
   var S=oppxPrep();
   Object.keys(S).forEach(function(k){ if(!Array.isArray(S[k])) return; S[k]=S[k].filter(function(x){ return oppxMatchQ(x,q); }); });
 
-  // ── ONE RANKED SPINE ──
-  // Presentation rank mirroring the engine's weights (ranking only; the engine
-  // still owns truth). Hand-raisers outrank system finds; money outranks vibes.
   var RANK={ revenue_at_risk:90, waiting_on_eric:85, blocked_approval:80, renewal_window:75, churn_risk:72,
     high_opportunity:70, proposal_stale:65, expansion_fit:60, draft_unsent:50, onboarding_blocked:49,
     care_delivery_gap:47, review_ask:46, site_issue:45, referral_ready:45, testimonial_ask:44,
     value_recap:43, relationship_touch:40, prospect_bench:0 };
-  function rankOf(x){
-    if(x.raw==='lead') return x.follow?66:84;
-    if(x.raw==='audit') return x.email?68:25;
-    return RANK[x.signal]!=null?RANK[x.signal]:35;
-  }
+  function rankOf(x){ if(x.raw==='lead') return x.follow?66:84; if(x.raw==='audit') return x.email?68:25; return RANK[x.signal]!=null?RANK[x.signal]:35; }
   function valOf(x){ var v=Number(x.estimated_value); return isFinite(v)&&v>0?v:0; }
   var unified=[].concat(S.hot,S.follow,S.grow,S.risk,S.disc).filter(function(x){ return x.signal!=='prospect_bench'; });
-  // dedupe (an item can sit in two buckets)
   var seen={}; unified=unified.filter(function(x){ var k=(x.raw||'p')+'_'+x.id; if(seen[k])return false; seen[k]=1; return true; });
   unified.sort(function(a,b){ return (rankOf(b)-rankOf(a)) || (valOf(b)-valOf(a)); });
+  OPPX.unified=unified;
 
-  // ── primary verb per item: the next action, not a category ──
   function verb(x){
     if(x.raw==='lead')  return {label:(x.follow?'Draft follow-up':'Draft reply'), fn:"oppxRawDraft('lead','"+escAttr(x.id)+"')"};
     if(x.raw==='audit') return x.email?{label:'Draft outreach', fn:"oppxRawDraft('audit','"+escAttr(x.id)+"')"}:{label:'See the audit', fn:"oppOpen('"+escAttr(x.id)+"')"};
@@ -4452,101 +4476,150 @@ function oppxRender(){
     return {label:'Draft it', fn:"oppxDraft('"+x.id+"')"};
   }
   function money(x){ var v=valOf(x); return v?('$'+v.toLocaleString()):''; }
-  function line(x){
-    if(x.raw) return x.why||'';
-    return x.summary||'';
-  }
+  function line(x){ return x.raw?(x.why||''):(x.summary||''); }
   function name(x){ return x.raw?x.name:(x.title||''); }
-  function openFn(x){ return x.raw?(x.raw==='audit'?"oppOpen('"+escAttr(x.id)+"')":"go('leads')"):"oppxToggle('"+x.id+"')"; }
+  function panelFn(x){ return "oppxPanelOpen('"+(x.raw||'p')+"','"+escAttr(String(x.id))+"')"; }
+  OPPX._verb=verb; OPPX._money=money; OPPX._line=line; OPPX._name=name; OPPX._valOf=valOf; OPPX._rankOf=rankOf;
 
   var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
   function footerLite(){ return '<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);">'
     +'<span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>'; }
   var lookForm='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">'
       +'<input id="oppxLookUrl" placeholder="Point the checker at a business website\u2026" aria-label="Business website to review" style="flex:1;min-width:200px;max-width:320px;padding:8px 12px;border:1.5px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;outline:none;" onkeydown="if(event.key===\'Enter\')oppLookAtBusiness()">'
-      +'<button class="bf-act" onclick="oppLookAtBusiness()">Run a check \u2192</button>'
-    +'</div>';
-  var patternLine = OPPX.pattern ? '<div class="bf-pattern" style="margin-top:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(OPPX.pattern)+'</span></div>' : '';
+      +'<button class="bf-act" onclick="oppLookAtBusiness()">Run a check \u2192</button></div>';
 
-  // ── honest all-searched empty state ──
   var benchN=(OPPX.bench||[]).length;
+  var uncontacted=(OPPX.bench||[]).filter(function(p){ var st=String(p.status||'').toLowerCase(); return !st||st==='new'; }).length;
+  var inMotion=0; unified.forEach(function(x){ inMotion+=valOf(x); });
+  var proposals=unified.filter(function(x){ return x.signal==='proposal_stale'||x.signal==='draft_unsent'||x.status==='sent'; }).length;
+
   if(!unified.length && !S.won.length && !S.lost.length && !q){
     var srcs=OPPX.sources||[];
     root.innerHTML='<div class="bf-eyebrow">Opportunities</div>'
       +'<h1 class="bf-headline">Searched '+(srcs.length||18)+' data sources \u2014 nothing actionable today.</h1>'
-      +'<div class="bf-sub">Every lead is answered, no offers are waiting, no balances are overdue, no monthly client is under-served, no site alarms, nothing drafted-but-unsent.'+(benchN?' Your bench holds '+benchN+' uncontacted prospects if you want to make your own weather.':'')+'</div>'
+      +'<div class="bf-sub">Every lead is answered, nothing is waiting, no alarms.'+(benchN?' Your bench holds '+uncontacted+' uncontacted prospects if you want to make your own weather.':'')+'</div>'
       +(srcs.length?'<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:14px;max-width:640px;">Checked: '+srcs.map(escHtml).join(' \u00b7 ')+'</div>':'')
-      +(benchN?('<div class="bf-secl" style="margin-top:26px;">Prospect database <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">\u2014 '+benchN+' records</span></div>'+oppxBenchTable()):'')
-      +'<div style="margin-top:14px;">'+lookForm+'</div>'
-      +footerLite();
+      +(benchN?('<div class="bf-secl" style="margin-top:26px;">Prospect database <span class="opx2-sub">\u2014 '+benchN+' records</span></div>'+oppxBenchTable()):'')
+      +'<div style="margin-top:14px;">'+lookForm+'</div>'+footerLite();
     return;
   }
 
-  // ── §3 insights math (from real rows only) ──
-  var inMotion=0; unified.forEach(function(x){ inMotion+=valOf(x); });
-  var mNow=new Date(); var monthKey=mNow.getFullYear()+'-'+String(mNow.getMonth()+1);
-  var wonMonth=S.won.filter(function(r){ var d2=new Date(r.updated_at||0); return (d2.getFullYear()+'-'+(d2.getMonth()+1))===monthKey; });
-  var wonVal=0; wonMonth.forEach(function(r){ wonVal+=valOf(r); });
-  var debtN=S.follow.length;
+  // ── 1. DAY AT A GLANCE ──
+  var today=unified.slice(0,4);
+  var glance='<div class="opx3-glance">'
+    +'<div class="opx3-gtitle">Your day at a glance</div>'
+    +'<div class="opx3-gstats">'
+      +'<div class="opx3-g"><div class="opx3-gn">'+today.length+'</div><div class="opx3-gl">high-priority action'+(today.length===1?'':'s')+'</div></div>'
+      +'<div class="opx3-g"><div class="opx3-gn">'+S.hot.length+'</div><div class="opx3-gl">hot lead'+(S.hot.length===1?'':'s')+'</div></div>'
+      +'<div class="opx3-g"><div class="opx3-gn">'+proposals+'</div><div class="opx3-gl">proposal'+(proposals===1?'':'s')+' waiting</div></div>'
+      +'<div class="opx3-g"><div class="opx3-gn">'+(inMotion?'$'+inMotion.toLocaleString():'\u2014')+'</div><div class="opx3-gl">potential pipeline</div></div>'
+      +(today.length?'<button class="bf-act primary opx3-gcta" onclick="'+(function(){var v=verb(today[0]);return v.fn;})()+'">Start today\u2019s outreach \u2192</button>':'')
+    +'</div></div>';
 
-  // ── filters (segmented, small) ──
-  var FILTERS=[['all','All'],['hot','Hot'],['follow','Follow-ups'],['grow','Grow'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
-  var counts={ all:unified.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
-  var chips=FILTERS.map(function(f){ var on=OPPX.filter===f[0];
-    return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>'; }).join('');
-
-  // ── §1 TODAY: the five highest-impact actions ──
-  var today=unified.slice(0,5);
-  var todayHtml=today.map(function(x,ix){
-    var v=verb(x), $=money(x);
-    return '<div class="opx2-act" tabindex="0" role="button" onclick="'+openFn(x)+'" onkeydown="if(event.key===\'Enter\'){'+openFn(x)+'}">'
-      +'<span class="opx2-n">'+(ix+1)+'</span>'
-      +'<span class="opx2-body"><span class="opx2-t">'+escHtml(name(x))+($?' <span class="opx2-v">'+$+'</span>':'')+'</span>'
-      +'<span class="opx2-w">'+escHtml(line(x))+'</span></span>'
-      +'<button class="bf-act primary opx2-cta" onclick="event.stopPropagation();'+v.fn+'">'+v.label+' \u2192</button>'
+  // ── 2. TODAY'S TOP ACTIONS (cards: why / do / impact) ──
+  function chipFor(x){ var r=rankOf(x); return r>=75?['HIGH','#c0392b','rgba(192,57,43,0.08)'] : r>=55?['MEDIUM','#9a7a1a','#fdf6e3'] : ['LOW','#2c6fb7','rgba(44,111,183,0.08)']; }
+  var cards=today.map(function(x){
+    var v=verb(x), c=chipFor(x), $=money(x);
+    var meta=[]; if($)meta.push($+' est.'); var ago=oppxAgo(x.raw?x.when:x.updated_at); if(ago)meta.push(ago);
+    return '<div class="opx3-card" tabindex="0" role="button" onclick="'+panelFn(x)+'" onkeydown="if(event.key===\'Enter\'){'+panelFn(x)+'}">'
+      +'<span class="opx3-chip" style="color:'+c[1]+';background:'+c[2]+';">'+c[0]+'</span>'
+      +'<div class="opx3-ct">'+escHtml(name(x))+'</div>'
+      +'<div class="opx3-cw">'+escHtml(line(x))+'</div>'
+      +(meta.length?'<div class="opx3-cm">'+escHtml(meta.join(' \u00b7 '))+'</div>':'')
+      +'<button class="bf-act primary" style="margin-top:10px;" onclick="event.stopPropagation();'+v.fn+'">'+v.label+' \u2192</button>'
     +'</div>';
   }).join('');
 
-  // ── §2 pipeline (ranked; reuses full rows w/ drawer + raw rows) ──
-  var pipeItems;
-  if(OPPX.filter==='all') pipeItems=unified.slice(5);
-  else if(OPPX.filter==='hot') pipeItems=S.hot;
-  else if(OPPX.filter==='follow') pipeItems=S.follow;
-  else if(OPPX.filter==='grow') pipeItems=S.grow;
-  else if(OPPX.filter==='atrisk') pipeItems=S.risk;
-  else if(OPPX.filter==='won') pipeItems=S.won;
-  else pipeItems=S.lost;
-  var pipeHtml=pipeItems.length?pipeItems.map(oppxAnyRow).join('')
-    :'<div style="font-size:12.5px;color:var(--muted);padding:8px 2px;">'+(OPPX.filter==='all'?'Everything actionable is in Today\u2019s list above.':'Nothing here right now.')+'</div>';
+  // ── 3. AI FEED as a scannable table; rows open the detail panel ──
+  var FILTERS=[['all','All opportunities'],['hot','Hot leads'],['follow','Follow-ups'],['grow','Grow'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
+  var counts={ all:unified.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
+  var chips=FILTERS.map(function(f){ var on=OPPX.filter===f[0];
+    return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>'; }).join('');
+  var pipeItems = OPPX.filter==='all'?unified : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
+  var tbl='<div style="overflow-x:auto;"><table class="opx-tbl opx3-tbl"><thead><tr><th>Opportunity</th><th>Why it matters</th><th>Value</th><th>Next action</th><th>Last activity</th></tr></thead><tbody>'
+    +(pipeItems.length?pipeItems.map(function(x){
+      var v=verb(x), $=money(x), ago=oppxAgo(x.raw?x.when:x.updated_at)||'\u2014';
+      var closed=!x.raw && !oppxIsOpen(x);
+      return '<tr class="opx3-row" onclick="'+panelFn(x)+'">'
+        +'<td style="font-weight:600;white-space:nowrap;">'+escHtml(name(x))+'</td>'
+        +'<td class="opx3-why">'+escHtml(line(x))+'</td>'
+        +'<td style="white-space:nowrap;'+($?'color:#1a7e49;font-weight:700;':'color:var(--muted);')+'">'+($||'\u2014')+'</td>'
+        +'<td>'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>':'<button class="iabtn" style="color:var(--p);font-weight:600;white-space:nowrap;" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>')+'</td>'
+        +'<td style="white-space:nowrap;color:var(--muted);">'+escHtml(ago)+'</td>'
+      +'</tr>';
+    }).join(''):'<tr><td colspan="5" style="color:var(--muted);padding:14px;">Nothing here right now.</td></tr>')
+    +'</tbody></table></div>';
 
   root.innerHTML =
     '<div class="bf-eyebrow">Opportunities</div>'
-    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(OPPX.answer||'How Davis Digital Studio grows today.')+'</h1>'
-    +'<div class="opx2-meta">'+(OPPX.sources&&OPPX.sources.length?OPPX.sources.length+' sources searched \u00b7 ':'')+unified.length+' in motion'+(inMotion?' \u00b7 $'+inMotion.toLocaleString()+' identified':'')+'</div>'
-    +(OPPX.engineDown?'<div style="margin:10px 0 0;padding:9px 13px;border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;font-size:12.5px;">The reasoning engine didn\u2019t answer, so this is your CRM directly. <button class="bf-whymore" onclick="loadOpportunities()">Retry</button></div>':'')
-
-    +(today.length?('<div class="bf-secl" style="margin-top:22px;">Today <span class="opx2-sub">\u2014 highest-impact first</span></div>'+todayHtml):'')
-
-    +'<div class="bf-secl" style="margin-top:26px;">Pipeline <span class="opx2-sub">\u2014 everything in motion, ranked</span></div>'
-    +'<div class="opx-toolbar" style="margin-top:8px;"><input class="opx-search" placeholder="Search\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities"><div class="opx-filters">'+chips+'</div></div>'
-    +pipeHtml
-
-    +'<div class="bf-secl" style="margin-top:26px;">The read</div>'
-    +'<div class="opx2-stats">'
-      +'<div class="opx2-stat"><div class="opx2-sv">'+(inMotion?'$'+inMotion.toLocaleString():'\u2014')+'</div><div class="opx2-sl">identified in open items</div></div>'
-      +'<div class="opx2-stat"><div class="opx2-sv">'+wonMonth.length+(wonVal?' \u00b7 $'+wonVal.toLocaleString():'')+'</div><div class="opx2-sl">won this month</div></div>'
-      +'<div class="opx2-stat"><div class="opx2-sv">'+debtN+'</div><div class="opx2-sl">waiting on you</div></div>'
-    +'</div>'
-    +patternLine
-
+    +'<h1 class="bf-headline" aria-live="polite" style="margin-bottom:2px;">'+escHtml(OPPX.answer||'Good morning, Eric.')+'</h1>'
+    +'<div class="opx2-meta">AI sales command center \u00b7 '+((OPPX.sources||[]).length||18)+' sources searched</div>'
+    +(OPPX.engineDown?'<div style="margin:10px 0 0;padding:9px 13px;border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;font-size:12.5px;">Engine unreachable \u2014 showing your CRM directly. <button class="bf-whymore" onclick="loadOpportunities()">Retry</button></div>':'')
+    +glance
+    +(today.length?('<div class="bf-secl" style="margin-top:22px;">Today\u2019s top actions</div><div class="opx3-cards">'+cards+'</div>'):'')
+    +'<div class="opx-toolbar" style="margin-top:24px;"><input class="opx-search" placeholder="Search\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities"><div class="opx-filters">'+chips+'</div></div>'
+    +tbl
     +'<div class="bf-secl" style="margin-top:26px;cursor:pointer;" onclick="oppxBenchToggle()">Prospect database <span class="opx2-sub">\u2014 '+benchN+' records \u00b7 '+(OPPX.ev.open?'hide \u25b4':'open \u25be')+'</span></div>'
-    +(OPPX.ev.open?oppxBenchTable():'<div style="font-size:12.5px;color:var(--muted);padding:4px 2px;">'+benchN+' researched businesses, fully editable \u2014 search, filter, draft, convert, bulk-update. Twenty minutes here is next month\u2019s inbound.</div>')
+    +(OPPX.ev.open?oppxBenchTable():'<div style="font-size:12.5px;color:var(--muted);padding:4px 2px;">'+uncontacted+' uncontacted of '+benchN+' \u2014 fully editable evidence: search, filter, draft, convert, bulk-update.</div>')
     +lookForm
     +footerLite();
 
-  if(OPPX.pendingOpen){
-    var pid=OPPX.pendingOpen; OPPX.pendingOpen=null;
-    if((OPPX.rows||[]).some(function(r){ return r.id===pid; })){ oppxToggle(pid); }
+  if(OPPX.pendingOpen){ var pid=OPPX.pendingOpen; OPPX.pendingOpen=null;
+    if((OPPX.rows||[]).some(function(r){ return r.id===pid; })){ oppxPanelOpen('p', pid); } }
+}
+
+// ── 5. DETAIL PANEL: everything about one opportunity, without losing the page ──
+function oppxPanelClose(){ var el=document.getElementById('oppxPanelBg'); if(el) el.remove(); document.removeEventListener('keydown', oppxPanelEsc); }
+function oppxPanelEsc(e){ if(e.key==='Escape') oppxPanelClose(); }
+function oppxPanelOpen(kind, id){
+  oppxPanelClose();
+  var x=null;
+  if(kind==='p'){ x=(OPPX.rows||[]).find(function(r){return String(r.id)===String(id);}); }
+  else { x=(OPPX.unified||[]).find(function(u){return u.raw===kind && String(u.id)===String(id);}); }
+  if(!x) return;
+  var isRaw=!!x.raw;
+  var v=OPPX._verb(x), $=OPPX._money(x), r=OPPX._rankOf(x);
+  var pr=r>=75?['HIGH PRIORITY','#c0392b']:r>=55?['MEDIUM PRIORITY','#9a7a1a']:['WORTH A LOOK','#2c6fb7'];
+  var cat=isRaw?x.source:((OPPX_CAT[x.category]||{}).label||x.category||'');
+  var stage=isRaw?(x.status||'new'):(x.status||'');
+  var whyFull=isRaw?(x.why||''):((x.summary||'')+(x.why_now?(' '+x.why_now):''));
+  var basis=(!isRaw && x.value_basis)?x.value_basis:'';
+  var acts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+    +'<button class="bf-act primary" onclick="'+v.fn+'">'+v.label+' \u2192</button>'
+    +(isRaw
+      ? (x.raw==='audit'?'<button class="bf-act" onclick="oppOpen(\''+escAttr(x.id)+'\')">See the audit</button>':'<button class="bf-act" onclick="go(\'leads\')">View record</button>')
+        +'<button class="bf-act" onclick="oppxRawConvert(\''+x.raw+'\',\''+escAttr(x.id)+'\')">Convert</button>'
+      : '<button class="bf-act" onclick="oppxWon(\''+x.id+'\')">Won</button>'
+        +'<button class="bf-act" onclick="oppxLost(\''+x.id+'\')">Lost</button>'
+        +'<button class="bf-act" onclick="oppxDismiss(\''+x.id+'\')">Dismiss</button>')
+    +'</div>';
+  var tlBlock=isRaw?'':'<div class="opx3-ph">Activity timeline</div><div id="oppxPanelTl"><div class="bf-skel" style="height:12px;width:70%;margin:6px 0;"></div><div class="bf-skel" style="height:12px;width:55%;"></div></div>';
+  var bg=document.createElement('div');
+  bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
+  bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
+  bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Opportunity detail">'
+    +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+    +'<div class="opx3-pchip" style="color:'+pr[1]+';">'+pr[0]+'</div>'
+    +'<div class="opx3-pt">'+escHtml(OPPX._name(x))+'</div>'
+    +'<div class="opx3-pm">'+escHtml(cat||'')+(stage?' \u00b7 '+escHtml(String(stage).replace(/_/g,' ')):'')+'</div>'
+    +'<div class="opx3-ph">Why this matters</div>'
+    +'<div class="opx3-pw">'+escHtml(whyFull||'\u2014')+'</div>'
+    +($?('<div class="opx3-pval"><div><div class="opx3-pvn">'+$+'</div><div class="opx3-pvl">opportunity value'+(basis?' \u00b7 '+escHtml(basis):'')+'</div></div></div>'):'')
+    +'<div class="opx3-ph">Recommended next step</div>'
+    +'<div class="opx3-next">'+escHtml(isRaw?(x.follow?'They\u2019ve gone quiet \u2014 a short, no-pressure follow-up.':'Open the conversation while it\u2019s warm.'):(x.next_action||v.label))+'</div>'
+    +acts
+    +tlBlock
+  +'</aside>';
+  document.body.appendChild(bg);
+  document.addEventListener('keydown', oppxPanelEsc);
+  if(!isRaw){
+    integApi('opportunity_timeline',{id:x.id}).then(function(r2){
+      var evs=((r2&&r2.data)||{}).events||[];
+      var el=document.getElementById('oppxPanelTl'); if(!el) return;
+      el.innerHTML=evs.length?evs.slice(0,10).map(function(ev){
+        return '<div class="opx3-tl"><span class="opx3-tld"></span><div><div style="font-size:12.5px;color:var(--ink);">'+escHtml((ev.event||'').replace(/_/g,' '))+(ev.detail?(' \u2014 '+escHtml(String(ev.detail).slice(0,90))):'')+'</div><div style="font-size:11px;color:var(--muted);">'+escHtml(oppxAgo(ev.created_at)||'')+(ev.actor?' \u00b7 '+escHtml(ev.actor):'')+'</div></div></div>';
+      }).join(''):'<div style="font-size:12px;color:var(--muted);">No events yet.</div>';
+    }).catch(function(){ var el=document.getElementById('oppxPanelTl'); if(el) el.innerHTML='<div style="font-size:12px;color:var(--muted);">Timeline unavailable.</div>'; });
   }
 }
 
@@ -4887,6 +4960,8 @@ async function oppxSet(id, patch, silent){
   }catch(e){ if(window.integToast) integToast('Couldn\u2019t save \u2014 try again'); }
 }
 
+function oppxWon(id){ oppxSet(id,{status:'won'}); oppxPanelClose(); }
+function oppxDismiss(id){ oppxSet(id,{status:'dismissed'}); oppxPanelClose(); }
 function oppxLost(id){
   // no prompt() — mark it, keep the drawer open, and the existing note field
   // is right there for "what lost it" when there's a lesson worth keeping
