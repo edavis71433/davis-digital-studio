@@ -14958,5 +14958,249 @@ window.ddsFilesCard=async function(mountId, clientId){
   };
 })();
 </script>
+
+<style>
+/* REPORTS — AI report builder. Library assembly. */
+#page-reports #rpxRoot{max-width:1280px;}
+.rpx-grid{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.5fr) minmax(230px,.75fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1100px){.rpx-grid{grid-template-columns:1fr;}}
+.rpx-hl{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(41,25,66,.05);font-size:13px;}
+.rpx-hl:last-child{border-bottom:none;}
+</style>
+<script>
+// ═══ REPORTS — client-ready proof of value, generated from the same real
+// intelligence as Talking Points, stored in client_reports, delivered to the
+// portal via the proven message+notification path, downloadable as a branded
+// print-to-PDF. No open-rates or satisfaction scores — no such data exists. ═══
+(function(){
+  var RPX={rows:[], clients:[], sel:null, tab:'all', ready:null, showNew:false};
+  function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
+  function att(s){ return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function cName(id){ var c=RPX.clients.find(function(x){return String(x.id)===String(id);}); return c?(c.name||'Client'):'\u2014'; }
+  function parse(r){ try{ return JSON.parse(r.body||'{}'); }catch(e){ return {}; } }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-reports'); if(!page) return null;
+    var root=document.getElementById('rpxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._rpxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='rpxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  window.rpxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:220px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('client_reports?select=*&order=created_at.desc&limit=200'); }),
+      safe(function(){ return api('clients?select=*&limit=300'); })
+    ]);
+    RPX.ready=(r[0]!==null);
+    RPX.rows=r[0]||[];
+    RPX.clients=(r[1]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    if(!RPX.sel&&RPX.rows[0]) RPX.sel=String(RPX.rows[0].id);
+    rpxRender();
+  };
+  window.rpxTab=function(t){ RPX.tab=t; rpxRender(); };
+  window.rpxSel=function(id){ RPX.sel=id; rpxRender(); };
+  window.rpxNewToggle=function(){ RPX.showNew=!RPX.showNew; rpxRender(); };
+
+  // ── the generator: same real sources as Talking Points, per client ──
+  window.rpxGenerate=async function(){
+    var sel=document.getElementById('rpxNC'); var cid=sel&&sel.value;
+    if(!cid){ toast('Pick a client'); return; }
+    toast('Generating from real data\u2026');
+    var mStart=new Date(); mStart=new Date(mStart.getFullYear(), mStart.getMonth(), 1);
+    var iso=mStart.toISOString();
+    var an=null;
+    try{ an=(await integApi('admin_analytics',{clientId:cid,months:3})).data||null; }catch(e){}
+    var r=await Promise.all([
+      safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&select=name,amount,paid_at&deleted_at=is.null&paid_at=gte.'+encodeURIComponent(iso)+'&limit=50'); }),
+      safe(function(){ return api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id&limit=1'); }),
+      safe(function(){ return api('files?client_id=eq.'+encodeURIComponent(cid)+'&select=name&created_at=gte.'+encodeURIComponent(iso)+'&limit=50'); })
+    ]);
+    var doneTasks=[];
+    if(r[1]&&r[1][0]){
+      var tk=await safe(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(r[1][0].id)+'&select=title,status&limit=100'); })||[];
+      doneTasks=tk.filter(function(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; });
+    }
+    var goods=[], warns=[], highlights=[];
+    if(an){
+      [an.website_analytics,an.search_analytics,an.website_health,an.business_profile,an.engagement_ops].forEach(function(g){
+        ((g&&g.interpretation)||[]).forEach(function(i){
+          if(i.status==='no_data') return;
+          if(i.value!=null) highlights.push({label:i.label, value:i.value, pct:(i.pct!=null?i.pct:null), up:(i.delta==null||i.delta>=0)});
+          if(i.status==='good'||i.status==='improved'||(i.delta!=null&&i.delta>0)) goods.push(i);
+          else if(i.status==='attention'||i.status==='declined'||(i.delta!=null&&i.delta<0)) warns.push(i);
+        });
+      });
+    }
+    var summary=[];
+    goods.slice(0,4).forEach(function(i){ summary.push(i.label+(i.pct!=null?' improved '+Math.abs(i.pct)+'%':'')+' \u2014 '+String(i.text||'').split('.')[0]+'.'); });
+    if(doneTasks.length) summary.push(doneTasks.length+' improvements completed on your roadmap this period.');
+    if(r[2]&&r[2].length) summary.push(r[2].length+' new deliverable'+(r[2].length===1?'':'s')+' added to your portal.');
+    if(!summary.length) summary.push('Foundations held steady this period \u2014 the metrics below are your baseline for next month\u2019s comparison.');
+    var next = (an&&an.executive_brief&&(an.executive_brief.recommended_action||an.executive_brief.recommendation))
+      || (warns[0]?('Focus for next period: '+warns[0].label+' \u2014 '+String(warns[0].text||'').split('.')[0]+'.'):'Continue the current roadmap \u2014 consistency is what compounds.');
+    var period=mStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    var data={ period:period, summary:summary, highlights:highlights.slice(0,6), watch:(warns[0]?{label:warns[0].label,text:String(warns[0].text||'').split('.')[0]}:null), next:next,
+      confidence:(an&&an.executive_brief&&an.executive_brief.confidence)||'low', tasksDone:doneTasks.length };
+    var row=await api('client_reports','POST',{ client_id:cid, title:period+' Performance Report', kind:'monthly', status:'draft', body:JSON.stringify(data) });
+    if(row===null){ toast('Couldn\u2019t save \u2014 run 09-reports.sql + redeploy clever-api'); return; }
+    RPX.showNew=false;
+    var saved=(Array.isArray(row)&&row[0]);
+    if(saved) RPX.sel=String(saved.id);
+    toast('\u2713 Report generated from real data');
+    rpxLoad();
+  };
+
+  window.rpxSend=async function(id){
+    var rep=RPX.rows.find(function(x){ return String(x.id)===String(id); }); if(!rep) return;
+    var d=parse(rep);
+    var text=(d.period||'This period')+' report from Davis Digital Studio:\n\n'
+      +(d.summary||[]).map(function(s){ return '\u2022 '+s; }).join('\n')
+      +(d.next?('\n\nWhat we recommend next: '+d.next):'')
+      +'\n\nFull details are in your monthly review \u2014 reply here with any questions!';
+    var m=await api('messages','POST',{client_id:rep.client_id, from_who:'eric', sender_name:'Eric', text:text});
+    if(m===null){ toast('Couldn\u2019t deliver'); return; }
+    try{ await api('notifications','POST',{client_id:rep.client_id, type:'message', title:'Your '+(d.period||'monthly')+' report is ready', body:'Highlights + what\u2019s next \u2014 in your messages.', link_tab:'messages'}); }catch(e){}
+    await api('client_reports?id=eq.'+encodeURIComponent(id),'PATCH',{status:'delivered', delivered_at:new Date().toISOString()});
+    toast('\u2713 Delivered to '+cName(rep.client_id)+'\u2019s portal');
+    rpxLoad();
+  };
+
+  window.rpxPdf=function(id){
+    var rep=RPX.rows.find(function(x){ return String(x.id)===String(id); }); if(!rep) return;
+    var d=parse(rep);
+    var w=window.open('','_blank'); if(!w){ toast('Allow pop-ups to download'); return; }
+    w.document.write('<html><head><title>'+esc(rep.title||'Report')+'</title><style>body{font-family:Georgia,serif;color:#241a38;max-width:640px;margin:40px auto;padding:0 24px;}h1{font-size:26px;}h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#5b3fa0;margin-top:28px;}li{line-height:1.7;font-size:14px;}.hl{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;font-size:14px;}.brand{color:#5b3fa0;font-weight:700;}.next{background:#f5f2fc;border-radius:12px;padding:16px;margin-top:20px;font-size:14px;line-height:1.6;}</style></head><body>'
+      +'<div class="brand">Davis Digital Studio</div><h1>'+esc(rep.title||'Performance Report')+'</h1>'
+      +'<div style="color:#6b6276;font-size:13px;">Prepared for '+esc(cName(rep.client_id))+' \u00b7 '+esc(d.period||'')+'</div>'
+      +'<h2>Executive summary</h2><ul>'+(d.summary||[]).map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'
+      +((d.highlights&&d.highlights.length)?('<h2>Key highlights</h2>'+d.highlights.map(function(h){ return '<div class="hl"><span>'+esc(h.label)+'</span><b>'+esc(String(h.value))+(h.pct!=null?' <span style="color:'+(h.up?'#1a7e49':'#c0392b')+';">'+(h.up?'\u25B2':'\u25BC')+Math.abs(h.pct)+'%</span>':'')+'</b></div>'; }).join('')):'')
+      +(d.next?'<div class="next"><b>What\u2019s next \u00b7</b> '+esc(d.next)+'</div>':'')
+      +'<div style="margin-top:30px;color:#6b6276;font-size:12px;">Every number in this report is measured, never estimated. \u2014 Eric Davis, Davis Digital Studio</div>'
+      +'</body></html>');
+    w.document.close();
+    setTimeout(function(){ try{ w.print(); }catch(e){} },400);
+  };
+  window.rpxEmail=function(id){
+    var rep=RPX.rows.find(function(x){ return String(x.id)===String(id); }); if(!rep) return;
+    var d=parse(rep);
+    var c=RPX.clients.find(function(x){ return String(x.id)===String(rep.client_id); });
+    ddsDraftAction({ subject:cName(rep.client_id), subjectId:String(rep.client_id), signal:'value_recap', module:'Reports',
+      action:'Send '+cName(rep.client_id)+' their '+(d.period||'monthly')+' report',
+      why:'a proof-of-value report is the strongest renewal and referral message there is',
+      changed:(d.summary||[]).join(' \u00b7 ').slice(0,700),
+      go:'reports', refId:String(id), email:(c&&(c.contact_email||c.email))||'' });
+  };
+
+  function rpxRender(){
+    var root=document.getElementById('rpxRoot'); if(!root) return;
+    if(RPX.ready===false&&!RPX.rows.length){
+      root.innerHTML='<div class="pt">Reports</div><div class="ibx-sub">AI-generated reports that prove value.</div>'
+        +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">One-time setup</div><div style="font-size:13px;color:var(--ink);line-height:1.7;">Run <b>09-reports.sql</b> in Supabase and redeploy <b>clever-api</b> (client_reports is now allowlisted), then <button class="ibx-pill" onclick="rpxLoad()">reload</button>.</div></div>';
+      return;
+    }
+    var delivered=RPX.rows.filter(function(x){ return x.status==='delivered'; });
+    var mNow=new Date(); var mIso=new Date(mNow.getFullYear(),mNow.getMonth(),1).toISOString();
+    var thisM=RPX.rows.filter(function(x){ return x.created_at>=mIso; });
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn">'+RPX.rows.length+'</div><div class="ivx-sl">Reports generated</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+delivered.length+'</div><div class="ivx-sl">Delivered to clients</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+(RPX.rows.length-delivered.length)+'</div><div class="ivx-sl">Drafts</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+thisM.length+'</div><div class="ivx-sl">This month</div></div>'
+    +'</div>';
+
+    var TABS=[['all','All reports'],['draft','Drafts'],['delivered','Delivered']];
+    var list=RPX.rows.filter(function(x){ return RPX.tab==='all'||x.status===RPX.tab; });
+    var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
+      var n=t[0]==='all'?RPX.rows.length:RPX.rows.filter(function(x){return x.status===t[0];}).length;
+      return '<button class="ibx-tab'+(RPX.tab===t[0]?' on':'')+'" onclick="rpxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
+    }).join('')+'<span style="flex:1;"></span></div>';
+
+    var newForm=RPX.showNew?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Generate a report \u2014 from real data only</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+      +'<select class="fi" id="rpxNC" style="margin:0;min-width:200px;">'+RPX.clients.map(function(c){return '<option value="'+att(String(c.id))+'">'+esc(c.name||'Client')+'</option>';}).join('')+'</select>'
+      +'<span class="ibx-chip" style="color:var(--p);background:rgba(91,63,160,.08);">Monthly Performance</span>'
+      +'<button class="bf-act primary" onclick="rpxGenerate()">Generate \u2192</button></div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Composes from analytics, roadmap completions, payments, and deliverables. Templates for Strategy / SEO / Health reports arrive as their data sources connect.</div>'
+    +'</div>'):'';
+
+    var listHtml=list.length?list.map(function(x){
+      var d=parse(x);
+      return '<div class="apx-item'+(RPX.sel===String(x.id)?' on':'')+'" onclick="rpxSel(\''+att(String(x.id))+'\')">'
+        +'<div class="ibx-av">'+esc((cName(x.client_id)||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(x.title||'Report')+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(cName(x.client_id))+' \u00b7 generated '+esc(agoS(x.created_at))+'</div>'
+        +'<span class="ibx-chip" style="display:inline-block;margin-top:7px;'+(x.status==='delivered'?'color:#1a7e49;background:#e7f6ee;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc(String(x.status||'draft').toUpperCase())+'</span></div>'
+      +'</div>';
+    }).join('')
+    :'<div class="grx-empty" style="margin-top:14px;">'+(RPX.rows.length?'Nothing in this tab.':'No reports yet \u2014 generate the first one and it composes itself from this month\u2019s real numbers.')+'</div>';
+
+    var rep=RPX.rows.find(function(x){ return String(x.id)===RPX.sel; });
+    var detail='', rail='';
+    if(rep){
+      var d=parse(rep);
+      detail='<div class="grx-card">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div style="flex:1;min-width:0;">'
+        +'<div style="font-size:18px;font-weight:750;color:var(--ink);">'+esc(rep.title)+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(cName(rep.client_id))+' \u00b7 '+esc(d.period||'')+' \u00b7 generated by the report builder</div></div>'
+        +'<span class="ibx-chip" style="'+(rep.status==='delivered'?'color:#1a7e49;background:#e7f6ee;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc(String(rep.status||'draft').toUpperCase())+'</span></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+          +'<button class="bf-act primary" onclick="rpxSend(\''+att(String(rep.id))+'\')">Send to portal</button>'
+          +'<button class="bf-act" onclick="rpxPdf(\''+att(String(rep.id))+'\')">Download PDF</button>'
+          +'<button class="ibx-pill" onclick="rpxEmail(\''+att(String(rep.id))+'\')">Draft email \u2192</button>'
+        +'</div>'
+        +'<div class="ivx-block"><div class="ivx-bh">\u2726 AI EXECUTIVE SUMMARY</div>'
+          +(d.summary||[]).map(function(s){ return '<div style="font-size:13px;color:var(--ink);line-height:1.6;padding:3px 0;">\u2713 '+esc(s)+'</div>'; }).join('')
+        +'</div>'
+        +((d.highlights&&d.highlights.length)?('<div class="ivx-block"><div class="ivx-bh">KEY HIGHLIGHTS</div>'
+          +d.highlights.map(function(h){ return '<div class="rpx-hl"><span>'+esc(h.label)+'</span><span style="flex:1;"></span><b>'+esc(String(h.value))+'</b>'+(h.pct!=null?' <span style="font-size:11.5px;font-weight:700;color:'+(h.up?'#1a7e49':'#c0392b')+';">'+(h.up?'\u2191':'\u2193')+Math.abs(h.pct)+'%</span>':'')+'</div>'; }).join('')
+        +'</div>'):'')
+        +(d.watch?'<div class="ivx-block"><div class="ivx-bh">WATCHING</div><div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'+esc(d.watch.label)+' \u2014 '+esc(d.watch.text)+'.</div></div>':'')
+        +(d.next?'<div class="msx-snap" style="margin-top:14px;">\u2726 <b>What\u2019s next</b> \u00b7 '+esc(d.next)+'</div>':'')
+      +'</div>';
+      rail='<div class="grx-card"><div class="grx-h">\u2726 Report insight</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'
+        +esc(rep.status!=='delivered'?'This draft is ready \u2014 Send to portal notifies '+cName(rep.client_id)+' instantly, and the PDF prints branded for calls and renewals.'
+          :'Delivered '+agoS(rep.delivered_at||rep.created_at)+'. The follow-up email (Draft email \u2192) is how reports become renewal conversations.')+'</div>'
+        +'<div class="rhx-kv" style="margin-top:8px;"><span>Confidence</span><b>'+esc(d.confidence||'low')+'</b></div>'
+        +(d.tasksDone?'<div class="rhx-kv"><span>Roadmap completions</span><b>'+d.tasksDone+'</b></div>':'')
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Report actions</div>'
+        +'<div class="tlx-qa" onclick="rpxNewToggle();window.scrollTo({top:0,behavior:\'smooth\'});">Generate another<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="go(\'analytics\')">Open Analytics<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(rep.client_id))+'\')}catch(e){}},300);">Client timeline<span class="c">\u203A</span></div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Not built \u2014 honestly</div>'
+        +'<div style="font-size:11.5px;color:var(--muted);line-height:1.6;">Open-rates and satisfaction scores need portal read-tracking and surveys \u2014 neither exists, so those mockup stats aren\u2019t shown. Scheduled auto-reports ship with the nightly cron.</div>'
+      +'</div>'
+      +'<div id="rpxProjMount"></div>';
+    } else {
+      detail='<div class="grx-card"><div class="grx-empty">Select a report \u2014 or generate the first one.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Reports</div>'
+      +'<div class="ibx-sub">AI-generated reports that prove value \u2014 every number measured, never estimated.</div></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="rpxNewToggle()">+ Create report</button></div>'
+      +stats
+      +tabs
+      +newForm
+      +'<div class="rpx-grid"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'</div></div>';
+    if(rep){ try{ ddsProjCtx('rpxProjMount', String(rep.client_id)); }catch(e){} }
+  }
+
+  window.loadReportsLegacy=window.loadReports;
+  window.loadReports=rpxLoad;
+  var _go4=window.go;
+  window.go=function(dest){ var r=_go4.apply(this,arguments); try{ if(dest==='reports') rpxLoad(); }catch(e){} return r; };
+})();
+</script>
 </body>
 </html>
