@@ -4774,7 +4774,10 @@ function oppxRender(){
         +'<td style="white-space:nowrap;"><div class="opx5-cell"><span class="opx5-av">'+escHtml((nm||'?').charAt(0).toUpperCase())+'</span><span><span style="font-weight:600;display:block;">'+escHtml(nm)+'</span><span style="font-size:11px;color:var(--muted);">'+escHtml(sub||'')+'</span></span></div></td>'
         +'<td class="opx3-why">'+escHtml(line(x))+'</td>'
         +'<td style="white-space:nowrap;'+($?'color:#1a7e49;font-weight:700;':'color:var(--muted);')+'">'+($||'\u2014')+'</td>'
-        +'<td>'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>':'<button class="opx5-pill" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>')+'</td>'
+        +'<td style="white-space:nowrap;">'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>'
+          :('<button class="opx5-pill" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>'
+            +(x.bench?'<button class="opx5-pill" style="margin-left:6px;border-color:rgba(41,25,66,0.15);color:var(--muted);" onclick="event.stopPropagation();oppxBenchEditJump(\''+escAttr(String(x.id))+'\')">Edit</button><button class="opx5-pill" style="margin-left:6px;border-color:rgba(192,57,43,0.25);color:#c0392b;" onclick="event.stopPropagation();oppxBenchStatus(\''+escAttr(String(x.id))+'\',\'Dismissed\')">Dismiss</button>':'')))
+        +'</td>'
         +'<td style="white-space:nowrap;color:var(--muted);">'+escHtml(ago)+'</td>'
         +'<td>'+(isFinite(Number(x.score))?'<span class="opx6-score">'+Number(x.score)+'</span>':'')+'</td>'
       +'</tr>';
@@ -4835,6 +4838,7 @@ function oppxPanelOpen(kind, id){
       +'<div class="opx3-next">Send the first outreach \u2014 short, specific, about their site, no pitch.</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
         +'<button class="bf-act primary" onclick="oppxBenchDraft(\''+escAttr(String(p.id))+'\')">Draft outreach \u2192</button>'
+        +'<button class="bf-act" onclick="oppxBenchEditJump(\''+escAttr(String(p.id))+'\')">Edit details</button>'
         +'<button class="bf-act" onclick="oppxBenchStatus(\''+escAttr(String(p.id))+'\',\'Contacted\');oppxPanelClose();">Contacted</button>'
         +'<button class="bf-act" onclick="ddsPrefillNewClient(\''+escAttr(p.business_name||'')+'\',\''+escAttr(p.email||'')+'\',\''+escAttr((p.business_name||'')+' \u2014 Website')+'\')">Convert</button>'
         +'<button class="bf-act" onclick="oppxBenchStatus(\''+escAttr(String(p.id))+'\',\'Dismissed\');oppxPanelClose();">Dismiss</button>'
@@ -5081,6 +5085,12 @@ function oppxBenchCase(p){
   return o;
 }
 function oppxEvEdit(id){ OPPX.ev.edit=(OPPX.ev.edit===id?null:id); oppxRender(); }
+function oppxBenchEditJump(id){
+  try{ oppxPanelClose(); }catch(e){}
+  OPPX.ev.open=true; OPPX.ev.edit=id;
+  oppxRender();
+  setTimeout(function(){ var el=document.querySelector('.opx-editrow'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); },60);
+}
 function oppxBenchEditor(p){
   var cf=oppxBenchCase(p);
   var stOpts=['New','Contacted','Replied','Client','Opted out','Dismissed'].map(function(s){return '<option '+((p.status||'New')===s?'selected':'')+'>'+s+'</option>';}).join('');
