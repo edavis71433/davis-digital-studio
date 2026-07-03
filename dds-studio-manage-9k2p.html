@@ -10609,9 +10609,9 @@ function anEngineNote(eng){
       results=await Promise.all([
         safe(function(){ return integApi('studio_brief',{}); }),
         safe(function(){ return integApi('sales_moves',{}); }),
-        safe(function(){ return api('clients?select=id,name,status,monthly_amount,launched_at&limit=500'); }),
+        safe(function(){ return api('clients?select=*&limit=500'); }),
         safe(function(){ return api('invoices?select=id,name,amount,status,paid_at,created_at&deleted_at=is.null&order=created_at.desc&limit=200'); }),
-        safe(function(){ return api('opportunities?select=id,title,status,estimated_value,updated_at&deleted_at=is.null&limit=300'); })
+        safe(function(){ return api('opportunities?select=*&deleted_at=is.null&limit=300'); })
       ]);
     }catch(e){ results=[null,null,null,null,null]; }
     if(!results[0]&&!results[1]&&!results[2]){
@@ -10660,12 +10660,13 @@ function anEngineNote(eng){
     var sent=brief.headline||brief.answer||'Here\u2019s what deserves your attention today.';
 
     var heroHtml=hero?('<div class="tdx-hero"><div class="eb">START HERE</div>'
-      +'<h2>'+esc(hero.action||hero.title||hero.subject||'Start today\u2019s outreach')+'</h2>'
+      +'<h2>'+esc(hero.title||hero.subject||hero.action||'Start today\u2019s outreach')+'</h2>'
       +'<p>'+esc(hero.why||hero.changed||'')+'</p>'
       +'<button class="go" onclick="'+heroAct(hero)+'">Start \u2192</button></div>')
       :('<div class="tdx-hero"><div class="eb">START HERE</div><h2>Start today\u2019s outreach</h2><p>Twenty minutes of contact work today is next month\u2019s pipeline.</p><button class="go" onclick="go(\'opportunities\')">Start \u2192</button></div>');
 
-    var needsHtml=needs.length?('<div class="tdx-h">Today\u2019s priorities</div><div class="tdx-list">'
+    var needsHtml=(!needs.length)?('<div class="tdx-h">Today\u2019s priorities</div><div class="tdx-list"><div class="tdx-row"><div class="tdx-rb"><div class="tdx-rw">Nothing is waiting on you \u2014 the engine searched every system. The hero above is your best use of today.</div></div></div></div>')
+      :('<div class="tdx-h">Today\u2019s priorities</div><div class="tdx-list">'
       +needs.map(function(it){
         var b=rowBtn(it);
         var tags='';
@@ -10678,7 +10679,7 @@ function anEngineNote(eng){
           +'<button class="tdx-pill" onclick="'+b.fn+'">'+esc(b.l)+'</button></div>';
       }).join('')
       +'<div style="text-align:center;padding:12px 0;"><button class="bf-whymore" style="color:var(--p);font-size:12.5px;" onclick="go(\'opportunities\')">View all priorities \u2192</button></div>'
-      +'</div>'):'';
+      +'</div>');
 
     var pulse='<div class="tdx-card"><div class="tdx-ph">\u25C8 STUDIO PULSE</div><div class="tdx-pulse">'
       +'<div class="tdx-pu"><div class="tdx-pn">'+act.length+'</div><div class="tdx-pl">Active clients</div></div>'
