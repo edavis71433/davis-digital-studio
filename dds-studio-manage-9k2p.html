@@ -12638,7 +12638,13 @@ function anEngineNote(eng){
     if(clientArg&&clientArg.id){ return tlxOpen(String(clientArg.id)); }
     if(TLX.cid) return tlxOpen(TLX.cid);
     root.innerHTML='<div class="bf-skel" style="height:26px;width:260px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
-    try{ TLX.clients=(await api('clients?select=id,name,contact_email,email,monthly_amount,launched_at,created_at,status&limit=300')||[]).filter(function(c){return String(c.status||'').toLowerCase()!=='archived';}); }catch(e){ TLX.clients=[]; }
+    var cr=null; try{ cr=await api('clients?select=*&limit=300'); }catch(e){ cr=null; }
+    if(cr===null||cr===undefined){
+      root.innerHTML='<div class="pt">Timeline</div><div class="ibx-sub">Couldn\u2019t load clients just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="TLX_RETRY()">Try again</button>';
+      window.TLX_RETRY=function(){ tlxLoad(); };
+      return;
+    }
+    TLX.clients=(cr||[]).filter(function(c){return String(c.status||'').toLowerCase()!=='archived';});
     root.innerHTML=
       '<div class="pt">Timeline</div>'
       +'<div class="ibx-sub">The full story of every partnership \u2014 pick a client.</div>'
@@ -12655,9 +12661,16 @@ function anEngineNote(eng){
     var root=ensureRoot(); if(!root) return;
     TLX.cid=String(cid); TLX.page=1;
     root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:120px;width:100%;border-radius:16px;"></div>';
-    if(!TLX.clients){ try{ TLX.clients=await api('clients?select=id,name,contact_email,email,monthly_amount,launched_at,created_at,status&limit=300')||[]; }catch(e){ TLX.clients=[]; } }
+    if(!TLX.clients){
+      var cr2=null; try{ cr2=await api('clients?select=*&limit=300'); }catch(e){ cr2=null; }
+      if(cr2===null||cr2===undefined){
+        root.innerHTML='<div class="pt">Timeline</div><div class="ibx-sub">Couldn\u2019t load this client just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="tlxOpen(\''+att(String(cid))+'\')">Try again</button> <button class="ibx-pill" style="margin-top:12px;" onclick="tlxBackList()">\u2190 All clients</button>';
+        return;
+      }
+      TLX.clients=cr2||[];
+    }
     var c=(TLX.clients||[]).find(function(x){ return String(x.id)===TLX.cid; });
-    if(!c){ tlxLoad(); return; }
+    if(!c){ TLX.cid=null; tlxLoad(); return; }
     var r=await Promise.all([
       safe(function(){ return api('messages?client_id=eq.'+encodeURIComponent(cid)+'&select=from_who,text,created_at&order=created_at.desc&limit=100'); }),
       safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&select=id,name,amount,status,paid_at,created_at,stripe_url&deleted_at=is.null&limit=100'); }),
