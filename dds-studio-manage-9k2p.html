@@ -13311,5 +13311,506 @@ function anEngineNote(eng){
   window.loadFiles=fsxLoad;
 })();
 </script>
+
+<style>
+/* APPROVALS — everything waiting on a decision. Fully assembled from the OS
+   library (stat strip, tabs, list rows, rail cards, chips); zero new components. */
+#page-approvals #apxRoot{max-width:1280px;}
+.apx-grid{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1100px){.apx-grid{grid-template-columns:1fr;}}
+.apx-item{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;margin-top:10px;cursor:pointer;transition:border-color .15s;}
+.apx-item:hover{border-color:rgba(91,63,160,.3);}
+.apx-item.on{border-color:var(--p);}
+.apx-t{font-size:13.5px;font-weight:700;color:var(--ink);}
+.apx-m{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.apx-chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 10px;border-radius:100px;margin-top:8px;}
+</style>
+<script>
+// ═══ APPROVALS — "everything waiting on a decision." Approvals you sent
+// (waiting on the client) + requests clients sent you (waiting on you), one
+// queue. New requests ride the proven addApproval pipeline (row + portal
+// notification + client email). ═══
+(function(){
+  var APX={apps:[], reqs:[], clients:[], tab:'all', sel:null, selKind:null, loaded:false, newOpen:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function st(x){ return String(x.status||'pending').toLowerCase(); }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-approvals'); if(!page) return null;
+    var root=document.getElementById('apxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._apxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='apxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function apxLoad(clientArg){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:240px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('approvals?select=*&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('client_requests?select=*&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('clients?select=*&limit=300'); })
+    ]);
+    if(r[0]===null&&r[2]===null){
+      root.innerHTML='<div class="pt">Approvals</div><div class="ibx-sub">Couldn\u2019t load just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="loadApprovalsX()">Try again</button>';
+      window.loadApprovalsX=function(){ apxLoad(); };
+      return;
+    }
+    APX.apps=r[0]||[]; APX.reqs=r[1]||[];
+    APX.clients=(r[2]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    APX.loaded=true;
+    if(!APX.sel){
+      var first=APX.apps.find(function(a){ return st(a)==='pending'; })||APX.reqs.find(function(q){ return st(q)==='pending'||st(q)==='new'; })||APX.apps[0]||APX.reqs[0];
+      if(first){ APX.sel=String(first.id); APX.selKind=(APX.apps.indexOf(first)>-1?'a':'r'); }
+    }
+    apxRender();
+  }
+
+  function cName(id){ var c=APX.clients.find(function(x){ return String(x.id)===String(id); }); return c?(c.name||'Client'):'\u2014'; }
+  function cObj(id){ return APX.clients.find(function(x){ return String(x.id)===String(id); }); }
+
+  window.apxTab=function(t){ APX.tab=t; apxRender(); };
+  window.apxSel=function(kind,id){ APX.sel=String(id); APX.selKind=kind; apxRender(); };
+  window.apxNew=function(){ APX.newOpen=!APX.newOpen; apxRender(); };
+
+  function chipFor(kind,x){
+    var s=st(x);
+    if(s==='approved') return ['APPROVED','#1a7e49','#e7f6ee'];
+    if(s==='declined'||s==='rejected') return ['DECLINED','#c0392b','rgba(192,57,43,.08)'];
+    if(s==='withdrawn') return ['WITHDRAWN','#7a6d8e','#f3f0fa'];
+    if(kind==='r') return ['WAITING ON YOU','#c0392b','rgba(192,57,43,.08)'];
+    return ['WAITING ON CLIENT','#9a7a1a','#fdf6e3'];
+  }
+
+  function apxRender(){
+    var root=document.getElementById('apxRoot'); if(!root) return;
+    var items=[];
+    APX.apps.forEach(function(a){ items.push({k:'a', x:a, open:st(a)==='pending'}); });
+    APX.reqs.forEach(function(q){ items.push({k:'r', x:q, open:(st(q)==='pending'||st(q)==='new')}); });
+    items.sort(function(a,b){ return (b.open-a.open)||(new Date(b.x.created_at)-new Date(a.x.created_at)); });
+
+    var wClient=APX.apps.filter(function(a){ return st(a)==='pending'; }).length;
+    var wYou=APX.reqs.filter(function(q){ return st(q)==='pending'||st(q)==='new'; }).length;
+    var appN=APX.apps.filter(function(a){ return st(a)==='approved'; }).length;
+    var decN=APX.apps.filter(function(a){ return st(a)==='declined'||st(a)==='rejected'; }).length;
+    var rate=(appN+decN)?Math.round(appN/(appN+decN)*100):null;
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn" style="'+(wClient?'color:#9a7a1a;':'')+'">'+wClient+'</div><div class="ivx-sl">Waiting on client</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn'+(wYou?' red':'')+'">'+wYou+'</div><div class="ivx-sl">Waiting on you</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+appN+'</div><div class="ivx-sl">Approved</div></div>'
+      +(rate!==null?'<div class="ivx-st"><div class="ivx-sn">'+rate+'%</div><div class="ivx-sl">Approval rate ('+(appN+decN)+' decided)</div></div>':'')
+    +'</div>';
+
+    var TABS=[['all','All'],['wc','Waiting on client'],['wy','Waiting on you'],['done','Completed']];
+    var list=items.filter(function(it){
+      if(APX.tab==='wc') return it.k==='a'&&it.open;
+      if(APX.tab==='wy') return it.k==='r'&&it.open;
+      if(APX.tab==='done') return !it.open;
+      return true;
+    });
+    var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
+      return '<button class="ibx-tab'+(APX.tab===t[0]?' on':'')+'" onclick="apxTab(\''+t[0]+'\')">'+t[1]+'</button>'; }).join('')
+      +'<span style="flex:1;"></span><button class="ibx-tab" onclick="apxNew()">+ New approval request</button></div>';
+
+    var newForm=APX.newOpen?('<div class="grx-card" style="margin-top:12px;"><div class="grx-h">New approval request</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +'<select class="fi" id="apxNewC" style="margin:0;min-width:180px;">'+APX.clients.map(function(c){ return '<option value="'+att(String(c.id))+'">'+esc(c.name||'Client')+'</option>'; }).join('')+'</select>'
+        +'<input class="fi" id="apxNewT" style="margin:0;flex:1;min-width:200px;" placeholder="What needs their approval? (e.g. Homepage design v2)">'
+      +'</div>'
+      +'<textarea class="fi" id="apxNewD" rows="2" style="margin-top:8px;" placeholder="Details (optional)"></textarea>'
+      +'<button class="bf-act primary" style="margin-top:10px;" onclick="apxNewSave()">Send \u2014 notifies + emails the client</button>'
+    +'</div>'):'';
+
+    var listHtml=list.length?list.map(function(it){
+      var c=chipFor(it.k,it.x);
+      return '<div class="apx-item'+(APX.sel===String(it.x.id)&&APX.selKind===it.k?' on':'')+'" onclick="apxSel(\''+it.k+'\',\''+att(String(it.x.id))+'\')">'
+        +'<div class="apx-t">'+esc(it.x.title||it.x.request||it.x.name||(it.k==='r'?'Client request':'Approval'))+'</div>'
+        +'<div class="apx-m">'+esc(cName(it.x.client_id))+' \u00b7 '+esc(agoS(it.x.created_at))+'</div>'
+        +'<span class="apx-chip" style="color:'+c[1]+';background:'+c[2]+';">'+c[0]+'</span>'
+      +'</div>';
+    }).join('')
+    :'<div class="grx-empty" style="margin-top:14px;">'+(APX.tab==='wy'?'Nothing waiting on you \u2014 clean desk.':'Nothing here. Send the first approval request and keep the project moving.')+'</div>';
+
+    // ── detail center ──
+    var detail='';
+    var cur=APX.selKind==='a'?APX.apps.find(function(a){return String(a.id)===APX.sel;}):APX.reqs.find(function(q){return String(q.id)===APX.sel;});
+    if(cur){
+      var kind=APX.selKind, ch=chipFor(kind,cur), cl=cObj(cur.client_id), s=st(cur);
+      var next = kind==='a'
+        ? (s==='pending'?['Client reviews it in their portal','They approve or request changes','You act on the answer \u2014 the project moves']
+          : s==='approved'?['Approved \u2014 act on it','Log the win on their Timeline','Momentum: consider the next ask']
+          : ['Decision recorded','Adjust and re-request if needed'])
+        : (s==='pending'||s==='new'?['You approve or decline below','They\u2019re notified in their portal','The work moves accordingly']:['Decision recorded']);
+      var acts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">';
+      if(kind==='a'&&s==='pending'){
+        acts+='<button class="bf-act primary" onclick="apxRemind(\''+att(String(cur.id))+'\')">Send reminder \u2192</button>'
+          +'<button class="bf-act" onclick="apxSet(\'approvals\',\''+att(String(cur.id))+'\',\'approved\')">Mark approved</button>'
+          +'<button class="bf-act" onclick="apxSet(\'approvals\',\''+att(String(cur.id))+'\',\'withdrawn\')">Withdraw</button>';
+      } else if(kind==='r'&&(s==='pending'||s==='new')){
+        acts+='<button class="bf-act primary" onclick="apxSet(\'client_requests\',\''+att(String(cur.id))+'\',\'approved\')">Approve</button>'
+          +'<button class="bf-act" onclick="apxSet(\'client_requests\',\''+att(String(cur.id))+'\',\'declined\')">Decline</button>';
+      }
+      acts+='<button class="bf-act" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(cur.client_id))+'\')}catch(e){}},400);">Open conversation</button></div>';
+      detail='<div class="grx-card">'
+        +'<span class="apx-chip" style="margin-top:0;color:'+ch[1]+';background:'+ch[2]+';">'+ch[0]+'</span>'
+        +'<div style="font-family:\'Fraunces\',serif;font-size:21px;font-weight:650;color:var(--ink);margin-top:10px;">'+esc(cur.title||cur.request||cur.name||'Item')+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;">'+esc(cName(cur.client_id))+' \u00b7 '+(kind==='a'?'You asked them':'They asked you')+' \u00b7 '+esc(agoS(cur.created_at))+'</div>'
+        +((cur.description||cur.body||cur.details)?'<div style="font-size:13px;color:var(--ink);line-height:1.65;margin-top:14px;white-space:pre-wrap;">'+esc(String(cur.description||cur.body||cur.details).slice(0,600))+'</div>':'')
+        +acts
+        +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS NEXT</div>'
+          +next.map(function(n,i2){ return '<div class="grx-ok" style="opacity:'+(i2===0?'1':'0.85')+';">'+esc(n)+'</div>'; }).join('')
+        +'</div>'
+      +'</div>';
+    } else {
+      detail='<div class="grx-card"><div class="grx-empty">Select an item \u2014 or send a new approval request.</div></div>';
+    }
+
+    // rail
+    var rail='';
+    if(cur){
+      var cl2=cObj(cur.client_id);
+      rail='<div class="grx-card"><div class="grx-h">Details</div>'
+        +'<div class="rhx-kv"><span>Requested by</span><b>'+(APX.selKind==='a'?'Eric Davis':esc(cName(cur.client_id)))+'</b></div>'
+        +'<div class="rhx-kv"><span>Requested</span><b>'+esc(agoS(cur.created_at)||'\u2014')+'</b></div>'
+        +'<div class="rhx-kv"><span>Status</span><b>'+esc(st(cur))+'</b></div>'
+        +'<div class="rhx-kv"><span>Client</span><b>'+esc(cName(cur.client_id))+'</b></div>'
+      +'</div>'
+      +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Related</div>'
+        +'<div class="tlx-qa" onclick="go(\'files\');setTimeout(function(){try{fsxCl(\''+att(String(cur.client_id))+'\')}catch(e){}},400);">Their files<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(cur.client_id))+'\')}catch(e){}},300);">Their timeline<span class="c">\u203A</span></div>'
+        +(cl2?'<div class="tlx-qa" onclick="go(\'clients\');setTimeout(function(){try{rhxOpen(\''+att(String(cur.client_id))+'\')}catch(e){}},400);">Relationship<span class="c">\u203A</span></div>':'')
+      +'</div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Approvals</div>'
+      +'<div class="ibx-sub">Everything waiting on a decision. Keep projects moving forward.</div></div>'
+      +'<span style="flex:1;"></span></div>'
+      +stats
+      +tabs
+      +newForm
+      +'<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'</div></div>';
+  }
+
+  window.apxSet=async function(table,id,status){
+    var r=await api(table+'?id=eq.'+encodeURIComponent(id),'PATCH',{status:status});
+    if(r===null){ toast('Couldn\u2019t update'); return; }
+    toast('\u2713 '+status.charAt(0).toUpperCase()+status.slice(1));
+    apxLoad();
+  };
+  window.apxRemind=function(id){
+    var a=APX.apps.find(function(x){ return String(x.id)===String(id); }); if(!a) return;
+    var cl=cObj(a.client_id);
+    ddsDraftAction({ subject:cName(a.client_id), subjectId:String(a.client_id), signal:'waiting_on_client', module:'Approvals',
+      action:'Nudge '+cName(a.client_id)+' on \u201c'+(a.title||'the approval')+'\u201d',
+      why:'a friendly reminder while it\u2019s fresh keeps the project moving without pressure',
+      changed:'Waiting since '+agoS(a.created_at), go:'approvals', refId:String(a.id),
+      email:(cl&&(cl.contact_email||cl.email))||'' });
+  };
+  window.apxNewSave=function(){
+    var cid=document.getElementById('apxNewC'); var t=document.getElementById('apxNewT'); var d=document.getElementById('apxNewD');
+    if(!cid||!cid.value||!t||!t.value.trim()){ toast('Pick a client and give it a title'); return; }
+    try{
+      var sel=document.getElementById('sel-approvals'); if(sel) sel.value=cid.value;
+      if(typeof onClientChange==='function') onClientChange(cid.value,'approvals');
+      setTimeout(async function(){
+        var lt=document.getElementById('apprTitle'), ld=document.getElementById('apprDesc');
+        if(lt) lt.value=t.value.trim(); if(ld) ld.value=(d&&d.value)||'';
+        try{ await addApproval(); }catch(e){ toast('Couldn\u2019t send'); return; }
+        APX.newOpen=false;
+        setTimeout(function(){ apxLoad(); },500);
+      },350);
+    }catch(e){ toast('Send path unavailable'); }
+  };
+
+  window.loadApprovalsLegacy=window.loadApprovals;
+  window.loadApprovals=apxLoad;
+})();
+</script>
+
+<style>
+/* APPROVALS — everything waiting on a decision. Library assembly; no new components. */
+#page-approvals #apxRoot{max-width:1180px;}
+.apx-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(0,1.3fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1000px){.apx-grid{grid-template-columns:1fr;}}
+.apx-item{display:flex;gap:12px;padding:14px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;margin-top:10px;cursor:pointer;transition:border-color .15s;}
+.apx-item:hover{border-color:rgba(91,63,160,.3);}
+.apx-item.on{border-color:var(--p);}
+</style>
+<script>
+// ═══ APPROVALS — "everything waiting on a decision." Two real queues:
+// approvals (waiting on the client, portal-actioned) and client_requests
+// (waiting on you). New approvals drive the legacy pipeline (row + portal
+// notification + client email) programmatically. ═══
+(function(){
+  var APX={apps:[], reqs:[], clients:[], tab:'all', sel:null, loaded:false, showNew:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function cName(id){ var c=APX.clients.find(function(x){return String(x.id)===String(id);}); return c?(c.name||'Client'):'\u2014'; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-approvals'); if(!page) return null;
+    var root=document.getElementById('apxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._apxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='apxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  window.apxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:240px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('approvals?select=*&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('client_requests?select=*&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('clients?select=*&limit=300'); })
+    ]);
+    if(r[0]===null&&r[1]===null){
+      root.innerHTML='<div class="pt">Approvals</div><div class="ibx-sub">Couldn\u2019t load just now.</div><button class="ibx-pill" style="margin-top:12px;" onclick="apxLoad()">Try again</button>';
+      return;
+    }
+    APX.apps=r[0]||[]; APX.reqs=r[1]||[];
+    APX.clients=(r[2]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    APX.loaded=true;
+    if(!APX.sel){
+      var first=APX.apps.find(function(a){ return String(a.status||'').toLowerCase()==='pending'; })||APX.reqs.find(function(q){ return String(q.status||'').toLowerCase()!=='done'; })||APX.apps[0];
+      if(first) APX.sel=(first.title!==undefined&&APX.apps.indexOf(first)>-1?'a:':'r:')+String(first.id);
+    }
+    apxRender();
+  };
+  window.apxTab=function(t){ APX.tab=t; apxRender(); };
+  window.apxSel=function(k){ APX.sel=k; apxRender(); };
+  window.apxNewToggle=function(){ APX.showNew=!APX.showNew; apxRender(); };
+
+  function items(){
+    var out=[];
+    APX.apps.forEach(function(a){ var st=String(a.status||'pending').toLowerCase();
+      out.push({key:'a:'+a.id, kind:'a', id:a.id, title:a.title||'Approval', desc:a.description||'', client_id:a.client_id, when:a.created_at, decided:a.updated_at||a.decided_at||null,
+        impact:String(a.impact||'').toLowerCase()||null,
+        bucket: st==='pending'?'client':(st==='approved'?'approved':(st==='declined'?'declined':'client')), status:st }); });
+    APX.reqs.forEach(function(q){ var st=String(q.status||'new').toLowerCase();
+      out.push({key:'r:'+q.id, kind:'r', id:q.id, title:q.title||q.request||q.text||'Client request', desc:q.description||q.body||q.details||'', client_id:q.client_id, when:q.created_at,
+        bucket: st==='done'?'done':'you', status:st }); });
+    out.sort(function(a,b){
+      var pr={you:0,client:1,approved:2,declined:2,done:2};
+      var im={launch:0,milestone:1,none:2};
+      var ia=(a.impact&&im[a.impact]!==undefined)?im[a.impact]:2, ib=(b.impact&&im[b.impact]!==undefined)?im[b.impact]:2;
+      return (pr[a.bucket]-pr[b.bucket])||(ia-ib)||(new Date(b.when)-new Date(a.when));
+    });
+    return out;
+  }
+
+  function impChip(it){
+    if(it.kind!=='a'||it.bucket!=='client'||!it.impact||it.impact==='none') return it.impact==='none'?'<span class="ibx-chip" style="color:#1a7e49;background:#e7f6ee;">\u25CF NO IMPACT \u2014 work continues</span>':'';
+    if(it.impact==='launch') return '<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">\u25CF BLOCKS LAUNCH</span>';
+    if(it.impact==='milestone') return '<span class="ibx-chip" style="color:#9a7a1a;background:#fdf6e3;">\u25CF BLOCKS NEXT MILESTONE</span>';
+    return '';
+  }
+  function chipFor(it){
+    if(it.bucket==='you') return ['WAITING ON YOU','#c0392b','rgba(192,57,43,.08)'];
+    if(it.bucket==='client') return ['WAITING ON CLIENT','#9a7a1a','#fdf6e3'];
+    if(it.bucket==='approved') return ['APPROVED','#1a7e49','#e7f6ee'];
+    if(it.bucket==='declined') return ['DECLINED','#c0392b','rgba(192,57,43,.08)'];
+    return ['DONE','#1a7e49','#e7f6ee'];
+  }
+
+  function apxRender(){
+    var root=document.getElementById('apxRoot'); if(!root) return;
+    var all=items();
+    var youN=all.filter(function(x){return x.bucket==='you';}).length;
+    var clientN=all.filter(function(x){return x.bucket==='client';}).length;
+    var apprN=all.filter(function(x){return x.bucket==='approved';}).length;
+    // avg days to approve: only when decided timestamps exist
+    var decided=all.filter(function(x){return x.bucket==='approved'&&x.decided;});
+    var avg=decided.length?(decided.reduce(function(s,x){return s+Math.max(0,(new Date(x.decided)-new Date(x.when))/86400000);},0)/decided.length):null;
+    var declN=all.filter(function(x){return x.bucket==='declined';}).length;
+    var rate=(apprN+declN)>0?Math.round(apprN/(apprN+declN)*100):null;
+
+    var stats='<div class="ivx-stats">'
+      +'<div class="ivx-st"><div class="ivx-sn'+(youN?' red':'')+'">'+youN+'</div><div class="ivx-sl">Waiting on you</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+clientN+'</div><div class="ivx-sl">Waiting on the client</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+apprN+'</div><div class="ivx-sl">Approved</div></div>'
+      +(avg!=null?'<div class="ivx-st"><div class="ivx-sn">'+avg.toFixed(1)+'</div><div class="ivx-sl">Avg days to approve</div></div>':'')
+      +(rate!=null?'<div class="ivx-st"><div class="ivx-sn">'+rate+'%</div><div class="ivx-sl">Approval rate</div></div>':'')
+    +'</div>';
+
+    var TABS=[['all','All'],['you','Waiting on you'],['client','Waiting on client'],['approved','Approved']];
+    var list=all.filter(function(x){ return APX.tab==='all'||x.bucket===APX.tab; });
+    var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
+      var n=t[0]==='all'?all.length:all.filter(function(x){return x.bucket===t[0];}).length;
+      return '<button class="ibx-tab'+(APX.tab===t[0]?' on':'')+'" onclick="apxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
+    }).join('')
+    +'<span style="flex:1;"></span>'
+    +'<button class="ibx-tab" onclick="apxNewToggle()">+ New approval request</button>'
+    +'</div>';
+
+    var newForm=APX.showNew?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">New approval request</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +'<select class="fi" id="apxNC" style="margin:0;min-width:180px;">'+APX.clients.map(function(c){return '<option value="'+att(String(c.id))+'">'+esc(c.name||'Client')+'</option>';}).join('')+'</select>'
+        +'<input class="fi" id="apxNT" style="margin:0;flex:1;min-width:200px;" placeholder="What needs their approval? (e.g. Homepage Mockup v4)">'
+      +'</div>'
+      +'<textarea class="fi" id="apxND" rows="2" style="margin-top:8px;" placeholder="Context for the client (optional)"></textarea>'
+      +'<div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--muted);">Project impact:</span>'
+        +'<select class="fi" id="apxNI" style="margin:0;max-width:240px;">'
+        +'<option value="none">Nothing \u2014 work continues</option>'
+        +'<option value="milestone">Blocks next milestone</option>'
+        +'<option value="launch">Blocks launch</option>'
+        +'</select></div>'
+      +'<button class="bf-act primary" style="margin-top:10px;" onclick="apxNewSave()">Send for approval \u2192 notifies + emails the client</button>'
+    +'</div>'):'';
+
+    var listHtml=list.length?list.map(function(it){
+      var ch=chipFor(it);
+      return '<div class="apx-item'+(APX.sel===it.key?' on':'')+'" onclick="apxSel(\''+it.key+'\')">'
+        +'<div class="ibx-av">'+esc((cName(it.client_id)||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(it.title)+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(cName(it.client_id))+' \u00b7 '+esc(agoS(it.when))+'</div>'
+        +'<span class="ibx-chip" style="display:inline-block;margin-top:8px;color:'+ch[1]+';background:'+ch[2]+';">'+ch[0]+'</span> '
+        +'<span style="display:inline-block;margin-top:8px;">'+impChip(it)+'</span></div>'
+      +'</div>';
+    }).join('')
+    :'<div class="grx-empty" style="margin-top:14px;">'+(all.length?'Nothing in this bucket.':'Nothing waiting on a decision \u2014 send the first approval request.')+'</div>';
+
+    // detail
+    var it=all.find(function(x){ return x.key===APX.sel; });
+    var detail='';
+    if(it){
+      var ch2=chipFor(it);
+      var acts='';
+      if(it.kind==='a'&&it.bucket==='client'){
+        acts='<button class="bf-act primary" onclick="apxNudge(\''+it.key+'\')">Send friendly reminder \u2192</button>'
+          +'<button class="bf-act" onclick="apxApprove(\''+it.key+'\')">Mark approved (on their behalf)</button>';
+      } else if(it.kind==='r'&&it.bucket==='you'){
+        acts='<button class="bf-act primary" onclick="apxReply(\''+it.key+'\')">Reply \u2192</button>'
+          +'<button class="bf-act" onclick="apxDone(\''+it.key+'\')">Mark done</button>';
+      } else {
+        acts='<button class="bf-act" onclick="apxReply(\''+it.key+'\')">Message the client</button>';
+      }
+      var next=it.kind==='a'
+        ? '1. The client sees this in their portal (they were notified)<br>2. They approve or request changes<br>3. It flips here the moment they act'
+        : '1. The client asked for this<br>2. You do it or reply with questions<br>3. Mark done \u2014 they see it resolved';
+      var age=(Date.now()-new Date(it.when))/86400000;
+      var insight = it.impact==='launch'&&it.bucket==='client' ? 'This blocks the launch \u2014 highest priority on the page. Nudge today, not this week.'
+        : it.impact==='milestone'&&it.bucket==='client' ? 'This blocks the next milestone \u2014 follow up this week to keep the roadmap on schedule.'
+        : it.bucket==='client'&&age>=2 ? 'Sent '+Math.floor(age)+' days ago with no decision \u2014 a short friendly nudge is the highest-leverage move here.'
+        : it.bucket==='you' ? 'The client is waiting on you \u2014 fast turnarounds here are what reviews are made of.'
+        : 'Resolved \u2014 nothing needed.';
+      detail='<div class="grx-card">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px;"><div style="flex:1;min-width:0;">'
+        +'<div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc(it.title)+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">'+esc(cName(it.client_id))+'</div></div>'
+        +'<span class="ibx-chip" style="color:'+ch2[1]+';background:'+ch2[2]+';">'+ch2[0]+'</span></div>'
+        +(it.desc?'<div style="font-size:13px;color:var(--ink);line-height:1.6;margin-top:12px;white-space:pre-wrap;">'+esc(String(it.desc).slice(0,500))+'</div>':'')
+        +'<div class="msx-snap" style="margin-top:14px;">\u2726 <b>Read</b> \u00b7 '+esc(insight)+'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'+acts+'</div>'
+        +(it.kind==='a'?('<div class="ivx-block"><div class="ivx-bh">PROJECT IMPACT <span style="font-weight:400;letter-spacing:0;text-transform:none;">\u2014 what does this block?</span></div>'
+          +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          +[['none','\u25CF Nothing \u2014 work continues','#1a7e49'],['milestone','\u25CF Next milestone','#9a7a1a'],['launch','\u25CF Launch','#c0392b']].map(function(o){
+            var on=it.impact===o[0];
+            return '<button class="ibx-pill" style="'+(on?('color:#fff;background:'+o[2]+';border-color:transparent;'):('color:'+o[2]+';'))+'" onclick="apxImpact(\''+it.key+'\',\''+o[0]+'\')">'+o[1]+'</button>';
+          }).join('')+'</div></div>'):'')
+        +'<div class="ivx-block"><div class="ivx-bh">DETAILS</div>'
+          +'<div class="rhx-kv"><span>Requested</span><b>'+esc(agoS(it.when)||'\u2014')+'</b></div>'
+          +'<div class="rhx-kv"><span>Client</span><b>'+esc(cName(it.client_id))+'</b></div>'
+          +'<div class="rhx-kv"><span>Status</span><b>'+esc(it.status)+'</b></div>'
+          +(it.decided?'<div class="rhx-kv"><span>Decided</span><b>'+esc(agoS(it.decided))+'</b></div>':'')
+        +'</div>'
+        +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS NEXT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">'+next+'</div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
+          +'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(it.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>'
+          +'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(it.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>'
+        +'</div>'
+      +'</div>';
+    } else {
+      detail='<div class="grx-card"><div class="grx-empty">Select an item.</div></div>';
+    }
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Approvals</div>'
+      +'<div class="ibx-sub">Everything waiting on a decision. Keep projects moving forward.</div></div>'
+      +'<span style="flex:1;"></span></div>'
+      +stats
+      +tabs
+      +newForm
+      +'<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>';
+  }
+
+  window.apxNewSave=async function(){
+    var cs=document.getElementById('apxNC'), t=document.getElementById('apxNT'), d2=document.getElementById('apxND');
+    if(!cs||!cs.value){ toast('Pick a client'); return; }
+    if(!t||!t.value.trim()){ toast('Give it a title'); return; }
+    // drive the proven legacy pipeline (row + notification + email)
+    try{
+      var sel=document.getElementById('sel-approvals'); if(sel) sel.value=cs.value;
+      if(typeof onClientChange==='function') onClientChange(cs.value,'approvals');
+      var ti=document.getElementById('apprTitle'), de=document.getElementById('apprDesc');
+      if(ti) ti.value=t.value.trim(); if(de) de.value=(d2&&d2.value)||'';
+      var impSel=document.getElementById('apxNI'); var impVal=(impSel&&impSel.value)||'none';
+      setTimeout(async function(){
+        try{ await addApproval(); }catch(e){ toast('Couldn\u2019t send \u2014 try again'); return; }
+        APX.showNew=false;
+        // stamp the declared impact onto the newly created row (newest for this client)
+        if(impVal!=='none'){
+          setTimeout(async function(){
+            try{
+              var rows=await api('approvals?client_id=eq.'+encodeURIComponent(cs.value)+'&select=id&order=created_at.desc&limit=1');
+              if(rows&&rows[0]) await api('approvals?id=eq.'+encodeURIComponent(rows[0].id),'PATCH',{impact:impVal});
+            }catch(e){}
+            apxLoad();
+          },500);
+        } else { setTimeout(function(){ apxLoad(); },600); }
+      },300);
+    }catch(e){ toast('Approval path unavailable'); }
+  };
+  window.apxImpact=async function(key,val){
+    var it=items().find(function(x){return x.key===key;}); if(!it||it.kind!=='a') return;
+    var r=await api('approvals?id=eq.'+encodeURIComponent(it.id),'PATCH',{impact:val});
+    if(r===null){ toast('The approvals table has no impact column yet \u2014 run 07-approvals-impact.sql and retry'); return; }
+    var row=APX.apps.find(function(a){return String(a.id)===String(it.id);}); if(row) row.impact=val;
+    toast('\u2713 Impact set \u2014 the queue just re-prioritized');
+    apxRender();
+  };
+  window.apxApprove=async function(key){
+    var it=items().find(function(x){return x.key===key;}); if(!it) return;
+    var r=await api('approvals?id=eq.'+encodeURIComponent(it.id),'PATCH',{status:'approved'});
+    if(r===null){ toast('Couldn\u2019t update'); return; }
+    toast('\u2713 Marked approved'); apxLoad();
+  };
+  window.apxDone=async function(key){
+    var it=items().find(function(x){return x.key===key;}); if(!it) return;
+    var r=await api('client_requests?id=eq.'+encodeURIComponent(it.id),'PATCH',{status:'done'});
+    if(r===null){ toast('Couldn\u2019t update'); return; }
+    toast('\u2713 Done \u2014 they\u2019ll see it resolved'); apxLoad();
+  };
+  window.apxNudge=function(key){
+    var it=items().find(function(x){return x.key===key;}); if(!it) return;
+    var c=APX.clients.find(function(x){return String(x.id)===String(it.client_id);});
+    ddsDraftAction({ subject:(c&&c.name)||'the client', subjectId:String(it.client_id), signal:'waiting_on_client', module:'Approvals',
+      action:'Nudge '+((c&&c.name)||'them')+' about \u201c'+it.title+'\u201d',
+      why:'a friendly reminder while it\u2019s fresh keeps the project moving without pressure',
+      changed:'Sent '+agoS(it.when)+' \u00b7 still awaiting their decision',
+      go:'approvals', refId:String(it.id), email:(c&&(c.contact_email||c.email))||'' });
+  };
+  window.apxReply=function(key){
+    var it=items().find(function(x){return x.key===key;}); if(!it) return;
+    try{ go('messages'); setTimeout(function(){ try{ msxOpen(String(it.client_id)); }catch(e){} },400); }catch(e){}
+  };
+
+  // nav hook (page had no loader of its own)
+  var _go2=window.go;
+  window.go=function(dest){ var r=_go2.apply(this,arguments); try{ if(dest==='approvals') apxLoad(); }catch(e){} return r; };
+})();
+</script>
 </body>
 </html>
