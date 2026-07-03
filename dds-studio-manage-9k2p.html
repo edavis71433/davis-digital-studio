@@ -1158,7 +1158,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
               <div class="fg"><label class="fl">Amount</label><input aria-label="$1,250" class="fi" id="invAmount" placeholder="e.g. $1,250"></div>
               <div class="fg"><label class="fl">Description</label><input aria-label="Website Redesign + SEO · Phase 1" class="fi" id="invDesc" placeholder="e.g. Website Redesign + SEO · Phase 1"></div>
               <div class="fg"><label class="fl">Due date</label><input aria-label="Due Jun 30, 2026" class="fi" id="invDue" placeholder="e.g. Due Jun 30, 2026"></div>
-              <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link <span style="font-weight:400;color:var(--muted);">— leave blank; after saving, click ⚡ Stripe link on the invoice and it fills itself. Paste here only for a manually created Payment Link.</span></label><input aria-label="Stripe payment link" class="fi" id="invStripe" placeholder="(auto-filled by ⚡ Stripe link)"></div>
+              <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link <span style="font-weight:400;color:var(--muted);">— created automatically when you save. Paste here only to override with a manual Payment Link.</span></label><input aria-label="Stripe payment link" class="fi" id="invStripe" placeholder="(auto-filled by ⚡ Stripe link)"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Status</label>
                 <select aria-label="Invstatus" class="fi" id="invStatus">
                   <option value="pending">Pending — show Pay Now button</option>
@@ -4470,6 +4470,16 @@ async function loadBillingOverview() {
           +'<span style="color:'+tone+';font-weight:600;">'+escHtml(s.subscription_status||'')+(s.next_billing_at?(' · renews '+new Date(s.next_billing_at).toLocaleDateString()):'')+'</span></div>';
       }).join('');
     }
+    var orders = d.audit_orders || [];
+    if (orders.length) {
+      html += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:12px 0 6px;">Audit orders (public site)</div>';
+      html += orders.slice(0,8).map(function(o){
+        var tone = o.status==='paid' ? 'var(--green,#3f7d5b)' : (o.status==='abandoned' ? 'var(--muted)' : '#a96a00');
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12.5px;">'
+          +'<span>'+escHtml(o.name||'')+' · '+escHtml(o.email||'')+(o.website?(' · '+escHtml(o.website)):'')+'</span>'
+          +'<span style="font-weight:600;color:'+tone+';">'+escHtml(o.status||'')+' · $'+(Number(o.amount)||0)+'</span></div>';
+      }).join('');
+    }
     if (!pays.length) {
       html += '<div style="font-size:12.5px;color:var(--muted);padding:8px 0;">No Stripe payments yet. When a client pays, it appears here automatically and the invoice flips to paid on its own.</div>';
     } else {
@@ -4841,10 +4851,29 @@ async function saveInvoice() {
   } else {
     var ins = await api("invoices","POST",payload);
     if (ins === null) return; // failed write already toasted; don't claim success
+    // Automation: the Stripe link creates itself on save (unless one was
+    // pasted manually), so the portal Pay button is live before the client
+    // even gets the email. If Stripe hiccups, the invoice still exists and
+    // the manual retry button in the list covers it.
+    var newId = (Array.isArray(ins) && ins.length && ins[0].id) ? ins[0].id : null;
+    var linkOk = !!payload.stripe_url;
+    if (newId && !payload.stripe_url && payload.status !== "paid") {
+      try {
+        var jwt = await adminJwt();
+        var pr = await fetch(SB_URL + "/functions/v1/clever-api", {
+          method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+          body: JSON.stringify({ type: "invoice_paylink", invoiceId: newId })
+        });
+        var pj = await pr.json();
+        linkOk = !!(pj && pj.ok);
+        if (!linkOk) console.warn("auto paylink failed:", pj && (pj.detail || pj.error));
+      } catch(e) { console.warn("auto paylink failed:", e); }
+    }
     try { await api("notifications","POST",{client_id:ctx.id,type:"invoice",title:"New invoice: "+payload.name,body:"Amount: "+payload.amount,link_tab:"invoices"}); } catch(e){}
     var inotify = { emailed:false, reason:"exception" };
     try { inotify = await emitClientEventByCtx(ctx, "invoice.sent", { amount: payload.amount, name: payload.name }); } catch(e){}
-    toast(inotify.emailed ? "✓ Invoice added + client notified" : "✓ Invoice added, but client was not emailed ("+(inotify.reason||"unknown")+")");
+    toast((inotify.emailed ? "✓ Invoice added + client notified" : "✓ Invoice added, but client was not emailed ("+(inotify.reason||"unknown")+")")
+      + (linkOk ? " · Pay button is live." : " · No Stripe link yet — use the retry button in the list."));
   }
   cancelEditInvoice();
   await loadInvoices(ctx);
