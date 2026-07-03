@@ -1504,6 +1504,17 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .msgx-chip.bad{color:#b03a2e;border-color:rgba(176,58,46,0.3);background:#fdecea;}
 .msgx-chip.quiet{color:var(--muted);border-color:rgba(0,0,0,0.08);cursor:default;}
 .msgx-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px dashed rgba(91,63,160,0.25);border-radius:10px;background:rgba(91,63,160,0.03);font-size:12px;color:var(--ink-2,#574d68);margin-bottom:10px;}
+/* ── Evidence panel: the AI hands over the work ── */
+.opx-ev{margin:0 2px 8px;padding:14px 14px 16px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
+.opx-ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.opx-ev-sel{padding:8px 10px;border:1px solid rgba(91,63,160,0.15);border-radius:9px;font-size:12.5px;background:#fff;color:var(--ink);}
+.opx-bulk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;font-weight:600;color:var(--ink);padding:8px 10px;background:rgba(91,63,160,0.05);border-radius:9px;margin-bottom:10px;}
+.opx-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.opx-tbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:7px 8px;border-bottom:1px solid var(--bf-line);white-space:nowrap;user-select:none;}
+.opx-tbl td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:top;color:var(--ink);}
+.opx-tbl tr:hover td{background:rgba(91,63,160,0.02);}
+.opx-tbl .iabtn{margin-right:4px;}
+@media (max-width:700px){ .opx-tbl th:nth-child(4), .opx-tbl td:nth-child(4), .opx-tbl th:nth-child(7), .opx-tbl td:nth-child(7), .opx-tbl th:nth-child(8), .opx-tbl td:nth-child(8){display:none;} }
 </style>
 
       <!-- OPPORTUNITIES — the second consumer of the reasoning engine. Asks the
@@ -4184,7 +4195,7 @@ function ddsSendDraft(go, refId){
 //  (opportunities_list) syncs the engine's read, runs the close-loop
 //  auto-resolve, and returns the workspace.
 // ════════════════════════════════════════════════════════════════════════════
-var OPPX = { rows:[], inbound:{leads:[],audit_leads:[]}, engineDown:false, loading:false, filter:'all', q:'', openId:null, tl:{}, answer:null, pattern:null, conf:'medium', confReason:'', pendingOpen:null };
+var OPPX = { rows:[], inbound:{leads:[],audit_leads:[]}, bench:[], ev:{open:false,q:'',src:'',st:'',sort:'created_at',dir:-1,page:1,sel:{}}, showAllDisc:false, engineDown:false, loading:false, filter:'all', q:'', openId:null, tl:{}, answer:null, pattern:null, conf:'medium', confReason:'', pendingOpen:null };
 var OPPX_OPEN = { surfaced:1, viewed:1, drafted:1, sent:1, followed_up:1 };
 
 async function loadOpportunities(){
@@ -4200,6 +4211,7 @@ async function loadOpportunities(){
     OPPX.inbound=d.inbound||{leads:[],audit_leads:[]};
     OPPX.answer=d.answer; OPPX.pattern=d.pattern;
     OPPX.sources=d.sources||[];
+    OPPX.bench=d.bench||[];
     OPPX.conf=d.confidence||'medium'; OPPX.confReason=d.confidence_reason||'';
     OPPX.engineDown=false;
     oppxRender();
@@ -4361,7 +4373,7 @@ function oppxPrep(){
     follow: followRows.concat(rest.filter(function(r){return r.category==='outreach';})).concat(rawFollow),
     grow:   rest.filter(function(r){return r.category==='expansion'||r.category==='renewal'||r.category==='referral'||r.category==='relationship';}),
     risk:   rest.filter(function(r){return r.category==='retention_risk'||r.category==='billing_recovery';}),
-    disc:   rawDisc.slice(0,6),
+    disc:   (OPPX.showAllDisc ? rawDisc : rawDisc.slice(0,6)), discTotal: rawDisc.length,
     won:    rows.filter(function(r){return r.status==='won';}),
     lost:   rows.filter(function(r){return r.status==='lost'||r.status==='dismissed';}),
   };
@@ -4431,7 +4443,8 @@ function oppxRender(){
     body+=section('Follow-ups due','the ball is in your court', S.follow, 'Nothing waiting on you. Sent offers, drafted-but-unsent replies, and quiet leads surface here when they need a touch.');
     body+=section('Grow existing clients','real openings on people who already pay you', S.grow, 'No expansion openings measured right now. Slow sites, weak SEO, missing analytics, care-plan gaps, renewals, and happy-client referrals appear here from the nightly signals.');
     body+=section('At risk','money or relationships that need protecting', S.risk, 'Nothing at risk \u2014 no overdue balances, nobody gone quiet.');
-    body+=section('AI-discovered','businesses the checker found (no contact left)', S.disc, 'Nothing from the checker lately.', lookForm);
+    var discExtra=(S.discTotal>S.disc.length?'<button class="bf-act" style="margin-top:10px;" onclick="OPPX.showAllDisc=true;oppxRender();">Show all '+S.discTotal+'</button>':'')+lookForm;
+    body+=section('AI-discovered','businesses the checker found (no contact left)', S.disc, 'Nothing from the checker lately.', discExtra);
     if(S.won.length||S.lost.length){
       var closed=S.won.concat(S.lost).sort(function(a,b){return new Date(b.updated_at||0)-new Date(a.updated_at||0);}).slice(0,6);
       body+=section('Recently closed','use the Won / Lost filters for the full history', closed, '');
@@ -4517,6 +4530,21 @@ function oppxRow(r){
   if(oppxStalled(r)) meta.push('<span class="opx-due over">\u26a0 stalled</span>');
 
   var actions='';
+  if(r.signal==='prospect_bench' && oppxIsOpen(r)){
+    actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxBenchToggle()">'+(OPPX.ev.open?'Hide the prospects \u25b4':'Show the '+(OPPX.bench||[]).length+' prospects \u25be')+'</button>'
+      +'<button class="bf-act" onclick="event.stopPropagation();go(\'prospects\')">Open Prospecting \u2192</button>';
+    var benchHead='<div class="opx-row'+(open?' open':'')+'" tabindex="0" role="button" aria-expanded="'+((open||OPPX.ev.open)?'true':'false')+'" onclick="oppxBenchToggle()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();oppxBenchToggle();}">'
+      +'<div class="opx-rmain">'
+        +'<div class="opx-rtop"><span class="opx-chip" style="color:'+st.c+';background:'+st.bg+';">'+st.label+'</span>'
+          +'<span class="opx-cat" style="color:'+cat.c+';">'+cat.label+'</span>'
+          +'<span class="opx-title">'+escHtml(r.title||'')+'</span>'
+        +'</div>'
+        +'<div class="bf-changed" style="margin-top:4px;">'+escHtml(r.summary||'')+'</div>'
+        +'<div class="bf-ractions" style="margin-top:10px;">'+actions+'</div>'
+      +'</div>'
+    +'</div>';
+    return benchHead + (OPPX.ev.open ? oppxBenchTable() : '');
+  }
   if(r.status==='surfaced'||r.status==='viewed') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Draft the offer \u2192</button>';
   else if(r.status==='drafted') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxSet(\''+r.id+'\',{status:\'sent\'})">Mark sent</button><button class="bf-act" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Re-draft</button>';
   else if(r.status==='sent'||r.status==='followed_up') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Draft follow-up</button><button class="bf-act" onclick="event.stopPropagation();oppxToggle(\''+r.id+'\',true)">Offer accepted \u2192</button>';
@@ -4538,6 +4566,116 @@ function oppxRow(r){
     +'</div>';
 
   return head + (open ? oppxDrawer(r) : '');
+}
+
+// ── EVIDENCE PANEL: the bench summary hands over the actual prospects ──
+// Insight (the card) -> Evidence (the full table, right here) -> Action
+// (per-row + bulk). Never "it exists somewhere else."
+var OPPX_BENCH_PAGE=25;
+function oppxBenchToggle(){ OPPX.ev.open=!OPPX.ev.open; OPPX.ev.page=1; oppxRender(); }
+function oppxEvSet(k,v){ OPPX.ev[k]=v; OPPX.ev.page=1; oppxRender(); }
+function oppxEvSort(col){ if(OPPX.ev.sort===col){OPPX.ev.dir*=-1;} else {OPPX.ev.sort=col;OPPX.ev.dir=col==='created_at'?-1:1;} oppxRender(); }
+function oppxEvSel(id,on){ if(on)OPPX.ev.sel[id]=1; else delete OPPX.ev.sel[id]; oppxRender(); }
+function oppxEvSelPage(on, ids){ ids.split(',').forEach(function(id){ if(!id)return; if(on)OPPX.ev.sel[id]=1; else delete OPPX.ev.sel[id]; }); oppxRender(); }
+
+function oppxBenchData(){
+  var q=OPPX.ev.q.toLowerCase(), src=OPPX.ev.src, st=OPPX.ev.st;
+  var rows=(OPPX.bench||[]).filter(function(p){
+    if(src && String(p.source||'')!==src) return false;
+    if(st && String(p.status||'New')!==st) return false;
+    if(q){ var hay=((p.business_name||'')+' '+(p.contact_name||'')+' '+(p.email||'')+' '+(p.website||'')).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
+    return true;
+  });
+  var s=OPPX.ev.sort, d=OPPX.ev.dir;
+  rows.sort(function(a,b){
+    var x=a[s], y=b[s];
+    if(s==='created_at'){ return d*((new Date(x||0))-(new Date(y||0))); }
+    return d*String(x||'').localeCompare(String(y||''));
+  });
+  return rows;
+}
+
+function oppxBenchTable(){
+  var all=OPPX.bench||[];
+  var rows=oppxBenchData();
+  var page=OPPX.ev.page, shown=rows.slice(0, page*OPPX_BENCH_PAGE);
+  var srcs={}, sts={};
+  all.forEach(function(p){ if(p.source)srcs[p.source]=1; sts[p.status||'New']=1; });
+  var selCount=Object.keys(OPPX.ev.sel).length;
+  var pageIds=shown.map(function(p){return p.id;}).join(',');
+  var allSel=shown.length&&shown.every(function(p){return OPPX.ev.sel[p.id];});
+
+  function th(label,col){ var on=OPPX.ev.sort===col; return '<th onclick="oppxEvSort(\''+col+'\')" style="cursor:pointer;">'+label+(on?(OPPX.ev.dir>0?' \u2191':' \u2193'):'')+'</th>'; }
+  var head='<tr><th><input type="checkbox" aria-label="Select page" '+(allSel?'checked':'')+' onclick="event.stopPropagation();oppxEvSelPage(this.checked,\''+pageIds+'\')"></th>'
+    +th('Business','business_name')+th('Contact','contact_name')+'<th>Website</th>'+th('Source','source')+th('Status','status')+th('Added','created_at')+'<th>Next action</th><th></th></tr>';
+
+  var body=shown.map(function(p){
+    var contact=escHtml(p.contact_name||'')+(p.email?('<div style="color:var(--muted);font-size:11px;">'+escHtml(p.email)+'</div>'):'');
+    var site=p.website?('<a href="'+escAttr(/^https?:/i.test(p.website)?p.website:'https://'+p.website)+'" target="_blank" rel="noopener" style="color:var(--p);" onclick="event.stopPropagation();">'+escHtml(String(p.website).replace(/^https?:\/\//,''))+'</a>'):'\u2014';
+    return '<tr>'
+      +'<td><input type="checkbox" aria-label="Select '+escAttr(p.business_name||'')+'" '+(OPPX.ev.sel[p.id]?'checked':'')+' onclick="event.stopPropagation();oppxEvSel(\''+p.id+'\',this.checked)"></td>'
+      +'<td style="font-weight:600;">'+escHtml(p.business_name||'\u2014')+'</td>'
+      +'<td>'+contact+'</td><td>'+site+'</td>'
+      +'<td>'+escHtml(p.source||'\u2014')+'</td>'
+      +'<td>'+escHtml(p.status||'New')+'</td>'
+      +'<td>'+escHtml(oppxAgo(p.created_at)||'\u2014')+'</td>'
+      +'<td style="color:var(--muted);">Send the first outreach</td>'
+      +'<td style="white-space:nowrap;">'
+        +'<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="event.stopPropagation();oppxBenchDraft(\''+p.id+'\')">Draft</button>'
+        +'<button class="iabtn" onclick="event.stopPropagation();oppxBenchStatus(\''+p.id+'\',\'Contacted\')">Contacted</button>'
+        +'<button class="iabtn" onclick="event.stopPropagation();ddsPrefillNewClient(\''+escAttr(p.business_name||'')+'\',\''+escAttr(p.email||'')+'\',\''+escAttr((p.business_name||'')+' \u2014 Website')+'\')">Convert</button>'
+        +'<button class="iabtn del" onclick="event.stopPropagation();oppxBenchStatus(\''+p.id+'\',\'Dismissed\')">Dismiss</button>'
+      +'</td></tr>';
+  }).join('');
+
+  var bulk=selCount?('<div class="opx-bulk">'+selCount+' selected \u00b7 '
+    +'<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="event.stopPropagation();oppxBenchBulk(\'Contacted\')">Mark contacted</button>'
+    +'<button class="iabtn" onclick="event.stopPropagation();oppxBenchCopyEmails()">Copy emails</button>'
+    +'<button class="iabtn del" onclick="event.stopPropagation();oppxBenchBulk(\'Dismissed\')">Dismiss</button>'
+    +'<button class="iabtn" onclick="event.stopPropagation();OPPX.ev.sel={};oppxRender();">Clear</button></div>'):'';
+
+  return '<div class="opx-ev" onclick="event.stopPropagation();">'
+    +'<div class="opx-ev-bar">'
+      +'<input class="opx-search" style="flex:1;min-width:160px;" placeholder="Search '+all.length+' prospects\u2026" value="'+escAttr(OPPX.ev.q)+'" oninput="oppxEvSet(\'q\',this.value)">'
+      +'<select class="opx-ev-sel" onchange="oppxEvSet(\'src\',this.value)"><option value="">All sources</option>'+Object.keys(srcs).sort().map(function(s2){return '<option '+(OPPX.ev.src===s2?'selected':'')+'>'+escHtml(s2)+'</option>';}).join('')+'</select>'
+      +'<select class="opx-ev-sel" onchange="oppxEvSet(\'st\',this.value)"><option value="">All statuses</option>'+Object.keys(sts).sort().map(function(s2){return '<option '+(OPPX.ev.st===s2?'selected':'')+'>'+escHtml(s2)+'</option>';}).join('')+'</select>'
+    +'</div>'
+    +bulk
+    +'<div style="overflow-x:auto;"><table class="opx-tbl"><thead>'+head+'</thead><tbody>'+(body||'<tr><td colspan="9" style="color:var(--muted);padding:14px;">No prospects match.</td></tr>')+'</tbody></table></div>'
+    +(rows.length>shown.length?'<button class="bf-act" style="margin-top:10px;" onclick="event.stopPropagation();OPPX.ev.page++;oppxRender();">Show '+Math.min(OPPX_BENCH_PAGE,rows.length-shown.length)+' more of '+rows.length+'</button>':'')
+  +'</div>';
+}
+
+function oppxBenchFind(id){ return (OPPX.bench||[]).find(function(p){return String(p.id)===String(id);}); }
+function oppxBenchDraft(id){
+  var p=oppxBenchFind(id); if(!p) return;
+  ddsDraftAction({ subject:p.business_name||'This business', subjectId:String(p.id), signal:'high_opportunity',
+    action:'Send '+(p.business_name||'them')+' a first outreach',
+    why:'on your bench'+(p.source?(' from '+p.source):'')+' \u2014 a real business you already researched, never contacted',
+    changed:'Never contacted'+(p.website?(' \u00b7 '+String(p.website).replace(/^https?:\/\//,'')):''),
+    module:'Opportunities', go:'prospects', refId:String(p.id) });
+}
+async function oppxBenchStatus(id,status){
+  var r=await api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',{status:status, updated_at:new Date().toISOString()});
+  if(r===null) return;
+  var p=oppxBenchFind(id); if(p) p.status=status;
+  delete OPPX.ev.sel[id];
+  toast('\u2713 '+status);
+  oppxRender();
+}
+async function oppxBenchBulk(status){
+  var ids=Object.keys(OPPX.ev.sel);
+  if(!ids.length) return;
+  await Promise.all(ids.map(function(id){ return api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',{status:status, updated_at:new Date().toISOString()}); }));
+  ids.forEach(function(id){ var p=oppxBenchFind(id); if(p) p.status=status; });
+  OPPX.ev.sel={};
+  toast('\u2713 '+ids.length+' marked '+status.toLowerCase());
+  oppxRender();
+}
+function oppxBenchCopyEmails(){
+  var ids=Object.keys(OPPX.ev.sel);
+  var emails=ids.map(function(id){var p=oppxBenchFind(id);return p&&p.email;}).filter(Boolean);
+  try{ navigator.clipboard.writeText(emails.join(', ')); toast('\u2713 '+emails.length+' emails copied'); }catch(e){}
 }
 
 function oppxDrawer(r){
