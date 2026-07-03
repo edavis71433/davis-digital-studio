@@ -3905,6 +3905,19 @@ function gpRenderPriorities(){
   } else {
     focusInner = '<div class="gp-empty">Eric will note here what you\u2019re working on together each month.</div>';
   }
+  // ---- HOW YOUR WEBSITE PERFORMED (plain-language digest, no charts) ----
+  // Only appears when there are at least two months of real data; every
+  // negative line already carries the plan inside the sentence.
+  var digestSec = '';
+  var digestItems = ws.digest || [];
+  if(digestItems.length){
+    var dInner = '<div class="gp-focus-list">'+digestItems.map(function(dg){
+      var dot = dg.tone==='up' ? '#3F7D5B' : (dg.tone==='down' ? '#B5781D' : 'var(--muted)');
+      return '<div class="gp-focus-item"><span class="gp-focus-dot" style="background:'+dot+'"></span><div><div class="gp-focus-it">'+esc(dg.label)+'</div><div class="gp-focus-id" style="line-height:1.5;white-space:normal;">'+esc(dg.line)+'</div></div></div>';
+    }).join('')+'</div>';
+    digestSec = gpSection('\uD83D\uDCC8','How your website performed','This month versus last, in plain English. Eric handles the numbers behind it.', dInner);
+  }
+
   var focusSec = gpSection('\uD83D\uDCC5','This month\u2019s focus','What you and Eric are working on right now.', focusInner);
 
   // ---- WHAT ERIC DID RECENTLY (the value receipt, on the main page) ----
@@ -3937,7 +3950,7 @@ function gpRenderPriorities(){
   var emptyTop = (!anyRecs) ? '<div class="gp-allgood"><div class="gp-allgood-ico">\u2713</div><div class="gp-allgood-t">Nothing needs you right now</div><div class="gp-allgood-d">Eric is keeping an eye on your website. The moment something is worth doing, it\u2019ll appear here, in plain English, with a simple yes or no.</div></div>' : '';
 
   document.getElementById('gp_priorities_body').innerHTML =
-    hero + emptyTop + topSec + qwSec + healthSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + didSec + askSec;
+    hero + emptyTop + topSec + qwSec + healthSec + digestSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + didSec + askSec;
 }
 
 // Website Health — plain words, no scary numbers leading.
