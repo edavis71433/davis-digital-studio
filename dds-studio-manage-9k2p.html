@@ -1624,6 +1624,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .opx5-pill{border:1px solid rgba(91,63,160,0.3);background:#fff;color:var(--p);font-weight:600;font-size:12px;padding:6px 13px;border-radius:100px;cursor:pointer;white-space:nowrap;}
 .opx5-pill:hover{background:rgba(91,63,160,0.06);}
 .opx3-tbl th{padding-top:14px;}
+.opx6-score{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:24px;padding:0 7px;border-radius:8px;background:#e7f6ee;color:#1a7e49;font-weight:750;font-size:12px;}
 /* loudness pass: one thing leads, everything else follows */
 .opx3-card .bf-act.primary{background:#fff;color:var(--p);border:1px solid rgba(91,63,160,0.3);}
 .opx3-card .bf-act.primary:hover{background:rgba(91,63,160,0.06);opacity:1;}
@@ -4669,6 +4670,7 @@ function oppxMatchQ(x,q){
 function oppxRender(){
   var root=document.getElementById('oppRoot');
   if(!root) return;
+  root.style.maxWidth='1120px';
   var q=OPPX.q;
   var S=oppxPrep();
   Object.keys(S).forEach(function(k){ if(!Array.isArray(S[k])) return; S[k]=S[k].filter(function(x){ return oppxMatchQ(x,q); }); });
@@ -4693,10 +4695,17 @@ function oppxRender(){
     return {label:'Draft it', fn:"oppxDraft('"+x.id+"')"};
   }
   function money(x){ if(x.bench) return ''; var v=valOf(x); return v?('$'+v.toLocaleString()):''; }
-  function line(x){ if(x.bench) return 'Researched'+(x.source?' via '+x.source:'')+' \u00b7 never contacted'; return x.raw?(x.why||''):(x.summary||''); }
+  function line(x){ if(x.bench) return x.enr||('Researched'+(x.source?' via '+x.source:'')+' \u00b7 never contacted'); return x.raw?(x.why||''):(x.summary||''); }
   function name(x){ if(x.bench) return x.bname; return x.raw?x.name:(x.title||''); }
   function panelFn(x){ return "oppxPanelOpen('"+(x.bench?'b':(x.raw||'p'))+"','"+escAttr(String(x.id))+"')"; }
-  function toBenchItem(p){ return {bench:1,id:p.id,bname:p.business_name||p.website||'A business',source:p.source||'',when:p.created_at}; }
+  function _dom(u){ return String(u||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]; }
+  var AUD={}; ((OPPX.inbound||{}).audit_leads||[]).forEach(function(a){ var d2=_dom(a.url); if(d2&&!AUD[d2]) AUD[d2]={score:Number(a.score), when:a.created_at}; });
+  function toBenchItem(p){
+    var hit=AUD[_dom(p.website)];
+    var it={bench:1,id:p.id,bname:p.business_name||p.website||'A business',source:p.source||'',when:p.created_at};
+    if(hit&&isFinite(hit.score)){ it.score=hit.score; it.enr='your checker scored their site '+hit.score+'/100 \u2014 a concrete, demonstrable opening'; }
+    return it;
+  }
   var benchTop=(OPPX.bench||[]).filter(function(p){var st=String(p.status||'').toLowerCase();return !st||st==='new';})
     .sort(function(a,b){return new Date(b.created_at||0)-new Date(a.created_at||0);}).map(toBenchItem);
   OPPX._verb=verb; OPPX._money=money; OPPX._line=line; OPPX._name=name; OPPX._valOf=valOf; OPPX._rankOf=rankOf;
@@ -4756,7 +4765,7 @@ function oppxRender(){
       OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
   var pipeItems = OPPX.showAllFeed?pipeAll:pipeAll.slice(0,8);
   var _unusedPipe = OPPX.filter==='all'?(unified.length?unified:benchTop.slice(0,25)) : OPPX.filter==='hot'?S.hot : OPPX.filter==='follow'?S.follow : OPPX.filter==='grow'?S.grow : OPPX.filter==='atrisk'?S.risk : OPPX.filter==='won'?S.won : S.lost;
-  var tbl='<div style="overflow-x:auto;"><table class="opx-tbl opx3-tbl"><thead><tr><th>Opportunity</th><th>Why it matters</th><th>Value</th><th>Next action</th><th>Last activity</th></tr></thead><tbody>'
+  var tbl='<div style="overflow-x:auto;"><table class="opx-tbl opx3-tbl"><thead><tr><th>Opportunity</th><th>Why it matters</th><th>Value</th><th>Next action</th><th>Last activity</th><th>Score</th></tr></thead><tbody>'
     +(pipeItems.length?pipeItems.map(function(x){
       var v=verb(x), $=money(x), ago=oppxAgo((x.raw||x.bench)?x.when:x.updated_at)||'\u2014';
       var closed=!x.raw && !x.bench && !oppxIsOpen(x);
@@ -4767,6 +4776,7 @@ function oppxRender(){
         +'<td style="white-space:nowrap;'+($?'color:#1a7e49;font-weight:700;':'color:var(--muted);')+'">'+($||'\u2014')+'</td>'
         +'<td>'+(closed?'<span style="color:var(--muted);">'+escHtml(x.status)+'</span>':'<button class="opx5-pill" onclick="event.stopPropagation();'+v.fn+'">'+v.label+'</button>')+'</td>'
         +'<td style="white-space:nowrap;color:var(--muted);">'+escHtml(ago)+'</td>'
+        +'<td>'+(isFinite(Number(x.score))?'<span class="opx6-score">'+Number(x.score)+'</span>':'')+'</td>'
       +'</tr>';
     }).join(''):'<tr><td colspan="5" style="color:var(--muted);padding:14px;">Nothing here right now.</td></tr>')
     +'</tbody></table></div>'
