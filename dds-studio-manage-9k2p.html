@@ -1146,7 +1146,9 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <div class="cb-av" id="bav-invoices">?</div>
           <div class="cb-info"><div class="cb-label">Invoices for</div><div class="cb-name" id="bname-invoices">—</div><div class="cb-project" id="bproj-invoices"></div></div>
         </div>
-        <div class="card"><div class="ch"><div class="ct">📋 Current Invoices</div></div><div class="cb" id="invList"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
+        <div class="card"><div class="ch"><div class="ct">📋 Current Invoices</div></div><div class="cb" style="padding-bottom:0;"><div id="billingOverview" style="margin-bottom:12px;"></div>
+            <div style="margin-bottom:4px;"><button class="sbtn" style="background:none;border:1px solid var(--p);color:var(--p);" onclick="startSubscription()">+ Start monthly plan (Stripe)</button></div></div>
+            <div class="cb" id="invList"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
         <div class="card" style="margin-top:0;">
           <div class="ch"><div class="ct" id="invFormTitle">💳 Add New Invoice</div></div>
           <div class="cb">
@@ -4396,6 +4398,92 @@ async function deleteTemplate(id) {
   await loadTemplates();
 }
 
+// ── STRIPE: generate a secure checkout link for an invoice ──
+// The server builds the session from the DB record (amount, client, metadata),
+// stores the URL on the invoice, and the portal pay button lights up. When
+// the client pays, the webhook flips the invoice to paid automatically.
+async function genPayLink(invoiceId) {
+  try {
+    var jwt = await adminJwt(); if (!jwt) { showLogin(); return; }
+    toast("Creating secure Stripe link…");
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type: "invoice_paylink", invoiceId: invoiceId })
+    });
+    var j = await r.json();
+    if (j && j.ok && j.url) {
+      toast("✓ Pay link created — it's live on the client's Billing tab now.");
+      try { await navigator.clipboard.writeText(j.url); toast("✓ Link copied to clipboard too."); } catch(e){}
+      var ctx = selectedClients["invoices"]; if (ctx) await loadInvoices(ctx);
+    } else {
+      toast("Could not create link: " + ((j && (j.detail || j.error)) || "unknown"));
+    }
+  } catch (e) { toast("Could not create link: " + e.message); }
+}
+async function copyPayLink(url) {
+  try { await navigator.clipboard.writeText(url); toast("✓ Pay link copied."); }
+  catch(e) { prompt("Copy the pay link:", url); }
+}
+
+// ── STRIPE: start a monthly plan checkout for the selected client ──
+async function startSubscription() {
+  var ctx = selectedClients["invoices"];
+  if (!ctx) { toast("Select a client first."); return; }
+  var amount = prompt("Monthly amount for " + ctx.name + " (e.g. 450):", "");
+  if (!amount) return;
+  var label = prompt("Plan name shown at checkout:", "Monthly website care");
+  if (label === null) return;
+  try {
+    var jwt = await adminJwt(); if (!jwt) { showLogin(); return; }
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type: "subscription_start", clientId: ctx.id, amount: amount, label: label || "Monthly plan" })
+    });
+    var j = await r.json();
+    if (j && j.ok && j.url) {
+      try { await navigator.clipboard.writeText(j.url); } catch(e){}
+      toast("✓ Subscription checkout created and copied — send it to " + ctx.name + ".");
+    } else { toast("Could not create subscription link: " + ((j && (j.detail || j.error)) || "unknown")); }
+  } catch (e) { toast("Could not create subscription link: " + e.message); }
+}
+
+// ── STRIPE: billing overview (recent payments + active plans) ──
+async function loadBillingOverview() {
+  var host = document.getElementById("billingOverview");
+  if (!host) return;
+  host.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0;">Loading payments…</div>';
+  try {
+    var jwt = await adminJwt(); if (!jwt) { host.innerHTML=""; return; }
+    var r = await fetch(SB_URL + "/functions/v1/clever-api", {
+      method: "POST", headers: {"Content-Type":"application/json","Authorization":"Bearer "+SB_KEY,"x-dds-user-jwt":jwt},
+      body: JSON.stringify({ type: "billing_overview" })
+    });
+    var j = await r.json();
+    var d = (j && j.data) || {};
+    var pays = d.payments || [], subs = d.subscriptions || [];
+    var html = '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:4px 0 10px;">Payments (live from Stripe)</div>';
+    if (subs.length) {
+      html += subs.map(function(s){
+        var tone = s.subscription_status==='active' ? 'var(--green,#3f7d5b)' : (s.subscription_status==='past_due' ? '#c0392b' : 'var(--muted)');
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12.5px;">'
+          +'<span>'+escHtml(s.name||'')+' · monthly plan</span>'
+          +'<span style="color:'+tone+';font-weight:600;">'+escHtml(s.subscription_status||'')+(s.next_billing_at?(' · renews '+new Date(s.next_billing_at).toLocaleDateString()):'')+'</span></div>';
+      }).join('');
+    }
+    if (!pays.length) {
+      html += '<div style="font-size:12.5px;color:var(--muted);padding:8px 0;">No Stripe payments yet. When a client pays, it appears here automatically and the invoice flips to paid on its own.</div>';
+    } else {
+      html += pays.slice(0,12).map(function(p){
+        var ok = p.status === 'paid';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12.5px;">'
+          +'<span>'+escHtml(p.description||p.kind||'Payment')+' · '+escHtml(p.email||'')+'</span>'
+          +'<span style="font-weight:600;color:'+(ok?'var(--green,#3f7d5b)':'#c0392b')+';">'+(ok?'':'FAILED · ')+'$'+(Number(p.amount)||0).toLocaleString()+' · '+new Date(p.created_at).toLocaleDateString()+'</span></div>';
+      }).join('');
+    }
+    host.innerHTML = html;
+  } catch (e) { host.innerHTML = '<div style="font-size:12px;color:var(--muted);">Could not load payments.</div>'; }
+}
+
 async function sendMsg() {
   var ctx = selectedClients["messages"];
   if (!ctx) { toast("Select a client first."); return; }
@@ -4676,6 +4764,7 @@ async function markProjectComplete() {
 
 // ── INVOICES ──
 async function loadInvoices(client) {
+  loadBillingOverview();
   var data = await api("invoices?select=*&client_id=eq."+client.id+"&order=created_at");
   var el = document.getElementById("invList");
   if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No invoices yet.</p>"; return; }
@@ -4689,6 +4778,9 @@ async function loadInvoices(client) {
         <div class="iamt">${inv.amount}</div>
         <span class="ibadge ${inv.status}">${cap(inv.status)}</span>
         <div class="iact">
+          ${inv.status!=="paid" ? (inv.stripe_url
+            ? `<button class="iabtn" onclick="copyPayLink('${inv.stripe_url.replace(/'/g,"\\'")}')">Copy pay link</button>`
+            : `<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="genPayLink('${inv.id}')">⚡ Stripe link</button>`) : ""}
           <button class="iabtn" onclick="editInvoice(${JSON.stringify(inv).replace(/"/g,"&quot;")})">Edit</button>
           <button class="iabtn del" onclick="delInvoice('${inv.id}')">Delete</button>
         </div>
