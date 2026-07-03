@@ -11722,5 +11722,281 @@ function anEngineNote(eng){
   window.go=function(dest){ var r=_go.apply(this,arguments); try{ if(dest==='quote') qbxLoad(); }catch(e){} return r; };
 })();
 </script>
+
+<style>
+/* RELATIONSHIP HUB */
+.rhx-stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.rhx-st{flex:1;min-width:170px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;}
+.rhx-sn{font-size:21px;font-weight:750;color:var(--ink);}
+.rhx-sl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.rhx-sent{font-size:13.5px;color:var(--muted);margin-top:12px;max-width:640px;line-height:1.6;}
+.rhx-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;}
+.rhx-row{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 18px;margin-top:10px;cursor:pointer;transition:border-color .15s, box-shadow .15s;}
+.rhx-row:hover{border-color:rgba(91,63,160,.25);box-shadow:0 2px 12px rgba(41,25,66,.05);}
+.rhx-av{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(91,63,160,.09);color:var(--p);font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.rhx-ring{flex:none;width:46px;height:46px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:14px;border:3px solid;}
+.rhx-rl{font-size:8px;font-weight:700;letter-spacing:.02em;}
+.rhx-col{min-width:0;}
+.rhx-nm{font-size:15px;font-weight:700;color:var(--ink);}
+.rhx-svc{font-size:12px;color:var(--muted);margin-top:2px;}
+.rhx-kn{font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.rhx-kl{font-size:10.5px;color:var(--muted);white-space:nowrap;}
+.rhx-open{border:1px solid rgba(91,63,160,.3);background:#fff;color:var(--p);font-weight:600;font-size:12.5px;padding:8px 16px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+.rhx-open:hover{background:rgba(91,63,160,.06);}
+.rhx-block{border:1px solid rgba(41,25,66,.06);border-radius:12px;padding:12px 14px;margin-top:14px;}
+.rhx-bh{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;}
+.rhx-kv{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;}
+.rhx-kv b{color:var(--ink);font-weight:650;}
+.rhx-tl{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(41,25,66,.05);font-size:12.5px;}
+.rhx-tl:last-child{border-bottom:none;}
+.rhx-tli{flex:none;width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;background:rgba(91,63,160,.08);color:var(--p);}
+</style>
+<script>
+// ═══ RELATIONSHIP HUB — Clients + All Clients merged into one page.
+// "What relationship deserves my attention next?" Health scores are a
+// disclosed formula over real signals, never a black box. Legacy pages
+// preserved underneath (Classic view). ═══
+(function(){
+  var RHX={rows:[], msgs:{}, inv:{}, eng:{}, q:'', hf:'all', page:1, loaded:false, legacy:false, engSentence:''};
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function money(n){ return '$'+Math.round(n).toLocaleString(); }
+  function mrrOf(c){ return Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0; }
+
+  function health(c){
+    var why=[], s=50;
+    if(String(c.status||'').toLowerCase()==='active'){ s+=10; why.push('active engagement'); }
+    var m=RHX.msgs[String(c.id)];
+    if(m){ var d=(Date.now()-new Date(m.created_at))/86400000;
+      if(d<=7){ s+=15; why.push('spoke within the week'); }
+      else if(d<=21){ s+=5; why.push('contact within 3 weeks'); }
+      else { s-=15; why.push('no contact in '+Math.floor(d)+' days'); } }
+    else { s-=5; why.push('no messages recorded'); }
+    var iv=RHX.inv[String(c.id)]||{paid:0,over:0,out:0};
+    if(iv.over){ s-=15; why.push(iv.over+' overdue invoice'+(iv.over===1?'':'s')); }
+    else if(iv.paid){ s+=10; why.push('pays on record'); }
+    if(mrrOf(c)>0){ s+=10; why.push('recurring revenue'); }
+    if(c.launched_at){ s+=5; why.push('launched'); } else { why.push('onboarding'); }
+    s=Math.max(5,Math.min(98,s));
+    var lbl = s>=85?['Excellent','#1a7e49'] : s>=70?['Healthy','#1a7e49'] : s>=50?['Attention','#9a7a1a'] : ['At risk','#c0392b'];
+    return {n:s, l:lbl[0], c:lbl[1], why:'Score is a formula over real signals: '+why.join(', ')+'.'};
+  }
+
+  function ensureRoot(pid, rid){
+    var page=document.getElementById(pid); if(!page) return null;
+    var root=document.getElementById(rid);
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._rhxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id=rid; root.style.maxWidth='1120px';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+  window.rhxClassic=function(){
+    ['page-clients','page-hub'].forEach(function(pid){
+      var page=document.getElementById(pid); if(!page) return;
+      Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._rhxHidden) ch.style.display=''; });
+    });
+    ['rhxRootC','rhxRootH'].forEach(function(rid){ var r=document.getElementById(rid); if(r) r.style.display='none'; });
+    RHX.legacy=true;
+    try{ CLIENTS.detail=null; }catch(e){}
+    try{ if(typeof clRenderLanding==='function'){} loadClientsLegacy&&loadClientsLegacy(); }catch(e){}
+    try{ loadHubLegacy&&loadHubLegacy(); }catch(e){}
+    toast('Classic view \u2014 refresh the page to return to the Hub');
+  };
+
+  async function rhxLoad(){
+    var pid=(document.getElementById('page-hub')&&document.getElementById('page-hub').classList.contains('active'))?'page-hub':'page-clients';
+    var rid=pid==='page-hub'?'rhxRootH':'rhxRootC';
+    var root=ensureRoot(pid,rid); if(!root||RHX.legacy) return;
+    RHX._rid=rid;
+    if(!RHX.loaded){
+      root.innerHTML='<div class="bf-skel" style="height:26px;width:280px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:14px;"></div>';
+      function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+      var r=await Promise.all([
+        safe(function(){ return api('clients?select=*&limit=400'); }),
+        safe(function(){ return api('messages?select=client_id,from_who,text,created_at&order=created_at.desc&limit=1200'); }),
+        safe(function(){ return api('invoices?select=id,client_id,name,amount,status,paid_at,due_date,created_at&deleted_at=is.null&order=created_at.desc&limit=500'); }),
+        safe(function(){ return integApi('reasoning_query',{question:'clients_attention'}); })
+      ]);
+      RHX.rows=(r[0]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+      (r[1]||[]).forEach(function(m){ var k=String(m.client_id); if(!RHX.msgs[k]) RHX.msgs[k]=m; });
+      (r[2]||[]).forEach(function(i){ var k=String(i.client_id||''); if(!k) return;
+        var b=RHX.inv[k]=RHX.inv[k]||{paid:0,paidSum:0,over:0,out:0,outSum:0,list:[]};
+        b.list.push(i);
+        var v=0; try{ v=invcAmt(i.amount)||0; }catch(e){}
+        if(String(i.status||'').toLowerCase()==='paid'){ b.paid++; b.paidSum+=v; }
+        else { b.out++; b.outSum+=v; var t=null; try{ t=invcDue(i.due_date); }catch(e){} if(t!=null&&t<Date.now()) b.over++; }
+      });
+      var eng=(r[3]&&r[3].data)||{};
+      (eng.items||[]).forEach(function(it){ var k=String(it.subjectId||it.client_id||it.refId||''); if(k) RHX.eng[k]=it; });
+      RHX.engSentence=eng.headline||eng.answer||'';
+      RHX.loaded=true;
+    }
+    rhxRender();
+  }
+
+  window.rhxQ=function(v){ RHX.q=v; RHX.page=1; rhxRender(); };
+  window.rhxHf=function(v){ RHX.hf=v; RHX.page=1; rhxRender(); };
+  window.rhxPg=function(d){ RHX.page+=d; rhxRender(); };
+
+  function rhxRender(){
+    var root=document.getElementById(RHX._rid||'rhxRootC'); if(!root||RHX.legacy) return;
+    var rows=RHX.rows;
+    var totalMrr=0, needN=0, onbN=0;
+    var enriched=rows.map(function(c){ var h=health(c); totalMrr+=mrrOf(c); if(h.n<70) needN++; if(!c.launched_at) onbN++; return {c:c,h:h}; });
+    enriched.sort(function(a,b){ return a.h.n-b.h.n; }); // attention first
+
+    var sent=RHX.engSentence || (rows.length
+      ? (needN? (needN+' relationship'+(needN===1?'':'s')+' could use a touch this week \u2014 the rest are steady.') : 'Your client relationships look healthy. Nothing is waving a flag.')
+      : 'No clients yet \u2014 your first relationship starts on the Opportunities bench.');
+
+    var stats='<div class="rhx-stats">'
+      +'<div class="rhx-st"><div class="rhx-sn">'+rows.length+'</div><div class="rhx-sl">Active relationships</div></div>'
+      +'<div class="rhx-st"><div class="rhx-sn">'+money(totalMrr)+'</div><div class="rhx-sl">Monthly recurring revenue</div></div>'
+      +'<div class="rhx-st"><div class="rhx-sn'+(needN?'" style="color:#9a7a1a;':'"')+'>'+needN+'</div><div class="rhx-sl">Need attention</div></div>'
+      +'<div class="rhx-st"><div class="rhx-sn">'+onbN+'</div><div class="rhx-sl">Onboarding</div></div>'
+    +'</div>';
+
+    var q=RHX.q.toLowerCase();
+    var list=enriched.filter(function(e){
+      if(RHX.hf==='attn'&&e.h.n>=70) return false;
+      if(RHX.hf==='exc'&&e.h.n<85) return false;
+      if(RHX.hf==='onb'&&e.c.launched_at) return false;
+      if(q){
+        var iv=RHX.inv[String(e.c.id)]||{list:[]};
+        var hay=(String(e.c.name||'')+' '+String(e.c.contact_email||e.c.email||'')+' '+String(e.c.website||'')+' '+String(e.c.phone||'')+' '+String(e.c.notes||'')+' '+iv.list.map(function(i){return i.name;}).join(' ')).toLowerCase();
+        if(hay.indexOf(q)===-1) return false;
+      }
+      return true;
+    });
+    var PAGE=6, total=list.length, maxP=Math.max(1,Math.ceil(total/PAGE));
+    if(RHX.page>maxP) RHX.page=maxP;
+    var start=(RHX.page-1)*PAGE, pageList=list.slice(start,start+PAGE);
+
+    var bar='<div class="rhx-bar">'
+      +'<input class="opx-search" style="flex:1;min-width:220px;" placeholder="Search clients, emails, invoices, notes\u2026" value="'+att(RHX.q)+'" oninput="rhxQ(this.value)" aria-label="Search relationships">'
+      +'<select class="fi" style="margin:0;max-width:170px;" onchange="rhxHf(this.value)" aria-label="Health filter">'
+        +'<option value="all"'+(RHX.hf==='all'?' selected':'')+'>All health</option>'
+        +'<option value="attn"'+(RHX.hf==='attn'?' selected':'')+'>Needs attention</option>'
+        +'<option value="exc"'+(RHX.hf==='exc'?' selected':'')+'>Excellent</option>'
+        +'<option value="onb"'+(RHX.hf==='onb'?' selected':'')+'>Onboarding</option>'
+      +'</select>'
+      +'<button class="ibx-tab" onclick="go(\'hub\');rhxClassic();" title="The original Clients + Client Hub pages">Classic view \u2192</button>'
+    +'</div>';
+
+    var body=pageList.length?pageList.map(function(e){
+      var c=e.c, h=e.h, iv=RHX.inv[String(c.id)]||{paidSum:0};
+      var m=RHX.msgs[String(c.id)];
+      var mrr=mrrOf(c);
+      var svc=c.contract_package||c.plan||(mrr?'Monthly partnership':'Project client');
+      return '<div class="rhx-row" onclick="rhxOpen(\''+att(String(c.id))+'\')">'
+        +'<div class="rhx-av">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div class="rhx-col" style="flex:1.4;"><div class="rhx-nm">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(svc)+'</div></div>'
+        +'<div class="rhx-ring" style="border-color:'+h.c+';color:'+h.c+';" title="'+att(h.why)+'"><span>'+h.n+'</span><span class="rhx-rl">'+esc(h.l)+'</span></div>'
+        +'<div class="rhx-col"><div class="rhx-kn">'+money(iv.paidSum||0)+'</div><div class="rhx-kl">Revenue to date</div>'
+          +'<div class="rhx-kn" style="margin-top:6px;">'+(mrr?money(mrr)+'/mo':'\u2014')+'</div><div class="rhx-kl">MRR</div></div>'
+        +'<div class="rhx-col"><div class="rhx-kn" style="font-weight:600;">'+(m?esc(agoS(m.created_at)):'\u2014')+'</div><div class="rhx-kl">Last contact</div>'
+          +(RHX.eng[String(c.id)]?'<div class="rhx-kl" style="margin-top:6px;color:var(--p);max-width:170px;white-space:normal;">\u2726 '+esc(String(RHX.eng[String(c.id)].action||RHX.eng[String(c.id)].why||'').slice(0,60))+'</div>':'')
+        +'</div>'
+        +'<button class="rhx-open" onclick="event.stopPropagation();rhxOpen(\''+att(String(c.id))+'\')">Open relationship \u2192</button>'
+      +'</div>';
+    }).join('')
+    :'<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">'+(rows.length?'No relationships match.':'No clients yet \u2014 convert your first from <a href="#" onclick="go(\'opportunities\');return false;" style="color:var(--p);">Opportunities</a>.')+'</div>';
+
+    var pager=total>PAGE?('<div style="display:flex;align-items:center;gap:10px;padding:14px 6px;font-size:12.5px;color:var(--muted);">Showing '+(start+1)+'\u2013'+(start+pageList.length)+' of '+total
+      +'<span style="flex:1;"></span>'+(RHX.page>1?'<button class="ibx-pill" onclick="rhxPg(-1)">\u2190</button>':'')+(RHX.page<maxP?'<button class="ibx-pill" onclick="rhxPg(1)">\u2192</button>':'')+'</div>'):'';
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Relationship Hub</div>'
+      +'<div class="ibx-sub">Your client relationships at a glance.</div></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="ddsPrefillNewClient(\'\',\'\',\'\')">+ New client</button></div>'
+      +stats
+      +'<div class="rhx-sent">'+esc(sent)+'</div>'
+      +bar
+      +'<div style="margin-top:6px;">'+body+'</div>'
+      +pager;
+  }
+
+  // ── relationship workspace ──
+  window.rhxOpen=async function(id){
+    try{ oppxPanelClose(); }catch(e){}
+    var c=RHX.rows.find(function(x){ return String(x.id)===String(id); }); if(!c) return;
+    var h=health(c), iv=RHX.inv[String(id)]||{list:[],paidSum:0,outSum:0,paid:0,out:0};
+    var eng=RHX.eng[String(id)];
+    var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
+    bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
+    var mrr=mrrOf(c);
+    var next = eng ? {t:eng.action||'Check in', w:eng.why||eng.changed||''}
+      : (RHX.msgs[String(id)]&&(Date.now()-new Date(RHX.msgs[String(id)].created_at))/86400000>14
+        ? {t:'Check in with '+(c.name||'them'), w:'No contact in over two weeks \u2014 a short, genuine note keeps the relationship warm.'}
+        : {t:'Keep the momentum', w:'Recent contact and steady signals \u2014 nothing urgent.'});
+    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Relationship" style="width:min(520px,96vw);">'
+      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+      +'<div style="display:flex;align-items:center;gap:12px;">'
+        +'<div class="rhx-av" style="width:50px;height:50px;font-size:18px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div style="flex:1;min-width:0;"><div class="opx3-pt" style="margin:0;">'+esc(c.name||'Client')+'</div>'
+        +'<div class="opx3-pm" style="margin-top:2px;">'+esc(c.contact_email||c.email||'')+(c.phone?' \u00b7 '+esc(c.phone):'')+'</div></div>'
+        +'<div class="rhx-ring" style="border-color:'+h.c+';color:'+h.c+';"><span>'+h.n+'</span><span class="rhx-rl">'+esc(h.l)+'</span></div>'
+      +'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;">'+esc(h.why)+'</div>'
+      +'<div class="rhx-block" style="background:#f5f2fc;border:none;"><div class="rhx-bh">\u2726 NEXT BEST ACTION</div>'
+        +'<div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(next.t)+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55;">'+esc(next.w)+'</div>'
+        +'<button class="bf-act primary" style="margin-top:12px;" onclick="rhxMsg(\''+att(String(id))+'\')">Do it now \u2192</button>'
+      +'</div>'
+      +'<div class="rhx-block"><div class="rhx-bh">KEY STATS</div>'
+        +'<div class="rhx-kv"><span>Revenue to date</span><b>'+money(iv.paidSum||0)+'</b></div>'
+        +'<div class="rhx-kv"><span>Monthly recurring</span><b>'+(mrr?money(mrr)+'/mo':'\u2014')+'</b></div>'
+        +'<div class="rhx-kv"><span>Invoices paid</span><b>'+(iv.paid||0)+'</b></div>'
+        +'<div class="rhx-kv"><span>Outstanding</span><b>'+(iv.out?money(iv.outSum):'\u2014')+'</b></div>'
+        +(c.website?'<div class="rhx-kv"><span>Website</span><b><a href="'+att(/^https?:/i.test(c.website)?c.website:'https://'+c.website)+'" target="_blank" rel="noopener" style="color:var(--p);">'+esc(String(c.website).replace(/^https?:\/\//,''))+'</a></b></div>':'')
+        +'<div class="rhx-kv"><span>Client since</span><b>'+esc(agoS(c.created_at)||'\u2014')+'</b></div>'
+      +'</div>'
+      +'<div class="rhx-block"><div class="rhx-bh">RELATIONSHIP TIMELINE</div><div id="rhxTl"><div class="bf-skel" style="height:11px;width:80%;margin:5px 0;"></div><div class="bf-skel" style="height:11px;width:55%;"></div></div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">'
+        +'<button class="bf-act" onclick="rhxMsg(\''+att(String(id))+'\')">Message</button>'
+        +'<button class="bf-act" onclick="oppxPanelClose();go(\'invoices\');">Invoices</button>'
+        +'<button class="bf-act" onclick="oppxPanelClose();go(\'hub\');rhxClassic();">Full record (classic) \u2192</button>'
+      +'</div>'
+    +'</aside>';
+    document.body.appendChild(bg);
+    document.addEventListener('keydown', oppxPanelEsc);
+    // timeline: real events — payments, launch, messages
+    try{
+      var ev=[];
+      (iv.list||[]).forEach(function(i){ if(i.paid_at) ev.push({i:'$',t:(i.name||'Invoice')+' paid', d:i.paid_at}); });
+      if(c.launched_at) ev.push({i:'\u25B2',t:'Website launched', d:c.launched_at});
+      var ms=await api('messages?client_id=eq.'+encodeURIComponent(id)+'&select=from_who,text,created_at&order=created_at.desc&limit=6')||[];
+      ms.forEach(function(m){ ev.push({i:'\u2709',t:(m.from_who==='eric'?'You wrote: ':(c.name||'They')+' wrote: ')+String(m.text||'').slice(0,60), d:m.created_at}); });
+      ev.push({i:'\u2726',t:'Relationship began', d:c.created_at});
+      ev.sort(function(a,b){ return new Date(b.d)-new Date(a.d); });
+      var host=document.getElementById('rhxTl');
+      if(host) host.innerHTML=ev.slice(0,9).map(function(e){
+        return '<div class="rhx-tl"><span class="rhx-tli">'+e.i+'</span><span style="flex:1;color:var(--ink);">'+esc(e.t)+'</span><span style="color:var(--muted);white-space:nowrap;">'+esc(agoS(e.d))+'</span></div>';
+      }).join('')||'<div style="font-size:12px;color:var(--muted);">The story starts with the first invoice or message.</div>';
+    }catch(e){}
+  };
+
+  window.rhxMsg=function(id){
+    var c=RHX.rows.find(function(x){ return String(x.id)===String(id); }); if(!c) return;
+    try{ oppxPanelClose(); }catch(e){}
+    var eng=RHX.eng[String(id)];
+    ddsDraftAction({ subject:c.name||'this client', subjectId:String(c.id), signal:'relationship_touch', module:'Clients',
+      action:(eng&&eng.action)||('Check in with '+(c.name||'them')),
+      why:(eng&&eng.why)||'a short genuine note is the cheapest retention there is',
+      changed:'Relationship health '+health(c).n+' \u2014 '+health(c).l,
+      go:'clients', refId:String(c.id) });
+  };
+
+  // merge: both nav destinations land on the Hub; legacy loaders preserved
+  window.loadClientsLegacy=window.loadClients;
+  window.loadHubLegacy=window.loadHub;
+  window.loadClients=rhxLoad;
+  window.loadHub=rhxLoad;
+})();
+</script>
 </body>
 </html>
