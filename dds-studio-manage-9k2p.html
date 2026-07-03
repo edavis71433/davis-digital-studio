@@ -12577,5 +12577,263 @@ function anEngineNote(eng){
 #page-growth #grxRoot .opx3-pt,#page-growth #grxRoot .opx3-pm{margin:0;}
 #page-growth #grxRoot .bf-skel{margin:6px 0;}
 </style>
+
+<style>
+/* TIMELINE — the full story of a partnership */
+#page-timeline #tlxRoot{max-width:1180px;}
+.tlx-band{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 22px;margin-top:16px;display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+.tlx-bm{padding:0 22px;border-left:1px solid rgba(41,25,66,.08);}
+.tlx-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.tlx-chip{border:1px solid rgba(41,25,66,.12);background:#fff;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:100px;cursor:pointer;}
+.tlx-chip.on{background:var(--p);color:#fff;border-color:transparent;}
+.tlx-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);gap:20px;margin-top:18px;align-items:start;}
+@media(max-width:1000px){.tlx-grid{grid-template-columns:1fr;}}
+.tlx-day{font-size:12px;font-weight:750;color:var(--ink);margin:22px 0 8px;letter-spacing:.02em;}
+.tlx-ev{display:flex;gap:14px;margin-top:10px;}
+.tlx-time{flex:none;width:62px;font-size:11px;color:var(--muted);padding-top:14px;text-align:right;}
+.tlx-dot{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;margin-top:6px;}
+.tlx-card{flex:1;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;min-width:0;}
+.tlx-t{font-size:14px;font-weight:700;color:var(--ink);}
+.tlx-b{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:3px;}
+.tlx-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.tlx-stat{border:1px solid rgba(41,25,66,.07);border-radius:10px;padding:8px 12px;min-width:100px;}
+.tlx-sl{font-size:10px;color:var(--muted);}
+.tlx-sn{font-size:14px;font-weight:750;color:var(--ink);margin-top:2px;}
+.tlx-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;background:rgba(91,63,160,.08);color:var(--p);margin-top:10px;margin-right:6px;}
+.tlx-ai{background:#f5f2fc;border-radius:12px;padding:11px 14px;margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink);}
+.tlx-rail .grx-card{margin-top:16px;}
+.tlx-rail .grx-card:first-child{margin-top:0;}
+.tlx-qa{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(41,25,66,.04);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);}
+.tlx-qa:last-child{border-bottom:none;}
+.tlx-qa .c{margin-left:auto;color:var(--muted);}
+.tlx-ms{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:12.5px;}
+.tlx-ms .d{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap;}
+</style>
+<script>
+// ═══ TIMELINE — "the full story of this partnership." All events real:
+// payments (Stripe ledger), messages, launches, completed tasks, notifications,
+// and Eric's own notes/meetings/milestones stored in the timeline table.
+// Legacy phase-editor page is dormant beneath (its job belongs to Projects). ═══
+(function(){
+  var TLX={cid:null, clients:null, ev:[], filter:'all', range:'all', d:null, page:1, legacy:false};
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function money(n){ return '$'+Math.round(Number(n)||0).toLocaleString(); }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-timeline'); if(!page) return null;
+    var root=document.getElementById('tlxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._tlxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='tlxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function tlxLoad(clientArg){
+    var root=ensureRoot(); if(!root) return;
+    if(clientArg&&clientArg.id){ return tlxOpen(String(clientArg.id)); }
+    if(TLX.cid) return tlxOpen(TLX.cid);
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:260px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
+    try{ TLX.clients=(await api('clients?select=id,name,contact_email,email,monthly_amount,launched_at,created_at,status&limit=300')||[]).filter(function(c){return String(c.status||'').toLowerCase()!=='archived';}); }catch(e){ TLX.clients=[]; }
+    root.innerHTML=
+      '<div class="pt">Timeline</div>'
+      +'<div class="ibx-sub">The full story of every partnership \u2014 pick a client.</div>'
+      +(TLX.clients.length?TLX.clients.map(function(c){
+        return '<div class="rhx-row" onclick="tlxOpen(\''+att(String(c.id))+'\')">'
+          +'<div class="rhx-av">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+          +'<div class="rhx-col" style="flex:1.4;"><div class="rhx-nm">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(c.contact_email||c.email||'')+'</div></div>'
+          +'<button class="rhx-open" onclick="event.stopPropagation();tlxOpen(\''+att(String(c.id))+'\')">Open timeline \u2192</button>'
+        +'</div>';
+      }).join(''):'<div class="grx-empty">No clients yet \u2014 the story starts when the first one converts.</div>');
+  }
+
+  window.tlxOpen=async function(cid){
+    var root=ensureRoot(); if(!root) return;
+    TLX.cid=String(cid); TLX.page=1;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:120px;width:100%;border-radius:16px;"></div>';
+    if(!TLX.clients){ try{ TLX.clients=await api('clients?select=id,name,contact_email,email,monthly_amount,launched_at,created_at,status&limit=300')||[]; }catch(e){ TLX.clients=[]; } }
+    var c=(TLX.clients||[]).find(function(x){ return String(x.id)===TLX.cid; });
+    if(!c){ tlxLoad(); return; }
+    var r=await Promise.all([
+      safe(function(){ return api('messages?client_id=eq.'+encodeURIComponent(cid)+'&select=from_who,text,created_at&order=created_at.desc&limit=100'); }),
+      safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&select=id,name,amount,status,paid_at,created_at,stripe_url&deleted_at=is.null&limit=100'); }),
+      safe(function(){ return api('notifications?client_id=eq.'+encodeURIComponent(cid)+'&select=type,title,body,created_at&order=created_at.desc&limit=100'); }),
+      safe(function(){ return api('timeline?client_id=eq.'+encodeURIComponent(cid)+'&select=*&order=created_at.desc&limit=100'); }),
+      safe(function(){ return api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id,created_at,plan_label&limit=3'); }),
+      safe(function(){ return api('stripe_payments?select=invoice_id,amount,kind,status,created_at&order=created_at.desc&limit=100'); })
+    ]);
+    var msgs=r[0]||[], invs=r[1]||[], notifs=r[2]||[], tl=r[3]||[], parts=r[4]||[], pays=r[5]||[];
+    var payByInv={}; pays.forEach(function(p){ if(!payByInv[String(p.invoice_id)]) payByInv[String(p.invoice_id)]=p; });
+
+    var ev=[];
+    msgs.forEach(function(m){ ev.push({k:'msg', d:m.created_at, title:(m.from_who==='eric'?'Message sent':'Client message received'), body:'\u201c'+String(m.text||'').slice(0,160)+'\u201d', icon:'\u2709', col:'#2c6fb7'}); });
+    invs.forEach(function(i){
+      if(i.paid_at){
+        var v=0; try{ v=invcAmt(i.amount)||0; }catch(e){}
+        var pay=payByInv[String(i.id)];
+        ev.push({k:'pay', d:i.paid_at, title:(i.name||'Invoice')+' paid', body:(v?money(v)+' received':'Payment received')+(pay?' via Stripe':''), stats:[['Amount',v?money(v):'\u2014'],['Method',pay?esc(pay.kind||'Stripe'):'Recorded'],['Balance','Paid in full']], tag:i.name, icon:'$', col:'#5b3fa0', pay:1});
+      }
+      ev.push({k:'pay', d:i.created_at, title:(i.name||'Invoice')+' sent', body:'Invoice issued'+(i.amount?' \u00b7 '+esc(String(i.amount)):''), icon:'\u29C1', col:'#9a7a1a'});
+    });
+    notifs.forEach(function(n){ ev.push({k:'note', d:n.created_at, title:esc(n.title||n.type||'Update'), body:esc(String(n.body||'').slice(0,160)), icon:'\u25C8', col:'#7a6d8e'}); });
+    tl.forEach(function(t){ var kind=String(t.kind||t.type||'note').toLowerCase();
+      ev.push({k:(kind==='milestone'?'mile':kind==='meeting'?'meet':'note'), d:t.event_date||t.created_at, title:esc(t.title||(kind.charAt(0).toUpperCase()+kind.slice(1))), body:esc(String(t.body||'').slice(0,200)), icon:kind==='milestone'?'\u2605':kind==='meeting'?'\u25A2':'\u270E', col:kind==='milestone'?'#b8860b':'#0e7a6e'}); });
+    if(c.launched_at) ev.push({k:'mile', d:c.launched_at, title:'Website launched', body:'The new website is live and accessible to the public.', tag:'Milestone', icon:'\u25B2', col:'#1a7e49'});
+    (parts||[]).forEach(function(p){ ev.push({k:'mile', d:p.created_at, title:'Growth partnership started', body:esc(p.plan_label||'Growth partnership'), icon:'\u2726', col:'#5b3fa0'}); });
+    // completed tasks via partnership
+    if(parts&&parts[0]){
+      var tk=await safe(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(parts[0].id)+'&select=title,status,created_at&limit=100'); })||[];
+      tk.filter(function(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; }).forEach(function(t){
+        ev.push({k:'task', d:t.created_at, title:esc(t.title||'Task completed'), body:'Roadmap task completed.', icon:'\u2713', col:'#1a7e49'});
+      });
+    }
+    ev.push({k:'mile', d:c.created_at, title:'Relationship began', body:(c.name||'Client')+' became a client.', icon:'\u2726', col:'#5b3fa0'});
+    ev=ev.filter(function(e){ return e.d; });
+    ev.sort(function(a,b){ return new Date(b.d)-new Date(a.d); });
+    TLX.ev=ev; TLX.d=c;
+    tlxRender();
+  };
+
+  window.tlxFilter=function(f){ TLX.filter=f; TLX.page=1; tlxRender(); };
+  window.tlxRange=function(v){ TLX.range=v; TLX.page=1; tlxRender(); };
+  window.tlxMore=function(){ TLX.page++; tlxRender(); };
+  window.tlxBackList=function(){ TLX.cid=null; tlxLoad(); };
+
+  function tlxRender(){
+    var root=document.getElementById('tlxRoot'); var c=TLX.d; if(!root||!c) return;
+    var CH=[['all','All events'],['msg','Messages'],['pay','Payments'],['mile','Milestones'],['task','Tasks'],['note','Notes'],['meet','Meetings']];
+    var cutoff = TLX.range==='30'?Date.now()-30*86400000 : TLX.range==='90'?Date.now()-90*86400000 : 0;
+    var list=TLX.ev.filter(function(e){
+      if(TLX.filter!=='all'&&e.k!==TLX.filter) return false;
+      if(cutoff&&new Date(e.d).getTime()<cutoff) return false;
+      return true;
+    });
+    var CAP=12*TLX.page, shown=list.slice(0,CAP);
+
+    // health (disclosed, same formula family)
+    var mrr=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0;
+    var lastMsg=TLX.ev.find(function(e){ return e.k==='msg'; });
+    var hs=60, oks=[];
+    if(String(c.status||'').toLowerCase()!=='archived'){ hs+=10; }
+    if(lastMsg&&(Date.now()-new Date(lastMsg.d))/86400000<=14){ hs+=12; oks.push('Recent communication'); }
+    if(TLX.ev.some(function(e){return e.k==='pay'&&/paid/.test(e.title);})){ hs+=10; oks.push('Payments landing'); }
+    if(c.launched_at){ hs+=8; oks.push('Website launched'); }
+    if(TLX.ev.some(function(e){return e.k==='task';})){ hs+=6; oks.push('Roadmap work delivered'); }
+    if(mrr>0){ hs+=4; oks.push('Recurring revenue'); }
+    hs=Math.max(10,Math.min(98,hs));
+    var hl=hs>=85?['Excellent','#1a7e49']:hs>=70?['Healthy','#1a7e49']:hs>=50?['Steady','#9a7a1a']:['Quiet','#c0392b'];
+
+    // key milestones (real, dated or dash)
+    var launched=TLX.ev.find(function(e){return e.title==='Website launched';});
+    var firstPay=TLX.ev.slice().reverse().find(function(e){return e.k==='pay'&&/paid/.test(e.title);});
+    var partStart=TLX.ev.find(function(e){return e.title==='Growth partnership started';});
+    var began=TLX.ev[TLX.ev.length-1];
+    function msRow(t,e){ return '<div class="tlx-ms"><span style="color:var(--p);">\u2726</span><span>'+esc(t)+'</span><span class="d">'+(e?esc(agoS(e.d)):'\u2014')+'</span></div>'; }
+
+    // AI suggestion after fresh payment
+    var freshPay=TLX.ev.find(function(e){ return e.k==='pay'&&/paid/.test(e.title)&&(Date.now()-new Date(e.d))/86400000<=14; });
+
+    var stream='';
+    var lastDay='';
+    shown.forEach(function(e){
+      var dt=new Date(e.d);
+      var day=dt.toDateString()===new Date().toDateString()?'Today':dt.toDateString()===new Date(Date.now()-86400000).toDateString()?'Yesterday':dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      if(day!==lastDay){ stream+='<div class="tlx-day">'+esc(day)+'</div>'; lastDay=day; }
+      var tm=dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      stream+='<div class="tlx-ev"><div class="tlx-time">'+esc(tm)+'</div>'
+        +'<div class="tlx-dot" style="background:'+e.col+';">'+e.icon+'</div>'
+        +'<div class="tlx-card"><div class="tlx-t">'+e.title+(e.tag==='Milestone'?' <span class="tlx-tag" style="background:#e7f6ee;color:#1a7e49;">Milestone</span>':'')+'</div>'
+        +(e.body?'<div class="tlx-b">'+e.body+'</div>':'')
+        +(e.stats?'<div class="tlx-stats">'+e.stats.map(function(s){return '<div class="tlx-stat"><div class="tlx-sl">'+s[0]+'</div><div class="tlx-sn">'+s[1]+'</div></div>';}).join('')+'</div>':'')
+        +(e.tag&&e.tag!=='Milestone'?'<span class="tlx-tag">'+esc(e.tag)+'</span>':'')
+        +(e.pay&&e===freshPay?'<div class="tlx-ai">\u2726 <b>AI suggestion</b><span style="flex:1;">Great time to request a review while the experience is fresh.</span><button class="bf-act" style="padding:7px 14px;font-size:12px;" onclick="tlxReviewAsk()">Draft review request</button></div>':'')
+      +'</div></div>';
+    });
+    if(!shown.length) stream='<div class="grx-empty" style="margin-top:20px;">No events match \u2014 the story grows as work, payments, and messages happen.</div>';
+
+    var rail=
+      '<div class="grx-card"><div class="grx-h">\u2726 AI relationship summary</div>'
+        +'<div style="display:flex;gap:14px;align-items:center;"><div class="rhx-ring" style="border-color:'+hl[1]+';color:'+hl[1]+';"><span>'+hs+'</span><span class="rhx-rl">'+esc(hl[0])+'</span></div>'
+        +'<div style="flex:1;">'+(oks.length?oks.map(function(o){return '<div class="grx-ok">'+esc(o)+'</div>';}).join(''):'<div class="grx-empty" style="padding:4px 0;">The signals build as the story does.</div>')+'</div></div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:10px;">A formula over the events below \u2014 nothing hidden.</div>'
+      +'</div>'
+      +'<div class="grx-card"><div class="grx-h">Key milestones</div>'
+        +msRow('Relationship began', began)
+        +msRow('First payment received', firstPay)
+        +msRow('Website launched', launched)
+        +msRow('Growth partnership', partStart)
+      +'</div>'
+      +'<div class="grx-card"><div class="grx-h">Files shared</div><div class="grx-empty" style="padding:6px 0;">File storage isn\u2019t wired into the platform yet \u2014 documented as a dependency, not faked here.</div></div>'
+      +'<div class="grx-card"><div class="grx-h">Quick add</div>'
+        +'<div class="tlx-qa" onclick="tlxAdd(\'note\')">\u270E Add note<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="tlxAdd(\'meeting\')">\u25A2 Log meeting<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="tlxAdd(\'milestone\')">\u2605 Add milestone<span class="c">\u203A</span></div>'
+        +'<div id="tlxAddForm" style="display:none;margin-top:10px;">'
+          +'<input class="fi" id="tlxAddT" placeholder="Title" style="margin-bottom:8px;">'
+          +'<textarea class="fi" id="tlxAddB" rows="2" placeholder="Details (optional)"></textarea>'
+          +'<button class="bf-act primary" style="margin-top:8px;" onclick="tlxAddSave()">Save</button>'
+        +'</div>'
+      +'</div>';
+
+    root.innerHTML=
+      '<button class="iabtn" style="color:var(--muted);font-size:12.5px;" onclick="tlxBackList()">\u2190 All clients</button>'
+      +'<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-top:6px;"><div><div class="pt">Timeline</div>'
+      +'<div class="ibx-sub">The full story of your partnership with '+esc(c.name||'this client')+'.</div></div>'
+      +'<span style="flex:1;"></span>'
+      +'<select class="fi" style="margin:0;max-width:130px;" onchange="tlxRange(this.value)" aria-label="Time range">'
+        +'<option value="all"'+(TLX.range==='all'?' selected':'')+'>All time</option>'
+        +'<option value="90"'+(TLX.range==='90'?' selected':'')+'>Last 90 days</option>'
+        +'<option value="30"'+(TLX.range==='30'?' selected':'')+'>Last 30 days</option>'
+      +'</select>'
+      +'<button class="bf-act primary" onclick="tlxAdd(\'note\')">+ Add note</button></div>'
+      +'<div class="tlx-band">'
+        +'<div style="display:flex;align-items:center;gap:14px;"><div class="rhx-av" style="width:48px;height:48px;font-size:17px;">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div><div class="rhx-nm" style="font-size:16px;">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(c.contact_email||c.email||'')+'</div></div></div>'
+        +'<div class="tlx-bm"><div class="grx-meta">Client since</div><div class="grx-metav">'+(function(){try{return new Date(c.created_at).toLocaleDateString('en-US',{month:'short',year:'numeric'});}catch(e){return '\u2014';}})()+'</div></div>'
+        +'<div class="tlx-bm"><div class="grx-meta">MRR</div><div class="grx-metav">'+(mrr?money(mrr)+'/mo':'\u2014')+'</div></div>'
+        +'<span style="flex:1;"></span>'
+        +'<div style="text-align:right;"><div class="grx-meta">Relationship health</div></div>'
+        +'<div class="rhx-ring" style="border-color:'+hl[1]+';color:'+hl[1]+';margin-left:12px;"><span>'+hs+'</span><span class="rhx-rl">'+esc(hl[0])+'</span></div>'
+      +'</div>'
+      +'<div class="tlx-chips">'+CH.map(function(f){ return '<button class="tlx-chip'+(TLX.filter===f[0]?' on':'')+'" onclick="tlxFilter(\''+f[0]+'\')">'+f[1]+'</button>'; }).join('')+'</div>'
+      +'<div class="tlx-grid"><div>'+stream
+        +(list.length>shown.length?'<div style="text-align:center;margin-top:16px;"><button class="ibx-pill" onclick="tlxMore()">\u21BB Load more events</button></div>':'')
+      +'</div><div class="tlx-rail">'+rail+'</div></div>';
+  }
+
+  window.tlxAdd=function(kind){
+    TLX._addKind=kind;
+    var f=document.getElementById('tlxAddForm'); if(!f) return;
+    f.style.display='';
+    var t=document.getElementById('tlxAddT'); if(t){ t.placeholder=(kind==='meeting'?'Meeting with\u2026':kind==='milestone'?'Milestone (e.g. First 5-star review)':'Note title'); t.focus(); }
+  };
+  window.tlxAddSave=async function(){
+    var t=document.getElementById('tlxAddT'), b=document.getElementById('tlxAddB');
+    var title=t&&t.value.trim(); if(!title){ toast('Give it a title'); return; }
+    var kind=TLX._addKind||'note';
+    var row={client_id:TLX.cid, kind:kind, title:title, body:(b&&b.value)||''};
+    var r=await api('timeline','POST',row);
+    if(r===null){ delete row.kind; row.type=kind; r=await api('timeline','POST',row); }
+    if(r===null){ toast('The timeline table refused the write \u2014 run 06-timeline.sql, then retry'); return; }
+    toast('\u2713 Added to the story');
+    tlxOpen(TLX.cid);
+  };
+  window.tlxReviewAsk=function(){
+    var c=TLX.d; if(!c) return;
+    ddsDraftAction({ subject:c.name||'the client', subjectId:String(c.id), signal:'review_ask', module:'Timeline',
+      action:'Ask '+(c.name||'them')+' for a review',
+      why:'they just paid \u2014 reviews asked at the moment of delight convert at multiples',
+      changed:'Fresh payment on the timeline', go:'timeline', refId:String(c.id),
+      email:c.contact_email||c.email||'' });
+  };
+
+  window.loadTimelineLegacy=window.loadTimeline;
+  window.loadTimeline=tlxLoad;
+})();
+</script>
 </body>
 </html>
