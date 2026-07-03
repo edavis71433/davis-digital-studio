@@ -10826,5 +10826,318 @@ function anEngineNote(eng){
   // no parse-time invocation: the normal post-login boot calls loadBrief().
 })();
 </script>
+
+<style>
+/* LEADS & INBOX — inbound command center */
+.ibx-sub{font-size:14px;color:var(--muted);margin:4px 0 0;}
+.ibx-brief{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:16px 20px;margin-top:18px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
+.ibx-b{flex:none;}
+.ibx-bn{font-size:21px;font-weight:750;color:var(--ink);}
+.ibx-bl{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;}
+.ibx-cta{margin-left:auto;background:var(--p);color:#fff;font-weight:700;font-size:13px;padding:10px 20px;border-radius:100px;border:none;cursor:pointer;transition:transform .12s;}
+.ibx-cta:hover{transform:translateY(-1px);}
+.ibx-sent{font-size:13.5px;color:var(--muted);margin-top:10px;max-width:640px;line-height:1.6;}
+.ibx-tabs{display:flex;align-items:center;gap:2px;border-bottom:1px solid rgba(41,25,66,.08);margin-top:22px;flex-wrap:wrap;}
+.ibx-tab{border:none;background:none;padding:9px 12px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;}
+.ibx-tab.on{color:var(--ink);font-weight:650;border-bottom-color:var(--p);}
+.ibx-tc{color:var(--muted);font-size:12px;margin-left:3px;font-weight:500;}
+.ibx-row{display:flex;align-items:center;gap:14px;padding:15px 12px;border-bottom:1px solid rgba(41,25,66,.05);cursor:pointer;border-radius:12px;transition:background .15s;}
+.ibx-row:hover{background:rgba(91,63,160,.03);}
+.ibx-av{flex:none;width:38px;height:38px;border-radius:50%;background:rgba(91,63,160,.09);color:var(--p);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.ibx-main{flex:1;min-width:0;}
+.ibx-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ibx-nm{font-size:14px;font-weight:650;color:var(--ink);}
+.ibx-chip{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:100px;}
+.ibx-want{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;}
+.ibx-meta{font-size:11px;color:var(--muted);white-space:nowrap;}
+.ibx-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+.ibx-pill{border:1px solid rgba(91,63,160,.3);background:#fff;color:var(--p);font-weight:600;font-size:12px;padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+.ibx-pill:hover{background:rgba(91,63,160,.06);}
+.ibx-q{padding:12px 14px;border:1px solid rgba(41,25,66,.06);border-radius:12px;margin-top:14px;}
+.ibx-qh{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;}
+.ibx-qr{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;}
+.ibx-qr b{color:var(--ink);font-weight:650;}
+</style>
+<script>
+// ═══ LEADS & INBOX — "Who wants my attention, and what should I say back?" ═══
+// Self-contained module: overrides loadLeads; legacy pipeline preserved intact
+// beneath and reachable via the Pipeline view toggle. All data from real
+// allowlisted tables. Every send goes through the composer with its recipient
+// banner — nothing sends silently.
+(function(){
+  var IBX={tab:'all', items:[], loading:false, legacy:false};
+  var __legacyLoadLeads = null;
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function dom0(u){ return String(u||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-leads'); if(!page) return null;
+    var root=document.getElementById('ibxRoot');
+    if(!root){
+      // hide legacy children once; never destroy them (Pipeline view restores)
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._ibxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='ibxRoot'; root.style.maxWidth='1120px';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  window.ibxPipeline=function(on){
+    var page=document.getElementById('page-leads'); var root=document.getElementById('ibxRoot');
+    IBX.legacy=!!on;
+    if(on){
+      if(root) root.style.display='none';
+      Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._ibxHidden) ch.style.display=''; });
+      try{ if(__legacyLoadLeads) __legacyLoadLeads(); }catch(e){}
+    } else {
+      Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._ibxHidden) ch.style.display='none'; });
+      if(root) root.style.display='';
+      ibxRender();
+    }
+  };
+
+  async function ibxLoad(){
+    var root=ensureRoot(); if(!root) return;
+    if(IBX.legacy){ window.ibxPipeline(true); return; }
+    if(IBX.loading) return; IBX.loading=true;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 10px;"></div><div class="bf-skel" style="height:60px;width:100%;border-radius:16px;"></div>';
+    function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+    var r=await Promise.all([
+      safe(function(){ return api('leads?select=id,name,email,subject,status,unread,last_actor,created_at,updated_at&order=updated_at.desc&limit=200'); }),
+      safe(function(){ return api('audit_leads?select=id,business_name,url,score,client_email,status,pipeline_stage,created_at&order=created_at.desc&limit=200'); }),
+      safe(function(){ return api('messages?select=client_id,from_who,text,created_at&order=created_at.desc&limit=800'); }),
+      safe(function(){ return api('clients?select=id,name,contact_email,email,status&limit=300'); }),
+      safe(function(){ return api('prospects?select=id,business_name,email,status,updated_at,created_at&order=updated_at.desc&limit=300'); })
+    ]);
+    var leads=r[0]||[], audits=r[1]||[], msgs=r[2]||[], clients=r[3]||[], prospects=r[4]||[];
+    var now=Date.now(), D=86400000;
+    var dead={closed:1,archived:1,spam:1,converted:1,won:1,dead:1,client:1,lost:1};
+    var items=[];
+
+    var cById={}; clients.forEach(function(c){ cById[String(c.id)]=c; });
+    var cByEmail={}; clients.forEach(function(c){ var e2=String(c.contact_email||c.email||'').toLowerCase(); if(e2) cByEmail[e2]=c; });
+
+    leads.forEach(function(l){
+      var st=String(l.status||'').toLowerCase(); if(dead[st]) return;
+      var t=new Date(l.updated_at||l.created_at||0).getTime(); if(!isFinite(t)||now-t>90*D) return;
+      var needs=(st==='new')||(l.unread&&l.last_actor==='them');
+      var waiting=(l.last_actor==='eric');
+      var isClient=!!cByEmail[String(l.email||'').toLowerCase()];
+      items.push({ kind:'lead', id:String(l.id), name:l.name||l.email||'A lead', email:l.email||'',
+        type:isClient?'Client':'New lead', source:'Contact form',
+        want:l.subject?('\u201c'+String(l.subject).slice(0,110)+'\u201d'):'Reached out through the site',
+        when:l.updated_at||l.created_at, needs:needs, waiting:waiting&&!needs, status:st,
+        rank: needs?(isClient?88:85):(waiting?40:60) });
+    });
+
+    var audByDom={};
+    audits.forEach(function(a){
+      var st=String(a.pipeline_stage||a.status||'').toLowerCase(); if(dead[st]) return;
+      var t=new Date(a.created_at||0).getTime(); if(!isFinite(t)) return;
+      var d2=dom0(a.url); if(d2) audByDom[d2]=a;
+      if(!a.client_email || now-t>60*D) return;
+      var sc=Number(a.score);
+      items.push({ kind:'audit', id:String(a.id), name:a.business_name||a.url||'A business', email:a.client_email||'',
+        type:'New lead', source:'Website audit',
+        want:'Ran your review'+(isFinite(sc)?(' \u2014 scored '+sc+'/100'):'')+' and left their email',
+        when:a.created_at, needs:true, fit:isFinite(sc)?sc:null, status:st||'new',
+        rank: (isFinite(sc)&&sc>=35&&sc<=72)?74:68 });
+    });
+
+    var lastByClient={};
+    msgs.forEach(function(m){ var k=String(m.client_id); if(!lastByClient[k]) lastByClient[k]=m; });
+    Object.keys(lastByClient).forEach(function(cid){
+      var m=lastByClient[cid]; var c=cById[cid]; if(!c) return;
+      if(String(c.status||'').toLowerCase()==='archived') return;
+      var t=new Date(m.created_at||0).getTime(); var dAgo=(now-t)/D;
+      if(m.from_who==='client' && dAgo<=45){
+        items.push({ kind:'client', id:cid, name:c.name||'A client', email:c.contact_email||c.email||'',
+          type:'Client', source:'Portal message',
+          want:'\u201c'+String(m.text||'').slice(0,110)+'\u201d',
+          when:m.created_at, needs:true, rank:88 });
+      } else if(m.from_who==='eric' && dAgo>=4 && dAgo<=45){
+        items.push({ kind:'client', id:cid, name:c.name||'A client', email:c.contact_email||c.email||'',
+          type:'Client', source:'Portal message', want:'You spoke last \u2014 no reply in '+Math.floor(dAgo)+' days',
+          when:m.created_at, needs:false, waiting:true, rank:42 });
+      }
+    });
+
+    prospects.forEach(function(p){
+      if(String(p.status||'')!=='Replied') return;
+      items.push({ kind:'prospect', id:String(p.id), name:p.business_name||'A prospect', email:p.email||'',
+        type:'Prospect', source:'Outreach reply',
+        want:'Replied to your outreach \u2014 the reply itself is in your email inbox', honest:true,
+        when:p.updated_at||p.created_at, needs:true, rank:80 });
+    });
+
+    items.sort(function(a,b){ return (b.rank-a.rank)||(new Date(b.when)-new Date(a.when)); });
+    IBX.items=items; IBX.loading=false;
+    ibxRender();
+  }
+
+  function counts(){
+    var it=IBX.items, c={all:it.length, needs:0, newleads:0, clients:0, prospects:0, waiting:0};
+    it.forEach(function(x){ if(x.needs)c.needs++; if(x.type==='New lead')c.newleads++; if(x.type==='Client')c.clients++; if(x.type==='Prospect')c.prospects++; if(x.waiting)c.waiting++; });
+    return c;
+  }
+
+  window.ibxTab=function(t){ IBX.tab=t; ibxRender(); };
+
+  function chipFor(x){
+    if(x.type==='Client') return ['CLIENT','#0e7a6e','#e4f5f2'];
+    if(x.type==='Prospect') return ['PROSPECT','#5b3fa0','rgba(91,63,160,.08)'];
+    return ['NEW LEAD','#c0392b','rgba(192,57,43,.08)'];
+  }
+
+  function ibxRender(){
+    var root=document.getElementById('ibxRoot'); if(!root||IBX.legacy) return;
+    var c=counts();
+    var hot=IBX.items.filter(function(x){ return x.fit!=null&&x.fit>=35&&x.fit<=72; }).length;
+    var sent = c.needs===0
+      ? 'All caught up \u2014 no one is waiting on you right now.'
+      : (c.needs+(c.needs===1?' person needs':' people need')+' a reply.'+(hot?' '+hot+(hot===1?' looks':' look')+' like a strong-fit lead.':'')+(c.waiting?' '+c.waiting+' can wait \u2014 the ball is with them.':''));
+    var first=IBX.items.filter(function(x){return x.needs;})[0];
+
+    var brief='<div class="ibx-brief">'
+      +'<div class="ibx-b"><div class="ibx-bn">'+c.needs+'</div><div class="ibx-bl">Needs reply</div></div>'
+      +'<div class="ibx-b"><div class="ibx-bn">'+c.newleads+'</div><div class="ibx-bl">New leads</div></div>'
+      +'<div class="ibx-b"><div class="ibx-bn">'+hot+'</div><div class="ibx-bl">Hot opportunities</div></div>'
+      +'<div class="ibx-b"><div class="ibx-bn">'+c.waiting+'</div><div class="ibx-bl">Waiting on them</div></div>'
+      +(first?'<button class="ibx-cta" onclick="ibxPanel(\''+first.kind+'\',\''+att(first.id)+'\')">Start replies \u2192</button>':'')
+      +'</div>';
+
+    var TABS=[['all','All'],['needs','Needs reply'],['newleads','New leads'],['clients','Clients'],['prospects','Prospects'],['waiting','Waiting']];
+    var tabs='<div class="ibx-tabs">'+TABS.map(function(t){
+      var n=c[t[0]]||0; var on=IBX.tab===t[0];
+      return '<button class="ibx-tab'+(on?' on':'')+'" onclick="ibxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
+    }).join('')
+    +'<span style="flex:1;"></span>'
+    +'<button class="ibx-tab" onclick="ibxPipeline(true)" title="The old drag-board, one click away">Pipeline view \u2192</button>'
+    +'</div>';
+
+    var list=IBX.items.filter(function(x){
+      if(IBX.tab==='needs') return x.needs;
+      if(IBX.tab==='newleads') return x.type==='New lead';
+      if(IBX.tab==='clients') return x.type==='Client';
+      if(IBX.tab==='prospects') return x.type==='Prospect';
+      if(IBX.tab==='waiting') return !!x.waiting;
+      return true;
+    });
+
+    var rows=list.length?list.map(function(x){
+      var ch=chipFor(x);
+      var dot=x.needs?'#c0392b':(x.waiting?'#9a7a1a':'#c9c2d8');
+      var btn=x.honest
+        ? '<a class="ibx-pill" style="text-decoration:none;" href="mailto:'+att(x.email)+'" onclick="event.stopPropagation();">Open email</a>'
+        : '<button class="ibx-pill" onclick="event.stopPropagation();ibxReply(\''+x.kind+'\',\''+att(x.id)+'\')">'+(x.needs?'Reply':'Follow up')+'</button>';
+      return '<div class="ibx-row" onclick="ibxPanel(\''+x.kind+'\',\''+att(x.id)+'\')">'
+        +'<span class="ibx-dot" style="background:'+dot+';"></span>'
+        +'<div class="ibx-av">'+esc((x.name||'?').charAt(0).toUpperCase())+'</div>'
+        +'<div class="ibx-main"><div class="ibx-top"><span class="ibx-nm">'+esc(x.name)+'</span>'
+          +'<span class="ibx-chip" style="color:'+ch[1]+';background:'+ch[2]+';">'+ch[0]+'</span>'
+          +'<span class="ibx-meta">'+esc(x.source)+'</span></div>'
+          +'<div class="ibx-want">'+esc(x.want)+'</div></div>'
+        +(x.fit!=null?'<span class="opx6-score">'+x.fit+'</span>':'')
+        +'<span class="ibx-meta">'+esc(agoS(x.when))+'</span>'
+        +btn
+      +'</div>';
+    }).join('')
+    :'<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">'+(IBX.tab==='all'?'All caught up \u2014 no one is waiting on you right now. Twenty minutes on the <a href="#" onclick="go(\'opportunities\');return false;" style="color:var(--p);">Opportunities bench</a> generates the next wave.':'Nothing here right now.')+'</div>';
+
+    root.innerHTML=
+      '<div class="pt">Leads &amp; Inbox</div>'
+      +'<div class="ibx-sub">Who wants your attention, and what should you say back?</div>'
+      +brief
+      +'<div class="ibx-sent">'+esc(sent)+'</div>'
+      +tabs
+      +'<div style="margin-top:4px;">'+rows+'</div>';
+  }
+
+  // ── conversation workspace: right slide-over ──
+  window.ibxPanel=async function(kind,id){
+    try{ oppxPanelClose(); }catch(e){}
+    var x=IBX.items.find(function(i){ return i.kind===kind&&String(i.id)===String(id); });
+    if(!x) return;
+    var ch=chipFor(x);
+    var bg=document.createElement('div'); bg.id='oppxPanelBg'; bg.className='opx3-panelbg';
+    bg.onclick=function(e){ if(e.target===bg) oppxPanelClose(); };
+    var qual='';
+    if(x.type==='New lead'){
+      qual='<div class="ibx-q"><div class="ibx-qh">QUALIFICATION</div>'
+        +'<div class="ibx-qr"><span>Fit score</span><b>'+(x.fit!=null?(x.fit+'/100'):'Not yet scored \u2014 run the checker')+'</b></div>'
+        +'<div class="ibx-qr"><span>Likely services</span><b>'+(x.kind==='audit'?'From the audit findings':'Unknown')+'</b></div>'
+        +'<div class="ibx-qr"><span>Budget signal</span><b>Unknown \u2014 no data source</b></div>'
+        +'<div class="ibx-qr"><span>Est. value</span><b>Unpriced until scoped</b></div>'
+      +'</div>';
+    }
+    var acts='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">'
+      +(x.honest
+        ? '<a class="bf-act primary" style="text-decoration:none;" href="mailto:'+att(x.email)+'">Open in email \u2192</a>'
+        : '<button class="bf-act primary" onclick="ibxReply(\''+kind+'\',\''+att(id)+'\')">Reply \u2192</button>')
+      +(x.kind!=='client'?'<button class="bf-act" onclick="ddsPrefillNewClient(\''+att(x.name)+'\',\''+att(x.email)+'\',\''+att(x.name+' \u2014 Website')+'\')">Convert</button>':'')
+      +(x.kind==='audit'?'<button class="bf-act" onclick="ibxPipeline(true);setTimeout(function(){try{showLeadDetail(\''+att(id)+'\')}catch(e){}},250);">Full audit</button>':'')
+      +(x.kind==='lead'||x.kind==='audit'?'<button class="bf-act" onclick="ibxArchive(\''+kind+'\',\''+att(id)+'\')">Archive</button>':'')
+    +'</div>';
+    bg.innerHTML='<aside class="opx3-panel" role="dialog" aria-modal="true" aria-label="Conversation">'
+      +'<button class="opx3-x" aria-label="Close" onclick="oppxPanelClose()">\u00d7</button>'
+      +'<div class="opx3-pchip" style="color:'+ch[1]+';">'+ch[0]+' \u00b7 '+esc(x.source).toUpperCase()+'</div>'
+      +'<div class="opx3-pt">'+esc(x.name)+'</div>'
+      +'<div class="opx3-pm">'+(x.email?esc(x.email):'no email on file')+' \u00b7 '+esc(agoS(x.when))+'</div>'
+      +'<div class="opx3-ph">What they want</div>'
+      +'<div class="opx3-pw">'+esc(x.want)+'</div>'
+      +'<div class="opx3-ph">Conversation</div>'
+      +'<div id="ibxThread"><div class="bf-skel" style="height:12px;width:80%;margin:6px 0;"></div><div class="bf-skel" style="height:12px;width:60%;"></div></div>'
+      +qual
+      +acts
+    +'</aside>';
+    document.body.appendChild(bg);
+    document.addEventListener('keydown', oppxPanelEsc);
+    // thread: real messages only
+    var th=document.getElementById('ibxThread');
+    try{
+      var rows2=[];
+      if(kind==='client'){ rows2=await api('messages?client_id=eq.'+encodeURIComponent(id)+'&select=from_who,text,created_at&order=created_at.desc&limit=12')||[]; rows2=rows2.map(function(m){return {who:m.from_who==='eric'?'You':x.name, t:m.text, d:m.created_at};}); }
+      else if(kind==='lead'){ var lm=await api('lead_messages?select=*&order=created_at.desc&limit=12&lead_id=eq.'+encodeURIComponent(id))||[]; rows2=lm.map(function(m){return {who:(m.from_who==='eric'||m.from==='eric'||m.sender==='eric')?'You':x.name, t:m.body||m.text||m.message||'', d:m.created_at};}); if(!rows2.length) rows2=[{who:x.name, t:x.want, d:x.when}]; }
+      else { rows2=[{who:x.name, t:x.want, d:x.when}]; }
+      if(th) th.innerHTML=rows2.slice(0,10).reverse().map(function(m){
+        return '<div style="padding:9px 0;border-bottom:1px solid rgba(41,25,66,.05);"><div style="font-size:11px;color:var(--muted);">'+esc(m.who)+' \u00b7 '+esc(agoS(m.d))+'</div><div style="font-size:13px;color:var(--ink);line-height:1.55;margin-top:2px;">'+esc(String(m.t||'').slice(0,400))+'</div></div>';
+      }).join('')||'<div style="font-size:12.5px;color:var(--muted);">No messages recorded yet.</div>';
+    }catch(e){ if(th) th.innerHTML='<div style="font-size:12.5px;color:var(--muted);">Couldn\u2019t load the thread.</div>'; }
+  };
+
+  // reply: everything through the composer — recipient banner, edit, send/copy
+  window.ibxReply=function(kind,id){
+    var x=IBX.items.find(function(i){ return i.kind===kind&&String(i.id)===String(id); });
+    if(!x) return;
+    try{ oppxPanelClose(); }catch(e){}
+    if(kind==='client'){
+      ddsDraftAction({ subject:x.name, subjectId:String(x.id), signal:'waiting_on_eric', module:'Clients',
+        action:'Reply to '+x.name, why:'they wrote in their portal and are waiting on you',
+        changed:'They said: '+String(x.want).slice(0,140), go:'messages', refId:String(x.id) });
+    } else {
+      ddsDraftAction({ subject:x.name, subjectId:String(x.id), signal:'high_opportunity', module:'Opportunities',
+        action:(x.needs?'Reply to ':'Follow up with ')+x.name,
+        why:(x.kind==='audit'?('they ran your review'+(x.fit!=null?(' and scored '+x.fit):'')+' and left their email'):'they contacted you first \u2014 the warmest a lead ever gets'),
+        changed:String(x.want).slice(0,140), go:'leads', refId:String(x.id), email:x.email||'' });
+    }
+  };
+
+  window.ibxArchive=async function(kind,id){
+    var path = kind==='lead' ? 'leads?id=eq.' : 'audit_leads?id=eq.';
+    var r=await api(path+encodeURIComponent(id),'PATCH',{status:'archived'});
+    if(r===null){ toast('Couldn\u2019t archive'); return; }
+    IBX.items=IBX.items.filter(function(i){ return !(i.kind===kind&&String(i.id)===String(id)); });
+    try{ oppxPanelClose(); }catch(e){}
+    toast('\u2713 Archived');
+    ibxRender();
+  };
+
+  __legacyLoadLeads = window.loadLeads;
+  window.loadLeads = ibxLoad;
+})();
+</script>
 </body>
 </html>
