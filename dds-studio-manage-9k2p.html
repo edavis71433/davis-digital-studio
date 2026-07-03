@@ -11441,5 +11441,286 @@ function anEngineNote(eng){
   window.loadInvoiceCommand=ivxLoad;
 })();
 </script>
+
+<style>
+/* BUILD A QUOTE — premium sales studio */
+.qbx-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,.9fr) minmax(300px,1.15fr);gap:18px;margin-top:20px;align-items:start;}
+@media(max-width:1100px){.qbx-grid{grid-template-columns:1fr;}}
+.qbx-card{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:18px 20px;}
+.qbx-h{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.qbx-n{width:20px;height:20px;border-radius:50%;background:rgba(91,63,160,.1);color:var(--p);font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+.qbx-hero{background:linear-gradient(135deg,#f5f2fc,#efe9fa);border:none;border-radius:16px;padding:20px 22px;margin-top:16px;}
+.qbx-conf{font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:3px 10px;border-radius:100px;background:#e7f6ee;color:#1a7e49;}
+.qbx-cat{border-bottom:1px solid rgba(41,25,66,.06);}
+.qbx-svc{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid rgba(41,25,66,.04);}
+.qbx-svc:last-child{border-bottom:none;}
+.qbx-svc input[type=checkbox]{width:17px;height:17px;accent-color:var(--p);cursor:pointer;flex:none;}
+.qbx-sn{font-size:13.5px;font-weight:650;color:var(--ink);}
+.qbx-sw{font-size:11.5px;color:var(--muted);line-height:1.45;}
+.qbx-price{width:86px;text-align:right;font-weight:700;font-size:13px;border:1px solid transparent;border-radius:8px;padding:5px 8px;color:var(--ink);background:transparent;}
+.qbx-price:hover,.qbx-price:focus{border-color:rgba(91,63,160,.25);background:#faf9fc;outline:none;}
+.qbx-mo{font-size:10.5px;color:var(--muted);}
+.qbx-kv{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;}
+.qbx-kv b{font-weight:700;color:var(--ink);}
+.qbx-kv.tot{border-top:2px solid var(--ink);margin-top:8px;padding-top:10px;font-size:14px;}
+.qbx-prev{background:#fff;border:1px solid rgba(41,25,66,.09);border-radius:18px;padding:24px;box-shadow:0 2px 14px rgba(41,25,66,.05);}
+.qbx-pt{font-family:'Fraunces',serif;font-size:22px;font-weight:650;color:var(--ink);line-height:1.2;}
+.qbx-inv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.qbx-iv{border:1px solid rgba(41,25,66,.08);border-radius:12px;padding:12px;text-align:center;}
+.qbx-ivn{font-size:19px;font-weight:750;color:var(--ink);}
+.qbx-ivl{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.qbx-get{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin-top:10px;}
+.qbx-gi{font-size:12px;color:var(--ink);display:flex;gap:6px;align-items:flex-start;}
+.qbx-gi:before{content:'\2713';color:#1a7e49;font-weight:800;}
+.qbx-tabs{display:flex;gap:2px;border-bottom:1px solid rgba(41,25,66,.08);margin-bottom:6px;flex-wrap:wrap;}
+</style>
+<script>
+// ═══ BUILD A QUOTE — sell the solution, not the line items. Drives the
+// existing branded PDF engine (previewQuote/downloadQuote). Classic form
+// preserved underneath. Prices are editable starting defaults — click any. ═══
+(function(){
+  var CAT=[
+    {name:'Core services', items:[
+      {k:'web',  name:'Website Design', why:'Modern site built for trust and conversion', p:1800},
+      {k:'seo',  name:'SEO Foundation', why:'On-page SEO and technical setup so they get found', p:600},
+      {k:'a11y', name:'Accessibility', why:'WCAG 2.2 AA compliance \u2014 wider reach, lower risk', p:300},
+      {k:'ana',  name:'Analytics & Tracking', why:'GA4 + conversion tracking \u2014 marketing they can measure', p:300},
+      {k:'forms',name:'Contact Forms', why:'Smart forms and notifications that capture every lead', p:200},
+      {k:'train',name:'Training & Handoff', why:'Video walkthroughs so they own it confidently', p:200}
+    ]},
+    {name:'Growth & marketing', items:[
+      {k:'copy', name:'Content Writing', why:'Website copy and messaging that sells', p:350},
+      {k:'blog', name:'Blog Setup', why:'Blog design and integration for long-term SEO', p:250},
+      {k:'perf', name:'Performance Boost', why:'Speed and optimization \u2014 faster sites convert more', p:250},
+      {k:'integ',name:'Advanced Integrations', why:'CRM, booking, automation \u2014 less manual work', p:300}
+    ]},
+    {name:'Care plans (monthly)', items:[
+      {k:'care', name:'Monthly Care Plan', why:'Ongoing updates, support, and peace of mind', p:499, mo:1},
+      {k:'lseo', name:'Local SEO', why:'Google Business and local visibility, every month', p:399, mo:1}
+    ]}
+  ];
+  var QBX={cid:'', cname:'', cemail:'', cweb:'', project:'', tab:0, on:{}, price:{}, custom:[], clients:[], aud:{}, legacy:false, loaded:false};
+  CAT.forEach(function(c){ c.items.forEach(function(s){ QBX.price[s.k]=s.p; }); });
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(s){ return esc(s).replace(/'/g,'&#39;'); }
+  function dom0(u){ return String(u||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]; }
+  function money(n){ return '$'+Math.round(n).toLocaleString(); }
+  function allItems(){ var a=[]; CAT.forEach(function(c){ c.items.forEach(function(s){ a.push(s); }); }); return a; }
+  function selected(){ return allItems().filter(function(s){ return QBX.on[s.k]; }); }
+  function sums(){
+    var one=0, mo=0;
+    selected().forEach(function(s){ var v=Number(QBX.price[s.k])||0; if(s.mo) mo+=v; else one+=v; });
+    QBX.custom.forEach(function(c){ var v=Number(c.p)||0; if(c.mo) mo+=v; else one+=v; });
+    return {one:one, mo:mo};
+  }
+  function score(){ var d=dom0(QBX.cweb); return (d&&QBX.aud[d]!=null)?QBX.aud[d]:null; }
+
+  function ensureRoot(){
+    var page=document.getElementById('page-quote'); if(!page) return null;
+    var root=document.getElementById('qbxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._qbxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='qbxRoot'; root.style.maxWidth='1280px';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+  window.qbxClassic=function(on){
+    var page=document.getElementById('page-quote'); var root=document.getElementById('qbxRoot');
+    QBX.legacy=!!on;
+    Array.prototype.forEach.call(page.children,function(ch){ if(ch.dataset._qbxHidden) ch.style.display=on?'':'none'; });
+    if(root) root.style.display=on?'none':'';
+    if(!on) qbxRender();
+  };
+
+  async function qbxLoad(){
+    var root=ensureRoot(); if(!root) return;
+    if(QBX.legacy){ window.qbxClassic(true); return; }
+    if(!QBX.loaded){
+      root.innerHTML='<div class="bf-skel" style="height:26px;width:260px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:120px;width:100%;border-radius:16px;"></div>';
+      try{
+        var r=await Promise.all([
+          api('clients?select=id,name,contact_email,email,website,status&limit=300').catch(function(){return null;}),
+          api('audit_leads?select=url,score&order=created_at.desc&limit=300').catch(function(){return null;})
+        ]);
+        QBX.clients=(r[0]||[]).filter(function(c){return String(c.status||'').toLowerCase()!=='archived';});
+        (r[1]||[]).forEach(function(a){ var d=dom0(a.url); var s=Number(a.score); if(d&&isFinite(s)&&QBX.aud[d]==null) QBX.aud[d]=s; });
+      }catch(e){}
+      QBX.loaded=true;
+    }
+    qbxRender();
+  }
+
+  window.qbxClient=function(v){
+    if(v==='__new'){ QBX.cid=''; QBX.cname=''; QBX.cemail=''; QBX.cweb=''; qbxRender(); return; }
+    var c=QBX.clients.find(function(x){ return String(x.id)===v; });
+    QBX.cid=v; QBX.cname=(c&&c.name)||''; QBX.cemail=(c&&(c.contact_email||c.email))||''; QBX.cweb=(c&&c.website)||'';
+    qbxRender();
+  };
+  window.qbxField=function(f,v){ QBX[f]=v; if(f!=='project'&&f!=='cname'&&f!=='cemail') qbxRender(); };
+  window.qbxTab=function(i){ QBX.tab=i; qbxRender(); };
+  window.qbxToggle=function(k){ if(QBX.on[k]) delete QBX.on[k]; else QBX.on[k]=1; qbxRender(); };
+  window.qbxPrice=function(k,v){ QBX.price[k]=Number(String(v).replace(/[^0-9.]/g,''))||0; qbxRender(); };
+  window.qbxCustom=function(){ QBX.custom.push({name:'Custom item', p:0, mo:0}); qbxRender(); };
+  window.qbxCustomEdit=function(i,f,v){ var c=QBX.custom[i]; if(!c)return; if(f==='p') c.p=Number(String(v).replace(/[^0-9.]/g,''))||0; else if(f==='mo') c.mo=v?1:0; else c[f]=v; qbxRender(); };
+  window.qbxCustomDel=function(i){ QBX.custom.splice(i,1); qbxRender(); };
+
+  window.qbxAccept=function(){
+    var sc=score();
+    var preset = (sc!=null&&sc<45) ? ['web','seo','perf','ana','forms','train']
+      : (sc!=null&&sc<=70) ? ['web','seo','a11y','ana','forms','train']
+      : ['web','seo','a11y','ana','forms','train','care'];
+    QBX.on={}; preset.forEach(function(k){ QBX.on[k]=1; });
+    toast('\u2713 Recommendation applied \u2014 everything stays editable');
+    qbxRender();
+  };
+
+  function recBlock(){
+    var sc=score();
+    var pkg, why, conf;
+    if(sc!=null&&sc<45){ pkg='Performance Rebuild + SEO'; why='Their site scored '+sc+'/100 in your checker \u2014 a rebuild with performance and SEO foundation fixes what\u2019s measurably costing them business.'; conf=['HIGH MATCH \u2014 grounded in their audit','#1a7e49','#e7f6ee']; }
+    else if(sc!=null&&sc<=70){ pkg='Website Refresh + SEO Foundation'; why='Scored '+sc+'/100 \u2014 solid bones, real gaps. A refresh plus SEO and accessibility captures the upside without a full rebuild.'; conf=['HIGH MATCH \u2014 grounded in their audit','#1a7e49','#e7f6ee']; }
+    else if(sc!=null){ pkg='Growth Partnership'; why='Scored '+sc+'/100 \u2014 the site is healthy, so the opportunity is ongoing growth: care plan, local SEO, and measurement.'; conf=['GOOD MATCH \u2014 grounded in their audit','#1a7e49','#e7f6ee']; }
+    else { pkg='Website + SEO Foundation'; why='No audit on file for this business yet \u2014 this is the general-purpose starting package. Run the checker on their site for a grounded recommendation.'; conf=['GENERAL \u2014 no audit yet','#9a7a1a','#fdf6e3']; }
+    return '<div class="qbx-hero"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="font-size:13.5px;font-weight:700;color:var(--ink);">\u2726 AI Recommended Package</span><span class="qbx-conf" style="color:'+conf[1]+';background:'+conf[2]+';">'+conf[0]+'</span></div>'
+      +'<div style="font-size:16px;font-weight:700;color:var(--ink);margin-top:10px;">'+esc(pkg)+'</div>'
+      +'<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px;max-width:520px;">'+esc(why)+'</div>'
+      +'<button class="bf-act primary" style="margin-top:14px;" onclick="qbxAccept()">Accept recommendation</button>'
+    +'</div>';
+  }
+
+  function qbxRender(){
+    var root=document.getElementById('qbxRoot'); if(!root||QBX.legacy) return;
+    var s=sums(), dep=s.one/2, nSel=selected().length+QBX.custom.length;
+    var buildWks=Math.max(2,Math.ceil(nSel/2));
+
+    var copts='<option value="__new">\u2014 New prospect (type below) \u2014</option>'
+      +QBX.clients.map(function(c){ return '<option value="'+att(String(c.id))+'"'+(String(c.id)===QBX.cid?' selected':'')+'>'+esc(c.name||'Client')+'</option>'; }).join('');
+    var clientCard='<div class="qbx-card"><div class="qbx-h"><span class="qbx-n">1</span> Client &amp; Project</div>'
+      +'<select class="fi" style="margin:0 0 10px;" onchange="qbxClient(this.value)" aria-label="Choose client">'+copts+'</select>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        +'<input class="fi" style="margin:0;" placeholder="Business name" value="'+att(QBX.cname)+'" onchange="qbxField(\'cname\',this.value)" aria-label="Business name">'
+        +'<input class="fi" style="margin:0;" placeholder="Email" value="'+att(QBX.cemail)+'" onchange="qbxField(\'cemail\',this.value)" aria-label="Email">'
+        +'<input class="fi" style="margin:0;" placeholder="Website (for audit lookup)" value="'+att(QBX.cweb)+'" onchange="qbxField(\'cweb\',this.value)" aria-label="Website">'
+        +'<input class="fi" style="margin:0;" placeholder="Project name" value="'+att(QBX.project)+'" onchange="qbxField(\'project\',this.value)" aria-label="Project name">'
+      +'</div>'
+      +(score()!=null?'<div style="font-size:12px;color:var(--muted);margin-top:8px;">Audit on file: <span class="opx6-score">'+score()+'</span> \u2014 feeding the recommendation.</div>':'')
+    +'</div>';
+
+    var cats='<div class="qbx-tabs">'+CAT.map(function(c,i){
+      return '<button class="ibx-tab'+(QBX.tab===i?' on':'')+'" onclick="qbxTab('+i+')">'+esc(c.name)+'</button>';
+    }).join('')+'</div>';
+    var svc=CAT[QBX.tab].items.map(function(sv){
+      return '<div class="qbx-svc"><input type="checkbox" '+(QBX.on[sv.k]?'checked':'')+' onchange="qbxToggle(\''+sv.k+'\')" aria-label="'+att(sv.name)+'">'
+        +'<div style="flex:1;min-width:0;"><div class="qbx-sn">'+esc(sv.name)+(sv.mo?' <span class="qbx-mo">/mo</span>':'')+'</div><div class="qbx-sw">'+esc(sv.why)+'</div></div>'
+        +'<input class="qbx-price" value="$'+(Number(QBX.price[sv.k])||0).toLocaleString()+'" onchange="qbxPrice(\''+sv.k+'\',this.value)" aria-label="Price">'
+      +'</div>';
+    }).join('');
+    var custom=QBX.custom.map(function(c,i){
+      return '<div class="qbx-svc"><input type="checkbox" checked onchange="qbxCustomDel('+i+')" aria-label="Remove">'
+        +'<div style="flex:1;"><input class="fi" style="margin:0;padding:6px 9px;font-size:13px;" value="'+att(c.name)+'" onchange="qbxCustomEdit('+i+',\'name\',this.value)" aria-label="Item name"></div>'
+        +'<label class="qbx-mo" style="display:flex;gap:4px;align-items:center;"><input type="checkbox" '+(c.mo?'checked':'')+' onchange="qbxCustomEdit('+i+',\'mo\',this.checked)"> /mo</label>'
+        +'<input class="qbx-price" value="$'+(Number(c.p)||0).toLocaleString()+'" onchange="qbxCustomEdit('+i+',\'p\',this.value)" aria-label="Price">'
+      +'</div>';
+    }).join('');
+    var svcCard='<div class="qbx-card" style="margin-top:16px;"><div class="qbx-h"><span class="qbx-n">2</span> Select services <span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:6px;">click any price to edit</span></div>'
+      +cats+svc+custom
+      +'<button class="ibx-pill" style="margin-top:12px;" onclick="qbxCustom()">+ Add custom line item</button>'
+    +'</div>';
+
+    var sumCard='<div class="qbx-card"><div class="qbx-h">Quote summary</div>'
+      +'<div class="qbx-kv"><span>One-time subtotal</span><b>'+money(s.one)+'</b></div>'
+      +'<div class="qbx-kv"><span>Monthly subtotal</span><b>'+(s.mo?money(s.mo)+'/mo':'\u2014')+'</b></div>'
+      +'<div class="qbx-kv"><span>Deposit (50%)</span><b>'+money(dep)+'</b></div>'
+      +'<div class="qbx-kv tot"><span>Total today</span><b>'+money(s.one)+'</b></div>'
+    +'</div>';
+    var tlCard=nSel?('<div class="qbx-card" style="margin-top:14px;"><div class="qbx-h">Project timeline</div>'
+      +'<div class="qbx-kv"><span>Setup</span><b>1 week</b></div>'
+      +'<div class="qbx-kv"><span>Design &amp; build</span><b>'+buildWks+'\u2013'+(buildWks+1)+' weeks</b></div>'
+      +'<div class="qbx-kv"><span>Review &amp; launch</span><b>1 week</b></div>'
+      +'<div class="qbx-kv tot"><span>Total</span><b>'+(buildWks+2)+'\u2013'+(buildWks+3)+' weeks</b></div>'
+    +'</div>'):'';
+    var ltv=s.one+s.mo*24;
+    var insCard=nSel?('<div class="qbx-card" style="margin-top:14px;"><div class="qbx-h">Internal insights <span style="font-weight:400;font-size:10.5px;color:var(--muted);">Eric only</span></div>'
+      +'<div class="qbx-kv"><span>24-month value</span><b>'+money(ltv)+'</b></div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:2px;">= one-time + monthly \u00d7 24. No close-probability model exists yet \u2014 not going to invent one.</div>'
+      +(QBX.cid?'<div style="font-size:12px;color:var(--ink);margin-top:10px;">Existing client \u2014 warm ground.</div>':'')
+      +(score()!=null?'<div style="font-size:12px;color:var(--ink);margin-top:4px;">Audit-backed proposal \u2014 lead with their score.</div>':'')
+    +'</div>'):'';
+
+    var gets=selected().map(function(sv){ return '<div class="qbx-gi">'+esc(sv.name)+'</div>'; }).join('')
+      +QBX.custom.map(function(c){ return '<div class="qbx-gi">'+esc(c.name)+'</div>'; }).join('');
+    var prev='<div class="qbx-prev"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);"><span style="font-weight:700;color:var(--ink);">Davis <span style="color:var(--p);">Digital</span> Studio</span><span>Proposal \u00b7 '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</span></div>'
+      +'<div class="qbx-pt" style="margin-top:16px;">'+esc(QBX.project||'Your project')+'</div>'
+      +'<div style="font-size:13px;color:var(--muted);margin-top:4px;">For '+esc(QBX.cname||'your business')+'</div>'
+      +'<div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:10px;">A solution designed to attract, convert, and retain more ideal customers \u2014 built once, working every day.</div>'
+      +'<div class="qbx-inv">'
+        +'<div class="qbx-iv"><div class="qbx-ivn">'+money(s.one)+'</div><div class="qbx-ivl">One-time investment</div></div>'
+        +'<div class="qbx-iv"><div class="qbx-ivn">'+(s.mo?money(s.mo):'\u2014')+'</div><div class="qbx-ivl">'+(s.mo?'Monthly investment':'No monthly plan')+'</div></div>'
+      +'</div>'
+      +(nSel?('<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-top:16px;">WHAT YOU\u2019LL GET</div><div class="qbx-get">'+gets+'</div>'):'')
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-top:16px;">NEXT STEPS</div>'
+      +'<div style="font-size:12px;color:var(--ink);line-height:1.8;margin-top:6px;">1. Review &amp; approve this proposal<br>2. Secure the project with the deposit<br>3. We get to work \u2014 you get updates in your portal</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;">'
+        +'<button class="bf-act" onclick="qbxPdf(0)">\u2913 Download PDF</button>'
+        +'<button class="bf-act" onclick="qbxPdf(1)">Preview full proposal</button>'
+        +'<button class="bf-act primary" onclick="qbxSend()">Review &amp; send \u2192</button>'
+      +'</div>'
+    +'</div>';
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;"><div><div class="pt">Build a Quote</div>'
+      +'<div class="ibx-sub">Create a proposal your client will be excited to approve.</div></div>'
+      +'<span style="flex:1;"></span><button class="ibx-tab" onclick="qbxClassic(true)">Classic form \u2192</button></div>'
+      +'<div class="qbx-grid">'
+        +'<div>'+clientCard+recBlock()+svcCard+'</div>'
+        +'<div>'+sumCard+tlCard+insCard+'</div>'
+        +'<div>'+prev+'</div>'
+      +'</div>';
+  }
+
+  // drive the existing branded PDF engine
+  function qbxFill(){
+    var set=function(id,v){ var el=document.getElementById(id); if(el) el.value=v; };
+    set('q-client',QBX.cname||'Client'); set('q-email',QBX.cemail||''); set('q-project',QBX.project||'Project');
+    var s=sums();
+    var notes=(document.getElementById('q-notes')&&document.getElementById('q-notes').value)||'';
+    var auto='50% deposit required to begin. Remaining balance due at launch.'+(s.mo?' Monthly items bill monthly after launch.':'');
+    set('q-notes', notes||auto);
+    var id=1; window.quoteLines=[];
+    selected().forEach(function(sv){ window.quoteLines.push({id:id++, desc:sv.name+(sv.mo?' (monthly)':''), qty:1, rate:'$'+(Number(QBX.price[sv.k])||0)+(sv.mo?'/mo':'')}); });
+    QBX.custom.forEach(function(c){ window.quoteLines.push({id:id++, desc:c.name+(c.mo?' (monthly)':''), qty:1, rate:'$'+(Number(c.p)||0)+(c.mo?'/mo':'')}); });
+    try{ renderQuoteLines(); }catch(e){}
+  }
+  window.qbxPdf=function(previewOnly){
+    if(!selected().length&&!QBX.custom.length){ toast('Pick at least one service first.'); return; }
+    qbxFill();
+    try{ previewQuote(); }catch(e){ toast('Couldn\u2019t build the document'); return; }
+    if(previewOnly){
+      var w=window.open('','_blank');
+      if(w&&window._quoteHtml){ w.document.write(window._quoteHtml); w.document.close(); }
+      else toast('Allow pop-ups to preview');
+    } else {
+      try{ downloadQuote(); }catch(e){ toast('Couldn\u2019t download'); }
+    }
+  };
+  window.qbxSend=function(){
+    if(!selected().length&&!QBX.custom.length){ toast('Pick at least one service first.'); return; }
+    var s=sums();
+    qbxPdf(0); // real artifact in hand
+    ddsDraftAction({ subject:QBX.cname||'this client', subjectId:QBX.cid||QBX.cname, signal:'high_opportunity', module:'Quotes',
+      action:'Send the proposal to '+(QBX.cname||'them'),
+      why:'a proposal sent while the conversation is warm closes at multiples of one sent cold',
+      changed:(QBX.project||'Proposal')+' \u00b7 '+money(s.one)+' one-time'+(s.mo?' + '+money(s.mo)+'/mo':'')+' \u2014 PDF just downloaded, attach it',
+      go:'quote', refId:QBX.cid||'', email:QBX.cemail||'' });
+  };
+
+  window.loadQuoteStudio=qbxLoad;
+  // page hook: go('quote') has no loader today (static form), so hook nav
+  var _go=window.go;
+  window.go=function(dest){ var r=_go.apply(this,arguments); try{ if(dest==='quote') qbxLoad(); }catch(e){} return r; };
+})();
+</script>
 </body>
 </html>
