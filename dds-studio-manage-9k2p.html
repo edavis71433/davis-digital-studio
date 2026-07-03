@@ -1675,6 +1675,10 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .tdx-st{flex:none;font-weight:700;color:var(--p);font-size:11.5px;min-width:34px;}
 .tdx-win{color:#1a7e49;font-weight:700;}
 .tdx-ago{margin-left:auto;color:var(--muted);font-size:11px;}
+.tdx-strip{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 20px;}
+.tdx-chip{font-size:11.5px;font-weight:700;letter-spacing:.01em;padding:5px 12px;border-radius:100px;white-space:nowrap;}
+.tdx-pill-sm{margin-left:auto;padding:4px 11px;font-size:11px;}
+.tdx-sr-b{flex:1;min-width:0;}
 /* ── Evidence panel: the AI hands over the work ── */
 .opx-ev{margin:0 2px 8px;padding:14px 14px 16px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
 .opx-ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
@@ -4011,17 +4015,65 @@ function tdxRender(root, d, moves, rv, clients, paid, fups){
   var items=d.attention||d.items||d.what_needs_you||[];
   var sentence=d.headline||d.answer||'Here\u2019s what deserves your attention today.';
 
-  // hero = the single highest-value move
+  // ── One Thing to Do Next: this must ALWAYS exist. Prefer the highest-value
+  // sales move; if none, fall back to the top priority item; if none, the
+  // soonest scheduled follow-up; if truly nothing, a calm proactive prompt.
+  // The morning read never shows an empty hero. ──
   var top=moves&&moves[0];
   var hero='';
   if(top){
     hero='<div class="tdx-hero">'
-      +'<div class="tdx-hk">Start here</div>'
+      +'<div class="tdx-hk">One thing to do next</div>'
       +'<div class="tdx-ht">'+escHtml(top.title||top.action||'Your highest-value move')+'</div>'
       +'<div class="tdx-hw">'+escHtml(top.why||'')+'</div>'
       +'<div class="tdx-hb"><button class="tdx-cta" onclick="'+(top.id?('oppxGoto(\''+escAttr(String(top.id))+'\')'):'go(\'opportunities\')')+'">'+escHtml(top.action||'Open it')+' \u2192</button></div>'
     +'</div>';
+  } else if(items && items.length){
+    var f0=items[0];
+    var heroBtn = f0.canDraft
+      ? 'ddsDraftAction('+escAttr(JSON.stringify({subject:f0.subject||'',subjectId:String(f0.refId||f0.subjectId||''),signal:f0.signal||'',action:f0.action||'',why:f0.why||'',changed:f0.changed||'',module:f0.module||'',go:f0.go||'',refId:String(f0.refId||'')}))+')'
+      : 'go(\''+escAttr(f0.go||'opportunities')+'\')';
+    hero='<div class="tdx-hero">'
+      +'<div class="tdx-hk">One thing to do next</div>'
+      +'<div class="tdx-ht">'+escHtml(f0.subject||f0.label||'Your top priority')+'</div>'
+      +'<div class="tdx-hw">'+escHtml(f0.why||f0.changed||'The most important open item right now.')+'</div>'
+      +'<div class="tdx-hb"><button class="tdx-cta" onclick="'+heroBtn+'">'+escHtml(f0.canDraft?'Draft a reply':'Open it')+' \u2192</button></div>'
+    +'</div>';
+  } else if(fups && fups.length){
+    var nf=fups[0];
+    hero='<div class="tdx-hero">'
+      +'<div class="tdx-hk">One thing to do next</div>'
+      +'<div class="tdx-ht">'+escHtml(nf.title||'Your next scheduled follow-up')+'</div>'
+      +'<div class="tdx-hw">'+escHtml(nf.next_action||'A follow-up you scheduled is coming due.')+'</div>'
+      +'<div class="tdx-hb"><button class="tdx-cta" onclick="'+(nf.id?('oppxGoto(\''+escAttr(String(nf.id))+'\')'):'go(\'opportunities\')')+'">Open it \u2192</button></div>'
+    +'</div>';
+  } else {
+    hero='<div class="tdx-hero">'
+      +'<div class="tdx-hk">One thing to do next</div>'
+      +'<div class="tdx-ht">You\u2019re clear. Get ahead of the week.</div>'
+      +'<div class="tdx-hw">Nothing is waiting on you. The best move now is finding your next client.</div>'
+      +'<div class="tdx-hb"><button class="tdx-cta" onclick="go(\'opportunities\')">Start outreach \u2192</button></div>'
+    +'</div>';
   }
+
+  // ── Workload + momentum: a one-line read of how busy today is and whether
+  // the week is trending ahead or behind. Computed from data already loaded
+  // (priority count, recent wins, overdue money) — no extra server call. ──
+  var openCount=items.length;
+  var wl = openCount===0 ? {t:'Your plate is clear',c:'#1a7e49',bg:'#e7f6ee'}
+    : openCount<=3 ? {t:'Light day \u00b7 '+openCount+' open',c:'#1a7e49',bg:'#e7f6ee'}
+    : openCount<=7 ? {t:'Steady day \u00b7 '+openCount+' open',c:'#9a7a1a',bg:'#fdf6e3'}
+    : {t:'Full day \u00b7 '+openCount+' open',c:'#c0392b',bg:'#fbecea'};
+  var overdue = rv && rv.over30 ? rv.over30 : 0;
+  var recentWins = (paid?paid.length:0);
+  var mo = recentWins>=2 && overdue<=0 ? {t:'Ahead this week \u00b7 '+recentWins+' paid',c:'#1a7e49',bg:'#e7f6ee'}
+    : overdue>0 ? {t:'Watch aging invoices',c:'#c0392b',bg:'#fbecea'}
+    : recentWins>=1 ? {t:'Good pace \u00b7 '+recentWins+' paid',c:'#1a7e49',bg:'#e7f6ee'}
+    : {t:'Holding steady',c:'#7a6d8e',bg:'#f3f0fa'};
+  var statusStrip='<div class="tdx-strip">'
+    +'<span class="tdx-chip" style="color:'+wl.c+';background:'+wl.bg+';">'+escHtml(wl.t)+'</span>'
+    +'<span class="tdx-chip" style="color:'+mo.c+';background:'+mo.bg+';">'+escHtml(mo.t)+'</span>'
+  +'</div>';
 
   // needs your attention: clean rows, one button each
   var shown=TDX.all?items:items.slice(0,4);
@@ -4069,7 +4121,8 @@ function tdxRender(root, d, moves, rv, clients, paid, fups){
   var sched=fups.length?fups.map(function(f){
     var when=f.next_action_due?new Date(f.next_action_due):null;
     var lbl=when?((when.getMonth()+1)+'/'+when.getDate()):'';
-    return '<div class="tdx-sr"><span class="tdx-st">'+escHtml(lbl)+'</span><span>'+escHtml(f.title||'')+(f.next_action?' \u2014 '+escHtml(f.next_action):'')+'</span></div>';
+    var act=f.id?'<button class="tdx-pill tdx-pill-sm" onclick="oppxGoto(\''+escAttr(String(f.id))+'\')">Open</button>':'';
+    return '<div class="tdx-sr"><span class="tdx-st">'+escHtml(lbl)+'</span><span class="tdx-sr-b">'+escHtml(f.title||'')+(f.next_action?' \u2014 '+escHtml(f.next_action):'')+'</span>'+act+'</div>';
   }).join(''):'<div class="tdx-nw">Nothing scheduled \u2014 follow-up dates you set on opportunities land here.</div>';
   var wins=[];
   (paid||[]).forEach(function(i){ if(i.paid_at) wins.push({t:'Invoice paid \u2014 '+(i.name||i.amount||''), when:i.paid_at}); });
@@ -4081,6 +4134,7 @@ function tdxRender(root, d, moves, rv, clients, paid, fups){
     '<div class="bf-eyebrow">'+escHtml(bfDateLine().split(' \u00b7')[0])+'</div>'
     +'<h1 class="bf-headline" style="font-size:30px;margin-bottom:4px;">'+escHtml(greet)+'</h1>'
     +'<div class="tdx-sent">'+escHtml(sentence)+'</div>'
+    +statusStrip
     +'<div class="tdx-grid">'
       +'<div class="tdx-main">'+hero+attention
         +'<div class="tdx-two">'
