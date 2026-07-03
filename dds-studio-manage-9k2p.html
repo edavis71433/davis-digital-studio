@@ -10611,7 +10611,10 @@ function anEngineNote(eng){
         safe(function(){ return integApi('sales_moves',{}); }),
         safe(function(){ return api('clients?select=*&limit=500'); }),
         safe(function(){ return api('invoices?select=id,name,amount,status,paid_at,created_at&deleted_at=is.null&order=created_at.desc&limit=200'); }),
-        safe(function(){ return api('opportunities?select=*&deleted_at=is.null&limit=300'); })
+        safe(function(){ return api('opportunities?select=*&deleted_at=is.null&limit=300'); }),
+        safe(function(){ return api('content_calendar?select=*&limit=120'); }),
+        safe(function(){ return api('growth_tasks?select=*&limit=200'); }),
+        safe(function(){ return integApi('calendly_today',{}); })
       ]);
     }catch(e){ results=[null,null,null,null,null]; }
     if(!results[0]&&!results[1]&&!results[2]){
@@ -10641,6 +10644,18 @@ function anEngineNote(eng){
     clients.filter(function(c){return c.launched_at;}).sort(function(a,b){return new Date(b.launched_at)-new Date(a.launched_at);}).slice(0,2).forEach(function(c){ acts.push({t:'Website launched for '+(c.name||'a client'),d:c.launched_at}); });
     opps.filter(function(o){return o.status==='won';}).sort(function(a,b){return new Date(b.updated_at)-new Date(a.updated_at);}).slice(0,2).forEach(function(o){ acts.push({t:'Won \u2014 '+(o.title||'an opportunity'),d:o.updated_at}); });
     acts.sort(function(a,b){return new Date(b.d)-new Date(a.d);}); acts=acts.slice(0,5);
+
+    // today's schedule — REAL dated work only (content calendar + tasks due today)
+    var sched=[]; var todayStr=new Date().toDateString();
+    function dateOf(r){ var f=['due_date','scheduled_for','publish_at','publish_date','due_at','date','due']; for(var i2=0;i2<f.length;i2++){ if(r[f[i2]]){ var t=new Date(r[f[i2]]); if(isFinite(t)) return t; } } return null; }
+    function titleOf(r){ return r.title||r.name||r.label||r.task||r.topic||'Scheduled item'; }
+    [(results[5]||[]),(results[6]||[])].forEach(function(list){ (list||[]).forEach(function(r){
+      var t=dateOf(r); if(t && t.toDateString()===todayStr && !r.done && !r.completed_at && String(r.status||'').toLowerCase()!=='done'){ sched.push({t:titleOf(r), d:t}); }
+    }); });
+    var cal=((results[7]&&results[7].data)||{});
+    (cal.events||[]).forEach(function(e2){ var t2=new Date(e2.start); if(isFinite(t2)) sched.push({t:(e2.name||'Booking')+' \u00b7 Calendly', d:t2, cal:1}); });
+    sched.sort(function(a,b){return a.d-b.d;}); sched=sched.slice(0,8);
+    var calHint=(cal.reason==='not_connected')?'<div class="tdx-nw" style="margin-top:8px;opacity:.8;">Connect Calendly (add the CALENDLY_TOKEN secret) and bookings appear here automatically.</div>':'';
 
     function heroAct(h){
       if(!h) return "go('opportunities')";
@@ -10696,6 +10711,14 @@ function anEngineNote(eng){
     var actHtml='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u2713 RECENT WINS</div>'
       +(acts.length?acts.map(function(a){return '<div class="tdx-act"><span class="dot">\u2713</span><span>'+esc(a.t)+'</span><span class="ago">'+esc(ago(a.d))+'</span></div>';}).join(''):'<div class="tdx-nw">Wins land here as they happen.</div>')+'</div>';
 
+    var schedHtml='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u25A2 TODAY\u2019S SCHEDULE</div>'
+      +(sched.length?sched.map(function(s2){
+        var tm=s2.d.getHours()||s2.d.getMinutes()?s2.d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'today';
+        return '<div class="tdx-act"><span style="flex:none;font-size:11.5px;color:var(--muted);width:64px;">'+tm+'</span><span>'+esc(s2.t)+'</span></div>';
+      }).join(''):'<div class="tdx-nw">Nothing scheduled today \u2014 the day is open for the mission above.</div>')
+      +calHint
+      +'</div>';
+
     var card20='<div class="tdx-20" style="margin-top:16px;"><b>Have 20 minutes?</b><p>Knock out today\u2019s outreach and set your pipeline in motion.</p><button class="go" style="background:var(--p);color:#fff;font-weight:700;font-size:13px;padding:9px 18px;border-radius:100px;border:none;cursor:pointer;" onclick="go(\'opportunities\')">Start outreach now \u2192</button></div>';
 
     root.innerHTML=
@@ -10703,7 +10726,7 @@ function anEngineNote(eng){
       +'<div class="tdx-greet">'+greet+', Eric.</div>'
       +'<div class="tdx-sub">'+esc(sent)+'</div>'
       +'<div class="tdx-grid">'
-        +'<div>'+heroHtml+needsHtml+actHtml+'</div>'
+        +'<div>'+heroHtml+needsHtml+schedHtml+actHtml+'</div>'
         +'<div>'+pulse+noticedHtml+card20+'</div>'
       +'</div>';
   }
