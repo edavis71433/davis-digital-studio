@@ -1175,7 +1175,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
               <div class="fg"><label class="fl">Invoice name</label><input aria-label="Deposit — 50%" class="fi" id="invName" placeholder="e.g. Deposit — 50%"></div>
               <div class="fg"><label class="fl">Amount</label><input aria-label="$1,250" class="fi" id="invAmount" placeholder="e.g. $1,250"></div>
               <div class="fg"><label class="fl">Description</label><input aria-label="Website Redesign + SEO · Phase 1" class="fi" id="invDesc" placeholder="e.g. Website Redesign + SEO · Phase 1"></div>
-              <div class="fg"><label class="fl">Due date</label><input aria-label="Due Jun 30, 2026" class="fi" id="invDue" placeholder="e.g. Due Jun 30, 2026"></div>
+              <div class="fg"><label class="fl">Due date</label><input aria-label="Invoice due date" class="fi" id="invDue" type="date"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Stripe payment link <span style="font-weight:400;color:var(--muted);">— created automatically when you save. Paste here only to override with a manual Payment Link.</span></label><input aria-label="Stripe payment link" class="fi" id="invStripe" placeholder="(auto-filled by ⚡ Stripe link)"></div>
               <div class="fg" style="grid-column:span 2;"><label class="fl">Status</label>
                 <select aria-label="Invstatus" class="fi" id="invStatus">
@@ -5637,7 +5637,10 @@ function editInvoice(inv) {
   document.getElementById("invName").value = inv.name||"";
   document.getElementById("invAmount").value = inv.amount||"";
   document.getElementById("invDesc").value = inv.description||"";
-  document.getElementById("invDue").value = inv.due_date||"";
+  // due_date may be legacy freetext ("Due Jun 30, 2026"); normalize through the
+  // shared parser into the date input. Unparseable → blank (degrades safely).
+  var dueMs = invcDue(inv.due_date);
+  document.getElementById("invDue").value = dueMs!=null ? new Date(dueMs).toISOString().slice(0,10) : "";
   document.getElementById("invStripe").value = inv.stripe_url||"";
   document.getElementById("invStatus").value = inv.status||"pending";
   document.getElementById("invFormTitle").textContent = "✏️ Edit Invoice";
