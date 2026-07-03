@@ -8597,6 +8597,27 @@ async function loadPracticePulse(){
   }catch(e){ host.innerHTML=''; }
 }
 
+// Manual trigger for the Search Console ingest — same route the monthly
+// scheduler calls. Reports exactly what happened, including per-domain errors.
+async function gscPullNow(){
+  var btn = document.getElementById('gscPullBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Pulling from Google\u2026'; }
+  try{
+    var r = await integApi('gsc_ingest', {});
+    if(r && r.ok){
+      toast('\u2713 Google data pulled \u00B7 '+(r.ingested||0)+' client'+(r.ingested===1?'':'s')+' \u00B7 period '+(r.period||'')+(r.errors&&r.errors.length?(' \u00B7 '+r.errors.length+' error(s) \u2014 see below'):''));
+      if(r.errors && r.errors.length){
+        var host = document.getElementById('pulseBody');
+        if(host) host.insertAdjacentHTML('afterbegin','<div style="background:#fdf6e3;border:1px solid rgba(169,106,0,0.3);border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5a10;margin-bottom:12px;">Google pull finished with issues: '+r.errors.map(function(e){return escHtml(e);}).join(' \u00B7 ')+'</div>');
+      }
+      loadPracticePulse();
+    } else {
+      toast('Google pull failed: '+((r&&(r.detail||r.error))||'unknown'));
+    }
+  }catch(e){ toast('Google pull failed: '+e.message); }
+  if(btn){ btn.disabled = false; btn.textContent = '\u21BB Pull Google data'; }
+}
+
 function pulseDraft(key){
   var item = (window._pulseItems||{})[key];
   if(!item){ toast('Could not find that item — refresh Analytics.'); return; }
@@ -8620,6 +8641,7 @@ function renderAnalyticsShell(){
     + '</select>'
     + '<select id="anClientSel" onchange="anSelectClient(this.value)" style="padding:9px 12px;border:1px solid var(--line,#e5e0ee);border-radius:10px;font-size:14px;min-width:200px;">'+opts+'</select>'
     + '<button onclick="anExportCsv()" title="Download the underlying data as CSV" style="padding:9px 14px;border:1px solid var(--line,#e5e0ee);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;">Export CSV</button>'
+    + '<button id="gscPullBtn" onclick="gscPullNow()" title="Pull last month\'s Google Search Console numbers for every growth client" style="padding:9px 14px;border:1px solid var(--p);border-radius:10px;background:rgba(91,63,160,0.06);color:var(--p);cursor:pointer;font-size:13px;font-weight:600;">\u21BB Pull Google data</button>'
     + '</div>'
     + '</div>'
     + '<div id="pulseBody" style="margin-top:18px;"></div>'
