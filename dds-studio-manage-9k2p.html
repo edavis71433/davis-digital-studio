@@ -13866,12 +13866,13 @@ function anEngineNote(eng){
       safe(function(){ return api('partnerships?select=id,client_id&limit=100'); }),
       safe(function(){ return api('clients?select=*&limit=300'); }),
       safe(function(){ return api('invoices?select=id,name,amount,status,due_date,client_id&deleted_at=is.null&limit=200'); }),
-      safe(function(){ return api('approvals?select=id,title,status,created_at,client_id&limit=200'); })
+      safe(function(){ return api('approvals?select=id,title,status,created_at,client_id&limit=200'); }),
+      safe(function(){ return api('files?select=id,client_id,name,url,type,created_at&order=created_at.desc&limit=300'); })
     ]);
     TSX.ready=(r[0]!==null);
     TSX.rows=r[0]||[]; TSX.growth=r[1]||[]; TSX.parts=r[2]||[];
     TSX.clients=(r[3]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
-    TSX.inv=r[4]||[]; TSX.apps=r[5]||[];
+    TSX.inv=r[4]||[]; TSX.apps=r[5]||[]; TSX.files=r[6]||[];
     tsxRender();
   };
   window.tsxTab=function(t){ TSX.tab=t; TSX.sel=null; tsxRender(); };
@@ -14050,28 +14051,71 @@ function anEngineNote(eng){
       else if(t2.source==='invoice'&&t2.client_id) recBtn='<button class="ibx-pill" style="margin-top:8px;" onclick="tsxNudgeDraft(\''+t2.key+'\')">Recommended: draft the payment follow-up \u2192</button>';
       else if(t2.client_id&&t2.status!=='done') recBtn='<button class="ibx-pill" style="margin-top:8px;" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Open their conversation \u2192</button>';
 
-      var subDone=t2.subs.filter(function(s){return s.done;}).length;
-      var subsHtml=(t2.kind==='s')?('<div class="ivx-block"><div class="ivx-bh">SUBTASKS'+(t2.subs.length?' \u2014 '+subDone+'/'+t2.subs.length:'')+'</div>'
+      var subDone2=t2.subs.filter(function(s){return s.done;}).length;
+      var subsHtml=(t2.kind==='s')?('<div class="ivx-block"><div class="ivx-bh">SUBTASKS'+(t2.subs.length?' \u2014 '+subDone2+'/'+t2.subs.length:'')+'</div>'
         +t2.subs.map(function(s,ix){
           return '<div class="grx-task" style="border:none;padding:6px 0;"><input type="checkbox" '+(s.done?'checked':'')+' style="width:16px;height:16px;accent-color:#1a7e49;cursor:pointer;" onchange="tsxSub(\''+t2.key+'\','+ix+',this.checked)"><span style="flex:1;'+(s.done?'color:var(--muted);text-decoration:line-through;':'')+'">'+esc(s.text)+'</span></div>';
         }).join('')
         +'<div class="grx-add"><input class="fi" id="tsxSubIn" placeholder="Add subtask"><button class="bf-act" onclick="tsxSubAdd(\''+t2.key+'\')">Add</button></div>'
       +'</div>'):'';
 
-      // related items (real)
+      // ── right rail widgets (real data only) ──
       var relApps=TSX.apps.filter(function(a){ return String(a.client_id)===String(t2.client_id)&&String(a.status||'').toLowerCase()==='pending'; });
       var relInv=TSX.inv.filter(function(i){ return String(i.client_id)===String(t2.client_id)&&String(i.status||'').toLowerCase()!=='paid'; });
       var relPart=TSX.parts.find(function(p){ return String(p.client_id)===String(t2.client_id); });
-      var related=(t2.client_id&&(relApps.length||relInv.length||relPart))?('<div class="ivx-block"><div class="ivx-bh">RELATED \u2014 same client</div>'
-        +relApps.slice(0,2).map(function(a){ return '<div class="rhx-kv"><span>Approval \u00b7 '+esc(String(a.title||'').slice(0,30))+'</span><b style="color:#9a7a1a;">WAITING</b></div>'; }).join('')
-        +relInv.slice(0,2).map(function(i){ return '<div class="rhx-kv"><span>Invoice \u00b7 '+esc(String(i.name||'').slice(0,30))+'</span><b style="color:#9a7a1a;">UNPAID</b></div>'; }).join('')
+      var relFiles=(TSX.files||[]).filter(function(f){ return String(f.client_id)===String(t2.client_id); }).slice(0,3);
+      function fIcon(f){ var e=String(f.name||'').toLowerCase().match(/\.([a-z0-9]{1,5})$/); e=e?e[1]:''; return ['png','jpg','jpeg','gif','webp'].indexOf(e)>-1?'img':'doc'; }
+
+      var impactCard='<div class="grx-card"><div class="grx-h" style="display:flex;align-items:center;">Task impact'
+        +(t2.impact==='launch'?'<span style="flex:1;"></span><span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">BLOCKING LAUNCH</span>':t2.impact==='milestone'?'<span style="flex:1;"></span><span class="ibx-chip" style="color:#9a7a1a;background:#fdf6e3;">BLOCKS MILESTONE</span>':t2.impact==='revenue'?'<span style="flex:1;"></span><span class="ibx-chip" style="color:#5b3fa0;background:rgba(91,63,160,.08);">REVENUE</span>':'')+'</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'
+        +(t2.impact==='launch'?'This task is blocking a launch \u2014 the highest-consequence work on the page.'
+          :t2.impact==='milestone'?'This task is blocking the next milestone.'
+          :t2.impact==='revenue'?'This task protects revenue \u2014 an unpaid invoice sits behind it.'
+          :'No declared blocker \u2014 work continues around it. Declare one below if that changes.')+'</div>'
+        +'<div class="rhx-kv" style="margin-top:8px;"><span>Priority</span><b>'+esc(t2.priority)+'</b></div>'
+        +(t2.due?'<div class="rhx-kv"><span>Due</span><b>'+esc(String(t2.due).slice(0,10))+'</b></div>':'')
+      +'</div>';
+
+      var ageD=Math.floor((Date.now()-new Date(t2.when))/86400000);
+      var aiLine = t2.status==='done'?'Done \u2014 the timeline has the receipt.'
+        : (t2.due&&new Date(t2.due)<new Date(todayStr))?'Overdue \u2014 this is the one to clear before anything ranked below it.'
+        : relApps.length?'This client also has '+relApps.length+' approval'+(relApps.length===1?'':'s')+' waiting on them \u2014 one message could move both.'
+        : ageD>=5?'Open for '+ageD+' days \u2014 either schedule it or consciously deprioritize it.'
+        : 'On track. The recommended step below is the shortest path.';
+      var aiCard='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">\u2726 AI insight</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'+esc(aiLine)+'</div>'
+        +(t2.client_id?'<button class="bf-act" style="margin-top:10px;" onclick="tsxNudgeDraft(\''+t2.key+'\')">Draft follow-up message</button>':'')
+      +'</div>';
+
+      var relatedCard=(t2.client_id&&(relApps.length||relInv.length||relPart||relFiles.length))?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Related items</div>'
+        +relApps.slice(0,2).map(function(a){ return '<div class="rhx-kv"><span>Approval \u00b7 '+esc(String(a.title||'').slice(0,26))+'</span><b style="color:#9a7a1a;">WAITING</b></div>'; }).join('')
+        +relInv.slice(0,2).map(function(i){ return '<div class="rhx-kv"><span>Invoice \u00b7 '+esc(String(i.name||'').slice(0,26))+'</span><b style="color:#9a7a1a;">UNPAID</b></div>'; }).join('')
         +(relPart?'<div class="rhx-kv"><span>Growth partnership</span><b><a href="#" style="color:var(--p);" onclick="go(\'growth\');setTimeout(function(){try{grxOpen(\''+att(String(relPart.id))+'\')}catch(e){}},300);return false;">Open \u2192</a></b></div>':'')
+        +(relFiles.length?('<div class="ivx-bh" style="margin-top:10px;">FILES</div>'+relFiles.map(function(f){
+            return '<div style="display:flex;gap:9px;align-items:center;padding:6px 0;">'
+              +'<div style="position:relative;width:34px;height:34px;border-radius:8px;background:rgba(91,63,160,.07);display:flex;align-items:center;justify-content:center;color:var(--p);font-size:13px;overflow:hidden;flex:none;"><span style="position:absolute;">'+(fIcon(f)==='img'?'\u25A3':'\u25AF')+'</span>'
+              +((fIcon(f)==='img'&&f.url)?'<img src="'+att(f.url)+'" style="position:relative;width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'" alt="">':'')+'</div>'
+              +'<div style="flex:1;min-width:0;font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(f.name||'File')+'</div>'
+              +(f.url?'<a href="'+att(f.url)+'" target="_blank" rel="noopener" style="color:var(--p);font-size:11.5px;font-weight:600;text-decoration:none;">Open</a>':'')
+            +'</div>';
+          }).join('')+'<button class="grx-link" style="margin-top:6px;" onclick="go(\'files\');setTimeout(function(){try{fsxCl(\''+att(String(t2.client_id))+'\')}catch(e){}},350);">View all files \u2192</button>'):'')
       +'</div>'):'';
+
+      var quickCard='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Quick actions</div>'
+        +(t2.client_id?'<div class="tlx-qa" onclick="go(\'approvals\');">Request approval<span class="c">\u203A</span></div>':'')
+        +(t2.client_id?'<div class="tlx-qa" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Message the client<span class="c">\u203A</span></div>':'')
+        +(t2.client_id?'<div class="tlx-qa" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},300);">Add a timeline note<span class="c">\u203A</span></div>':'')
+        +'<div class="tlx-qa" onclick="tsxNewToggle();window.scrollTo({top:0,behavior:\'smooth\'});">Create another task<span class="c">\u203A</span></div>'
+      +'</div>';
+
+      var rail=impactCard+aiCard+relatedCard+quickCard;
+      var related='';
 
       detail='<div class="grx-card">'
         +'<div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc(t2.title)+'</div>'
         +(t2.client_id?'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">'+esc(cName(t2.client_id))+'</div>':'')
-        +'<div class="msx-snap" style="margin-top:12px;">\u2726 <b>Why this exists</b> \u00b7 '+esc(srcWhy[t2.source]||('Source: '+t2.source))
+        +'<div class="msx-snap" style="margin-top:12px;">\u2726 <b>AI assistant</b> \u00b7 '+esc(srcWhy[t2.source]||('Source: '+t2.source))
         +(t2.impact!=='none'?' Completing it clears a declared '+esc(t2.impact)+' blocker.':'')+recBtn+'</div>'
         +(t2.kind==='s'?(
           '<div class="ivx-block"><div class="ivx-bh">STATUS</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
@@ -14107,7 +14151,8 @@ function anEngineNote(eng){
       +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
       +tabs
       +newForm
-      +'<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>';
+      +(t2?('<div class="msx-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'</div></div>')
+           :('<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>'));
   }
 
   window.tsxNewSave=async function(){
