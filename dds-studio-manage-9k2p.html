@@ -13823,19 +13823,32 @@ function anEngineNote(eng){
 .tsx-sec.red{color:#c0392b;}
 </style>
 <script>
-// ═══ TASKS — everything that moves a relationship forward, ranked by
-// consequence. Real tasks live in studio_tasks (new) + growth_tasks
-// (roadmaps). Suggestions are derived from real signals (overdue invoices,
-// stale approvals) and become tasks only when accepted — attributed, deduped,
-// never silent. Completing a task writes a Timeline event. ═══
+// ═══ TASKS v2 — everything that moves a relationship forward, ranked by
+// consequence. studio_tasks + growth_tasks in one queue; suggestions derived
+// from real signals, materialized only on Accept; subtasks stored as a
+// checklist convention inside body (real column, no schema change);
+// completing a task writes a Timeline event. ═══
 (function(){
-  var TSX={rows:[], growth:[], clients:[], parts:[], inv:[], apps:[], sel:null, tab:'open', dismissed:{}, ready:null, showNew:false};
+  var TSX={rows:[], growth:[], clients:[], parts:[], inv:[], apps:[], sel:null, tab:'open', dismissed:{}, ready:null, showNew:false, sort:'impact', q:''};
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(s){ return esc(s).replace(/'/g,'&#39;'); }
   function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
   function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
   function cName(id){ var c=TSX.clients.find(function(x){return String(x.id)===String(id);}); return c?(c.name||'Client'):''; }
   function done(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; }
+  // checklist convention: body lines "- [ ] x" / "- [x] x"
+  function parseBody(body){
+    var lines=String(body||'').split('\n'), desc=[], subs=[];
+    lines.forEach(function(ln){
+      var m=ln.match(/^- \[( |x)\] (.*)$/);
+      if(m) subs.push({done:m[1]==='x', text:m[2]});
+      else desc.push(ln);
+    });
+    return {desc:desc.join('\n').trim(), subs:subs};
+  }
+  function buildBody(desc,subs){
+    return (desc?desc+'\n':'')+subs.map(function(s){ return '- ['+(s.done?'x':' ')+'] '+s.text; }).join('\n');
+  }
 
   function ensureRoot(){
     var page=document.getElementById('page-tasks'); if(!page) return null;
@@ -13856,8 +13869,7 @@ function anEngineNote(eng){
       safe(function(){ return api('approvals?select=id,title,status,created_at,client_id&limit=200'); })
     ]);
     TSX.ready=(r[0]!==null);
-    TSX.rows=r[0]||[];
-    TSX.growth=r[1]||[]; TSX.parts=r[2]||[];
+    TSX.rows=r[0]||[]; TSX.growth=r[1]||[]; TSX.parts=r[2]||[];
     TSX.clients=(r[3]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
     TSX.inv=r[4]||[]; TSX.apps=r[5]||[];
     tsxRender();
@@ -13865,20 +13877,23 @@ function anEngineNote(eng){
   window.tsxTab=function(t){ TSX.tab=t; TSX.sel=null; tsxRender(); };
   window.tsxSel=function(k){ TSX.sel=(TSX.sel===k?null:k); tsxRender(); };
   window.tsxNewToggle=function(){ TSX.showNew=!TSX.showNew; tsxRender(); };
+  window.tsxSort=function(v){ TSX.sort=v; tsxRender(); };
+  window.tsxQ2=function(v){ TSX.q=v; tsxRender(); };
 
   function partClient(pid){ var p=TSX.parts.find(function(x){return String(x.id)===String(pid);}); return p?p.client_id:null; }
 
   function allTasks(){
     var out=[];
     TSX.rows.forEach(function(t){
-      out.push({key:'s:'+t.id, kind:'s', id:t.id, title:t.title||'Task', body:t.body||'', client_id:t.client_id,
+      var pb=parseBody(t.body);
+      out.push({key:'s:'+t.id, kind:'s', id:t.id, title:t.title||'Task', desc:pb.desc, subs:pb.subs, client_id:t.client_id,
         status:String(t.status||'open').toLowerCase(), priority:String(t.priority||'medium').toLowerCase(),
         impact:String(t.impact||'none').toLowerCase(), due:t.due_date||null, source:t.source||'manual',
         source_ref:t.source_ref||'', when:t.created_at, done_at:t.done_at});
     });
     TSX.growth.forEach(function(t){
-      out.push({key:'g:'+t.id, kind:'g', id:t.id, title:t.title||'Roadmap task', body:'', client_id:partClient(t.partnership_id),
-        status:done(t)?'done':'open', priority:'medium', impact:'none', due:null, source:'growth roadmap',
+      out.push({key:'g:'+t.id, kind:'g', id:t.id, title:t.title||'Roadmap task', desc:'', subs:[], client_id:partClient(t.partnership_id),
+        status:done(t)?'done':(String(t.status||'').toLowerCase()==='doing'?'doing':'open'), priority:'medium', impact:'none', due:null, source:'growth roadmap',
         source_ref:'', when:t.created_at, done_at:null});
     });
     return out;
@@ -13911,10 +13926,14 @@ function anEngineNote(eng){
     if(im==='revenue') return '<span class="ibx-chip" style="color:#5b3fa0;background:rgba(91,63,160,.08);">\u25CF REVENUE</span>';
     return ''; }
   function rank(t){
-    var im={launch:0,revenue:1,milestone:2,none:3}[t.impact]!==undefined?{launch:0,revenue:1,milestone:2,none:3}[t.impact]:3;
-    var pr={high:0,medium:1,low:2}[t.priority]!==undefined?{high:0,medium:1,low:2}[t.priority]:1;
-    var od=(t.due&&new Date(t.due)<new Date(new Date().toDateString()))?0:1;
-    return od*0+im*10+pr*3+od; // overdue handled in sections; impact dominates
+    var im={launch:0,revenue:1,milestone:2,none:3}[t.impact]; if(im===undefined) im=3;
+    var pr={high:0,medium:1,low:2}[t.priority]; if(pr===undefined) pr=1;
+    return im*10+pr*3;
+  }
+  function sortPool(pool){
+    if(TSX.sort==='due') return pool.slice().sort(function(a,b){ return (a.due?new Date(a.due):Infinity)-(b.due?new Date(b.due):Infinity); });
+    if(TSX.sort==='new') return pool.slice().sort(function(a,b){ return new Date(b.when)-new Date(a.when); });
+    return pool.slice().sort(function(a,b){ return rank(a)-rank(b)||(new Date(b.when)-new Date(a.when)); });
   }
 
   function tsxRender(){
@@ -13922,33 +13941,48 @@ function anEngineNote(eng){
     if(TSX.ready===false){
       root.innerHTML='<div class="pt">Tasks</div><div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div>'
         +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">One-time setup</div>'
-        +'<div style="font-size:13px;color:var(--ink);line-height:1.7;">The tasks table isn\u2019t reachable yet. Two steps, once:<br>1. Run <b>08-tasks.sql</b> in Supabase<br>2. Redeploy <b>clever-api</b> (it now allowlists studio_tasks)<br>Then <button class="ibx-pill" onclick="tsxLoad()">reload this page</button>. Roadmap tasks from Growth still show below once setup completes.</div></div>';
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.7;">The tasks table isn\u2019t reachable yet. Two steps, once:<br>1. Run <b>08-tasks.sql</b> in Supabase<br>2. Redeploy <b>clever-api</b> (it now allowlists studio_tasks)<br>Then <button class="ibx-pill" onclick="tsxLoad()">reload this page</button>.</div></div>';
       return;
     }
     var all=allTasks(), sugg=suggestions();
     var todayStr=new Date().toDateString();
+    var q=TSX.q.toLowerCase();
+    if(q) all=all.filter(function(t){ return t.title.toLowerCase().indexOf(q)>-1||cName(t.client_id).toLowerCase().indexOf(q)>-1; });
     var open=all.filter(function(t){ return t.status!=='done'; });
+    var doing=open.filter(function(t){ return t.status==='doing'; });
     var overdue=open.filter(function(t){ return t.due&&new Date(t.due)<new Date(todayStr); });
     var dueToday=open.filter(function(t){ return t.due&&new Date(t.due).toDateString()===todayStr; });
     var done7=all.filter(function(t){ return t.status==='done'&&t.done_at&&(Date.now()-new Date(t.done_at))/86400000<=7; });
+    // on-time rate: only when >=3 completed tasks had due dates (real history)
+    var doneWithDue=allTasks().filter(function(t){ return t.status==='done'&&t.done_at&&t.due; });
+    var onTime=doneWithDue.length>=3?Math.round(doneWithDue.filter(function(t){ return new Date(t.done_at)<=new Date(new Date(t.due).getTime()+86399000); }).length/doneWithDue.length*100):null;
 
     var stats='<div class="ivx-stats">'
       +'<div class="ivx-st"><div class="ivx-sn'+(overdue.length?' red':'')+'">'+overdue.length+'</div><div class="ivx-sl">Overdue</div></div>'
       +'<div class="ivx-st"><div class="ivx-sn">'+dueToday.length+'</div><div class="ivx-sl">Due today</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+open.length+'</div><div class="ivx-sl">Open</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+doing.length+'</div><div class="ivx-sl">In progress</div></div>'
       +'<div class="ivx-st"><div class="ivx-sn">'+done7.length+'</div><div class="ivx-sl">Completed this week</div></div>'
-      +(sugg.length?'<div class="ivx-st"><div class="ivx-sn">\u2726 '+sugg.length+'</div><div class="ivx-sl">Suggested by the platform</div></div>':'')
+      +(onTime!=null?'<div class="ivx-st"><div class="ivx-sn">'+onTime+'%</div><div class="ivx-sl">On-time rate</div></div>':'')
+      +(sugg.length?'<div class="ivx-st"><div class="ivx-sn">\u2726 '+sugg.length+'</div><div class="ivx-sl">Suggested</div></div>':'')
     +'</div>';
 
-    var sentence = overdue.length? overdue.length+' task'+(overdue.length===1?' is':'s are')+' overdue \u2014 the queue below is ranked by consequence, not age.'
+    var sentence = overdue.length? overdue.length+' overdue \u2014 the queue is ranked by consequence, not age.'
       : open.length? 'The '+open.length+' open task'+(open.length===1?'':'s')+' below are ranked by business impact. Start at the top.'
-      : 'Nothing open \u2014 accept a suggestion below or add the first task.';
+      : 'Nothing open \u2014 accept a suggestion or add the first task.';
 
     var TABS=[['open','Open'],['done','Completed'],['sugg','\u2726 Suggested']];
     var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
-      var n=t[0]==='open'?open.length:t[0]==='done'?all.length-open.length:sugg.length;
+      var n=t[0]==='open'?open.length:t[0]==='done'?all.filter(function(x){return x.status==='done';}).length:sugg.length;
       return '<button class="ibx-tab'+(TSX.tab===t[0]?' on':'')+'" onclick="tsxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
-    }).join('')+'<span style="flex:1;"></span><button class="ibx-tab" onclick="tsxNewToggle()">+ New task</button></div>';
+    }).join('')
+    +'<span style="flex:1;"></span>'
+    +'<select class="fi" style="margin:0;max-width:150px;" onchange="tsxSort(this.value)" aria-label="Sort">'
+      +'<option value="impact"'+(TSX.sort==='impact'?' selected':'')+'>Sort: Impact</option>'
+      +'<option value="due"'+(TSX.sort==='due'?' selected':'')+'>Sort: Due date</option>'
+      +'<option value="new"'+(TSX.sort==='new'?' selected':'')+'>Sort: Newest</option>'
+    +'</select>'
+    +'<input class="opx-search" style="max-width:180px;" placeholder="Search tasks\u2026" value="'+att(TSX.q)+'" oninput="tsxQ2(this.value)" aria-label="Search tasks">'
+    +'</div>';
 
     var newForm=TSX.showNew?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">New task</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
@@ -13964,11 +13998,15 @@ function anEngineNote(eng){
 
     function row(t){
       var od=t.due&&new Date(t.due)<new Date(todayStr)&&t.status!=='done';
+      var subDone=t.subs.filter(function(s){return s.done;}).length;
       return '<div class="apx-item'+(TSX.sel===t.key?' on':'')+'" onclick="tsxSel(\''+t.key+'\')">'
         +'<input type="checkbox" '+(t.status==='done'?'checked':'')+' style="width:18px;height:18px;accent-color:#1a7e49;cursor:pointer;flex:none;margin-top:2px;" onclick="event.stopPropagation();" onchange="tsxDone(\''+t.key+'\',this.checked)">'
         +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);'+(t.status==='done'?'text-decoration:line-through;color:var(--muted);':'')+'">'+esc(t.title)+'</div>'
-        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(t.client_id?esc(cName(t.client_id))+' \u00b7 ':'')+esc(t.source)+(t.due?' \u00b7 due '+esc(String(t.due).slice(0,10)):'')+'</div>'
-        +'<div style="margin-top:7px;">'+(od?'<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">OVERDUE</span> ':'')+prChip(t.priority)+' '+imChip(t.impact)+'</div></div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(t.client_id?esc(cName(t.client_id))+' \u00b7 ':'')+esc(t.source)
+        +(t.due?' \u00b7 due '+esc(String(t.due).slice(0,10)):'')+(t.subs.length?' \u00b7 '+subDone+'/'+t.subs.length+' subtasks':'')+'</div>'
+        +'<div style="margin-top:7px;">'+(od?'<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">OVERDUE</span> ':'')
+        +(t.status==='doing'?'<span class="ibx-chip" style="color:#2c6fb7;background:rgba(44,111,183,.08);">IN PROGRESS</span> ':'')
+        +prChip(t.priority)+' '+imChip(t.impact)+'</div></div>'
       +'</div>';
     }
 
@@ -13986,42 +14024,75 @@ function anEngineNote(eng){
       :'<div class="grx-empty" style="margin-top:14px;">No suggestions right now \u2014 they appear when real signals fire (overdue invoices, stale approvals).</div>';
     } else {
       var pool=(TSX.tab==='done')?all.filter(function(t){return t.status==='done';}):open;
-      pool=pool.slice().sort(function(a,b){ return rank(a)-rank(b); });
-      if(TSX.tab==='open'){
+      pool=sortPool(pool);
+      if(TSX.tab==='open'&&TSX.sort==='impact'){
         var ovs=pool.filter(function(t){return t.due&&new Date(t.due)<new Date(todayStr);});
-        var rest=pool.filter(function(t){return !(t.due&&new Date(t.due)<new Date(todayStr));});
+        var tds=pool.filter(function(t){return t.due&&new Date(t.due).toDateString()===todayStr;});
+        var rest=pool.filter(function(t){return ovs.indexOf(t)===-1&&tds.indexOf(t)===-1;});
         listHtml=(ovs.length?'<div class="tsx-sec red">OVERDUE ('+ovs.length+')</div>'+ovs.map(row).join(''):'')
-          +(rest.length?'<div class="tsx-sec">RANKED BY IMPACT</div>'+rest.map(row).join(''):'')
-          ||'';
+          +(tds.length?'<div class="tsx-sec" style="color:#9a7a1a;">DUE TODAY ('+tds.length+')</div>'+tds.map(row).join(''):'')
+          +(rest.length?'<div class="tsx-sec">RANKED BY IMPACT</div>'+rest.map(row).join(''):'');
         if(!pool.length) listHtml='<div class="grx-empty" style="margin-top:14px;">Nothing open. \u2726 Suggested has candidates when signals fire.</div>';
       } else {
-        listHtml=pool.length?pool.map(row).join(''):'<div class="grx-empty" style="margin-top:14px;">Nothing completed yet.</div>';
+        listHtml=pool.length?pool.map(row).join(''):'<div class="grx-empty" style="margin-top:14px;">Nothing here.</div>';
       }
     }
 
-    // detail
+    // ── detail ──
     var t2=allTasks().find(function(x){ return x.key===TSX.sel; });
     var detail='';
     if(t2){
-      var srcWhy={manual:'You created this yourself.', 'growth roadmap':'This is part of the client\u2019s growth roadmap \u2014 completing it moves their partnership progress ring.',
+      var srcWhy={manual:'You created this yourself.', 'growth roadmap':'Part of the client\u2019s growth roadmap \u2014 completing it moves their partnership progress ring.',
         invoice:'Created from an overdue invoice signal.', approval:'Created from a stale approval signal.', message:'Created from a client message.'};
+      // recommended next step (contextual, real destinations)
+      var recBtn='';
+      if(t2.source==='approval'&&t2.client_id) recBtn='<button class="ibx-pill" style="margin-top:8px;" onclick="tsxNudgeDraft(\''+t2.key+'\')">Recommended: draft the nudge \u2192</button>';
+      else if(t2.source==='invoice'&&t2.client_id) recBtn='<button class="ibx-pill" style="margin-top:8px;" onclick="tsxNudgeDraft(\''+t2.key+'\')">Recommended: draft the payment follow-up \u2192</button>';
+      else if(t2.client_id&&t2.status!=='done') recBtn='<button class="ibx-pill" style="margin-top:8px;" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Open their conversation \u2192</button>';
+
+      var subDone=t2.subs.filter(function(s){return s.done;}).length;
+      var subsHtml=(t2.kind==='s')?('<div class="ivx-block"><div class="ivx-bh">SUBTASKS'+(t2.subs.length?' \u2014 '+subDone+'/'+t2.subs.length:'')+'</div>'
+        +t2.subs.map(function(s,ix){
+          return '<div class="grx-task" style="border:none;padding:6px 0;"><input type="checkbox" '+(s.done?'checked':'')+' style="width:16px;height:16px;accent-color:#1a7e49;cursor:pointer;" onchange="tsxSub(\''+t2.key+'\','+ix+',this.checked)"><span style="flex:1;'+(s.done?'color:var(--muted);text-decoration:line-through;':'')+'">'+esc(s.text)+'</span></div>';
+        }).join('')
+        +'<div class="grx-add"><input class="fi" id="tsxSubIn" placeholder="Add subtask"><button class="bf-act" onclick="tsxSubAdd(\''+t2.key+'\')">Add</button></div>'
+      +'</div>'):'';
+
+      // related items (real)
+      var relApps=TSX.apps.filter(function(a){ return String(a.client_id)===String(t2.client_id)&&String(a.status||'').toLowerCase()==='pending'; });
+      var relInv=TSX.inv.filter(function(i){ return String(i.client_id)===String(t2.client_id)&&String(i.status||'').toLowerCase()!=='paid'; });
+      var relPart=TSX.parts.find(function(p){ return String(p.client_id)===String(t2.client_id); });
+      var related=(t2.client_id&&(relApps.length||relInv.length||relPart))?('<div class="ivx-block"><div class="ivx-bh">RELATED \u2014 same client</div>'
+        +relApps.slice(0,2).map(function(a){ return '<div class="rhx-kv"><span>Approval \u00b7 '+esc(String(a.title||'').slice(0,30))+'</span><b style="color:#9a7a1a;">WAITING</b></div>'; }).join('')
+        +relInv.slice(0,2).map(function(i){ return '<div class="rhx-kv"><span>Invoice \u00b7 '+esc(String(i.name||'').slice(0,30))+'</span><b style="color:#9a7a1a;">UNPAID</b></div>'; }).join('')
+        +(relPart?'<div class="rhx-kv"><span>Growth partnership</span><b><a href="#" style="color:var(--p);" onclick="go(\'growth\');setTimeout(function(){try{grxOpen(\''+att(String(relPart.id))+'\')}catch(e){}},300);return false;">Open \u2192</a></b></div>':'')
+      +'</div>'):'';
+
       detail='<div class="grx-card">'
         +'<div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc(t2.title)+'</div>'
         +(t2.client_id?'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">'+esc(cName(t2.client_id))+'</div>':'')
         +'<div class="msx-snap" style="margin-top:12px;">\u2726 <b>Why this exists</b> \u00b7 '+esc(srcWhy[t2.source]||('Source: '+t2.source))
-        +(t2.impact!=='none'?' Completing it clears a declared '+esc(t2.impact)+' blocker.':'')+'</div>'
+        +(t2.impact!=='none'?' Completing it clears a declared '+esc(t2.impact)+' blocker.':'')+recBtn+'</div>'
         +(t2.kind==='s'?(
-          '<div class="ivx-block"><div class="ivx-bh">PRIORITY</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          '<div class="ivx-block"><div class="ivx-bh">STATUS</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          +[['open','Open'],['doing','In progress'],['done','Done']].map(function(o){ return '<button class="ibx-pill" style="'+(t2.status===o[0]?'color:#fff;background:var(--p);border-color:transparent;':'')+'" onclick="tsxStatus(\''+t2.key+'\',\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div></div>'
+          +'<div class="ivx-block"><div class="ivx-bh">PRIORITY</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
           +['high','medium','low'].map(function(p){ return '<button class="ibx-pill" style="'+(t2.priority===p?'color:#fff;background:var(--p);border-color:transparent;':'')+'" onclick="tsxSet(\''+t2.key+'\',\'priority\',\''+p+'\')">'+p.charAt(0).toUpperCase()+p.slice(1)+'</button>'; }).join('')+'</div></div>'
           +'<div class="ivx-block"><div class="ivx-bh">IMPACT \u2014 what does this block?</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'
           +[['none','Nothing'],['milestone','Milestone'],['launch','Launch'],['revenue','Revenue']].map(function(o){ return '<button class="ibx-pill" style="'+(t2.impact===o[0]?'color:#fff;background:var(--p);border-color:transparent;':'')+'" onclick="tsxSet(\''+t2.key+'\',\'impact\',\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div></div>'
           +'<div class="ivx-block"><div class="ivx-bh">DUE DATE</div><input class="fi" type="date" style="margin:0;" value="'+att(t2.due?String(t2.due).slice(0,10):'')+'" onchange="tsxSet(\''+t2.key+'\',\'due_date\',this.value)"></div>'
-        ):'<div class="ivx-block"><div class="ivx-bh">ROADMAP TASK</div><div style="font-size:12.5px;color:var(--muted);">Lives on the Growth roadmap \u2014 priority/impact/due dates apply to studio tasks. Check it off here or there; the progress ring moves either way.</div></div>')
-        +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS WHEN YOU COMPLETE IT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">1. It\u2019s stamped done with today\u2019s date<br>2. A Timeline event is written to the client\u2019s story'+(t2.kind==='g'?'<br>3. Their Growth progress ring moves':'')+'</div></div>'
+          +'<div class="ivx-block"><div class="ivx-bh">DESCRIPTION</div>'
+            +'<textarea class="fi" id="tsxDesc" rows="3" placeholder="What good looks like, links, context\u2026">'+esc(t2.desc)+'</textarea>'
+            +'<button class="bf-act" style="margin-top:8px;" onclick="tsxDescSave(\''+t2.key+'\')">Save description</button></div>'
+          +subsHtml
+        ):'<div class="ivx-block"><div class="ivx-bh">ROADMAP TASK</div><div style="font-size:12.5px;color:var(--muted);">Lives on the Growth roadmap. Check it off here or there \u2014 the progress ring moves either way. Priority, impact, due dates and subtasks apply to studio tasks.</div></div>')
+        +related
+        +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS WHEN YOU COMPLETE IT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">1. Stamped done with today\u2019s date<br>2. A Timeline event is written to the client\u2019s story'+(t2.kind==='g'?'<br>3. Their Growth progress ring moves':'')+'</div></div>'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
           +(t2.status!=='done'?'<button class="bf-act primary" onclick="tsxDone(\''+t2.key+'\',true)">\u2713 Complete</button>':'')
           +(t2.client_id?'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>':'')
           +(t2.client_id?'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>':'')
+          +(t2.client_id?'<button class="ibx-pill" onclick="go(\'approvals\');">Approvals \u2192</button>':'')
         +'</div>'
       +'</div>';
     } else {
@@ -14031,7 +14102,7 @@ function anEngineNote(eng){
     root.innerHTML=
       '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Tasks</div>'
       +'<div class="ibx-sub">Everything that needs to get done. Prioritized by impact.</div></div>'
-      +'<span style="flex:1;"></span></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="tsxNewToggle()">+ New task</button></div>'
       +stats
       +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
       +tabs
@@ -14053,8 +14124,44 @@ function anEngineNote(eng){
     var patch={}; patch[field]=val||null;
     var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',patch);
     if(r===null){ toast('Couldn\u2019t save'); return; }
-    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row[field==='due_date'?'due_date':field]=val;
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row[field]=val;
     toast('\u2713 Saved'); tsxRender();
+  };
+  window.tsxStatus=async function(key,val){
+    if(val==='done') return tsxDone(key,true);
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{status:val, done_at:null});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row){ row.status=val; row.done_at=null; }
+    toast('\u2713 '+(val==='doing'?'In progress':'Reopened')); tsxRender();
+  };
+  window.tsxDescSave=async function(key){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    var ta=document.getElementById('tsxDesc'); if(!ta) return;
+    var body=buildBody(ta.value.trim(), t.subs);
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{body:body});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.body=body;
+    toast('\u2713 Description saved'); tsxRender();
+  };
+  window.tsxSub=async function(key,ix,on){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    t.subs[ix].done=on;
+    var body=buildBody(t.desc, t.subs);
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{body:body});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.body=body;
+    tsxRender();
+  };
+  window.tsxSubAdd=async function(key){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    var el=document.getElementById('tsxSubIn'); var v=el&&el.value.trim(); if(!v) return;
+    t.subs.push({done:false, text:v});
+    var body=buildBody(t.desc, t.subs);
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{body:body});
+    if(r===null){ toast('Couldn\u2019t save'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.body=body;
+    toast('\u2713 Subtask added'); tsxRender();
   };
   window.tsxDone=async function(key,on){
     var t=allTasks().find(function(x){return x.key===key;}); if(!t) return;
@@ -14080,6 +14187,13 @@ function anEngineNote(eng){
     toast('\u2713 Accepted \u2014 it\u2019s a real task now'); tsxLoad();
   };
   window.tsxDismiss=function(ref){ TSX.dismissed[ref]=1; toast('Dismissed for this session'); tsxRender(); };
+  window.tsxNudgeDraft=function(key){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||!t.client_id) return;
+    var c=TSX.clients.find(function(x){return String(x.id)===String(t.client_id);});
+    ddsDraftAction({ subject:(c&&c.name)||'the client', subjectId:String(t.client_id), signal:t.source==='invoice'?'payment_follow_up':'waiting_on_client', module:'Tasks',
+      action:t.title, why:t.source==='invoice'?'the invoice is past due \u2014 warm and factual wins here':'the approval is stale \u2014 a friendly reminder keeps momentum',
+      changed:'From the task queue', go:'tasks', refId:String(t.id), email:(c&&(c.contact_email||c.email))||'' });
+  };
 
   var _go3=window.go;
   window.go=function(dest){ var r=_go3.apply(this,arguments); try{ if(dest==='tasks') tsxLoad(); }catch(e){} return r; };
