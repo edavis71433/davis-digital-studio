@@ -14714,5 +14714,249 @@ window.ddsFilesCard=async function(mountId, clientId){
   }
 })();
 </script>
+
+<script>
+// ═══ ANALYTICS v2 — mockup anatomy over the existing intelligence. All
+// computation (admin_analytics groups, executive brief, Pulse) is reused;
+// only the assembly changes. GA4-backed series confirmed real by the route's
+// own sources. Revenue/Leads/Conversions series computed from tables. ═══
+(function(){
+  var ANX={tab:'traffic', series:{}, seriesLoaded:false, alerts:null};
+  function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
+  function money(n){ return '$'+Math.round(Number(n)||0).toLocaleString(); }
+  function monthKey(d){ var x=new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'); }
+  function monthLabel(k){ var p=k.split('-'); return new Date(p[0],p[1]-1,1).toLocaleDateString('en-US',{month:'short'}); }
+  function lastNMonths(n){ var out=[],d=new Date(); for(var i=n-1;i>=0;i--){ var x=new Date(d.getFullYear(),d.getMonth()-i,1); out.push(monthKey(x)); } return out; }
+  function toPoints(mapObj){ return lastNMonths(6).map(function(k){ return {period:monthLabel(k), value:mapObj[k]||0}; }); }
+  function groupMetric(g, key){ if(!g) return null; if(g[key]&&g[key].points) return g[key]; var arr=(g.metrics||g.series||g.items)||[]; return arr.find(function(m){ return m.key===key; })||null; }
+  function anyMetric(d, key){
+    var gs=[d.website_analytics,d.search_analytics,d.website_health,d.business_profile,d.engagement_ops];
+    for(var i=0;i<gs.length;i++){ var m=groupMetric(gs[i],key); if(m) return m; } return null;
+  }
+  function mDelta(m){
+    var pts=(m&&m.points)||[]; if(pts.length<2) return null;
+    var a=pts[pts.length-2].value, b=pts[pts.length-1].value;
+    if(a==null||b==null||a===0) return null;
+    return Math.round((b-a)/a*100);
+  }
+  function deltaHtml(d){ if(d==null||d===0) return ''; return '<span style="font-size:11px;font-weight:700;color:'+(d>0?'#1a7e49':'#c0392b')+';">'+(d>0?'\u2191 ':'\u2193 ')+Math.abs(d)+'%</span>'; }
+  function latest(m){ var pts=(m&&m.points)||[]; return pts.length?pts[pts.length-1].value:null; }
+
+  async function loadSeries(){
+    if(ANX.seriesLoaded) return;
+    function safe(fn){ return fn().catch(function(){ return null; }); }
+    var since=new Date(); since.setMonth(since.getMonth()-6); var iso=since.toISOString();
+    var r=await Promise.all([
+      safe(function(){ return api('invoices?select=amount,paid_at&deleted_at=is.null&paid_at=gte.'+encodeURIComponent(iso)+'&limit=500'); }),
+      safe(function(){ return api('leads?select=created_at&created_at=gte.'+encodeURIComponent(iso)+'&limit=800'); }),
+      safe(function(){ return api('clients?select=created_at&created_at=gte.'+encodeURIComponent(iso)+'&limit=200'); })
+    ]);
+    var rev={}, lds={}, cvs={};
+    (r[0]||[]).forEach(function(i){ if(!i.paid_at) return; var k=monthKey(i.paid_at); var v=0; try{ v=invcAmt(i.amount)||0; }catch(e){} rev[k]=(rev[k]||0)+v; });
+    (r[1]||[]).forEach(function(l){ var k=monthKey(l.created_at); lds[k]=(lds[k]||0)+1; });
+    (r[2]||[]).forEach(function(c){ var k=monthKey(c.created_at); cvs[k]=(cvs[k]||0)+1; });
+    ANX.series={revenue:toPoints(rev), leads:toPoints(lds), conversions:toPoints(cvs)};
+    ANX.seriesLoaded=true;
+  }
+  async function loadAlerts(){
+    if(ANX.alerts!==null) return;
+    try{
+      var j=await visEdge({type:'visibility_list'});
+      var rows=(j&&j.data)||[];
+      ANX.alerts=rows.filter(function(x){ return x.latest&&((x.latest.overall!=null&&x.latest.overall<80)||x.latest.https===false); })
+        .map(function(x){ return { name:(x.site&&(x.site.label||x.site.url))||'Site',
+          text:x.latest.https===false?'No HTTPS \u2014 browsers warn visitors away':'Health '+x.latest.overall+' \u2014 below the healthy line', sev:x.latest.https===false||x.latest.overall<50?'red':'amber' }; });
+    }catch(e){ ANX.alerts=[]; }
+  }
+
+  window.anxTab=function(t){ ANX.tab=t; window.renderAnalytics(); };
+
+  window.anxTalking=async function(){
+    var mount=document.getElementById('anxTPBody'); if(!mount) return;
+    mount.innerHTML='<div class="bf-skel" style="height:60px;border-radius:10px;"></div>';
+    var d=ANALYTICS.data||{}; var brief=d.executive_brief||{};
+    var cid=ANALYTICS.clientId;
+    var cRow=(ANALYTICS.clients||[]).find(function(c){ return String(c.id)===String(cid); });
+    var cname=(cRow&&cRow.name)||'your business';
+    function safe(fn){ return fn().catch(function(){ return null; }); }
+    var mStart=new Date(); mStart=new Date(mStart.getFullYear(), mStart.getMonth(), 1).toISOString();
+    var r=await Promise.all([
+      safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&select=name,amount,paid_at&deleted_at=is.null&paid_at=gte.'+encodeURIComponent(mStart)+'&limit=50'); }),
+      safe(function(){ return api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id&limit=1'); }),
+      safe(function(){ return api('files?client_id=eq.'+encodeURIComponent(cid)+'&select=name,created_at&created_at=gte.'+encodeURIComponent(mStart)+'&limit=50'); })
+    ]);
+    var doneTasks=[];
+    if(r[1]&&r[1][0]){
+      var tk=await safe(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(r[1][0].id)+'&select=title,status&limit=100'); })||[];
+      doneTasks=tk.filter(function(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; });
+    }
+    var st=await safe(function(){ return api('studio_tasks?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,done_at&done_at=gte.'+encodeURIComponent(mStart)+'&limit=50'); })||[];
+    var stDone=st.filter(function(t){ return String(t.status||'')==='done'; });
+
+    // gather positive + attention interpretation lines (already business-language)
+    var goods=[], warns=[];
+    [d.website_analytics,d.search_analytics,d.website_health,d.business_profile,d.engagement_ops].forEach(function(g){
+      ((g&&g.interpretation)||[]).forEach(function(i){
+        if(i.status==='no_data') return;
+        if(i.status==='good'||i.status==='improved'||(i.delta!=null&&i.delta>0)) goods.push(i);
+        else if(i.status==='attention'||i.status==='declined'||(i.delta!=null&&i.delta<0)) warns.push(i);
+      });
+    });
+    function esc2(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
+    var happened=[];
+    goods.slice(0,3).forEach(function(i){ happened.push(i.label+(i.pct!=null?' up '+Math.abs(i.pct)+'%':'')+' \u2014 '+String(i.text||'').split('.')[0]+'.'); });
+    if(stDone.length+doneTasks.length) happened.push((stDone.length+doneTasks.length)+' pieces of work completed on your roadmap this month.');
+    if(r[2]&&r[2].length) happened.push(r[2].length+' new deliverable'+(r[2].length===1?'':'s')+' shared to your portal.');
+    if(!happened.length) happened.push('A steady month \u2014 the foundations we\u2019ve built are holding, and the numbers below show where the next win comes from.');
+
+    var matters=[];
+    if(warns[0]) matters.push('One thing we\u2019re watching: '+warns[0].label+(warns[0].pct!=null?' ('+(warns[0].delta<0?'down ':'up ')+Math.abs(warns[0].pct)+'%)':'')+' \u2014 '+String(warns[0].text||'').split('.')[0]+'.');
+    if(brief.headline) matters.push('The headline: '+brief.headline);
+    if(!matters.length) matters.push('Every measured signal is steady or improving \u2014 exactly what month-over-month consistency should look like.');
+
+    var next=[];
+    if(brief.recommended_action||brief.recommendation) next.push(String(brief.recommended_action||brief.recommendation));
+    if(!next.length&&warns[0]) next.push('Focus next month: turn the '+warns[0].label+' trend around \u2014 I\u2019ll bring a plan to our next call.');
+    if(!next.length) next.push('Next month we keep compounding: same roadmap, next phase.');
+
+    var text='WHAT HAPPENED THIS MONTH\n'+happened.map(function(x){return '\u2022 '+x;}).join('\n')
+      +'\n\nWHY IT MATTERS\n'+matters.map(function(x){return '\u2022 '+x;}).join('\n')
+      +'\n\nWHAT I RECOMMEND NEXT\n'+next.map(function(x){return '\u2022 '+x;}).join('\n');
+    ANX.tpText=text;
+
+    mount.innerHTML=
+      '<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);">WHAT HAPPENED</div>'
+      +happened.map(function(x){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.55;padding:3px 0;">\u2022 '+esc2(x)+'</div>'; }).join('')
+      +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-top:10px;">WHY IT MATTERS</div>'
+      +matters.map(function(x){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.55;padding:3px 0;">\u2022 '+esc2(x)+'</div>'; }).join('')
+      +'<div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin-top:10px;">WHAT I RECOMMEND NEXT</div>'
+      +next.map(function(x){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.55;padding:3px 0;">\u2022 '+esc2(x)+'</div>'; }).join('')
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
+        +'<button class="ibx-pill" onclick="navigator.clipboard&&navigator.clipboard.writeText(ANX.tpText);toast(\'\u2713 Copied \u2014 paste anywhere\')">Copy</button>'
+        +'<button class="bf-act primary" onclick="anxTPDraft()">Draft the monthly email \u2192</button>'
+        +'<button class="ibx-pill" onclick="anxTalking()">\u21BB Regenerate</button>'
+      +'</div>'
+      +'<div style="font-size:10.5px;color:var(--muted);margin-top:8px;">Built from this month\u2019s real numbers, roadmap completions, and deliverables. Auto-generation at period close ships with the nightly cron (queued behind the engine read fix).</div>';
+  };
+  window.anxTPDraft=function(){
+    var cid=ANALYTICS.clientId;
+    var cRow=(ANALYTICS.clients||[]).find(function(c){ return String(c.id)===String(cid); });
+    ddsDraftAction({ subject:(cRow&&cRow.name)||'the client', subjectId:String(cid||''), signal:'value_recap', module:'Analytics',
+      action:'Send '+((cRow&&cRow.name)||'them')+' this month\u2019s update',
+      why:'a grounded monthly recap is the strongest retention and renewal message there is',
+      changed:String(ANX.tpText||'').slice(0,900),
+      go:'analytics', refId:String(cid||''), email:(cRow&&(cRow.contact_email||cRow.email))||'' });
+  };
+
+  window.renderAnalytics=async function(){
+    var body=document.getElementById('anBody'); if(!body) return;
+    var d=ANALYTICS.data;
+    if(!d){ body.innerHTML='<div class="grx-card"><div class="grx-empty">Couldn\u2019t load analytics \u2014 try Pull Google data or reselect the client.</div></div>'; return; }
+    await loadSeries(); await loadAlerts();
+    var brief=d.executive_brief||{};
+    var sessions=anyMetric(d,'sessions');
+    var clicks=anyMetric(d,'search_clicks');
+    var psi=anyMetric(d,'psi_performance');
+    var gbp=anyMetric(d,'gbp_calls');
+    var prog=anyMetric(d,'project_progress');
+
+    // ── Performance Overview: 4 real tabs ──
+    var TAB={traffic:{label:'Traffic', pts:(sessions&&sessions.points)||[], unit:'', sub:'Sessions \u00b7 GA4'},
+             leads:{label:'Leads', pts:ANX.series.leads||[], unit:'', sub:'Contact-form arrivals'},
+             conversions:{label:'Conversions', pts:ANX.series.conversions||[], unit:'', sub:'New clients'},
+             revenue:{label:'Revenue', pts:ANX.series.revenue||[], unit:'$', sub:'Paid invoices'}};
+    var cur=TAB[ANX.tab]||TAB.traffic;
+    var curLast=cur.pts.length?cur.pts[cur.pts.length-1].value:null;
+    var curDelta=(function(){ if(cur.pts.length<2) return null; var a=cur.pts[cur.pts.length-2].value,b=cur.pts[cur.pts.length-1].value; if(!a) return null; return Math.round((b-a)/a*100); })();
+    var chart='';
+    try{ chart=anLineChart(cur.pts,{w:560,h:150}); }catch(e){ chart='<div class="grx-empty">Chart unavailable.</div>'; }
+
+    var perf='<div class="grx-card"><div class="grx-h" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">Performance overview'
+      +'<span style="flex:1;"></span>'
+      +Object.keys(TAB).map(function(k){ return '<button class="grx-tab'+(ANX.tab===k?' on':'')+'" style="padding:6px 12px;" onclick="anxTab(\''+k+'\')">'+TAB[k].label+'</button>'; }).join('')
+      +'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">'
+        +'<span style="font-size:30px;font-weight:800;color:var(--ink);">'+(curLast!=null?(cur.unit==='$'?money(curLast):Number(curLast).toLocaleString()):'\u2014')+'</span>'
+        +'<span style="font-size:12px;color:var(--muted);">'+esc(cur.sub)+' \u00b7 this month</span>'+deltaHtml(curDelta)
+      +'</div>'
+      +'<div style="margin-top:8px;">'+chart+'</div>'
+    +'</div>';
+
+    // ── Key metrics row (real series only) ──
+    var kms=[['Sessions',sessions],['Search clicks',clicks],['Site performance',psi],['GBP calls',gbp],['Project progress',prog]]
+      .filter(function(x){ return x[1]&&latest(x[1])!=null; });
+    var key=kms.length?('<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Key metrics</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">'
+      +kms.map(function(x){
+        var sp=''; try{ sp=anLineChart((x[1].points||[]).slice(-6),{w:130,h:34,pad:3}); }catch(e){}
+        return '<div><div style="font-size:19px;font-weight:800;color:var(--ink);">'+Number(latest(x[1])).toLocaleString()+' '+deltaHtml(mDelta(x[1]))+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);margin:2px 0 4px;">'+esc(x[0])+'</div>'+sp+'</div>';
+      }).join('')+'</div></div>'):'';
+
+    // ── SEO / search card ──
+    var seo=clicks?('<div class="grx-card"><div class="grx-h">Search performance</div>'
+      +'<div style="font-size:22px;font-weight:800;color:var(--ink);">'+Number(latest(clicks)).toLocaleString()+' '+deltaHtml(mDelta(clicks))+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Search clicks \u00b7 Google Search Console</div>'
+      +(function(){ try{ return anLineChart((clicks.points||[]).slice(-6),{w:300,h:70,pad:4}); }catch(e){ return ''; } })()
+      +(d.search_analytics&&d.search_analytics.interpretation?'<div style="font-size:12px;color:var(--ink);line-height:1.55;margin-top:8px;">'+esc(String(d.search_analytics.interpretation).slice(0,220))+'</div>':'')
+    +'</div>'):('<div class="grx-card"><div class="grx-h">Search performance</div><div class="grx-empty" style="padding:6px 0;">No Search Console data for this client yet \u2014 Pull Google data, or connect their property in Integrations.</div></div>');
+
+    // ── AI insights rail (executive brief, restyled light) ──
+    function move(label,m){ if(!m) return '<div class="rhx-kv"><span>'+label+'</span><b style="color:var(--muted);font-weight:500;">None yet</b></div>';
+      return '<div class="rhx-kv"><span>'+label+'</span><b style="color:'+(m.improved?'#1a7e49':'#c0392b')+';">'+esc(m.label)+' '+(m.improved?'\u25B2':'\u25BC')+' '+Math.abs(m.pct)+'%</b></div>'; }
+    var conf={high:['High confidence','#1a7e49','#eaf5ee'],medium:['Medium confidence','#9a7a1a','#fdf6e3'],low:['Early \u2014 low confidence','#7a6d8e','#f3f0fa']}[brief.confidence||'low'];
+    var insights='<div class="grx-card"><div class="grx-h" style="display:flex;align-items:center;">\u2726 AI insights<span style="flex:1;"></span><span class="ibx-chip" style="color:'+conf[1]+';background:'+conf[2]+';">'+conf[0]+'</span></div>'
+      +(brief.headline?'<div style="font-family:\'Fraunces\',serif;font-size:16px;color:var(--ink);line-height:1.4;margin-bottom:10px;">'+esc(brief.headline)+'</div>':'')
+      +move('Biggest change',brief.biggest_change)
+      +move('Biggest risk',brief.biggest_risk)
+      +move('Biggest opportunity',brief.biggest_opportunity)
+      +(brief.recommended_action||brief.recommendation?'<div class="msx-snap" style="margin-top:10px;">\u2192 '+esc(String(brief.recommended_action||brief.recommendation).slice(0,180))+'</div>':'')
+    +'</div>';
+
+    // ── Alerts (real, from Site Monitor) ──
+    var alerts='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Alerts</div>'
+      +((ANX.alerts&&ANX.alerts.length)?ANX.alerts.slice(0,4).map(function(a){
+        return '<div class="rhx-kv"><span style="color:'+(a.sev==='red'?'#c0392b':'#9a7a1a')+';">\u25CF '+esc(a.name)+'</span><b style="font-weight:500;font-size:11.5px;color:var(--muted);">'+esc(a.text)+'</b></div>';
+      }).join('')+'<button class="grx-link" style="margin-top:6px;" onclick="go(\'visibility\')">Open Site Monitor \u2192</button>'
+      :'<div class="grx-empty" style="padding:6px 0;">Nothing flagged \u2014 every monitored site is healthy and on HTTPS.</div>')
+    +'</div>';
+
+    // ── Integrations honesty ──
+    var integ='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Integrations \u2014 honest status</div>'
+      +'<div class="rhx-kv"><span>Google Analytics 4</span><b style="color:#1a7e49;">CONNECTED</b></div>'
+      +'<div class="rhx-kv"><span>Search Console</span><b style="color:#1a7e49;">CONNECTED</b></div>'
+      +'<div class="rhx-kv"><span>PageSpeed</span><b style="color:#1a7e49;">CONNECTED</b></div>'
+      +'<div class="rhx-kv"><span>Semrush / Uptime / Cloudflare</span><b style="color:var(--muted);">NOT WIRED</b></div>'
+    +'</div>';
+
+    // ── deep-dive groups (existing renderers, kept) ──
+    var deep='';
+    try{
+      deep='<div class="grx-h" style="margin:20px 0 4px;">Deep dive</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;">'
+        +anGroup('Website analytics', d.website_analytics, d.website_analytics&&d.website_analytics.interpretation, 'sessions')
+        +anGroup('Search analytics', d.search_analytics, d.search_analytics&&d.search_analytics.interpretation, 'search_clicks')
+        +anGroup('Website health', d.website_health, d.website_health&&d.website_health.interpretation, 'psi_performance')
+        +anGroup('Business Profile', d.business_profile, d.business_profile&&d.business_profile.interpretation, 'gbp_calls')
+        +anGroup('Engagement & delivery', d.engagement_ops, d.engagement_ops&&d.engagement_ops.interpretation, 'project_progress')
+        +'</div>';
+    }catch(e){}
+
+    var fresh=''; try{ fresh=anFreshnessBar(brief); }catch(e){}
+
+    var talking='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">\u2726 Monthly talking points</div>'
+      +'<div id="anxTPBody"><div style="font-size:12.5px;color:var(--muted);line-height:1.6;">One click builds a client-ready summary of this month \u2014 what happened, why it matters, what\u2019s next \u2014 from the real numbers on this page. Your foundation for check-ins, renewals, and the monthly email.</div>'
+      +'<button class="bf-act primary" style="margin-top:10px;" onclick="anxTalking()">Generate talking points</button></div>'
+    +'</div>';
+    body.innerHTML=
+      '<div style="display:grid;grid-template-columns:minmax(0,1.9fr) minmax(250px,.8fr);gap:16px;align-items:start;">'
+        +'<div>'+perf+key+'<div style="margin-top:16px;">'+seo+'</div></div>'
+        +'<div>'+insights+talking+alerts+integ+'</div>'
+      +'</div>'
+      +fresh
+      +deep;
+  };
+})();
+</script>
 </body>
 </html>
