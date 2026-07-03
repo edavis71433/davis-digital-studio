@@ -827,8 +827,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
     @media (prefers-reduced-motion: reduce){ .oc-scrim,.oc-modal{ animation:none } .oc-spin,.oc-spin-p,.oc-skel{ animation:none } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>.skip-link{position:absolute;left:-9999px;top:0;background:var(--p,#5b3fa0);color:#fff;padding:10px 18px;border-radius:0 0 10px 0;font-size:13px;font-weight:600;z-index:10000;text-decoration:none;}.skip-link:focus{left:0;}</style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to main content</a>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- LOGIN -->
@@ -917,7 +919,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
     </div>
 
     <!-- MAIN -->
-    <div class="main">
+    <div class="main" id="main" tabindex="-1">
 
       <!-- OVERVIEW -->
       <div class="page active" id="page-overview">
@@ -926,6 +928,8 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
              me most, what to do next, what can wait, and why. Modeled on the
              Analytics executive brief. Rendered by loadBrief(). -->
         <div id="briefRoot" style="max-width:720px;"></div>
+        <!-- TODAY'S SALES MOVES — the command-center rail. Rendered by loadSalesMoves(). -->
+        <div id="salesMovesRoot" style="max-width:720px;"></div>
       </div>
 
       <!-- CLIENT HUB -->
@@ -940,7 +944,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 
       <div class="page" id="page-hub">
         <div class="pt">Client Hub</div>
-        <div class="ps">Everyone you work with, in one place. Click a client to see their full record: messages, files, invoices, approvals, timeline, and any tools they have run on the site.</div>
+        <div class="ps">The full record and command center for one client: the engine's read, the money, the history, and every action pre-selected. For <em>who needs attention first</em>, start in Clients — it hands off here.</div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center;">
           <input aria-label="Search clients by name, project, or email..." id="hubSearch" oninput="renderHub()" placeholder="Search clients by name, project, or email..." style="flex:1;min-width:220px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;">
@@ -983,8 +987,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 
       <!-- MESSAGES -->
       <div class="page" id="page-messages">
-        <div class="pt">Send Message</div>
-        <div class="ps">Message a client, they get an email notification instantly.</div>
+        <div class="pt">Messages</div>
+        <div class="ps">Who's waiting on you, who's gone quiet, and the thread with each client — with a grounded draft one click away.</div>
+        <!-- TRIAGE — needs your reply / waiting on them. Rendered by loadMsgTriage(). -->
+        <div id="msgTriage"></div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel messages" class="client-select" id="sel-messages" onchange="onClientChange(this.value,'messages')">
@@ -995,10 +1001,13 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <div class="cb-av" id="bav-messages">?</div>
           <div class="cb-info"><div class="cb-label">Currently messaging</div><div class="cb-name" id="bname-messages">—</div><div class="cb-project" id="bproj-messages"></div></div>
         </div>
+        <!-- CONTEXT — the client's real state while you write. Rendered by loadMsgContext(). -->
+        <div id="msgContext"></div>
         <div class="card">
           <div class="ch"><div class="ct">💬 Message Thread</div></div>
           <div class="cb">
             <div class="thread" id="msgThread"><p style="font-size:13px;color:var(--muted);text-align:center;padding:20px;">Select a client to load messages.</p></div>
+            <div id="msgDraftBar"></div>
             <div id="tmplRow" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;"></div>
             <div class="fg"><textarea aria-label="Type your message..." class="fi" id="msgText" rows="3" placeholder="Type your message..."></textarea></div>
             <button class="sbtn" onclick="sendMsg()">Send + notify client →</button>
@@ -1142,7 +1151,9 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <!-- INVOICES -->
       <div class="page" id="page-invoices">
         <div class="pt">Invoices</div>
-        <div class="ps">View, edit, and add invoices. Clients get an email notification when you add one.</div>
+        <div class="ps">The money across every client — what's outstanding, what's overdue, and the move on each. Pick a client below to manage their invoices.</div>
+        <!-- THE MONEY, RIGHT NOW — portfolio-wide command strip. Rendered by loadInvoiceCommand(). -->
+        <div id="invCommand"></div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel invoices" class="client-select" id="sel-invoices" onchange="onClientChange(this.value,'invoices')">
@@ -1428,6 +1439,72 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
           </div>
         </div>
       </div>
+
+<style id="oppWorkspaceCss">
+/* ── Opportunities workspace: chips, filters, rows, drawer, timeline ── */
+.opx-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0 20px;}
+.opx-search{flex:1;min-width:200px;padding:9px 14px;border:1px solid rgba(91,63,160,0.15);border-radius:10px;font-size:13px;outline:none;background:#fff;color:var(--ink);}
+.opx-search:focus{border-color:var(--p);}
+.opx-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.opx-filter{font-size:12px;font-weight:600;padding:6px 13px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;}
+.opx-filter.on{background:var(--p);color:#fff;border-color:var(--p);}
+.opx-fcount{font-weight:500;opacity:.75;margin-left:2px;}
+.opx-row{padding:16px 2px;border-top:1px solid var(--bf-line);display:flex;gap:14px;cursor:pointer;}
+.opx-row:focus-visible{outline:2px solid var(--p);outline-offset:2px;border-radius:8px;}
+.opx-row.open{background:linear-gradient(to bottom, rgba(91,63,160,0.03), transparent);}
+.opx-rmain{flex:1;min-width:0;}
+.opx-rtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.opx-chip{font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:100px;white-space:nowrap;}
+.opx-cat{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.opx-title{font-size:14.5px;font-weight:600;color:var(--ink);}
+.opx-val{font-size:12.5px;font-weight:700;color:#1a7e49;margin-left:auto;white-space:nowrap;}
+.opx-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px;}
+.opx-dot{opacity:.5;}
+.opx-due{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(91,63,160,0.08);color:var(--p);white-space:nowrap;}
+.opx-due.over{background:#fdecea;color:#b03a2e;}
+.opx-drawer{margin:0 2px 4px;padding:16px 16px 18px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
+.opx-dl{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.opx-accept{margin-top:14px;padding:12px 14px;border:1px dashed rgba(26,126,73,0.35);border-radius:12px;background:rgba(26,126,73,0.04);}
+.opx-tl{display:flex;flex-direction:column;gap:7px;}
+.opx-tli{display:flex;align-items:baseline;gap:9px;font-size:12px;flex-wrap:wrap;}
+.opx-tlw{color:var(--muted);flex:none;width:56px;font-size:11px;}
+.opx-tle{font-weight:600;color:var(--ink);text-transform:capitalize;}
+.opx-tld{color:var(--ink-2,#574d68);}
+.opx-tla{margin-left:auto;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+/* ── Today's Sales Moves rail (overview) ── */
+.opx-rail{margin:6px 0 30px;}
+.opx-rail-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.opx-rail-track{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;}
+.opx-move{flex:0 0 236px;padding:14px 15px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;cursor:pointer;transition:border-color .12s, transform .12s;}
+.opx-move:hover{border-color:var(--p);transform:translateY(-1px);}
+.opx-move:focus-visible{outline:2px solid var(--p);outline-offset:2px;}
+.opx-move.urgent{border-color:rgba(176,58,46,0.35);}
+.opx-move-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.opx-move-top .opx-val{margin-left:auto;}
+.opx-move-title{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.opx-move-action{font-size:12px;color:var(--ink-2,#574d68);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+@media (prefers-reduced-motion: reduce){ .opx-move{transition:none;} }
+/* ── Invoices: the money, right now ── */
+.invc-wrap{padding:16px 18px 14px;border:1px solid rgba(91,63,160,0.14);border-radius:16px;background:#fff;margin-bottom:20px;}
+.invc-stats{display:flex;gap:26px;flex-wrap:wrap;}
+.invc-stat .invc-n{font-family:var(--serif,Georgia);font-size:22px;font-weight:600;color:var(--ink);line-height:1.15;}
+.invc-stat.bad .invc-n{color:#b03a2e;}
+.invc-stat .invc-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.invc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(0,0,0,0.05);flex-wrap:wrap;}
+.invc-main{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;}
+.invc-who{font-size:13px;font-weight:600;color:var(--ink);}
+.invc-what{font-size:12.5px;color:var(--ink-2,#574d68);}
+.invc-link{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#1a7e49;background:#e7f6ee;padding:2px 8px;border-radius:100px;white-space:nowrap;}
+.invc-side{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.invc-side .opx-val{margin-left:0;margin-right:4px;}
+@media (max-width:640px){ .invc-stats{gap:16px;} .invc-stat .invc-n{font-size:18px;} }
+/* ── Messages: context chips + in-thread draft bar ── */
+.msgx-ctx{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
+.msgx-chip{font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.18);background:#fff;color:var(--p);cursor:pointer;}
+.msgx-chip.bad{color:#b03a2e;border-color:rgba(176,58,46,0.3);background:#fdecea;}
+.msgx-chip.quiet{color:var(--muted);border-color:rgba(0,0,0,0.08);cursor:default;}
+.msgx-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px dashed rgba(91,63,160,0.25);border-radius:10px;background:rgba(91,63,160,0.03);font-size:12px;color:var(--ink-2,#574d68);margin-bottom:10px;}
+</style>
 
       <!-- OPPORTUNITIES — the second consumer of the reasoning engine. Asks the
            brain "which opportunity is strongest?" and renders the narrated read.
@@ -1849,7 +1926,7 @@ function go(page) {
   if (page === "clients") loadClients();
   if (page === "hub") loadHub();
   if (page === "team") { tmLoad(); tmRoleHint(); }
-  if (page === "messages") loadTemplates();
+  if (page === "messages") { loadTemplates(); try { loadMsgTriage(); } catch(e){} }
   if (page === "opportunities") loadOpportunities();
   if (page === "prospects") loadProspects();
   if (page === "reports") loadReports();
@@ -1857,6 +1934,7 @@ function go(page) {
   if (page === "growth") loadGrowth();
   if (page === "integrations") loadIntegrations();
   if (page === "analytics") loadAnalytics();
+  if (page === "invoices") { try { loadInvoiceCommand(); } catch(e){} }
   try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
 }
 
@@ -2364,6 +2442,7 @@ async function showOsLeadDetail(lead, detail) {
       '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
         '<button id="osSendBtn" onclick="osSendReply(\''+L.id+'\')" style="background:var(--p);color:#fff;border:none;font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Send reply</button>'+
         '<button id="osDraftBtn" onclick="osDraftReply(\''+L.id+'\')" style="background:#fff;color:var(--ink);border:1px solid rgba(91,63,160,0.2);font-weight:500;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Draft for me</button>'+
+        '<button onclick="osConvertLead(\''+L.id+'\')" style="background:#fff;color:#1a7e49;border:1px solid rgba(26,126,73,0.35);font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Convert to client \u2192</button>'+
       '</div>'+
     '</div>';
 }
@@ -2789,6 +2868,11 @@ async function loadHub() {
   hubLeads = res[1] || [];
   clients = hubClients; // keep the rest of the panel in sync
   renderHub();
+  // arriving from Clients detail ("Open full record") — open that client now
+  if (window.HUB_PENDING) {
+    var pid = window.HUB_PENDING; window.HUB_PENDING = null;
+    try { openHubClient(pid); } catch(e){}
+  }
 }
 
 function renderHub() {
@@ -2871,13 +2955,18 @@ async function openHubClient(id) {
     api("intake_forms?select=*&client_id=eq."+c.id+"&order=submitted_at.desc"),
     api("client_requests?select=*&client_id=eq."+c.id+"&order=created_at.desc"),
     api("activity_log?select=*&client_id=eq."+c.id+"&order=created_at.desc&limit=20"),
-    clientEmailForContact ? api("contacts?select=id&email=eq."+encodeURIComponent(clientEmailForContact)+"&limit=1") : Promise.resolve([])
+    clientEmailForContact ? api("contacts?select=id&email=eq."+encodeURIComponent(clientEmailForContact)+"&limit=1") : Promise.resolve([]),
+    api("opportunities?select=id,status,category,title,value_estimate&client_id=eq."+c.id+"&deleted_at=is.null&limit=50").catch(function(){return [];})
   ]);
   var msgs = res[0]||[], files = res[1]||[], invs = res[2]||[], apprs = res[3]||[], tl = res[4]||[];
   var intake = (res[5]||[])[0] || null;
   var requests = res[6]||[];
   var activity = res[7]||[];
   var hasMatchingContact = !!(res[8] && res[8].length);
+  var hubOpps = (res[9]||[]).filter(function(o){ return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1; });
+  var hubOppVal = hubOpps.reduce(function(s,o){ return s+(o.value_estimate?Number(o.value_estimate):0); },0);
+  var hubOverdueAmt = invs.filter(function(i){ return i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now(); })
+    .reduce(function(s,i){ return s+invcAmt(i.amount); },0);
   var leads = hubLeads.filter(function(l){
     return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
   });
@@ -2908,14 +2997,23 @@ async function openHubClient(id) {
   html += '<button onclick="document.getElementById(\'hubDetail\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,0.15);background:transparent;color:var(--muted);cursor:pointer;">Close</button>';
   html += '</div></div>';
 
+  // ── THE ENGINE'S READ — relationship health + next best action, the same
+  //    brain the Clients tab asks, embedded so the record is also the judgment.
+  //    Loads after render, fails soft (record works even if the brain is down).
+  html += '<div id="hubBrain-'+c.id+'"></div>';
+
   // Stat row
   html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:18px;">';
   html += statBox((c.progress||0)+"%","Progress");
   html += statBox(msgs.length,"Messages");
   html += statBox(files.length,"Files");
-  html += statBox(pendingInv,"Open invoices");
+  html += hubOverdueAmt
+    ? '<div style="text-align:center;padding:12px;background:#fdecea;border:1px solid rgba(176,58,46,0.25);border-radius:10px;"><div style="font-size:20px;font-weight:700;color:#b03a2e;">'+invcFmt(hubOverdueAmt)+'</div><div style="font-size:10px;color:#b03a2e;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;">Overdue</div></div>'
+    : statBox(pendingInv,"Open invoices");
   html += statBox(pendingAppr,"Pending approvals");
-  html += statBox(leads.length,"Tool runs");
+  html += hubOpps.length
+    ? statBox(hubOpps.length + (hubOppVal?(' \u00b7 '+invcFmt(hubOppVal)):''), "Open opportunities")
+    : statBox(leads.length,"Tool runs");
   html += '</div>';
 
   // ── NOTES (saved to the matching contact's owner_notes) ──
@@ -2965,6 +3063,9 @@ async function openHubClient(id) {
     {ctx:"invoices",   label:"Send invoice",    p:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
     {ctx:"contracts",  label:"Documents",       p:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'}
   ];
+  if (hubOpps.length) {
+    hubActs.push({ctx:"__opps", label:"Opportunities ("+hubOpps.length+")", p:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'});
+  }
   hubActs.forEach(function(a){
     html += '<button onclick="hubJumpTo(\''+a.ctx+'\',\''+c.id+'\')" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:8px 13px;border-radius:9px;border:1px solid rgba(91,63,160,0.15);background:rgba(91,63,160,0.04);color:var(--p);cursor:pointer;font-weight:500;">'+
       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+a.p+'</svg>'+a.label+'</button>';
@@ -3237,7 +3338,45 @@ async function openHubClient(id) {
 
   detail.innerHTML = html;
   try { prefillHubNotes((c.contact_email||c.email||"").toLowerCase(), c.id); } catch(e){}
+  try { hubLoadBrain(c); } catch(e){}
 }
+
+// The engine's read on this client, embedded in the record: relationship
+// health + the concrete next move, with a grounded draft one click away.
+// Same two questions the Clients tab asks; same brain; fail-soft.
+async function hubLoadBrain(c){
+  var host=document.getElementById('hubBrain-'+c.id);
+  if(!host) return;
+  host.innerHTML='<div class="bf-skel" style="height:40px;border-radius:12px;margin-top:16px;"></div>';
+  try{
+    var pair=await Promise.all([
+      integApi('reasoning_query',{question:'relationship_health', subjectId:String(c.id)}),
+      integApi('reasoning_query',{question:'recommend_for_client', subjectId:String(c.id)})
+    ]);
+    var health=(pair[0]&&pair[0].data)||null;
+    var rec=(pair[1]&&pair[1].data)||null;
+    var items=(health&&health.items)||[];
+    var h=clHealth(items[0]?items[0].kind:'healthy');
+    var recItem=(rec&&rec.items&&rec.items[0])||null;
+    HUB_BRAIN_REC[c.id]=recItem||null;
+    var line=(health&&health.answer)||'';
+    var next=(rec&&rec.answer)||'';
+    if(!line&&!next){ host.innerHTML=''; return; }
+    host.innerHTML =
+      '<div style="margin-top:16px;padding:13px 15px;border:1px solid rgba(91,63,160,0.14);border-radius:12px;background:rgba(91,63,160,0.025);">'
+        +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">'
+          +'<span class="bf-conf-pill" style="color:'+h.c+';background:'+h.bg+';">'+h.w+'</span>'
+          +(line?'<span style="font-size:13px;color:var(--ink);line-height:1.5;">'+escHtml(line)+'</span>':'')
+        +'</div>'
+        +(next?'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:4px;">'
+          +'<div style="font-size:12.5px;color:var(--ink-2,#574d68);line-height:1.5;"><strong style="color:var(--p);">Next best move:</strong> '+escHtml(next)+'</div>'
+          +(recItem&&bfActionable(recItem)?'<button class="iabtn" style="color:var(--p);font-weight:600;flex:none;" onclick="hubDraftRec(\''+c.id+'\')">Draft it \u2192</button>':'')
+        +'</div>':'')
+      +'</div>';
+  }catch(e){ host.innerHTML=''; }
+}
+var HUB_BRAIN_REC = {};
+function hubDraftRec(cid){ if(HUB_BRAIN_REC[cid]) ddsDraftAction(HUB_BRAIN_REC[cid]); }
 
 // Create the missing contacts row for a given client, using that client's
 // current record as the source of truth. Generic — works for any client_id,
@@ -3335,6 +3474,7 @@ async function editProjectSummary(clientId) {
 
 // Jump to a working tab with this client pre-selected
 function hubJumpTo(ctx, clientId) {
+  if (ctx === "__opps") { go('opportunities'); return; }
   go(ctx);
   setTimeout(function(){
     var sel = document.getElementById("sel-"+ctx);
@@ -3654,6 +3794,8 @@ async function loadBrief(){
   if(!root) return;
   if(BRIEF.loading) return;
   BRIEF.loading=true;
+  // the Sales Moves rail loads in parallel — independent call, independent render
+  try{ if(typeof loadSalesMoves==='function') loadSalesMoves(); }catch(e){}
   bfRenderSkeleton(root);
   try{
     var r=await integApi('studio_brief',{});
@@ -3972,6 +4114,13 @@ function ddsRenderComposer(item, d){
   var subjField = d.channel==='email'
     ? '<label class="dds-act-label">Subject</label><input id="ddsActSubj" class="dds-act-input" value="'+escAttr(d.subject_line||'')+'">'
     : '';
+  // WORKFLOW: when the draft is a portal message to a known client, sending is
+  // one click HERE — same write + notify + feed path as the Messages page —
+  // instead of copy, navigate, select, paste, send.
+  var canPortalSend = d.channel!=='email' && item.module==='Clients' && item.subjectId;
+  var primaryBtn = canPortalSend
+    ? '<button class="bf-act primary" id="ddsPortalSendBtn" onclick="ddsSendPortal(\''+escAttr(item.subjectId)+'\')">Send in portal \u2192</button>'
+    : '<button class="bf-act primary" onclick="ddsSendDraft(\''+escAttr(item.go||'')+'\',\''+escAttr(item.refId||'')+'\')">'+(d.channel==='email'?'Open in email':'Go send it')+' \u2192</button>';
   form.innerHTML =
     subjField
     +'<label class="dds-act-label">'+(d.channel==='email'?'Message':'Message to '+escHtml(item.subject||'them'))+'</label>'
@@ -3980,8 +4129,35 @@ function ddsRenderComposer(item, d){
     +'<div class="dds-act-foot">'
       +'<button class="bf-act" onclick="ddsCloseComposer()">Cancel</button>'
       +'<button class="bf-act" onclick="ddsCopyDraft()">Copy</button>'
-      +'<button class="bf-act primary" onclick="ddsSendDraft(\''+escAttr(item.go||'')+'\',\''+escAttr(item.refId||'')+'\')">'+(d.channel==='email'?'Open in email':'Go send it')+' \u2192</button>'
+      +primaryBtn
     +'</div>';
+}
+
+// send the draft straight into the client's portal thread: message row +
+// notification + project-feed emit, with the same honest emailed/not toast
+// the Messages page gives. Never sends without the button press; never
+// pretends an email went out when it didn't.
+async function ddsSendPortal(clientId){
+  var bodyEl=document.getElementById('ddsActBody');
+  var text=bodyEl?String(bodyEl.value||'').trim():'';
+  if(!text){ if(window.integToast) integToast('Nothing to send yet'); return; }
+  var btn=document.getElementById('ddsPortalSendBtn');
+  if(btn){ btn.disabled=true; btn.textContent='Sending\u2026'; }
+  try{
+    var rows=await api('clients?select=*&id=eq.'+encodeURIComponent(clientId)+'&limit=1');
+    var c=rows&&rows[0];
+    if(!c){ if(window.integToast) integToast('Couldn\u2019t find that client'); if(btn){btn.disabled=false;btn.textContent='Send in portal \u2192';} return; }
+    await api('messages','POST',{client_id:c.id, from_who:'eric', sender_name:'Eric', text:text});
+    try{ await api('notifications','POST',{client_id:c.id, type:'message', title:'New message from Eric', body:text.slice(0,90), link_tab:'messages'}); }catch(e){}
+    var result={ emailed:false, reason:'exception' };
+    try{ result=await emitClientMessageToFeed(c, text); }catch(e){}
+    ddsCloseComposer();
+    if(window.integToast) integToast(result.emailed ? '\u2713 Sent \u2014 client notified by email' : '\u2713 Sent to their portal (email didn\u2019t go: '+(result.reason||'unknown')+')');
+    try{ if(typeof loadMsgTriage==='function'){ MSGX.loading=false; var h=document.getElementById('msgTriage'); if(h) h.innerHTML=''; } }catch(e){}
+  }catch(e){
+    if(window.integToast) integToast('Couldn\u2019t send \u2014 try again');
+    if(btn){ btn.disabled=false; btn.textContent='Send in portal \u2192'; }
+  }
 }
 
 function ddsCopyDraft(){
@@ -4000,31 +4176,34 @@ function ddsSendDraft(go, refId){
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  OPPORTUNITIES — the second consumer of the reasoning engine.
-//  Asks the brain "which opportunity is strongest?" and renders the answer as a
-//  narrated read: the one to act on, then the ranked few, each interpreted (not
-//  a table). It implements ZERO scoring or business logic of its own — every
-//  judgment comes from reasoning_query. This is the proof the brain is reusable:
-//  the Brief asks one question, Opportunities asks another, same machinery.
+//  OPPORTUNITIES — the sales command center workspace.
+//  Discovery still comes from the reasoning engine; STATE now persists. Every
+//  opportunity is a row with a lifecycle (surfaced → viewed → drafted → sent →
+//  followed_up → won / lost / dismissed), a value with an honest basis, a next
+//  action with a due date, and a full activity timeline. One list call
+//  (opportunities_list) syncs the engine's read, runs the close-loop
+//  auto-resolve, and returns the workspace.
 // ════════════════════════════════════════════════════════════════════════════
-var OPP = { data:null, loading:false };
+var OPPX = { rows:[], loading:false, filter:'all', q:'', openId:null, tl:{}, answer:null, pattern:null, conf:'medium', confReason:'', pendingOpen:null };
+var OPPX_OPEN = { surfaced:1, viewed:1, drafted:1, sent:1, followed_up:1 };
 
 async function loadOpportunities(){
   var root=document.getElementById('oppRoot');
   if(!root) return;
-  if(OPP.loading) return;
-  OPP.loading=true;
+  if(OPPX.loading) return;
+  OPPX.loading=true;
   oppRenderSkeleton(root);
   try{
-    // ask the brain for EVERY open opportunity — inbound audits AND expansion
-    // openings on existing clients — ranked together by the deterministic engine.
-    var r=await integApi('reasoning_query',{question:'all_opportunities'});
-    OPP.data=(r&&r.data)||null;
-    oppRender(root, OPP.data);
+    var r=await integApi('opportunities_list',{});
+    var d=(r&&r.data)||{};
+    OPPX.rows=d.rows||[];
+    OPPX.answer=d.answer; OPPX.pattern=d.pattern;
+    OPPX.conf=d.confidence||'medium'; OPPX.confReason=d.confidence_reason||'';
+    oppxRender();
   }catch(e){
     oppRenderError(root, e);
   }finally{
-    OPP.loading=false;
+    OPPX.loading=false;
   }
 }
 
@@ -4033,7 +4212,6 @@ function oppRenderSkeleton(root){
     '<div class="bf-eyebrow">Opportunities</div>'
     +'<div class="bf-skel" style="height:29px;width:78%;margin-bottom:10px;"></div>'
     +'<div class="bf-skel" style="height:29px;width:50%;margin-bottom:24px;"></div>'
-    +'<div class="bf-skel" style="height:74px;width:100%;border-radius:16px;margin-bottom:26px;"></div>'
     +[0,1,2].map(function(){ return '<div style="padding:16px 2px;border-top:1px solid var(--bf-line);display:flex;gap:14px;"><div class="bf-skel" style="height:30px;width:30px;border-radius:8px;"></div><div style="flex:1;"><div class="bf-skel" style="height:15px;width:40%;margin-bottom:8px;"></div><div class="bf-skel" style="height:13px;width:65%;"></div></div></div>'; }).join('');
 }
 
@@ -4045,146 +4223,374 @@ function oppRenderError(root, e){
     +'<button class="bf-act" onclick="loadOpportunities()">Try again</button>';
 }
 
-// a business that scored low (35) is a strong fit; high (72) is a lighter one.
-// surface the raw score (what Eric recognizes) and a fit word from confidence.
-function oppFit(c){
-  return ({
-    high:{c:'#1a7e49',w:'High fit'},
-    medium:{c:'#9a7a1a',w:'Medium fit'},
-    low:{c:'#7a6d8e',w:'Lower fit'}
-  })[c]||{c:'#7a6d8e',w:'Lower fit'};
+// ── vocabulary: categories, statuses, small formatters ──
+var OPPX_CAT = {
+  new_inbound:      { label:'New inbound',   c:'#5b3fa0', bg:'rgba(91,63,160,0.08)' },
+  expansion:        { label:'Grow existing', c:'#1a7e49', bg:'#e7f6ee' },
+  retention_risk:   { label:'Retention risk',c:'#b03a2e', bg:'#fdecea' },
+  billing_recovery: { label:'Billing',       c:'#b03a2e', bg:'#fdecea' },
+  renewal:          { label:'Renewal',       c:'#9a7a1a', bg:'#fdf6e3' },
+  referral:         { label:'Referral',      c:'#0e7a6e', bg:'#e4f5f2' }
+};
+var OPPX_STATUS = {
+  surfaced:    { label:'New',         c:'#5b3fa0', bg:'rgba(91,63,160,0.10)' },
+  viewed:      { label:'Seen',        c:'#574d68', bg:'rgba(87,77,104,0.10)' },
+  drafted:     { label:'Drafted',     c:'#2b6cb0', bg:'#e8f1fb' },
+  sent:        { label:'Sent',        c:'#9a7a1a', bg:'#fdf6e3' },
+  followed_up: { label:'Followed up', c:'#0e7a6e', bg:'#e4f5f2' },
+  won:         { label:'Won',         c:'#1a7e49', bg:'#e7f6ee' },
+  lost:        { label:'Lost',        c:'#7a6d8e', bg:'#f3f0fa' },
+  dismissed:   { label:'Dismissed',   c:'#7a6d8e', bg:'#f3f0fa' }
+};
+function oppxCat(r){ return OPPX_CAT[r.category] || { label:r.category, c:'#7a6d8e', bg:'#f3f0fa' }; }
+function oppxSt(r){ return OPPX_STATUS[r.status] || { label:r.status, c:'#7a6d8e', bg:'#f3f0fa' }; }
+function oppxIsOpen(r){ return !!OPPX_OPEN[r.status]; }
+function oppxVal(r){
+  if(r.value_estimate==null) return '';
+  var v=Number(r.value_estimate);
+  var s = v>=1000 ? '$'+(Math.round(v/100)/10).toLocaleString()+'k' : '$'+v.toLocaleString();
+  return '<span class="opx-val" title="'+escAttr(r.value_basis||'')+'">'+s+' <span style="font-weight:400;opacity:.65;">est</span></span>';
 }
-// pull the numeric score out of the brain's "changed" sentence ("...scored 44")
-function oppScore(it){
-  var m=String(it.changed||'').match(/scored\s+(\d{1,3})/i);
-  return m ? m[1] : null;
+function oppxAgo(iso){
+  if(!iso) return null;
+  var d=Math.floor((Date.now()-new Date(iso).getTime())/86400000);
+  return d<=0?'today':(d===1?'1d ago':d+'d ago');
+}
+function oppxStalled(r){
+  return oppxIsOpen(r) && (r.status==='sent'||r.status==='followed_up') && r.last_touch_at
+    && (Date.now()-new Date(r.last_touch_at).getTime()) > 7*86400000;
+}
+function oppxDueChip(r){
+  if(!oppxIsOpen(r) || !r.next_action_due) return '';
+  var ms=new Date(r.next_action_due).getTime(); var days=Math.ceil((ms-Date.now())/86400000);
+  if(days<0)  return '<span class="opx-due over">due '+Math.abs(days)+'d ago</span>';
+  if(days===0)return '<span class="opx-due over">due today</span>';
+  return '<span class="opx-due">due in '+days+'d</span>';
 }
 
-function oppRender(root, d){
-  if(!d){ return oppRenderError(root, null); }
-  var items=d.items||[];
+// ── filters (New / Warm / At Risk / Won / Lost, plus All) ──
+function oppxMatches(r, f){
+  if(f==='all')  return oppxIsOpen(r);
+  if(f==='new')  return oppxIsOpen(r) && r.category==='new_inbound';
+  if(f==='warm') return oppxIsOpen(r) && (r.category==='expansion'||r.category==='renewal'||r.category==='referral');
+  if(f==='atrisk') return oppxIsOpen(r) && (r.category==='retention_risk'||r.category==='billing_recovery'||oppxStalled(r));
+  if(f==='won')  return r.status==='won';
+  if(f==='lost') return r.status==='lost'||r.status==='dismissed';
+  return true;
+}
+function oppxSetFilter(f){ OPPX.filter=f; oppxRender(); }
+function oppxSearch(v){ OPPX.q=String(v||'').toLowerCase(); oppxRender(); }
 
-  // ── empty / all-quiet: the hero, inviting discovery, never a sad blank ──
-  if(!items.length){
-    root.innerHTML =
-      '<div class="bf-eyebrow">Opportunities</div>'
-      +'<div style="padding:24px 0 8px;">'
-        +'<div style="width:46px;height:46px;border-radius:50%;background:var(--p-soft,#f1ecf9);display:flex;align-items:center;justify-content:center;margin-bottom:20px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--p,#5b3fa0)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>'
-        +'<h1 class="bf-headline" style="max-width:560px;margin-bottom:10px;">'+escHtml(d.answer||'No opportunities surfaced yet.')+'</h1>'
-        +'<div style="font-size:14.5px;color:var(--ink-2,#574d68);line-height:1.6;max-width:520px;margin-bottom:24px;">When a business runs your free review and looks genuinely worth your time, the strongest ones land here, ranked by fit. You can also look at any business yourself.</div>'
-        +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
-          +'<button class="bf-act primary" onclick="oppLookAtBusiness()">Look at a business \u2192</button>'
-          +'<button class="bf-act" onclick="go(\'prospects\')">Outreach log</button>'
-        +'</div>'
-      +'</div>';
-    return;
-  }
+var OPPX_EMPTY = {
+  all:  { h:'Nothing open right now.', s:'Opportunities arrive from four places: your free review tool, the contact form, the signals the studio measures nightly on existing clients, and happy survey responses. You can also point the AI Review tool at any business yourself.' },
+  new:  { h:'No new inbound right now.', s:'Inbound lands here when a business runs your free review or writes through the contact form. Sharing the review tool is the fastest way to fill this list.' },
+  warm: { h:'No expansion openings on your current clients.', s:'When the nightly signals find a fixable gap — a slow site, weak SEO, no analytics, no care plan — or a renewal window or a happy client worth a referral ask, it lands here.' },
+  atrisk:{ h:'Nothing at risk. The book is healthy.', s:'Overdue balances, clients gone quiet, and offers that stalled after sending would show here — with the move to make on each.' },
+  won:  { h:'No wins recorded yet.', s:'When an accepted offer\u2019s invoice gets paid — or you mark one won — it lands here, so over time you can see what actually converts.' },
+  lost: { h:'Nothing lost or dismissed.', s:'Dismissed items stay quiet for 60 days, then return only if the condition still holds. Lost ones stay put so you can learn from them.' }
+};
 
-  // Two kinds of opportunity now flow through here. Split them because the
-  // action differs: "grow existing" is a warm client you offer a service to;
-  // "new inbound" is a stranger who raised a hand and you open a conversation.
-  var GROW = { expansion_fit:1, care_plan_gap:1 };
-  var grow = items.filter(function(it){ return GROW[it.signal]; });
-  var inbound = items.filter(function(it){ return !GROW[it.signal]; });
+// ── the workspace render ──
+function oppxRender(){
+  var root=document.getElementById('oppRoot');
+  if(!root) return;
+  var rows=OPPX.rows||[];
+  var q=OPPX.q;
+  var visible=rows.filter(function(r){
+    if(!oppxMatches(r, OPPX.filter)) return false;
+    if(q && (String(r.title||'')+' '+String(r.summary||'')).toLowerCase().indexOf(q)===-1) return false;
+    return true;
+  });
 
-  // stash the current items so the one-click Draft button can find its item by id
-  OPP.byId = {};
-  items.forEach(function(it){ OPP.byId[it.subjectId||it.refId||it.id] = it; });
+  // filter chips with live counts
+  var counts={ all:0,new:0,warm:0,atrisk:0,won:0,lost:0 };
+  rows.forEach(function(r){ Object.keys(counts).forEach(function(f){ if(oppxMatches(r,f)) counts[f]++; }); });
+  var FILTERS=[['all','All'],['new','New'],['warm','Warm'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
+  var chips=FILTERS.map(function(f){
+    var on=OPPX.filter===f[0];
+    return '<button class="opx-filter'+(on?' on':'')+'" onclick="oppxSetFilter(\''+f[0]+'\')">'+f[1]+(counts[f[0]]?' <span class="opx-fcount">'+counts[f[0]]+'</span>':'')+'</button>';
+  }).join('');
 
-  var top=items[0];
-  var topIsGrow = !!GROW[top.signal];
-  var topBtn = topIsGrow
-    ? '<button class="bf-start-btn" onclick="oppDraft(\''+escAttr(top.subjectId||top.refId)+'\')">Draft the offer \u2192</button>'
-    : '<button class="bf-start-btn" onclick="oppOpen(\''+escAttr(top.refId)+'\')">See the audit \u2192</button>';
-  var startCard=
-    '<div class="bf-start">'
-      +'<div class="bf-start-l">Start here</div>'
-      +'<div class="bf-start-row">'
-        +'<div><div class="bf-start-action">'+escHtml(top.action||('Reach out to '+top.subject))+'</div>'
-        +'<div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;max-width:440px;line-height:1.5;">'+escHtml(top.why||'')+'</div></div>'
-        +topBtn
-      +'</div>'
+  var toolbar=
+    '<div class="opx-toolbar">'
+      +'<input class="opx-search" placeholder="Search by client or business\u2026" value="'+escAttr(OPPX.q)+'" oninput="oppxSearch(this.value)" aria-label="Search opportunities">'
+      +'<div class="opx-filters">'+chips+'</div>'
     +'</div>';
 
-  // one row renderer, aware of which kind it is so the primary action fits.
-  function oppRow(it){
-    var isGrow = !!GROW[it.signal];
-    var fit=oppFit(it.confidence);
-    var sc=oppScore(it);
-    var idAttr = escAttr(it.subjectId||it.refId||'');
-    // grow-existing rows show impact (e.g. "recurring revenue") where inbound
-    // rows show the audit score — each surfaces the number that actually decides.
-    var leadCol = (!isGrow && sc)
-      ? '<div style="text-align:center;flex:none;width:42px;"><div class="op-score" style="color:'+fit.c+';">'+escHtml(sc)+'</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">score</div></div>'
-      : '<span class="bf-cdot" style="background:'+fit.c+';margin-top:7px;"></span>';
-    var primary = isGrow
-      ? '<button class="bf-act primary" onclick="event.stopPropagation();oppDraft(\''+idAttr+'\')">Draft the offer \u2192</button>'
-      : '<button class="bf-act" onclick="event.stopPropagation();oppOpen(\''+escAttr(it.refId)+'\')">See the audit \u2192</button>';
-    var impactTag = (isGrow && it.impact)
-      ? '<span style="font-size:10.5px;font-weight:500;color:'+fit.c+';">'+escHtml(it.impact)+'</span>'
-      : '<span style="font-size:10.5px;font-weight:500;color:'+fit.c+';">'+fit.w+'</span>';
-    return '<div class="bf-row exp op-row" tabindex="0" role="button" aria-expanded="false">'
-      +leadCol
-      +'<div class="bf-rmain">'
-        +'<div class="bf-rtop"><div class="bf-subj">'+escHtml(it.subject)+'</div>'+impactTag+'</div>'
-        +'<div class="bf-changed">'+escHtml(it.changed||'')+'</div>'
-        +'<div class="bf-why">'+escHtml(it.why||'')+'</div>'
-        +'<div class="bf-ractions">'+primary+'<button class="bf-whymore" onclick="event.stopPropagation();bfToggleRow(this)">why this one?</button></div>'
-      +'</div>'
+  var patternLine = OPPX.pattern
+    ? '<div class="bf-pattern"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(OPPX.pattern)+'</span></div>'
+    : '';
+
+  var body='';
+  if(!visible.length){
+    var em=OPPX_EMPTY[OPPX.filter]||OPPX_EMPTY.all;
+    body='<div style="padding:26px 0 8px;">'
+      +'<div style="width:46px;height:46px;border-radius:50%;background:var(--p-soft,#f1ecf9);display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--p,#5b3fa0)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>'
+      +'<div style="font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px;">'+escHtml(em.h)+'</div>'
+      +'<div style="font-size:13.5px;color:var(--ink-2,#574d68);line-height:1.6;max-width:520px;margin-bottom:20px;">'+escHtml(em.s)+'</div>'
+      +'<button class="bf-act primary" onclick="oppxLookFocus()">Look at a business \u2192</button>'
     +'</div>';
+  } else if(OPPX.filter==='all'){
+    // three sections in the order money moves: protect, grow, new
+    var protect=visible.filter(function(r){ return r.category==='retention_risk'||r.category==='billing_recovery'; });
+    var growS=visible.filter(function(r){ return r.category==='expansion'||r.category==='renewal'||r.category==='referral'; });
+    var inboundS=visible.filter(function(r){ return r.category==='new_inbound'; });
+    if(protect.length) body+='<div class="bf-secl">Protect the money</div>'+protect.map(oppxRow).join('');
+    if(growS.length)   body+='<div class="bf-secl" style="margin-top:'+(protect.length?'26px':'0')+';">Grow clients you already have</div>'+growS.map(oppxRow).join('');
+    if(inboundS.length)body+='<div class="bf-secl" style="margin-top:'+((protect.length||growS.length)?'26px':'0')+';">New inbound \u2014 they raised a hand</div>'+inboundS.map(oppxRow).join('');
+  } else {
+    body=visible.map(oppxRow).join('');
   }
 
-  var growSection = grow.length
-    ? '<div class="bf-secl">Grow clients you already have</div>'
-      +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 12px;line-height:1.55;">Warmer and higher-margin than cold outreach. Each one is a gap the signals already measured on a client who trusts you.</div>'
-      +grow.map(oppRow).join('')
-    : '';
-
-  var inboundSection = inbound.length
-    ? '<div class="bf-secl" style="margin-top:'+(grow.length?'28px':'0')+';">New inbound \u2014 they raised a hand</div>'
-      +'<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 12px;line-height:1.55;">Businesses that ran your free review and look worth your time, ranked by fit.</div>'
-      +inbound.map(oppRow).join('')
-    : '';
-
-  var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[d.confidence]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
+  var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
   var footer=
     '<div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--bf-line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">'
-      +'<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);"><span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(d.confidence_reason||'')+'</span></div>'
-      +'<button class="bf-act primary" onclick="oppLookAtBusiness()">+ Look at a business</button>'
+      +'<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);"><span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>'
+      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+        +'<input id="oppxLookUrl" placeholder="Paste a business website\u2026" aria-label="Business website to review" style="width:220px;padding:8px 12px;border:1.5px solid rgba(91,63,160,0.18);border-radius:9px;font-size:13px;outline:none;" onkeydown="if(event.key===\'Enter\')oppLookAtBusiness()">'
+        +'<button class="bf-act primary" onclick="oppLookAtBusiness()">Look at it \u2192</button>'
+      +'</div>'
     +'</div>';
-
-  var patternLine = d.pattern
-    ? '<div class="bf-pattern"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;opacity:.7;"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg><span>'+escHtml(d.pattern)+'</span></div>'
-    : '';
 
   root.innerHTML =
     '<div class="bf-eyebrow">Opportunities</div>'
-    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(d.answer||'')+'</h1>'
-    +'<div class="bf-sub">Everything worth pursuing right now \u2014 growing the clients you have, and the new ones reaching toward you.</div>'
+    +'<h1 class="bf-headline" aria-live="polite">'+escHtml(OPPX.answer||'Your open opportunities, with their state.')+'</h1>'
+    +'<div class="bf-sub">Where the next dollar is, what to say, when to say it \u2014 and whether it worked.</div>'
     +patternLine
-    +startCard
-    +growSection
-    +inboundSection
+    +toolbar
+    +body
     +footer;
 
-  Array.prototype.forEach.call(root.querySelectorAll('.bf-row.exp'), function(r){
-    function toggle(e){ if(e.target && e.target.tagName==='BUTTON')return; bfToggleRow(r); }
-    r.addEventListener('click', toggle);
-    r.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); bfToggleRow(r); } });
-  });
+  // a Sales Move card asked to open a specific row
+  if(OPPX.pendingOpen){
+    var pid=OPPX.pendingOpen; OPPX.pendingOpen=null;
+    if(rows.some(function(r){ return r.id===pid; })){ oppxToggle(pid); }
+  }
 }
 
-// One-click: draft the expansion offer for a grow-existing opportunity. Reuses
-// the shared engine composer (draft_action) — same machinery the Brief uses,
-// grounded only in the facts the engine already decided. No new intelligence.
-function oppDraft(id){
-  var it = OPP.byId && OPP.byId[id];
-  if(!it){ return; }
+// ── one row + its inline drawer ──
+function oppxRow(r){
+  var cat=oppxCat(r), st=oppxSt(r);
+  var open=OPPX.openId===r.id;
+  var touch=oppxAgo(r.last_touch_at);
+  var meta=[];
+  meta.push(touch?('touched '+touch):'no touch yet');
+  var due=oppxDueChip(r); if(due) meta.push(due);
+  if(oppxStalled(r)) meta.push('<span class="opx-due over">\u26a0 stalled</span>');
+
+  var actions='';
+  if(r.status==='surfaced'||r.status==='viewed') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Draft the offer \u2192</button>';
+  else if(r.status==='drafted') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxSet(\''+r.id+'\',{status:\'sent\'})">Mark sent</button><button class="bf-act" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Re-draft</button>';
+  else if(r.status==='sent'||r.status==='followed_up') actions='<button class="bf-act primary" onclick="event.stopPropagation();oppxDraft(\''+r.id+'\')">Draft follow-up</button><button class="bf-act" onclick="event.stopPropagation();oppxToggle(\''+r.id+'\',true)">Offer accepted \u2192</button>';
+  else actions='<button class="bf-act" onclick="event.stopPropagation();oppxSet(\''+r.id+'\',{status:\'surfaced\'})">Reopen</button>';
+
+  var head=
+    '<div class="opx-row'+(open?' open':'')+'" tabindex="0" role="button" aria-expanded="'+(open?'true':'false')+'" onclick="oppxToggle(\''+r.id+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();oppxToggle(\''+r.id+'\');}">'
+      +'<div class="opx-rmain">'
+        +'<div class="opx-rtop">'
+          +'<span class="opx-chip" style="color:'+st.c+';background:'+st.bg+';">'+st.label+'</span>'
+          +'<span class="opx-cat" style="color:'+cat.c+';">'+cat.label+'</span>'
+          +'<span class="opx-title">'+escHtml(r.title||'')+'</span>'
+          +oppxVal(r)
+        +'</div>'
+        +'<div class="bf-changed" style="margin-top:4px;">'+escHtml(r.summary||'')+'</div>'
+        +'<div class="opx-meta">'+meta.join('<span class="opx-dot">\u00b7</span>')+'</div>'
+        +'<div class="bf-ractions" style="margin-top:10px;">'+actions+'</div>'
+      +'</div>'
+    +'</div>';
+
+  return head + (open ? oppxDrawer(r) : '');
+}
+
+function oppxDrawer(r){
+  var canClose=oppxIsOpen(r);
+  var acceptForm = (canClose && r.client_id && !r.invoice_id)
+    ? '<div class="opx-accept"><div class="opx-dl">Offer accepted?</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+        +'<input id="opx-amt-'+r.id+'" type="number" min="1" step="1" placeholder="Amount" value="'+(r.value_estimate?Math.round(Number(r.value_estimate)):'')+'" style="width:120px;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;">'
+        +'<button class="bf-act primary" onclick="event.stopPropagation();oppxAccept(\''+r.id+'\')">Create the invoice \u2192</button>'
+      +'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;">Creates the invoice, generates the Stripe pay link, and copies it \u2014 one motion. When it\u2019s paid, this opportunity marks itself won.</div></div>'
+    : (r.invoice_id ? '<div class="opx-accept"><div class="opx-dl">Invoice linked</div><div style="font-size:12.5px;color:var(--ink-2,#574d68);">Awaiting payment \u2014 pays out to <strong>won</strong> automatically. <button class="bf-whymore" onclick="event.stopPropagation();go(\'invoices\')">Open invoices \u2192</button></div></div>'
+    : (canClose && !r.client_id && (r.lead_id||r.audit_lead_id) ? '<div class="opx-accept"><div class="opx-dl">Ready to work together?</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+        +'<button class="bf-act primary" onclick="event.stopPropagation();oppxConvert(\''+r.id+'\')">Convert to client \u2192</button>'
+      +'</div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;">Opens New Client with their details filled in. Once created, this opportunity links itself to the new client automatically \u2014 come back and Accept.</div></div>' : ''));
+
+  var dueVal = r.next_action_due ? String(r.next_action_due).slice(0,10) : '';
+  var closers = canClose
+    ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
+        +'<button class="bf-act" style="color:#1a7e49;" onclick="event.stopPropagation();oppxSet(\''+r.id+'\',{status:\'won\'})">Mark won</button>'
+        +'<button class="bf-act" onclick="event.stopPropagation();oppxLost(\''+r.id+'\')">Mark lost</button>'
+        +'<button class="bf-act" onclick="event.stopPropagation();oppxSet(\''+r.id+'\',{status:\'dismissed\'})" title="Stays quiet for 60 days, returns only if the condition persists">Dismiss</button>'
+      +'</div>'
+    : '';
+  var audit = r.audit_lead_id ? '<button class="bf-act" onclick="event.stopPropagation();oppOpen(\''+escAttr(r.audit_lead_id)+'\')">See the audit \u2192</button>' : '';
+
+  return '<div class="opx-drawer" onclick="event.stopPropagation();">'
+    +(r.why?'<div class="opx-dl">Why this matters</div><div class="bf-why" style="margin-bottom:14px;">'+escHtml(r.why)+'</div>':'')
+    +(r.value_basis&&r.value_estimate!=null?'<div style="font-size:12px;color:var(--muted);margin:-6px 0 14px;">Value basis: '+escHtml(r.value_basis)+'</div>':'')
+    +(canClose
+      ? '<div class="opx-dl">Next step</div>'
+        +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">'
+          +'<input id="opx-na-'+r.id+'" value="'+escAttr(r.next_action||'')+'" placeholder="What happens next" style="flex:1;min-width:180px;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;">'
+          +'<input id="opx-due-'+r.id+'" type="date" value="'+dueVal+'" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;">'
+          +'<button class="bf-act" onclick="event.stopPropagation();oppxSaveNext(\''+r.id+'\')">Save</button>'
+        +'</div>'
+      : '')
+    +acceptForm
+    +'<div class="opx-dl" style="margin-top:14px;">Add a note</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;">'
+      +'<input id="opx-note-'+r.id+'" placeholder="What happened?" style="flex:1;padding:8px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;" onkeydown="if(event.key===\'Enter\')oppxNote(\''+r.id+'\')">'
+      +'<button class="bf-act" onclick="event.stopPropagation();oppxNote(\''+r.id+'\')">Add</button>'
+    +'</div>'
+    +(audit?'<div style="margin-top:14px;">'+audit+'</div>':'')
+    +closers
+    +'<div class="opx-dl" style="margin-top:18px;">Activity</div>'
+    +'<div id="opx-tl-'+r.id+'" class="opx-tl"><div class="bf-skel" style="height:12px;width:60%;"></div></div>'
+  +'</div>';
+}
+
+// ── interactions ──
+function oppxToggle(id, focusAccept){
+  OPPX.openId = OPPX.openId===id ? null : id;
+  var r=(OPPX.rows||[]).find(function(x){ return x.id===id; });
+  oppxRender();
+  if(OPPX.openId===id && r){
+    if(r.status==='surfaced'){ oppxSet(id, {status:'viewed'}, true); }
+    oppxLoadTimeline(id);
+    if(focusAccept){ var a=document.getElementById('opx-amt-'+id); if(a) a.focus(); }
+    var el=document.querySelector('.opx-row.open'); if(el) try{ el.scrollIntoView({block:'nearest',behavior:'smooth'}); }catch(e){}
+  }
+}
+
+async function oppxSet(id, patch, silent){
+  try{
+    var r=await integApi('opportunity_update', Object.assign({id:id}, patch));
+    var row=r&&r.data&&r.data.row;
+    if(row){
+      OPPX.rows=(OPPX.rows||[]).map(function(x){ return x.id===id?row:x; });
+      OPPX.tl[id]=null; // timeline changed
+      if(!silent){ oppxRender(); if(OPPX.openId===id) oppxLoadTimeline(id); if(window.integToast) integToast(patch.status?('Marked '+patch.status.replace('_',' ')):'Saved'); }
+      else { OPPX.rows=OPPX.rows; }
+    }
+  }catch(e){ if(window.integToast) integToast('Couldn\u2019t save \u2014 try again'); }
+}
+
+function oppxLost(id){
+  // no prompt() — mark it, keep the drawer open, and the existing note field
+  // is right there for "what lost it" when there's a lesson worth keeping
+  OPPX.openId=id;
+  oppxSet(id, {status:'lost'});
+  if(window.integToast) integToast('Marked lost \u2014 add what lost it as a note if there\u2019s a lesson');
+}
+
+function oppxSaveNext(id){
+  var na=document.getElementById('opx-na-'+id), due=document.getElementById('opx-due-'+id);
+  oppxSet(id, { next_action: na?na.value:'', next_action_due: (due&&due.value)?due.value:null });
+}
+
+function oppxNote(id){
+  var el=document.getElementById('opx-note-'+id);
+  var t=el?String(el.value||'').trim():'';
+  if(!t) return;
+  el.value='';
+  oppxSet(id, {note:t});
+}
+
+async function oppxAccept(id){
+  var el=document.getElementById('opx-amt-'+id);
+  var amt=el?Number(el.value):0;
+  if(!amt||amt<=0){ if(window.integToast) integToast('Enter the accepted amount first'); return; }
+  try{
+    var r=await integApi('opportunity_accept',{id:id, amount:amt});
+    if(r&&r.data&&r.data.invoice_id){
+      if(window.integToast) integToast('Invoice created \u2014 getting the pay link\u2026');
+      // WORKFLOW: accept \u2192 invoice \u2192 Stripe link \u2192 copied, in one motion.
+      // genPayLink toasts honestly and copies the URL; if Stripe isn't
+      // configured it says so and the invoice still exists.
+      try{ await genPayLink(r.data.invoice_id); }catch(e){}
+      loadOpportunities();
+    } else {
+      if(window.integToast) integToast((r&&r.error==='no_client')?'Create the client first, then accept':'Couldn\u2019t create the invoice');
+    }
+  }catch(e){ if(window.integToast) integToast('Couldn\u2019t create the invoice'); }
+}
+
+// Draft the offer: same engine composer the Brief uses, grounded in this row's
+// facts. Opening a draft advances surfaced/viewed → drafted (the lifecycle
+// records intent, the timeline records the moment).
+function oppxDraft(id){
+  var r=(OPPX.rows||[]).find(function(x){ return x.id===id; });
+  if(!r) return;
   ddsDraftAction({
-    subject: it.subject, subjectId: it.subjectId||it.refId||'', signal: it.signal,
-    action: it.action, why: it.why, changed: it.changed, module: it.module||'Opportunities',
-    go: it.go, refId: it.refId
+    subject:r.title, subjectId:r.client_id||r.lead_id||'', signal:r.signal,
+    action:r.recommended_action||('Reach out to '+r.title), why:r.why, changed:r.summary,
+    module:'Opportunities', go:'opportunities', refId:r.audit_lead_id||''
   });
+  if(r.status==='surfaced'||r.status==='viewed'){ oppxSet(id,{status:'drafted'}, OPPX.openId!==id); }
+}
+
+// WORKFLOW: convert an unlinked opportunity's lead into a client without
+// retyping anything — the New Client form opens pre-filled from the source
+// row. After creation, the nightly/next sync links this opportunity to the
+// new client automatically (email match), so Accept unblocks by itself.
+async function oppxConvert(id){
+  var r=(OPPX.rows||[]).find(function(x){ return x.id===id; });
+  if(!r) return;
+  var name='', email='';
+  try{
+    if(r.lead_id){
+      var l=await api('leads?select=name,email&id=eq.'+r.lead_id+'&limit=1');
+      if(l&&l[0]){ name=l[0].name||''; email=l[0].email||''; }
+    } else if(r.audit_lead_id){
+      var a=await api('audit_leads?select=business_name,client_email&id=eq.'+r.audit_lead_id+'&limit=1');
+      if(a&&a[0]){ name=a[0].business_name||''; email=a[0].client_email||''; }
+    }
+  }catch(e){}
+  if(!name) name=r.title||'';
+  ddsPrefillNewClient(name, email, name?name+' \u2014 Website':'');
+}
+
+// shared prefill: one place that carries lead context into the New Client form
+function ddsPrefillNewClient(name, email, project){
+  go('newclient');
+  setTimeout(function(){
+    try{
+      var n=document.getElementById('nc-name'); if(n) n.value=name||'';
+      var em=document.getElementById('nc-cemail'); if(em) em.value=email||'';
+      var pr=document.getElementById('nc-proj'); if(pr&&project) pr.value=project;
+      toast(email?'Details carried over \u2014 review and create.':'Name carried over \u2014 add their email and create.');
+      if(n) n.scrollIntoView({behavior:'smooth',block:'center'});
+    }catch(e){}
+  }, 250);
+}
+
+// form-lead conversion (the contact-form inbox had no convert path at all)
+async function osConvertLead(leadId){
+  try{
+    var rows=await api('leads?select=name,email&id=eq.'+leadId+'&limit=1');
+    var l=rows&&rows[0]; if(!l) return;
+    ddsPrefillNewClient(l.name||'', l.email||'', l.name?l.name+' \u2014 Website':'');
+  }catch(e){}
+}
+
+async function oppxLoadTimeline(id){
+  var host=document.getElementById('opx-tl-'+id);
+  if(!host) return;
+  if(OPPX.tl[id]){ host.innerHTML=OPPX.tl[id]; return; }
+  try{
+    var r=await integApi('opportunity_timeline',{id:id});
+    var ev=(r&&r.data&&r.data.events)||[];
+    var html = ev.length ? ev.map(function(e){
+      var when=oppxAgo(e.created_at)||'';
+      var who=e.actor==='eric'?'you':(e.actor==='automation'?'auto':'engine');
+      return '<div class="opx-tli"><span class="opx-tlw">'+escHtml(when)+'</span><span class="opx-tle">'+escHtml(String(e.event).replace('_',' '))+'</span>'+(e.detail?'<span class="opx-tld">'+escHtml(e.detail)+'</span>':'')+'<span class="opx-tla">'+who+'</span></div>';
+    }).join('') : '<div style="font-size:12px;color:var(--muted);">No activity yet.</div>';
+    OPPX.tl[id]=html;
+    var host2=document.getElementById('opx-tl-'+id); if(host2) host2.innerHTML=html;
+  }catch(e){ host.innerHTML='<div style="font-size:12px;color:var(--muted);">Couldn\u2019t load the activity feed.</div>'; }
 }
 
 // drill into a surfaced opportunity: the audit detail already lives in the
@@ -4201,18 +4607,58 @@ function oppOpen(refId){
   }, 200);
 }
 
-// discovery as an ACTION, not a page: paste a URL, the existing AI Review tool
-// runs the real audit, and the result flows back into the engine as a signal.
+// discovery as an ACTION, not a page: paste a URL in the footer field, the
+// existing AI Review tool runs the real audit, and the result flows back into
+// the engine as a signal. No prompt() — the field lives in the workspace.
 function oppLookAtBusiness(){
-  var url = prompt('Paste a business website to look at (the AI Review tool will audit it):');
-  if(!url) return;
-  url = url.trim();
+  var el=document.getElementById('oppxLookUrl');
+  var url = el ? String(el.value||'').trim() : '';
+  if(!url){
+    if(el){ el.focus(); if(window.integToast) integToast('Paste their website first'); }
+    return;
+  }
   if(!/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+  if(el) el.value='';
   // open the public AI Review tool in a new tab; its run lands in audit_leads and
   // becomes a scored opportunity the brain will surface here next load.
   try{ window.open('https://davisdigitalstudio.com/ai-critique?url=' + encodeURIComponent(url), '_blank'); }
   catch(e){ go('prospects'); }
 }
+function oppxLookFocus(){ var el=document.getElementById('oppxLookUrl'); if(el){ el.focus(); el.scrollIntoView({behavior:'smooth',block:'center'}); } }
+
+// ════════════════════════════════════════════════════════════════════════════
+//  TODAY'S SALES MOVES — the dashboard rail. The 3-5 highest-value actions,
+//  ranked deterministically by the server (overdue touches first, then dollars,
+//  then category urgency). Each card is one click from the doing.
+// ════════════════════════════════════════════════════════════════════════════
+async function loadSalesMoves(){
+  var host=document.getElementById('salesMovesRoot');
+  if(!host) return;
+  try{
+    var r=await integApi('sales_moves',{});
+    var d=(r&&r.data)||{};
+    var moves=d.moves||[];
+    if(!moves.length){ host.innerHTML=''; return; }
+    var pv=d.pipeline_value?('<span style="font-size:12px;color:var(--muted);font-weight:400;">$'+Math.round(d.pipeline_value).toLocaleString()+' open pipeline</span>'):'';
+    var cards=moves.map(function(m){
+      var cat=OPPX_CAT[m.category]||{label:m.category,c:'#7a6d8e',bg:'#f3f0fa'};
+      var urgent=m.overdue||m.stalled;
+      var val=m.value!=null?('<span class="opx-val" title="'+escAttr(m.value_basis||'')+'">$'+(Number(m.value)>=1000?(Math.round(Number(m.value)/100)/10).toLocaleString()+'k':Number(m.value).toLocaleString())+'</span>'):'';
+      var flag=m.overdue?'<span class="opx-due over">due now</span>':(m.stalled?'<span class="opx-due over">\u26a0 stalled</span>':'');
+      return '<div class="opx-move'+(urgent?' urgent':'')+'" onclick="oppxGoto(\''+m.id+'\')" tabindex="0" role="button" onkeydown="if(event.key===\'Enter\'){oppxGoto(\''+m.id+'\');}">'
+        +'<div class="opx-move-top"><span class="opx-cat" style="color:'+cat.c+';">'+cat.label+'</span>'+flag+val+'</div>'
+        +'<div class="opx-move-title">'+escHtml(m.title||'')+'</div>'
+        +'<div class="opx-move-action">'+escHtml(m.action||'')+'</div>'
+      +'</div>';
+    }).join('');
+    host.innerHTML=
+      '<div class="opx-rail">'
+        +'<div class="opx-rail-head"><span class="bf-secl" style="margin:0;">Today\u2019s sales moves</span>'+pv+'</div>'
+        +'<div class="opx-rail-track">'+cards+'</div>'
+      +'</div>';
+  }catch(e){ host.innerHTML=''; }
+}
+function oppxGoto(id){ OPPX.pendingOpen=id; go('opportunities'); }
 
 // ════════════════════════════════════════════════════════════════════════════
 //  CLIENTS — the third consumer of the reasoning engine.
@@ -4382,20 +4828,193 @@ function clRenderDetail(root, name, health, rec){
     +signalsHtml
     +'<div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;gap:10px;flex-wrap:wrap;">'
       +'<button class="bf-act" onclick="clOpenRecord()">Open full record \u2192</button>'
-      +'<button class="bf-act" onclick="go(\'messages\')">Message them</button>'
+      +'<button class="bf-act" onclick="clMsgThem()">Message them</button>'
     +'</div>';
 }
 
 function clActLabel(go){
   return ({invoices:'Open billing',messages:'Open messages',approvals:'Open approvals',growth:'Open partnership',hub:'Open record',timeline:'Open timeline'})[go]||'Take me there';
 }
-function clActOn(go, refId){ if(go) window.go(go); }
+// route to the right tab WITH this client pre-selected — the bridge that was
+// missing: judgment (Clients) and record (Hub) are two halves of one workspace
+function clActOn(goKey, refId){
+  var cid = CLIENTS.detail ? CLIENTS.detail.id : '';
+  if(!goKey) return;
+  if(goKey==='hub'){ return clOpenRecord(); }
+  if(goKey==='growth' && cid){ return hubToGrowth(cid); }
+  if(cid && ['messages','invoices','files','approvals','timeline','contracts'].indexOf(goKey)>-1){ return hubJumpTo(goKey, cid); }
+  window.go(goKey);
+}
 function clDraftRec(){ if(CLIENTS._rec) ddsDraftAction(CLIENTS._rec); }function clBack(){ CLIENTS.detail=null; loadClients(); }
-function clOpenRecord(){ go('hub'); }
+function clOpenRecord(){
+  if(CLIENTS.detail) window.HUB_PENDING = CLIENTS.detail.id;
+  go('hub');
+}
+function clMsgThem(){ if(CLIENTS.detail) hubJumpTo('messages', CLIENTS.detail.id); else go('messages'); }
 // ── MESSAGES ──
+// ════════════════════════════════════════════════════════════════════════════
+//  MESSAGES — a relationship surface, not an outbox. Before any client is
+//  picked, the triage strip answers the two questions that matter: who is
+//  waiting on your reply, and who has gone quiet after yours. Once a client is
+//  open, the context panel shows their real state (overdue money, pending
+//  approvals, open opportunities, your usual reply time) while you write, and
+//  a grounded draft — fed their actual last message — is one click away.
+//  Sending is untouched: same sendMsg, same email notify, same honest toast.
+// ════════════════════════════════════════════════════════════════════════════
+var MSGX = { loading:false, clients:{}, lastByClient:{} };
+
+function msgxDays(iso){ return Math.floor((Date.now()-new Date(iso).getTime())/86400000); }
+
+async function loadMsgTriage(){
+  var host=document.getElementById('msgTriage');
+  if(!host||MSGX.loading) return;
+  MSGX.loading=true;
+  if(!host.innerHTML) host.innerHTML='<div class="bf-skel" style="height:52px;border-radius:14px;margin-bottom:16px;"></div>';
+  try{
+    var results=await Promise.all([
+      api('messages?select=client_id,from_who,created_at&order=created_at.desc&limit=1000'),
+      api('clients?select=id,name,status,monthly_amount&order=name&limit=500')
+    ]);
+    var msgs=results[0]||[], clients=results[1]||[];
+    MSGX.clients={}; clients.forEach(function(c){ MSGX.clients[c.id]=c; });
+    // newest message per client (list is already newest-first)
+    var last={};
+    msgs.forEach(function(m){ if(m.client_id && !last[m.client_id]) last[m.client_id]=m; });
+    MSGX.lastByClient=last;
+
+    var needsReply=[], waitingOnThem=[];
+    Object.keys(last).forEach(function(cid){
+      var c=MSGX.clients[cid];
+      if(!c || String(c.status||'').toLowerCase()==='archived') return;
+      var m=last[cid], d=msgxDays(m.created_at);
+      if(m.from_who==='client' && d<=45) needsReply.push({c:c, days:d});
+      else if(m.from_who==='eric' && d>=4 && d<=45) waitingOnThem.push({c:c, days:d});
+    });
+    needsReply.sort(function(a,b){ return b.days-a.days; });
+    waitingOnThem.sort(function(a,b){ return b.days-a.days; });
+
+    function row(x, kind){
+      var chip = kind==='reply'
+        ? '<span class="opx-due over">'+(x.days===0?'waiting today':'waiting '+x.days+'d')+'</span>'
+        : '<span class="opx-due">quiet '+x.days+'d</span>';
+      var draftBtn = kind==='reply'
+        ? '<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="msgxDraft(\''+x.c.id+'\',\'reply\')">Draft the reply</button>'
+        : '<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="msgxDraft(\''+x.c.id+'\',\'follow\')">Draft a follow-up</button>';
+      return '<div class="invc-row">'
+        +'<div class="invc-main">'+chip+'<span class="invc-who">'+escHtml(x.c.name||'')+'</span></div>'
+        +'<div class="invc-side">'+draftBtn
+          +'<button class="iabtn" onclick="msgxOpen(\''+x.c.id+'\')">Open thread</button>'
+        +'</div>'
+      +'</div>';
+    }
+
+    var body='';
+    if(needsReply.length){
+      body+='<div class="bf-secl">Needs your reply</div>'+needsReply.slice(0,6).map(function(x){ return row(x,'reply'); }).join('');
+    }
+    if(waitingOnThem.length){
+      body+='<div class="bf-secl" style="margin-top:'+(needsReply.length?'18px':'0')+';">Waiting on them \u2014 worth a nudge</div>'+waitingOnThem.slice(0,5).map(function(x){ return row(x,'follow'); }).join('');
+    }
+    if(!needsReply.length&&!waitingOnThem.length){
+      body='<div style="font-size:13px;color:var(--ink-2,#574d68);padding:2px 2px 4px;">Inbox zero \u2014 nobody is waiting on you, and nothing you sent recently has gone quiet. When a client writes, they appear here with a one-click grounded reply.</div>';
+    }
+    host.innerHTML='<div class="invc-wrap" style="padding-top:14px;">'+body+'</div>';
+  }catch(e){ host.innerHTML=''; }
+  finally{ MSGX.loading=false; }
+}
+
+// open a client's thread from a triage row: drive the existing selector so
+// every downstream behavior (banner, thread, context) fires the proven path
+function msgxOpen(cid){
+  var sel=document.getElementById('sel-messages');
+  if(sel){ sel.value=cid; }
+  onClientChange(cid,'messages');
+}
+
+// grounded draft: fetch the client's actual last message so the composer works
+// from their words, not a guess. Reply = waiting_on_eric; nudge = churn_risk
+// (the engine's own vocabulary for "gone quiet") — both already draftable.
+async function msgxDraft(cid, kind){
+  var c=MSGX.clients[cid]||{};
+  var rows=await api('messages?select=text,from_who,created_at&client_id=eq.'+cid+'&order=created_at.desc&limit=1');
+  var m=rows&&rows[0];
+  var snippet=m&&m.text?String(m.text).slice(0,180):'';
+  var d=m?msgxDays(m.created_at):null;
+  if(kind==='reply'){
+    ddsDraftAction({
+      subject:c.name||'This client', subjectId:cid, signal:'waiting_on_eric',
+      action:'Reply to '+(c.name||'the client'),
+      why:'they reached out'+(d?(' '+d+'d ago'):'')+' and the ball is in your court \u2014 responsiveness is the relationship',
+      changed:(c.name||'They')+' wrote: "'+snippet+'"',
+      module:'Clients', go:'messages', refId:''
+    });
+  } else {
+    ddsDraftAction({
+      subject:c.name||'This client', subjectId:cid, signal:'churn_risk',
+      action:'Send '+(c.name||'the client')+' a light follow-up',
+      why:'you sent the last word'+(d?(' '+d+'d ago'):'')+' and it went quiet \u2014 a short, no-pressure nudge keeps things moving without crowding them',
+      changed:'No reply since your last message'+(d?(' '+d+'d ago'):''),
+      module:'Clients', go:'messages', refId:''
+    });
+  }
+}
+
+// context panel: the client's real state while you write. Every fact is a
+// literal count/sum from their rows, and every chip is a door to its tab.
+async function loadMsgContext(client, threadData){
+  var host=document.getElementById('msgContext');
+  if(!host) return;
+  if(!client){ host.innerHTML=''; return; }
+  try{
+    var results=await Promise.all([
+      api('invoices?select=amount,status,due_date&client_id=eq.'+client.id+'&limit=200'),
+      api('approvals?select=status&client_id=eq.'+client.id+'&limit=100'),
+      api('opportunities?select=status,value_estimate&client_id=eq.'+client.id+'&deleted_at=is.null&limit=50').catch(function(){return [];})
+    ]);
+    var invs=results[0]||[], apprs=results[1]||[], opps=results[2]||[];
+    var now=Date.now();
+    var overdue=invs.filter(function(i){ return i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<now; });
+    var overdueAmt=overdue.reduce(function(s,i){ return s+invcAmt(i.amount); },0);
+    var pending=apprs.filter(function(a){ return !a.status||a.status==='pending'||a.status==='open'; }).length;
+    var openOpps=(opps||[]).filter(function(o){ return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1; });
+    var oppVal=openOpps.reduce(function(s,o){ return s+(o.value_estimate?Number(o.value_estimate):0); },0);
+
+    // your usual reply time, from this thread's actual client->eric turn gaps
+    var median=null;
+    if(threadData&&threadData.length>1){
+      var gaps=[];
+      for(var i=1;i<threadData.length;i++){
+        if(threadData[i-1].from_who==='client'&&threadData[i].from_who==='eric'){
+          var g=(new Date(threadData[i].created_at)-new Date(threadData[i-1].created_at))/86400000;
+          if(isFinite(g)&&g>=0) gaps.push(g);
+        }
+      }
+      if(gaps.length){ gaps.sort(function(a,b){return a-b;}); median=gaps[Math.floor(gaps.length/2)]; }
+    }
+
+    var chips=[];
+    if(overdueAmt) chips.push('<button class="msgx-chip bad" onclick="go(\'invoices\')">'+invcFmt(overdueAmt)+' overdue</button>');
+    if(pending) chips.push('<button class="msgx-chip" onclick="go(\'approvals\')">'+pending+' approval'+(pending===1?'':'s')+' pending</button>');
+    if(openOpps.length) chips.push('<button class="msgx-chip" onclick="go(\'opportunities\')">'+openOpps.length+' open opportunit'+(openOpps.length===1?'y':'ies')+(oppVal?(' \u00b7 '+invcFmt(oppVal)):'')+'</button>');
+    if(median!=null) chips.push('<span class="msgx-chip quiet">you usually reply within ~'+(median<1?'a day':Math.round(median)+'d')+'</span>');
+    host.innerHTML = chips.length
+      ? '<div class="msgx-ctx">'+chips.join('')+'</div>'
+      : '';
+  }catch(e){ host.innerHTML=''; }
+}
+
 async function loadMessages(client) {
   var data = await api("messages?select=*&client_id=eq."+client.id+"&order=created_at");
   var thread = document.getElementById("msgThread");
+  try { loadMsgContext(client, data||[]); } catch(e){}
+  // in-thread grounded draft: when their message is the latest, offer the reply
+  var bar = document.getElementById("msgDraftBar");
+  if (bar) {
+    var lastM = data && data.length ? data[data.length-1] : null;
+    bar.innerHTML = (lastM && lastM.from_who === "client")
+      ? '<div class="msgx-bar"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Their last message: \u201c'+escHtml(String(lastM.text||"").slice(0,90))+'\u201d</span><button class="iabtn" style="color:var(--p);font-weight:600;flex:none;" onclick="msgxDraft(\''+client.id+'\',\'reply\')">Draft the reply</button></div>'
+      : '';
+  }
   if (!data || data.length===0) { thread.innerHTML="<p style='font-size:13px;color:var(--muted);text-align:center;padding:20px;'>No messages yet.</p>"; return; }
   var prevMsg = null;
   thread.innerHTML = data.map(m=>{
@@ -4510,6 +5129,154 @@ async function startSubscription() {
 }
 
 // ── STRIPE: billing overview (recent payments + active plans) ──
+// ════════════════════════════════════════════════════════════════════════════
+//  INVOICES — THE MONEY, RIGHT NOW. The tab used to be per-client storage: pick
+//  a client, see their rows. This strip answers the portfolio question first —
+//  what's outstanding, what's overdue, what's due soon — with the move on each
+//  row one click away: draft the chase (same composer, revenue_at_risk), get or
+//  copy the pay link, mark paid. Rows linked to an open opportunity say so,
+//  because paying them marks the opportunity won automatically.
+//  Every number is computed from the literal invoice rows. Nothing invented.
+// ════════════════════════════════════════════════════════════════════════════
+var INVC = { loading:false, clients:{}, opps:{} };
+
+function invcAmt(a){ return parseFloat(String(a==null?'':a).replace(/[^0-9.]/g,''))||0; }
+function invcDue(d){
+  if(!d) return null;
+  var s=String(d).replace(/^due\s+/i,'').trim();
+  var t=new Date(s).getTime();
+  return isNaN(t)?null:t;
+}
+function invcFmt(n){ return '$'+Math.round(n).toLocaleString(); }
+
+async function loadInvoiceCommand(){
+  var host=document.getElementById('invCommand');
+  if(!host||INVC.loading) return;
+  INVC.loading=true;
+  if(!host.innerHTML) host.innerHTML='<div class="bf-skel" style="height:64px;border-radius:14px;margin-bottom:16px;"></div>';
+  try{
+    var results=await Promise.all([
+      api('invoices?select=*&order=created_at.desc&limit=1000'),
+      api('clients?select=id,name,monthly_amount&order=name&limit=500'),
+      api('opportunities?select=id,invoice_id,status,category&deleted_at=is.null&limit=500').catch(function(){return [];})
+    ]);
+    var invs=results[0]||[], clients=results[1]||[], opps=results[2]||[];
+    INVC.clients={}; clients.forEach(function(c){ INVC.clients[c.id]=c; });
+    INVC.opps={};
+    (opps||[]).forEach(function(o){
+      if(o.invoice_id && ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1) INVC.opps[o.invoice_id]=o;
+    });
+
+    var now=Date.now(), day=86400000;
+    var open=invs.filter(function(i){ return i.status!=='paid'; });
+    var outstanding=0; open.forEach(function(i){ outstanding+=invcAmt(i.amount); });
+    var overdue=[], dueSoon=[];
+    open.forEach(function(i){
+      if(i.status==='draft') return;                 // draft = not yet due, by definition
+      var t=invcDue(i.due_date);
+      if(t==null) return;
+      if(t<now) overdue.push({inv:i, days:Math.max(1,Math.floor((now-t)/day)), amt:invcAmt(i.amount)});
+      else if(t-now<=14*day) dueSoon.push({inv:i, days:Math.max(0,Math.ceil((t-now)/day)), amt:invcAmt(i.amount)});
+    });
+    overdue.sort(function(a,b){ return (b.amt-a.amt)||(b.days-a.days); });
+    dueSoon.sort(function(a,b){ return a.days-b.days; });
+    var overdueTotal=overdue.reduce(function(s,x){ return s+x.amt; },0);
+    var soonTotal=dueSoon.reduce(function(s,x){ return s+x.amt; },0);
+    var mrr=clients.reduce(function(s,c){ return s+invcAmt(c.monthly_amount); },0);
+
+    var stats=
+      '<div class="invc-stats">'
+        +'<div class="invc-stat"><div class="invc-n">'+invcFmt(outstanding)+'</div><div class="invc-l">outstanding \u00b7 '+open.length+' invoice'+(open.length===1?'':'s')+'</div></div>'
+        +'<div class="invc-stat'+(overdueTotal?' bad':'')+'"><div class="invc-n">'+invcFmt(overdueTotal)+'</div><div class="invc-l">overdue \u00b7 '+overdue.length+'</div></div>'
+        +'<div class="invc-stat"><div class="invc-n">'+invcFmt(soonTotal)+'</div><div class="invc-l">due in 14 days \u00b7 '+dueSoon.length+'</div></div>'
+        +(mrr?'<div class="invc-stat"><div class="invc-n">'+invcFmt(mrr)+'<span style="font-size:12px;font-weight:500;">/mo</span></div><div class="invc-l">monthly plans</div></div>':'')
+      +'</div>';
+
+    function rowHtml(x, kind){
+      var i=x.inv, c=INVC.clients[i.client_id]||{}, name=c.name||'\u2014';
+      var linked=INVC.opps[i.id];
+      var chip = kind==='over'
+        ? '<span class="opx-due over">'+x.days+'d overdue</span>'
+        : '<span class="opx-due">'+(x.days===0?'due today':'due in '+x.days+'d')+'</span>';
+      var pay = i.stripe_url
+        ? '<button class="iabtn" onclick="copyPayLink(\''+escAttr(String(i.stripe_url).replace(/'/g,"\\'"))+'\')">Copy pay link</button>'
+        : '<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="invGenAndRefresh(\''+i.id+'\')">\u26a1 Stripe link</button>';
+      var chase = kind==='over'
+        ? '<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="invChase(\''+i.id+'\')">Draft the chase</button>'
+        : '';
+      return '<div class="invc-row">'
+        +'<div class="invc-main">'+chip
+          +'<span class="invc-who">'+escHtml(name)+'</span>'
+          +'<span class="invc-what">'+escHtml(i.name||'')+'</span>'
+          +(linked?'<span class="invc-link" title="An open opportunity is linked \u2014 paying this marks it won automatically">linked to an offer</span>':'')
+        +'</div>'
+        +'<div class="invc-side"><span class="opx-val">'+invcFmt(x.amt)+'</span>'
+          +chase+pay
+          +'<button class="iabtn" style="color:#1a7e49;font-weight:600;" onclick="invMarkPaid(\''+i.id+'\')">Mark paid</button>'
+        +'</div>'
+      +'</div>';
+    }
+
+    var body='';
+    if(overdue.length){
+      body+='<div class="bf-secl" style="margin-top:16px;">Needs attention \u2014 chase these</div>'
+        +overdue.slice(0,8).map(function(x){ return rowHtml(x,'over'); }).join('');
+      if(overdue.length>8) body+='<div style="font-size:11.5px;color:var(--muted);padding:6px 2px;">+'+(overdue.length-8)+' more overdue \u2014 pick the client below to see them all.</div>';
+    }
+    if(dueSoon.length){
+      body+='<div class="bf-secl" style="margin-top:'+(overdue.length?'18px':'16px')+';">Due in the next 14 days</div>'
+        +dueSoon.slice(0,5).map(function(x){ return rowHtml(x,'soon'); }).join('');
+    }
+    if(!overdue.length&&!dueSoon.length){
+      body+='<div style="font-size:13px;color:var(--ink-2,#574d68);padding:12px 2px 4px;">'
+        +(open.length
+          ? 'Nothing overdue and nothing due in the next two weeks. The '+invcFmt(outstanding)+' outstanding is on schedule.'
+          : 'All paid up \u2014 no open invoices anywhere. When an offer is accepted in Opportunities, its invoice lands here automatically.')
+        +'</div>';
+    }
+
+    host.innerHTML='<div class="invc-wrap">'+stats+body+'</div>';
+  }catch(e){
+    host.innerHTML='';
+  }finally{
+    INVC.loading=false;
+  }
+}
+
+async function invGenAndRefresh(id){
+  await genPayLink(id);
+  INVC.loading=false; loadInvoiceCommand();
+}
+
+// mark paid in one click — the close-loop does the rest (a linked opportunity
+// marks itself won on the next sync, no extra step)
+async function invMarkPaid(id){
+  var linked=INVC.opps[id];
+  var r=await api('invoices?id=eq.'+id,'PATCH',{status:'paid'});
+  if(r===null) return;
+  toast(linked ? '\u2713 Paid \u2014 the linked opportunity will mark itself won' : '\u2713 Marked paid');
+  INVC.loading=false; loadInvoiceCommand();
+  var ctx=selectedClients['invoices'];
+  if(ctx) loadInvoices(ctx);
+}
+
+// draft the chase — same grounded composer the Brief and Opportunities use,
+// with the invoice's real facts (amount, days overdue) as the signal
+function invChase(id){
+  api('invoices?select=*&id=eq.'+id+'&limit=1').then(function(rows){
+    var i=rows&&rows[0]; if(!i) return;
+    var c=INVC.clients[i.client_id]||{};
+    var t=invcDue(i.due_date), days=t?Math.max(1,Math.floor((Date.now()-t)/86400000)):null;
+    ddsDraftAction({
+      subject:c.name||'This client', subjectId:i.client_id||'', signal:'revenue_at_risk',
+      action:'Send a warm, personal payment reminder for "'+(i.name||'the open invoice')+'"',
+      why:(i.amount||'A balance')+' has been outstanding'+(days?' for '+days+' days':'')+' \u2014 a short personal note recovers most invoices without straining the relationship',
+      changed:'Invoice "'+(i.name||'')+'"'+(days?' is '+days+'d overdue':' is unpaid'),
+      module:'Clients', go:'invoices', refId:''
+    });
+  });
+}
+
 async function loadBillingOverview() {
   var host = document.getElementById("billingOverview");
   if (!host) return;
@@ -4837,6 +5604,7 @@ async function markProjectComplete() {
 // ── INVOICES ──
 async function loadInvoices(client) {
   loadBillingOverview();
+  try { INVC.loading=false; loadInvoiceCommand(); } catch(e){}
   var data = await api("invoices?select=*&client_id=eq."+client.id+"&order=created_at");
   var el = document.getElementById("invList");
   if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No invoices yet.</p>"; return; }
@@ -4851,7 +5619,7 @@ async function loadInvoices(client) {
         <span class="ibadge ${inv.status}">${cap(inv.status)}</span>
         <div class="iact">
           ${inv.status!=="paid" ? (inv.stripe_url
-            ? `<button class="iabtn" onclick="copyPayLink('${inv.stripe_url.replace(/'/g,"\\'")}')">Copy pay link</button>`
+            ? `<button class="iabtn" onclick="copyPayLink('${escAttr(inv.stripe_url.replace(/'/g,"\\'"))}')">Copy pay link</button>`
             : `<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="genPayLink('${inv.id}')">⚡ Stripe link</button>`) : ""}
           <button class="iabtn" onclick="editInvoice(${JSON.stringify(inv).replace(/"/g,"&quot;")})">Edit</button>
           <button class="iabtn del" onclick="delInvoice('${inv.id}')">Delete</button>
@@ -7866,17 +8634,56 @@ function tabOverview(root, d){
   const p = d.partnership;
   const stat=(n,l)=>`<div class="stat"><div class="n">${gpEsc(String(n))}</div><div class="l">${gpEsc(l)}</div></div>`;
   const lastReview = p.last_review_period ? periodLabel(p.last_review_period) : 'None yet';
+  const period = thisPeriod();
+
+  // THIS MONTH, from the data already in hand: what got done, what's planned,
+  // and whether the client can SEE the value (the renewal question).
+  const doneThisMonth = (d.work_log||[]).filter(w=>w.period===period);
+  const visibleThisMonth = doneThisMonth.filter(w=>w.client_visible);
+  const openTasks = (d.tasks||[]).filter(t=>t.status!=='done');
+  const reviewPublished = p.last_review_period===period;
+  const renewDays = p.renews_at ? daysUntil(p.renews_at) : null;
+
+  // the honest renewal-value read: computed, never invented
+  let valueRead = '';
+  if (renewDays!=null && renewDays>=0 && renewDays<=45 && !reviewPublished && !visibleThisMonth.length) {
+    valueRead = `<div class="row" style="border:1px solid rgba(181,120,29,0.35);background:rgba(181,120,29,0.06);border-radius:10px;padding:10px 12px;margin-bottom:12px;"><div class="rbody"><div class="rt" style="font-size:13px;">Renews in ${renewDays}d — and they've seen no logged value this month</div><div class="rd">Publish the review or log client-visible work so the renewal conversation has receipts.</div></div></div>`;
+  } else if (renewDays!=null && renewDays>=0 && renewDays<=45) {
+    valueRead = `<div class="rmeta" style="margin-bottom:12px;">Renews in ${renewDays}d · ${visibleThisMonth.length} client-visible item${visibleThisMonth.length===1?'':'s'} this month · review ${reviewPublished?'published':'not published'}</div>`;
+  }
+
+  const doneRows = doneThisMonth.slice(0,4).map(w=>
+    `<div class="row"><div class="rbody"><div class="rt" style="font-size:13.5px;font-weight:450">${gpEsc(w.title)}</div></div><span class="chip ${w.client_visible?'chip-ok':''}">${w.client_visible?'visible':'private'}</span></div>`
+  ).join('') || `<div class="rd" style="padding:8px 0;">Nothing logged for ${gpEsc(periodLabel(period))} yet. Everything you log becomes the client's monthly receipt.</div>`;
+  const moreDone = doneThisMonth.length>4 ? `<div class="rmeta" style="padding:6px 0 0;">+${doneThisMonth.length-4} more in the work log</div>` : '';
+
+  const nextRows = openTasks.slice(0,3).map(t=>
+    `<div class="row"><div class="rbody"><div class="rt" style="font-size:13.5px;font-weight:450">${gpEsc(t.title||'Task')}</div></div></div>`
+  ).join('') || `<div class="rd" style="padding:8px 0;">No open tasks. Accepted recommendations land here as next month's plan.</div>`;
+
   root.innerHTML = `
     <div class="stat-row" style="margin-bottom:18px">
-      ${stat(d.goals.filter(g=>g.status==='active').length,'Active goals')}
-      ${stat(d.tasks.filter(t=>t.status!=='done').length,'Open tasks')}
+      ${stat(doneThisMonth.length,'Done this month')}
+      ${stat(openTasks.length,'Planned next')}
       ${stat(d.recommendations.filter(r=>r.status==='suggested').length,'Recs to review')}
-      ${stat(d.work_log.length,'Work logged')}
+      ${stat(d.goals.filter(g=>g.status==='active').length,'Active goals')}
     </div>
+    ${valueRead}
+    <div id="gpCtx"></div>
     <div class="grid g2">
       <div class="card card-pad">
-        <div class="card-h"><div><h3>This month</h3><div class="sub">${periodLabel(thisPeriod())}</div></div></div>
-        <div class="row"><div class="rbody"><div class="rt" style="font-size:14px;font-weight:450">Monthly review</div></div>${p.last_review_period===thisPeriod()?'<span class="chip chip-ok">Published</span>':'<span class="chip chip-warn">Not yet</span>'}</div>
+        <div class="card-h"><div><h3>What you did</h3><div class="sub">${periodLabel(period)}</div></div><button class="btn btn-sm" data-act="towork">Work log →</button></div>
+        ${doneRows}${moreDone}
+      </div>
+      <div class="card card-pad">
+        <div class="card-h"><div><h3>What's next</h3><div class="sub">Open tasks</div></div></div>
+        ${nextRows}
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card card-pad">
+        <div class="card-h"><div><h3>This month</h3><div class="sub">${periodLabel(period)}</div></div></div>
+        <div class="row"><div class="rbody"><div class="rt" style="font-size:14px;font-weight:450">Monthly review</div></div>${reviewPublished?'<span class="chip chip-ok">Published</span>':'<span class="chip chip-warn">Not yet</span>'}</div>
         <div class="row"><div class="rbody"><div class="rt" style="font-size:14px;font-weight:450">Plan</div></div><span class="chip">${gpEsc(p.plan_label||'—')}${p.monthly_amount?` · ${money(p.monthly_amount)}/mo`:''}</span></div>
         <div class="row"><div class="rbody"><div class="rt" style="font-size:14px;font-weight:450">Last review</div></div><span class="chip">${gpEsc(lastReview)}</span></div>
         ${p.renews_at?`<div class="row"><div class="rbody"><div class="rt" style="font-size:14px;font-weight:450">Renews</div></div><span class="chip">${gpEsc(shortDate(p.renews_at))} (${daysUntil(p.renews_at)}d)</span></div>`:''}
@@ -7895,6 +8702,30 @@ function tabOverview(root, d){
   root.querySelector('[data-act="addrec"]').addEventListener('click',()=>openAddRec(p.id));
   root.querySelector('[data-act="gen"]').addEventListener('click',()=>genRecs(p.id));
   root.querySelector('[data-act="review"]').addEventListener('click',()=>{ GP.dtab='review'; drawDetail(); });
+  root.querySelector('[data-act="towork"]').addEventListener('click',()=>{ GP.dtab='work'; drawDetail(); });
+  gpLoadCtx(p);
+}
+
+// money + opportunity context for this partnership's client: literal facts,
+// each chip a door. Fail-soft — the overview never waits on this.
+async function gpLoadCtx(p){
+  const host = document.getElementById('gpCtx');
+  if(!host || !p.client_id) return;
+  try{
+    const res = await Promise.all([
+      api('invoices?select=amount,status,due_date&client_id=eq.'+p.client_id+'&limit=200'),
+      api('opportunities?select=status,value_estimate&client_id=eq.'+p.client_id+'&deleted_at=is.null&limit=50').catch(function(){return [];})
+    ]);
+    const invs=res[0]||[], opps=res[1]||[];
+    const overdueAmt = invs.filter(i=>i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now())
+      .reduce((s,i)=>s+invcAmt(i.amount),0);
+    const openOpps=(opps||[]).filter(o=>['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1);
+    const oppVal=openOpps.reduce((s,o)=>s+(o.value_estimate?Number(o.value_estimate):0),0);
+    const chips=[];
+    if(overdueAmt) chips.push('<button class="msgx-chip bad" onclick="hubJumpTo(\'invoices\',\''+p.client_id+'\')">'+invcFmt(overdueAmt)+' overdue</button>');
+    if(openOpps.length) chips.push('<button class="msgx-chip" onclick="go(\'opportunities\')">'+openOpps.length+' open opportunit'+(openOpps.length===1?'y':'ies')+(oppVal?(' · '+invcFmt(oppVal)):'')+'</button>');
+    host.innerHTML = chips.length ? '<div class="msgx-ctx" style="margin:0 0 16px;">'+chips.join('')+'</div>' : '';
+  }catch(e){ host.innerHTML=''; }
 }
 
 /* ---------- GOALS ---------- */
@@ -8576,6 +9407,9 @@ async function renderSyncHistory(){
 }
 
 function integToast(msg){
+  // one toast system, not two: delegate to the primary toast (which carries
+  // role=status + aria-live), so every confirmation looks and announces the same
+  if (typeof toast === 'function' && document.getElementById('toast')) { return toast(msg); }
   var t=document.getElementById('integToast');
   if(!t){ t=document.createElement('div'); t.id='integToast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2a2433;color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;box-shadow:0 6px 24px rgba(0,0,0,.2);'; document.body.appendChild(t); }
   t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },3200);
