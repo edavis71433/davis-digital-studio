@@ -4199,6 +4199,7 @@ async function loadOpportunities(){
     OPPX.rows=d.rows||[];
     OPPX.inbound=d.inbound||{leads:[],audit_leads:[]};
     OPPX.answer=d.answer; OPPX.pattern=d.pattern;
+    OPPX.sources=d.sources||[];
     OPPX.conf=d.confidence||'medium'; OPPX.confReason=d.confidence_reason||'';
     OPPX.engineDown=false;
     oppxRender();
@@ -4247,7 +4248,9 @@ var OPPX_CAT = {
   retention_risk:   { label:'Retention risk',c:'#b03a2e', bg:'#fdecea' },
   billing_recovery: { label:'Billing',       c:'#b03a2e', bg:'#fdecea' },
   renewal:          { label:'Renewal',       c:'#9a7a1a', bg:'#fdf6e3' },
-  referral:         { label:'Referral',      c:'#0e7a6e', bg:'#e4f5f2' }
+  referral:         { label:'Referral',      c:'#0e7a6e', bg:'#e4f5f2' },
+  relationship:     { label:'Relationship',  c:'#0e7a6e', bg:'#e4f5f2' },
+  outreach:         { label:'Outreach',      c:'#5b3fa0', bg:'rgba(91,63,160,0.08)' }
 };
 var OPPX_STATUS = {
   surfaced:    { label:'New',         c:'#5b3fa0', bg:'rgba(91,63,160,0.10)' },
@@ -4355,8 +4358,8 @@ function oppxPrep(){
 
   return {
     hot:    rest.filter(function(r){return r.category==='new_inbound';}).concat(rawHot),
-    follow: followRows.concat(rawFollow),
-    grow:   rest.filter(function(r){return r.category==='expansion'||r.category==='renewal'||r.category==='referral';}),
+    follow: followRows.concat(rest.filter(function(r){return r.category==='outreach';})).concat(rawFollow),
+    grow:   rest.filter(function(r){return r.category==='expansion'||r.category==='renewal'||r.category==='referral'||r.category==='relationship';}),
     risk:   rest.filter(function(r){return r.category==='retention_risk'||r.category==='billing_recovery';}),
     disc:   rawDisc.slice(0,6),
     won:    rows.filter(function(r){return r.status==='won';}),
@@ -4401,6 +4404,27 @@ function oppxRender(){
       +'<button class="bf-act" onclick="oppLookAtBusiness()">Run a check \u2192</button>'
     +'</div>';
 
+  var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
+  function footerLite(){ return '<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);">'
+    +'<span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>'; }
+  var footer=footerLite();
+
+  // THE HONEST EMPTY STATE: only after every source was actually searched.
+  // If literally nothing is actionable anywhere, say what was checked and why
+  // it's quiet — never a shrug, never a site-checker pitch.
+  var totalAnything = counts.all + S.won.length + S.lost.length + S.disc.length;
+  if(!totalAnything && !q){
+    var srcs=OPPX.sources||[];
+    root.innerHTML =
+      '<div class="bf-eyebrow">Opportunities</div>'
+      +'<h1 class="bf-headline">Searched '+(srcs.length||18)+' data sources \u2014 nothing actionable today.</h1>'
+      +'<div class="bf-sub">Every lead is answered, no offers are waiting, no balances are overdue, no monthly client is under-served, no site alarms, no fresh wins to share, nothing drafted-but-unsent, and the bench is worked. That\u2019s not an empty pipeline \u2014 that\u2019s a caught-up one.</div>'
+      +(srcs.length?'<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:14px;max-width:640px;">Checked: '+srcs.map(escHtml).join(' \u00b7 ')+'</div>':'')
+      +'<div style="margin-top:18px;">'+patternLine+'</div>'
+      +'<div style="margin-top:8px;">'+lookForm+'</div>'
+      +footerLite();
+    return;
+  }
   var body='';
   if(OPPX.filter==='all'){
     body+=section('Hot leads','they raised a hand', S.hot, 'No new inbound right now. Contact-form leads, audit runs with an email, and quote requests land here the moment they arrive.');
@@ -4419,9 +4443,6 @@ function oppxRender(){
   else if(OPPX.filter==='won'){ body+=section('Won','', S.won, 'No wins recorded yet. Paid linked invoices and manual wins land here.'); }
   else if(OPPX.filter==='lost'){ body+=section('Lost & dismissed','dismissed items stay quiet 60 days, then return only if still true', S.lost, 'Nothing lost or dismissed.'); }
 
-  var cf=({high:{c:'#1a7e49',bg:'#e7f6ee',w:'High confidence'},medium:{c:'#9a7a1a',bg:'#fdf6e3',w:'Medium confidence'},low:{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'}})[OPPX.conf]||{c:'#7a6d8e',bg:'#f3f0fa',w:'Early read'};
-  var footer='<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--bf-line);display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);">'
-    +'<span class="bf-conf-pill" style="color:'+cf.c+';background:'+cf.bg+';">'+cf.w+'</span><span>'+escHtml(OPPX.confReason||'')+'</span></div>';
 
   root.innerHTML =
     '<div class="bf-eyebrow">Opportunities</div>'
