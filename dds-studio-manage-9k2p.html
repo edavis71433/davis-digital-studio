@@ -8569,8 +8569,9 @@ async function loadPracticePulse(){
                       quiet_client:'silence is where churn starts — a warm touch reverses it',
                       renewal_soon:'a renewal decided before the value recap lands is a coin flip',
                       needs_reply:'they wrote last; every day unanswered erodes trust',
-                      at_risk:'overdue money plus silence is the churn signature' })[draftKind] || '' };
-            var draftable = ['overdue_money','quiet_client','renewal_soon','needs_reply','at_risk'].indexOf(draftKind) !== -1;
+                      at_risk:'overdue money plus silence is the churn signature',
+                      unhappy_client:'a low survey score caught early is a save; caught late is a churn story' })[draftKind] || '' };
+            var draftable = ['overdue_money','quiet_client','renewal_soon','needs_reply','at_risk','unhappy_client'].indexOf(draftKind) !== -1;
             return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(0,0,0,0.04);font-size:12.5px;">'
               +'<span style="color:var(--ink);">'+escHtml(it.action)+'</span>'
               +'<span style="flex:none;display:flex;gap:10px;">'
@@ -8590,6 +8591,7 @@ async function loadPracticePulse(){
       + list('Renewals in 30 days', d.renewals, 'amber', 'No renewals this month. Breathing room.', 'renewal_soon')
       + list('Gone quiet (14d+)', d.quiet, 'p', 'Every client has a recent touch. Relationships warm.', 'quiet_client')
       + list('Upsell candidates', d.upsell, 'p', 'No uncovered live sites right now.', 'upsell')
+      + list('Unhappy signals (surveys)', d.unhappy||[], 'red', 'No low scores in the last 90 days. Clients are happy.', 'unhappy_client')
       +'</div>'
       +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 6px;">Client deep dive</div>';
   }catch(e){ host.innerHTML=''; }
@@ -8719,8 +8721,8 @@ function anGroup(title, summaries, interpretation, primaryKey){
   var interpHtml = interpretation.filter(function(i){return i.status!=='no_data';}).map(function(i){
     var st=STATUS_STYLE[i.status]||STATUS_STYLE.no_data;
     var deltaTag = (i.delta!=null && i.status!=='baseline') ? '<span style="font-size:12px;font-weight:600;color:'+st.c+';">'+(i.delta>0?'▲':(i.delta<0?'▼':'■'))+' '+(i.pct!=null?(Math.abs(i.pct)+'%'):Math.abs(i.delta))+'</span>' : '';
-    // baseline gets a clear "one month — not a trend yet" treatment
-    var baselineNote = i.status==='baseline' ? '<div style="font-size:11px;color:#9a7a1a;background:#fdf6e3;border-radius:6px;padding:4px 8px;margin-top:5px;display:inline-block;">⏳ One month of data — not a trend yet. Another month needed to compare.</div>' : '';
+    // baseline gets benchmark framing: a captured starting point, not a deficiency
+    var baselineNote = i.status==='baseline' ? '<div style="font-size:11px;color:var(--p);background:var(--pxxxl,#f7f4fd);border-radius:6px;padding:4px 8px;margin-top:5px;display:inline-block;">Baseline captured — next month gets measured against this.</div>' : '';
     var srcTag = i.source ? '<span style="font-size:10px;color:var(--muted);background:#f4f2f7;border-radius:5px;padding:1px 6px;margin-left:6px;">'+escHtml(i.source)+'</span>' : '';
     return '<div style="padding:12px 0;border-top:1px solid var(--line,#eee);">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px;">'
