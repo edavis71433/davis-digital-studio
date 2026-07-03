@@ -14534,7 +14534,7 @@ window.ddsFilesCard=async function(mountId, clientId){
         +'<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);">'+esc((c&&c.name)||host(r.site&&r.site.url)||'Site')+' '+tr+'</div>'
         +'<div style="font-size:11.5px;color:var(--muted);margin-top:2px;">'+esc(host(r.site&&r.site.url))+(L&&(L.checked_at||L.created_at)?' \u00b7 '+esc(agoS(L.checked_at||L.created_at)):' \u00b7 unchecked')+'</div>'
         +'<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">'
-          +[['Perf',metric(L,['perf','performance'])],['SEO',metric(L,['seo'])],['A11y',metric(L,['accessibility','access'])]].map(function(p){
+          +[['Perf',metric(L,['performance','perf'])],['Vis',metric(L,['visibility'])],['Mob',metric(L,['mobile'])],['Local',metric(L,['local'])]].map(function(p){
             return p[1]!=null?'<span class="smx-pill" style="color:'+col(p[1])+';">'+p[0]+' '+p[1]+'</span>':'';
           }).join('')
         +'</div></div>'
@@ -14549,16 +14549,19 @@ window.ddsFilesCard=async function(mountId, clientId){
       var L=r2.latest, P=r2.previous, o=L&&L.overall!=null?L.overall:null;
       var c=clientFor(r2.site&&r2.site.url);
       var mets=[
-        ['Performance', metric(L,['perf','performance']), 'Visitors wait longer for pages to load \u2014 every extra second raises the chance they leave before contacting you.', 'Optimize images & compress assets'],
-        ['SEO', metric(L,['seo']), 'Google has a harder time understanding and ranking these pages \u2014 fewer people find the business through search.', 'Fix metadata & on-page SEO basics'],
-        ['Accessibility', metric(L,['accessibility','access']), 'Some visitors \u2014 and Google \u2014 struggle to use the site. Accessibility issues quietly cost trust and rankings.', 'Fix accessibility issues']
+        ['Performance', metric(L,['performance','perf']), 'Visitors wait longer for pages to load \u2014 every extra second raises the chance they leave before contacting you.', 'Optimize images & compress assets'],
+        ['Search visibility', metric(L,['visibility']), 'Google has a harder time understanding and ranking these pages \u2014 fewer people find the business through search.', 'Fix on-page SEO basics'],
+        ['Mobile experience', metric(L,['mobile']), 'Most local customers arrive on a phone \u2014 a weak mobile experience quietly turns them away before they call.', 'Fix mobile experience issues'],
+        ['Local presence', metric(L,['local']), 'Local signals (maps, listings, NAP consistency) drive nearby customers \u2014 weak signals mean competitors get found first.', 'Strengthen local signals']
       ];
       var summary = o==null?'This site hasn\u2019t been checked yet \u2014 run the first check for real PageSpeed scores.'
         : o>=80?'This website is healthy. '+(mets.filter(function(m){return m[1]!=null&&m[1]<80;}).length?('One area below 80 is worth attention \u2014 see the card below.'):'All measured areas are in the green. Nothing customer-facing needs you.')
         : 'This website needs attention \u2014 the cards below say exactly why it matters and what to do.';
+      var keyMap={'Performance':['performance','perf'],'Search visibility':['visibility'],'Mobile experience':['mobile'],'Local presence':['local']};
       var improvements=(L&&P)?mets.map(function(m){
-        var prev=metric(P,[m[0].toLowerCase()==='performance'?'perf':m[0].toLowerCase()==='accessibility'?'accessibility':'seo', m[0].toLowerCase()]);
-        return (m[1]!=null&&prev!=null&&m[1]>prev)?('<div class="grx-ok">'+esc(m[0])+' improved '+(m[1]-prev)+' points since the last check</div>'):'';
+        var prev=metric(P,keyMap[m[0]]||[]);
+        var d=(m[1]!=null&&prev!=null)?m[1]-prev:0;
+        return d>0?('<div class="grx-ok">'+esc(m[0])+' improved '+d+' points since the last check</div>'):'';
       }).join(''):'';
 
       work='<div class="grx-card">'
@@ -14572,16 +14575,28 @@ window.ddsFilesCard=async function(mountId, clientId){
           +'<div class="rhx-ring" style="width:76px;height:76px;border-width:5px;border-color:'+col(o)+';color:'+col(o)+';"><span style="font-size:22px;">'+(o!=null?o:'\u2014')+'</span><span class="rhx-rl">'+esc(lbl(o))+'</span></div>'
           +'<div style="flex:1;min-width:220px;font-size:13px;color:var(--ink);line-height:1.6;">\u2726 <b>Website summary</b> \u00b7 '+esc(summary)+'</div>'
         +'</div>'
-        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;">'
           +mets.map(function(m){
-            return '<div class="smx-met"><div class="smx-mn" style="color:'+col(m[1])+';">'+(m[1]!=null?m[1]:'\u2014')+'</div><div class="smx-ml">'+m[0]+' \u00b7 Google PageSpeed</div>'
+            return '<div class="smx-met"><div class="smx-mn" style="color:'+col(m[1])+';">'+(m[1]!=null?m[1]:'\u2014')+'</div><div class="smx-ml">'+m[0]+(m[0]==='Performance'?' \u00b7 Google PageSpeed':' \u00b7 site check')+'</div>'
               +(m[1]!=null&&m[1]<80?('<div class="smx-mt">'+esc(m[2])+'</div><button class="ibx-pill" style="margin-top:8px;" onclick="smxTask(\''+att(SMX.sel)+'\',\''+m[0]+'\')">'+esc(m[3])+' \u2192 task</button>'):'')
             +'</div>';
           }).join('')
         +'</div>'
         +(improvements?'<div class="ivx-block"><div class="ivx-bh">RECENT IMPROVEMENTS \u2014 vs previous check</div>'+improvements+'</div>':'')
+        +(function(){
+          var acts=[];
+          if(L&&(L.checked_at)) acts.push(['\u25B6','Health check completed'+(o!=null?' \u2014 overall '+o:''), L.checked_at]);
+          if(L&&P&&L.overall!=null&&P.overall!=null&&L.overall!==P.overall){ var d=L.overall-P.overall; acts.push([d>0?'\u25B2':'\u25BC','Overall score '+(d>0?'improved':'dropped')+' '+Math.abs(d)+' points', L.checked_at]); }
+          if(P&&P.checked_at) acts.push(['\u25B6','Previous check', P.checked_at]);
+          if(r2.site&&r2.site.created_at) acts.push(['\u2726','Site added to monitoring', r2.site.created_at]);
+          if(!acts.length) return '';
+          return '<div class="ivx-block"><div class="ivx-bh">RECENT ACTIVITY</div>'+acts.slice(0,4).map(function(a){
+            return '<div class="rhx-kv"><span>'+a[0]+' '+esc(a[1])+'</span><b style="font-weight:500;color:var(--muted);">'+esc(agoS(a[2]))+'</b></div>';
+          }).join('')+'</div>';
+        })()
         +'<div class="ivx-block"><div class="ivx-bh">STATUS \u2014 what we actually know</div>'
-          +(o!=null?'<div class="grx-ok">Site reachable \u2014 PageSpeed completed a full crawl</div>':'')
+          +(o!=null||L&&L.ok?'<div class="grx-ok">Site reachable \u2014 the checker completed a full crawl</div>':'')
+          +(L&&L.https===true?'<div class="grx-ok">HTTPS \u2014 secure connection verified</div>':(L&&L.https===false?'<div style="font-size:12.5px;color:#c0392b;padding:4px 0;">\u2717 No HTTPS detected \u2014 browsers warn visitors away; the single highest-priority fix</div>':''))
           +(L&&(L.checked_at||L.created_at)?'<div class="grx-ok">Last verified '+esc(agoS(L.checked_at||L.created_at))+'</div>':'<div style="font-size:12.5px;color:var(--muted);padding:4px 0;">\u25CB Not checked yet</div>')
           +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Uptime pings, SSL expiry, backups, and security scanning aren\u2019t wired yet \u2014 documented as dependencies, never simulated.</div>'
         +'</div>'
