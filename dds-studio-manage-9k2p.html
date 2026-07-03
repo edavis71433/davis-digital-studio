@@ -8540,7 +8540,43 @@ async function loadAnalytics(){
   }
   if(!ANALYTICS.clientId && ANALYTICS.clients.length) ANALYTICS.clientId = ANALYTICS.clients[0].id;
   renderAnalyticsShell();
+  loadPracticePulse();
   if(ANALYTICS.clientId) await refreshAnalytics();
+}
+
+// ── PRACTICE PULSE — the operator layer. Six lists, every line is a decision
+// with an action, sorted by urgency. The per-client deep dive lives below it.
+async function loadPracticePulse(){
+  var host = document.getElementById('pulseBody'); if(!host) return;
+  host.innerHTML = '<div class="bf-skel" style="height:100px;border-radius:16px;margin-bottom:18px;"></div>';
+  try{
+    var r = await integApi('practice_pulse',{});
+    var d = (r&&r.data)||null;
+    if(!d){ host.innerHTML=''; return; }
+    function list(title, items, tone, empty){
+      var col = tone==='red' ? '#c0392b' : (tone==='amber' ? '#a96a00' : 'var(--p)');
+      var body = items.length
+        ? items.slice(0,5).map(function(it){
+            return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(0,0,0,0.04);font-size:12.5px;">'
+              +'<span style="color:var(--ink);">'+escHtml(it.action)+'</span>'
+              +'<button onclick="anSelectClient(\''+it.clientId+'\')" style="flex:none;font-size:11px;font-weight:600;color:var(--p);background:none;border:none;cursor:pointer;padding:0;">View \u2192</button></div>';
+          }).join('')
+        : '<div style="font-size:12px;color:var(--muted);padding:7px 0;">'+escHtml(empty)+'</div>';
+      return '<div style="background:#fff;border:1px solid '+(items.length&&tone==='red'?'rgba(192,57,43,0.3)':'rgba(91,63,160,0.12)')+';border-radius:14px;padding:14px 16px;">'
+        +'<div style="font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:'+col+';margin-bottom:2px;">'+escHtml(title)+(items.length?' \u00B7 '+items.length:'')+'</div>'+body+'</div>';
+    }
+    host.innerHTML =
+      '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--p);margin:2px 0 10px;">Practice pulse \u2014 every line is a decision</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:24px;">'
+      + list('At risk', d.atRisk, 'red', 'No churn signatures right now.')
+      + list('Waiting on your reply', d.needsReply, 'red', 'Inbox zero with clients.')
+      + list('Money outstanding', d.money, 'amber', 'Nothing unpaid.')
+      + list('Renewals in 30 days', d.renewals, 'amber', 'No renewals this month.')
+      + list('Gone quiet (14d+)', d.quiet, 'p', 'Every relationship has a recent touch.')
+      + list('Upsell candidates', d.upsell, 'p', 'No uncovered live sites.')
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 6px;">Client deep dive</div>';
+  }catch(e){ host.innerHTML=''; }
 }
 
 function renderAnalyticsShell(){
@@ -8561,7 +8597,8 @@ function renderAnalyticsShell(){
     + '<button onclick="anExportCsv()" title="Download the underlying data as CSV" style="padding:9px 14px;border:1px solid var(--line,#e5e0ee);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;">Export CSV</button>'
     + '</div>'
     + '</div>'
-    + '<div id="anBody" style="margin-top:18px;"></div>';
+    + '<div id="pulseBody" style="margin-top:18px;"></div>'
+    + '<div id="anBody" style="margin-top:4px;"></div>';
 }
 function anSelectClient(id){ ANALYTICS.clientId=id; refreshAnalytics(); }
 function anSetRange(v){ ANALYTICS.months = v ? Number(v) : null; refreshAnalytics(); }

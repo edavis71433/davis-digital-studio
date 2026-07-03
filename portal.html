@@ -3907,6 +3907,19 @@ function gpRenderPriorities(){
   }
   var focusSec = gpSection('\uD83D\uDCC5','This month\u2019s focus','What you and Eric are working on right now.', focusInner);
 
+  // ---- WHAT ERIC DID RECENTLY (the value receipt, on the main page) ----
+  // Answers "what did I pay for" in one glance — the single most important
+  // retention question — without making the client dig into history.
+  var recentWork = (ws.work_log||[]).slice(0,3);
+  var didSec = '';
+  if(recentWork.length){
+    var didInner = '<div class="gp-done-wrap">'+recentWork.map(function(w){
+      return '<div class="gp-done"><span class="gp-done-tick">\u2713</span><span>'+esc(w.title||'')+(w.detail?' \u2014 '+esc(w.detail):'')+'</span></div>';
+    }).join('')+'</div>'
+    +'<button class="gp-link" onclick="nav(\'gp_history\')">See everything Eric has done \u2192</button>';
+    didSec = gpSection('\u2705','What Eric did recently','Real work on your site, in plain English.', didInner);
+  }
+
   // ---- ASK ERIC (always available) ----
   var askSec = '<section class="gp-sec"><div class="gp-sec-head"><span class="gp-sec-emoji">\uD83D\uDCAC</span><div><div class="gp-sec-title">Need something?</div><div class="gp-sec-sub">Ask Eric for anything, anytime.</div></div></div>'
     +'<div class="gp-ask"><input id="gpReqTitle" class="gp-input" placeholder="What do you need? (e.g. Update our holiday hours)">'
@@ -3924,7 +3937,7 @@ function gpRenderPriorities(){
   var emptyTop = (!anyRecs) ? '<div class="gp-allgood"><div class="gp-allgood-ico">\u2713</div><div class="gp-allgood-t">Nothing needs you right now</div><div class="gp-allgood-d">Eric is keeping an eye on your website. The moment something is worth doing, it\u2019ll appear here, in plain English, with a simple yes or no.</div></div>' : '';
 
   document.getElementById('gp_priorities_body').innerHTML =
-    hero + emptyTop + topSec + qwSec + healthSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + askSec;
+    hero + emptyTop + topSec + qwSec + healthSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + didSec + askSec;
 }
 
 // Website Health — plain words, no scary numbers leading.
