@@ -1633,6 +1633,45 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .opx3-card{box-shadow:none;}
 .opx3-card:hover{box-shadow:0 2px 12px rgba(41,25,66,0.05);}
 .opx4-read{opacity:.85;}
+/* Today: executive assistant */
+.tdx-sent{font-size:14px;color:var(--muted);margin-bottom:20px;}
+.tdx-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:20px;align-items:start;}
+@media (max-width:900px){.tdx-grid{grid-template-columns:1fr;}}
+.tdx-hero{background:linear-gradient(135deg,#241a3e,#3a2a63);border-radius:18px;padding:26px 28px;color:#fff;}
+.tdx-hk{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7;}
+.tdx-ht{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-top:8px;line-height:1.2;}
+.tdx-hw{font-size:13.5px;opacity:.85;margin-top:8px;line-height:1.6;max-width:480px;}
+.tdx-hb{margin-top:16px;display:flex;justify-content:flex-end;}
+.tdx-cta{background:#fff;color:#3a2a63;border:none;border-radius:100px;padding:9px 18px;font-size:13px;font-weight:650;cursor:pointer;}
+.tdx-purple .tdx-cta{background:var(--p);color:#fff;}
+.tdx-h{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:26px 0 6px;}
+.tdx-list{background:#fff;border:1px solid rgba(41,25,66,0.08);border-radius:14px;padding:4px 16px;}
+.tdx-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(41,25,66,0.05);}
+.tdx-row:last-child{border-bottom:none;}
+.tdx-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--p);opacity:.5;}
+.tdx-rb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.tdx-rt{font-size:14px;font-weight:600;color:var(--ink);}
+.tdx-rw{font-size:12px;color:var(--muted);}
+.tdx-pill{flex:none;border:1px solid rgba(91,63,160,0.3);background:#fff;color:var(--p);font-weight:600;font-size:12px;padding:7px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+.tdx-pill:hover{background:rgba(91,63,160,0.06);}
+.tdx-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;}
+@media (max-width:700px){.tdx-two{grid-template-columns:1fr;}}
+.tdx-card{background:#fff;border:1px solid rgba(41,25,66,0.08);border-radius:14px;padding:16px 18px;}
+.tdx-rail .tdx-card{margin-bottom:14px;}
+.tdx-purple{background:#f5f2fc;border-color:transparent;}
+.tdx-ck{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.tdx-pg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tdx-pn{font-size:19px;font-weight:700;color:var(--ink);}
+.tdx-pl{font-size:11px;color:var(--muted);margin-top:1px;}
+.tdx-ok{margin-top:12px;font-size:12px;color:#1a7e49;font-weight:600;}
+.tdx-n{padding:9px 0;border-bottom:1px solid rgba(41,25,66,0.05);}
+.tdx-n:last-child{border-bottom:none;}
+.tdx-nt{font-size:13px;font-weight:600;color:var(--ink);}
+.tdx-nw{font-size:12px;color:var(--muted);line-height:1.55;margin-top:2px;}
+.tdx-sr{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink);padding:6px 0;}
+.tdx-st{flex:none;font-weight:700;color:var(--p);font-size:11.5px;min-width:34px;}
+.tdx-win{color:#1a7e49;font-weight:700;}
+.tdx-ago{margin-left:auto;color:var(--muted);font-size:11px;}
 /* ── Evidence panel: the AI hands over the work ── */
 .opx-ev{margin:0 2px 8px;padding:14px 14px 16px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
 .opx-ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
@@ -3937,16 +3976,117 @@ async function loadBrief(){
   // the Sales Moves rail loads in parallel — independent call, independent render
   try{ if(typeof loadSalesMoves==='function') loadSalesMoves(); }catch(e){}
   bfRenderSkeleton(root);
+  var oldV=document.getElementById('todayVitals'); if(oldV) oldV.remove();
   try{
-    var r=await integApi('studio_brief',{});
-    BRIEF.data=(r&&r.data)||null;
-    bfRender(root, BRIEF.data);
+    var res=await Promise.allSettled([
+      integApi('studio_brief',{}),
+      integApi('sales_moves',{}),
+      integApi('revenue_vitals',{}),
+      api('clients?select=id,name,status,monthly_amount,launched_at,progress&limit=500'),
+      api('invoices?select=name,amount,paid_at&status=eq.paid&order=paid_at.desc&limit=5'),
+      api('opportunities?select=id,title,next_action,next_action_due&status=in.(sent,followed_up,drafted)&next_action_due=not.is.null&order=next_action_due.asc&limit=5')
+    ]);
+    var g=function(i){ var x=res[i]; return x.status==='fulfilled'?x.value:null; };
+    BRIEF.data=(g(0)&&g(0).data)||null;
+    var mvd=(g(1)&&g(1).data)||{}; var moves=mvd.moves||mvd.rows||(Array.isArray(mvd)?mvd:[]);
+    var rv=(g(2)&&g(2).data)||null;
+    tdxRender(root, BRIEF.data, moves, rv, g(3)||[], g(4)||[], g(5)||[]);
   }catch(e){
     bfRenderError(root, e);
   }finally{
     BRIEF.loading=false;
   }
-  loadTodayVitals(); // revenue + system health cards render below The Brief
+}
+
+// ── TODAY: the executive assistant. One question: what should Eric do today? ──
+var TDX={ all:false };
+function tdxRender(root, d, moves, rv, clients, paid, fups){
+  d=d||{}; clients=clients||[]; paid=paid||[]; fups=fups||[];
+  var money=function(n){ return '$'+(Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}); };
+  var hour=new Date().getHours();
+  var greet=(hour<12?'Good morning':hour<18?'Good afternoon':'Good evening')+', Eric.';
+  var items=d.attention||d.items||d.what_needs_you||[];
+  var sentence=d.headline||d.answer||'Here\u2019s what deserves your attention today.';
+
+  // hero = the single highest-value move
+  var top=moves&&moves[0];
+  var hero='';
+  if(top){
+    hero='<div class="tdx-hero">'
+      +'<div class="tdx-hk">Start here</div>'
+      +'<div class="tdx-ht">'+escHtml(top.title||top.action||'Your highest-value move')+'</div>'
+      +'<div class="tdx-hw">'+escHtml(top.why||'')+'</div>'
+      +'<div class="tdx-hb"><button class="tdx-cta" onclick="'+(top.id?('oppxGoto(\''+escAttr(String(top.id))+'\')'):'go(\'opportunities\')')+'">'+escHtml(top.action||'Open it')+' \u2192</button></div>'
+    +'</div>';
+  }
+
+  // needs your attention: clean rows, one button each
+  var shown=TDX.all?items:items.slice(0,4);
+  var rows=shown.map(function(it){
+    var title=it.subject||it.label||'';
+    var btn = it.canDraft
+      ? '<button class="tdx-pill" onclick="ddsDraftAction('+escAttr(JSON.stringify({subject:it.subject||'',subjectId:String(it.refId||it.subjectId||''),signal:it.signal||'',action:it.action||'',why:it.why||'',changed:it.changed||'',module:it.module||'',go:it.go||'',refId:String(it.refId||'')}))+')">Draft for me</button>'
+      : '<button class="tdx-pill" onclick="go(\''+escAttr(it.go||'opportunities')+'\')">Open</button>';
+    return '<div class="tdx-row">'
+      +'<span class="tdx-dot"></span>'
+      +'<span class="tdx-rb"><span class="tdx-rt">'+escHtml(title)+'</span>'
+      +'<span class="tdx-rw">'+escHtml(it.why||it.changed||'')+(it.cost?' \u00b7 '+escHtml(it.cost):'')+'</span></span>'
+      +btn
+    +'</div>';
+  }).join('');
+  var attention = items.length
+    ? '<div class="tdx-h">Today\u2019s priorities</div><div class="tdx-list">'+rows+'</div>'
+      +(items.length>shown.length?'<button class="bf-whymore" style="margin-top:10px;color:var(--p);" onclick="TDX.all=true;loadBrief();">View all priorities ('+items.length+') \u2192</button>':'')
+    : '';
+
+  // studio pulse: reassurance, nothing interactive
+  var act=clients.filter(function(c){return String(c.status||'').toLowerCase()!=='archived';});
+  var mrr=0; act.forEach(function(c){ var v=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,'')); if(isFinite(v)) mrr+=v; });
+  var inflight=act.filter(function(c){return (c.progress||0)<100;}).length;
+  var pulse='<div class="tdx-card"><div class="tdx-ck">Studio pulse</div><div class="tdx-pg">'
+    +'<div class="tdx-p"><div class="tdx-pn">'+act.length+'</div><div class="tdx-pl">Active clients</div></div>'
+    +'<div class="tdx-p"><div class="tdx-pn">'+money(rv?rv.recurring:mrr)+'</div><div class="tdx-pl">MRR</div></div>'
+    +'<div class="tdx-p"><div class="tdx-pn">'+(rv?money(rv.outstanding):'\u2014')+'</div><div class="tdx-pl">Outstanding</div></div>'
+    +'<div class="tdx-p"><div class="tdx-pn">'+inflight+'</div><div class="tdx-pl">Projects in flight</div></div>'
+    +'</div>'
+    +(rv&&!(rv.over30>0)?'<div class="tdx-ok">\u2713 Everything looks healthy</div>':'')
+  +'</div>';
+
+  // AI noticed: quiet observations = the priorities beyond the fold
+  var extra=items.slice(4,8);
+  var noticed=extra.length?('<div class="tdx-card"><div class="tdx-ck">AI noticed</div>'
+    +extra.map(function(it){ return '<div class="tdx-n"><div class="tdx-nt">'+escHtml(it.subject||it.label||'')+'</div><div class="tdx-nw">'+escHtml(it.why||'')+'</div></div>'; }).join('')
+  +'</div>'):'';
+
+  var twenty='<div class="tdx-card tdx-purple"><div class="tdx-ck" style="color:var(--p);">Have 20 minutes?</div>'
+    +'<div class="tdx-nw" style="margin:4px 0 12px;">Knock out today\u2019s outreach and set your pipeline in motion.</div>'
+    +'<button class="tdx-cta" onclick="go(\'opportunities\')">Start outreach now \u2192</button></div>';
+
+  // bottom: scheduled follow-ups (real due dates) + recent wins (real payments/launches)
+  var sched=fups.length?fups.map(function(f){
+    var when=f.next_action_due?new Date(f.next_action_due):null;
+    var lbl=when?((when.getMonth()+1)+'/'+when.getDate()):'';
+    return '<div class="tdx-sr"><span class="tdx-st">'+escHtml(lbl)+'</span><span>'+escHtml(f.title||'')+(f.next_action?' \u2014 '+escHtml(f.next_action):'')+'</span></div>';
+  }).join(''):'<div class="tdx-nw">Nothing scheduled \u2014 follow-up dates you set on opportunities land here.</div>';
+  var wins=[];
+  (paid||[]).forEach(function(i){ if(i.paid_at) wins.push({t:'Invoice paid \u2014 '+(i.name||i.amount||''), when:i.paid_at}); });
+  act.forEach(function(c){ if(c.launched_at) wins.push({t:'Website launched \u2014 '+(c.name||''), when:c.launched_at}); });
+  wins.sort(function(a,b){return new Date(b.when)-new Date(a.when);});
+  var winsHtml=wins.slice(0,5).map(function(w){ return '<div class="tdx-sr"><span class="tdx-win">\u2713</span><span>'+escHtml(w.t)+'</span><span class="tdx-ago">'+escHtml(oppxAgo(w.when)||'')+'</span></div>'; }).join('')||'<div class="tdx-nw">Wins land here as they happen.</div>';
+
+  root.innerHTML=
+    '<div class="bf-eyebrow">'+escHtml(bfDateLine().split(' \u00b7')[0])+'</div>'
+    +'<h1 class="bf-headline" style="font-size:30px;margin-bottom:4px;">'+escHtml(greet)+'</h1>'
+    +'<div class="tdx-sent">'+escHtml(sentence)+'</div>'
+    +'<div class="tdx-grid">'
+      +'<div class="tdx-main">'+hero+attention
+        +'<div class="tdx-two">'
+          +'<div class="tdx-card"><div class="tdx-ck">Scheduled follow-ups</div>'+sched+'</div>'
+          +'<div class="tdx-card"><div class="tdx-ck">Recent wins</div>'+winsHtml+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="tdx-rail">'+pulse+noticed+twenty+'</div>'
+    +'</div>';
 }
 
 // ── TODAY VITALS: revenue at a glance + system health. Appended below The
@@ -10369,6 +10509,172 @@ function anEngineNote(eng){
 
 
 
+</script>
+
+<style>
+/* TODAY — executive assistant page */
+.tdx-date{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+.tdx-greet{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--ink);margin:6px 0 4px;letter-spacing:-0.01em;}
+.tdx-sub{font-size:14.5px;color:var(--muted);max-width:620px;line-height:1.6;}
+.tdx-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:22px;margin-top:24px;align-items:start;}
+@media(max-width:980px){.tdx-grid{grid-template-columns:1fr;}}
+.tdx-hero{background:linear-gradient(135deg,#2a1a4e,#3b2566);border-radius:18px;padding:26px 28px;color:#fff;position:relative;overflow:hidden;}
+.tdx-hero .eb{font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.55);}
+.tdx-hero h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin:10px 0 8px;line-height:1.2;}
+.tdx-hero p{font-size:13.5px;color:rgba(255,255,255,.75);line-height:1.6;margin:0;max-width:420px;}
+.tdx-hero .go{margin-top:18px;display:inline-flex;align-items:center;gap:6px;background:#fff;color:#3b2566;font-weight:700;font-size:13.5px;padding:10px 20px;border-radius:100px;border:none;cursor:pointer;}
+.tdx-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px;display:flex;align-items:center;gap:6px;}
+.tdx-list{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:4px 18px;}
+.tdx-row{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid rgba(41,25,66,.05);}
+.tdx-row:last-child{border-bottom:none;}
+.tdx-ic{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}
+.tdx-rb{flex:1;min-width:0;}
+.tdx-rt{font-size:14px;font-weight:650;color:var(--ink);}
+.tdx-rw{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.tdx-tag{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:100px;margin-top:6px;margin-right:6px;}
+.tdx-pill{flex:none;border:1px solid rgba(91,63,160,.3);background:#fff;color:var(--p);font-weight:600;font-size:12.5px;padding:7px 15px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+.tdx-pill:hover{background:rgba(91,63,160,.06);}
+.tdx-card{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:16px;padding:18px;}
+.tdx-ph{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.tdx-pulse{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tdx-pu{border:1px solid rgba(41,25,66,.06);border-radius:12px;padding:12px 14px;}
+.tdx-pn{font-size:19px;font-weight:750;color:var(--ink);}
+.tdx-pl{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;}
+.tdx-ok{font-size:12px;color:#1a7e49;margin-top:12px;display:flex;align-items:center;gap:6px;}
+.tdx-ni{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(41,25,66,.05);}
+.tdx-ni:last-child{border-bottom:none;}
+.tdx-nic{flex:none;width:34px;height:34px;border-radius:10px;background:rgba(91,63,160,.07);color:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.tdx-nt{font-size:13px;font-weight:600;color:var(--ink);}
+.tdx-nw{font-size:12px;color:var(--muted);margin-top:1px;line-height:1.5;}
+.tdx-act{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12.5px;color:var(--ink);}
+.tdx-act .dot{flex:none;width:18px;height:18px;border-radius:50%;background:#e7f6ee;color:#1a7e49;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.tdx-act .ago{margin-left:auto;color:var(--muted);font-size:11px;white-space:nowrap;}
+.tdx-20{background:#f3effc;border:none;border-radius:16px;padding:18px;}
+.tdx-20 b{font-size:14.5px;color:var(--ink);}
+.tdx-20 p{font-size:12.5px;color:var(--muted);margin:4px 0 12px;line-height:1.55;}
+</style>
+<script>
+// ═══ TODAY — the chief of staff. Overrides loadBrief/loadSalesMoves. ═══
+(function(){
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function ago(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
+  function money(n){ n=Number(n)||0; return '$'+Math.round(n).toLocaleString(); }
+  var ICON={lead:'\u2709',invoice:'$',client:'\u25CF',default:'\u2726'};
+
+  async function loadTodayX(){
+    var root=document.getElementById('briefRoot'); if(!root) return;
+    var rail=document.getElementById('salesMovesRoot'); if(rail) rail.innerHTML='';
+    root.style.maxWidth='1120px';
+    root.innerHTML='<div class="bf-skel" style="height:34px;width:320px;margin:8px 0 12px;"></div><div class="bf-skel" style="height:14px;width:60%;"></div><div class="bf-skel" style="height:180px;width:100%;margin-top:22px;border-radius:18px;"></div>';
+
+    function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+    var brief=null, moves=[], clients=[], invoices=[], opps=[];
+    var results;
+    try{
+      results=await Promise.all([
+        safe(function(){ return integApi('studio_brief',{}); }),
+        safe(function(){ return integApi('sales_moves',{}); }),
+        safe(function(){ return api('clients?select=id,name,status,monthly_amount,launched_at&limit=500'); }),
+        safe(function(){ return api('invoices?select=id,name,amount,status,paid_at,created_at&deleted_at=is.null&order=created_at.desc&limit=200'); }),
+        safe(function(){ return api('opportunities?select=id,title,status,estimated_value,updated_at&deleted_at=is.null&limit=300'); })
+      ]);
+    }catch(e){ results=[null,null,null,null,null]; }
+    if(!results[0]&&!results[1]&&!results[2]){
+      root.innerHTML='<div class="tdx-greet" style="font-size:24px;">Couldn\u2019t load your morning just now.</div><div class="tdx-sub">Usually a brief hiccup talking to the server.</div><button class="tdx-pill" style="margin-top:14px;" onclick="loadBrief()">Try again</button>';
+      return;
+    }
+    brief=(results[0]&&results[0].data)||{};
+    moves=((results[1]&&results[1].data)||{}).moves||((results[1]&&results[1].data)||{}).items||[];
+    clients=results[2]||[]; invoices=results[3]||[]; opps=results[4]||[];
+
+    var items=Array.isArray(brief.items)?brief.items:[];
+    var hero=moves[0]||items[0]||null;
+    var noticed=(moves.length>1?moves.slice(1,4):items.slice(1,4));
+    var needs=items.filter(function(it){return it!==hero;}).slice(0,4);
+    if(!needs.length && moves.length>1) needs=moves.slice(1,5);
+
+    // pulse (all real)
+    var act=clients.filter(function(c){return String(c.status||'').toLowerCase()!=='archived';});
+    var mrr=0; act.forEach(function(c){ var v=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0; mrr+=v; });
+    var openOpp=opps.filter(function(o){return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1;});
+    var pipe=0; openOpp.forEach(function(o){ var v=Number(o.estimated_value)||0; if(v>0)pipe+=v; });
+    var unpaid=invoices.filter(function(i){return i.status&&i.status!=='paid';}).length;
+
+    // activity (real: payments, launches, wins)
+    var acts=[];
+    invoices.filter(function(i){return i.paid_at;}).slice(0,4).forEach(function(i){ acts.push({t:'Invoice paid'+(i.name?' \u2014 '+i.name:''),d:i.paid_at}); });
+    clients.filter(function(c){return c.launched_at;}).sort(function(a,b){return new Date(b.launched_at)-new Date(a.launched_at);}).slice(0,2).forEach(function(c){ acts.push({t:'Website launched for '+(c.name||'a client'),d:c.launched_at}); });
+    opps.filter(function(o){return o.status==='won';}).sort(function(a,b){return new Date(b.updated_at)-new Date(a.updated_at);}).slice(0,2).forEach(function(o){ acts.push({t:'Won \u2014 '+(o.title||'an opportunity'),d:o.updated_at}); });
+    acts.sort(function(a,b){return new Date(b.d)-new Date(a.d);}); acts=acts.slice(0,5);
+
+    function heroAct(h){
+      if(!h) return "go('opportunities')";
+      if(h.id && String(h.id).length>20) return "OPPX.pendingOpen='"+esc(h.id)+"';go('opportunities')";
+      return "go('"+esc(h.go||'opportunities')+"')";
+    }
+    function rowBtn(it){
+      var lbl=it.canDraft?'Draft for me':(String(it.action||'Open').split(' ')[0]||'Open');
+      if(it.canDraft) return {l:'Draft for me',fn:"ddsDraftAction(window.__tdxItems["+it.__ix+"])"};
+      return {l:'Open',fn:"go('"+esc(it.go||'overview')+"')"};
+    }
+    window.__tdxItems=needs; needs.forEach(function(it,ix){it.__ix=ix;});
+
+    var h=new Date().getHours();
+    var greet=(h<12?'Good morning':h<18?'Good afternoon':'Good evening');
+    var dateLine=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+    var sent=brief.headline||brief.answer||'Here\u2019s what deserves your attention today.';
+
+    var heroHtml=hero?('<div class="tdx-hero"><div class="eb">START HERE</div>'
+      +'<h2>'+esc(hero.action||hero.title||hero.subject||'Start today\u2019s outreach')+'</h2>'
+      +'<p>'+esc(hero.why||hero.changed||'')+'</p>'
+      +'<button class="go" onclick="'+heroAct(hero)+'">Start \u2192</button></div>')
+      :('<div class="tdx-hero"><div class="eb">START HERE</div><h2>Start today\u2019s outreach</h2><p>Twenty minutes of contact work today is next month\u2019s pipeline.</p><button class="go" onclick="go(\'opportunities\')">Start \u2192</button></div>');
+
+    var needsHtml=needs.length?('<div class="tdx-h">Today\u2019s priorities</div><div class="tdx-list">'
+      +needs.map(function(it){
+        var b=rowBtn(it);
+        var tags='';
+        if(it.impact) tags+='<span class="tdx-tag" style="background:#e7f6ee;color:#1a7e49;">'+esc(it.impact)+'</span>';
+        if(it.confidence==='high') tags+='<span class="tdx-tag" style="background:rgba(91,63,160,.08);color:var(--p);">high confidence</span>';
+        var ic=(it.subject||it.title||'?').charAt(0).toUpperCase();
+        return '<div class="tdx-row"><div class="tdx-ic" style="background:rgba(91,63,160,.08);color:var(--p);">'+esc(ic)+'</div>'
+          +'<div class="tdx-rb"><div class="tdx-rt">'+esc(it.subject||it.title||'')+'</div>'
+          +'<div class="tdx-rw">'+esc(it.changed||it.why||'')+'</div>'+(tags?'<div>'+tags+'</div>':'')+'</div>'
+          +'<button class="tdx-pill" onclick="'+b.fn+'">'+esc(b.l)+'</button></div>';
+      }).join('')
+      +'<div style="text-align:center;padding:12px 0;"><button class="bf-whymore" style="color:var(--p);font-size:12.5px;" onclick="go(\'opportunities\')">View all priorities \u2192</button></div>'
+      +'</div>'):'';
+
+    var pulse='<div class="tdx-card"><div class="tdx-ph">\u25C8 STUDIO PULSE</div><div class="tdx-pulse">'
+      +'<div class="tdx-pu"><div class="tdx-pn">'+act.length+'</div><div class="tdx-pl">Active clients</div></div>'
+      +'<div class="tdx-pu"><div class="tdx-pn">'+money(mrr)+'</div><div class="tdx-pl">MRR</div></div>'
+      +'<div class="tdx-pu"><div class="tdx-pn">'+(pipe?money(pipe):openOpp.length)+'</div><div class="tdx-pl">'+(pipe?'Pipeline value':'Open opportunities')+'</div></div>'
+      +'<div class="tdx-pu"><div class="tdx-pn">'+unpaid+'</div><div class="tdx-pl">Invoices awaiting payment</div></div>'
+      +'</div>'+(unpaid===0&&needs.length===0?'<div class="tdx-ok">\u2713 Everything looks healthy</div>':'')+'</div>';
+
+    var noticedHtml='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u2726 AI NOTICED</div>'
+      +(noticed.length?noticed.map(function(n){
+        return '<div class="tdx-ni"><div class="tdx-nic">\u2726</div><div><div class="tdx-nt">'+esc(n.subject||n.title||'')+'</div><div class="tdx-nw">'+esc(n.why||n.changed||'')+'</div></div></div>';
+      }).join(''):'<div class="tdx-nw">Nothing unusual across your systems right now.</div>')+'</div>';
+
+    var actHtml='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u2713 RECENT WINS</div>'
+      +(acts.length?acts.map(function(a){return '<div class="tdx-act"><span class="dot">\u2713</span><span>'+esc(a.t)+'</span><span class="ago">'+esc(ago(a.d))+'</span></div>';}).join(''):'<div class="tdx-nw">Wins land here as they happen.</div>')+'</div>';
+
+    var card20='<div class="tdx-20" style="margin-top:16px;"><b>Have 20 minutes?</b><p>Knock out today\u2019s outreach and set your pipeline in motion.</p><button class="go" style="background:var(--p);color:#fff;font-weight:700;font-size:13px;padding:9px 18px;border-radius:100px;border:none;cursor:pointer;" onclick="go(\'opportunities\')">Start outreach now \u2192</button></div>';
+
+    root.innerHTML=
+      '<div class="tdx-date">'+dateLine+'</div>'
+      +'<div class="tdx-greet">'+greet+', Eric.</div>'
+      +'<div class="tdx-sub">'+esc(sent)+'</div>'
+      +'<div class="tdx-grid">'
+        +'<div>'+heroHtml+needsHtml+actHtml+'</div>'
+        +'<div>'+pulse+noticedHtml+card20+'</div>'
+      +'</div>';
+  }
+  window.loadBrief=loadTodayX;
+  window.loadSalesMoves=function(){};
+  // no parse-time invocation: the normal post-login boot calls loadBrief().
+})();
 </script>
 </body>
 </html>
