@@ -1504,6 +1504,11 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
 .msgx-chip.bad{color:#b03a2e;border-color:rgba(176,58,46,0.3);background:#fdecea;}
 .msgx-chip.quiet{color:var(--muted);border-color:rgba(0,0,0,0.08);cursor:default;}
 .msgx-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px dashed rgba(91,63,160,0.25);border-radius:10px;background:rgba(91,63,160,0.03);font-size:12px;color:var(--ink-2,#574d68);margin-bottom:10px;}
+.dds-act-dest{font-size:12.5px;color:var(--ink-2,#574d68);background:rgba(91,63,160,0.05);border:1px solid rgba(91,63,160,0.12);border-radius:9px;padding:9px 12px;margin-bottom:12px;line-height:1.55;}
+.opx-editrow td{background:rgba(91,63,160,0.03);padding:14px 12px;}
+.opx-ef{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:10px;}
+.opx-ef label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.opx-ef input,.opx-ef select,.opx-ef textarea{width:100%;padding:8px 10px;border:1px solid rgba(91,63,160,0.18);border-radius:8px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff;box-sizing:border-box;}
 /* ── Evidence panel: the AI hands over the work ── */
 .opx-ev{margin:0 2px 8px;padding:14px 14px 16px;border:1px solid rgba(91,63,160,0.14);border-radius:14px;background:#fff;}
 .opx-ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
@@ -4129,11 +4134,22 @@ function ddsRenderComposer(item, d){
   // one click HERE — same write + notify + feed path as the Messages page —
   // instead of copy, navigate, select, paste, send.
   var canPortalSend = d.channel!=='email' && item.module==='Clients' && item.subjectId;
+  // NEVER WONDER WHO GETS THIS: every draft states its destination and
+  // whether this screen can send at all, before the message text.
+  var destLine;
+  if (canPortalSend) {
+    destLine='<div class="dds-act-dest"><strong>Sends to:</strong> '+escHtml(item.subject||'this client')+'\u2019s portal thread (plus an email notification if reachable) \u2014 only when you press \u201cSend in portal\u201d.</div>';
+  } else if (d.channel==='email') {
+    destLine='<div class="dds-act-dest"><strong>To:</strong> '+(item.email?escHtml(item.email):'<em>no email on file \u2014 add one to their record first</em>')+' \u00b7 <strong>Draft only.</strong> Nothing is sent from this screen; Copy or \u201cOpen in email\u201d puts it in your own mail app to send.</div>';
+  } else {
+    destLine='<div class="dds-act-dest"><strong>Draft only.</strong> \u201cGo send it\u201d opens the right screen \u2014 nothing sends from here.</div>';
+  }
   var primaryBtn = canPortalSend
     ? '<button class="bf-act primary" id="ddsPortalSendBtn" onclick="ddsSendPortal(\''+escAttr(item.subjectId)+'\')">Send in portal \u2192</button>'
     : '<button class="bf-act primary" onclick="ddsSendDraft(\''+escAttr(item.go||'')+'\',\''+escAttr(item.refId||'')+'\')">'+(d.channel==='email'?'Open in email':'Go send it')+' \u2192</button>';
   form.innerHTML =
-    subjField
+    destLine
+    +subjField
     +'<label class="dds-act-label">'+(d.channel==='email'?'Message':'Message to '+escHtml(item.subject||'them'))+'</label>'
     +'<textarea id="ddsActBody" class="dds-act-textarea" rows="9">'+escHtml(d.body||'')+'</textarea>'
     +'<div class="dds-act-meta">'+(d.is_ai?'Drafted by your assistant from the engine\u2019s read. Edit anything before sending.':'A starting template, make it yours before sending.')+'</div>'
@@ -4510,7 +4526,7 @@ function oppxRawDraft(kind,id){
       : 'they ran your review'+(isFinite(Number(x.score))?(' and scored '+x.score):'')+(x.client_email?' and left their email':'')),
     changed:(kind==='lead' ? ('They wrote'+(x.subject?(': \u201c'+String(x.subject).slice(0,90)+'\u201d'):' through the site'))
       : ('Review run on '+(x.url||'their site'))),
-    module:'Opportunities', go:'leads', refId:String(x.id) });
+    module:'Opportunities', go:'leads', refId:String(x.id), email:(kind==='lead'?(x.email||''):(x.client_email||'')) });
 }
 function oppxRawConvert(kind,id){
   var x=oppxRawFind(kind,id); if(!x) return;
@@ -4621,11 +4637,13 @@ function oppxBenchTable(){
       +'<td>'+escHtml(oppxAgo(p.created_at)||'\u2014')+'</td>'
       +'<td style="color:var(--muted);">Send the first outreach</td>'
       +'<td style="white-space:nowrap;">'
+        +'<button class="iabtn" onclick="event.stopPropagation();oppxEvEdit(\''+p.id+'\')">Edit</button>'
         +'<button class="iabtn" style="color:var(--p);font-weight:600;" onclick="event.stopPropagation();oppxBenchDraft(\''+p.id+'\')">Draft</button>'
         +'<button class="iabtn" onclick="event.stopPropagation();oppxBenchStatus(\''+p.id+'\',\'Contacted\')">Contacted</button>'
         +'<button class="iabtn" onclick="event.stopPropagation();ddsPrefillNewClient(\''+escAttr(p.business_name||'')+'\',\''+escAttr(p.email||'')+'\',\''+escAttr((p.business_name||'')+' \u2014 Website')+'\')">Convert</button>'
         +'<button class="iabtn del" onclick="event.stopPropagation();oppxBenchStatus(\''+p.id+'\',\'Dismissed\')">Dismiss</button>'
-      +'</td></tr>';
+      +'</td></tr>'
+      +(OPPX.ev.edit===p.id ? oppxBenchEditor(p) : '');
   }).join('');
 
   var bulk=selCount?('<div class="opx-bulk">'+selCount+' selected \u00b7 '
@@ -4646,6 +4664,60 @@ function oppxBenchTable(){
   +'</div>';
 }
 
+// ── inline prospect editor: full CRUD without leaving the evidence ──
+// notes is the Prospecting workroom's structured case file; we edit INSIDE it
+// (summary, next.action, next.due) and never clobber research/log/history.
+function oppxBenchCase(p){
+  var o=null;
+  try{ o=JSON.parse(p.notes||''); }catch(e){}
+  if(!o||typeof o!=='object'||Array.isArray(o)) o={ v:1, info:{}, research:[], log:[], next:{action:'',due:''}, starred:false, summary:String(p.notes||'') };
+  o.info=o.info||{}; o.research=Array.isArray(o.research)?o.research:[]; o.log=Array.isArray(o.log)?o.log:[];
+  o.next=o.next||{action:'',due:''}; o.summary=o.summary||'';
+  return o;
+}
+function oppxEvEdit(id){ OPPX.ev.edit=(OPPX.ev.edit===id?null:id); oppxRender(); }
+function oppxBenchEditor(p){
+  var cf=oppxBenchCase(p);
+  var stOpts=['New','Contacted','Replied','Client','Opted out','Dismissed'].map(function(s){return '<option '+((p.status||'New')===s?'selected':'')+'>'+s+'</option>';}).join('');
+  function f(label,id,val,ph){ return '<div><label for="'+id+'">'+label+'</label><input id="'+id+'" value="'+escAttr(val||'')+'" placeholder="'+escAttr(ph||'')+'"></div>'; }
+  return '<tr class="opx-editrow"><td colspan="9">'
+    +'<div class="opx-ef">'
+      +f('Business','oppxE_bn',p.business_name)
+      +f('Contact name','oppxE_cn',p.contact_name)
+      +f('Email','oppxE_em',p.email)
+      +f('Phone','oppxE_ph',p.phone)
+      +f('Website','oppxE_ws',p.website)
+      +f('Source','oppxE_src',p.source)
+      +'<div><label for="oppxE_st">Status</label><select id="oppxE_st">'+stOpts+'</select></div>'
+      +f('Next action','oppxE_na',cf.next.action,'e.g. Send first outreach')
+      +'<div><label for="oppxE_fu">Follow-up date</label><input id="oppxE_fu" type="date" value="'+escAttr((cf.next.due||'').slice(0,10))+'"></div>'
+    +'</div>'
+    +'<div><label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;" for="oppxE_nt">Notes</label>'
+    +'<textarea id="oppxE_nt" rows="3" style="width:100%;padding:8px 10px;border:1px solid rgba(91,63,160,0.18);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;">'+escHtml(cf.summary)+'</textarea></div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+      +'<button class="bf-act primary" onclick="event.stopPropagation();oppxBenchSave(\''+p.id+'\')">Save changes</button>'
+      +'<button class="bf-act" onclick="event.stopPropagation();oppxEvEdit(\''+p.id+'\')">Cancel</button>'
+      +'<span style="flex:1;"></span>'
+      +'<button class="bf-act" onclick="event.stopPropagation();oppxBenchDraft(\''+p.id+'\')">Draft outreach \u2192</button>'
+    +'</div>'
+  +'</td></tr>';
+}
+async function oppxBenchSave(id){
+  var p=oppxBenchFind(id); if(!p) return;
+  var v=function(eid){ var el=document.getElementById(eid); return el?String(el.value||'').trim():''; };
+  var cf=oppxBenchCase(p);
+  cf.summary=v('oppxE_nt');
+  cf.next={ action:v('oppxE_na'), due:v('oppxE_fu') };
+  var patch={ business_name:v('oppxE_bn'), contact_name:v('oppxE_cn'), email:v('oppxE_em'), phone:v('oppxE_ph'),
+    website:v('oppxE_ws'), source:v('oppxE_src'), status:v('oppxE_st')||'New',
+    notes:JSON.stringify(cf), updated_at:new Date().toISOString() };
+  var r=await api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',patch);
+  if(r===null){ toast('Couldn\u2019t save \u2014 try again'); return; }
+  Object.assign(p, patch);
+  OPPX.ev.edit=null;
+  toast('\u2713 Saved');
+  oppxRender();
+}
 function oppxBenchFind(id){ return (OPPX.bench||[]).find(function(p){return String(p.id)===String(id);}); }
 function oppxBenchDraft(id){
   var p=oppxBenchFind(id); if(!p) return;
@@ -4653,7 +4725,7 @@ function oppxBenchDraft(id){
     action:'Send '+(p.business_name||'them')+' a first outreach',
     why:'on your bench'+(p.source?(' from '+p.source):'')+' \u2014 a real business you already researched, never contacted',
     changed:'Never contacted'+(p.website?(' \u00b7 '+String(p.website).replace(/^https?:\/\//,'')):''),
-    module:'Opportunities', go:'prospects', refId:String(p.id) });
+    module:'Opportunities', go:'prospects', refId:String(p.id), email:p.email||'' });
 }
 async function oppxBenchStatus(id,status){
   var r=await api('prospects?id=eq.'+encodeURIComponent(id),'PATCH',{status:status, updated_at:new Date().toISOString()});
