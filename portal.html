@@ -188,7 +188,7 @@ body{font-family:var(--sans);background:var(--cream);color:var(--ink);-webkit-fo
 .chk-tx .c2{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
 
 /* MESSAGES */
-.msg-thread{max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:4px;}
+.msg-thread{max-height:min(64vh,620px);overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:4px;overscroll-behavior:contain;}
 .msg-thread::-webkit-scrollbar{width:3px;}
 .msg-thread::-webkit-scrollbar-thumb{background:var(--pxl);border-radius:2px;}
 .msg-bubble{display:flex;gap:10px;}
@@ -893,9 +893,24 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 .conv-content{ min-width:0; }
 .conv-meta{ font-size:11.5px; color:var(--muted); margin-bottom:5px; }
 .conv-msg.from-client .conv-meta{ text-align:right; }
-.conv-text{ font-size:15px; line-height:1.6; color:var(--ink); background:#fff; border:1px solid var(--line);
-  border-radius:16px; padding:13px 16px; white-space:pre-wrap; word-break:break-word; }
+.conv-text{ font-size:14.5px; line-height:1.5; color:var(--ink); background:#fff; border:1px solid var(--line);
+  border-radius:16px; padding:11px 14px; white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere; -webkit-text-size-adjust:100%; }
 .conv-msg.from-client .conv-text{ background:var(--p-soft); border-color:transparent; }
+/* Grouped messages: consecutive notes from the same sender read as one turn —
+   the avatar and name/time header appear once, follow-ups tuck underneath. */
+.conv-msg.grouped{ margin-top:-9px; }
+.conv-msg.grouped .conv-av{ visibility:hidden; height:0; }
+.conv-msg.grouped .conv-meta{ display:none; }
+.conv-msg.grouped .conv-text{ border-radius:16px; }
+/* Phone: bubbles use the width, chrome shrinks, long messages breathe. */
+@media (max-width:640px){
+  .msg-thread{ max-height:none; height:calc(100dvh - 320px); min-height:320px; }
+  .conv-msg{ max-width:94%; gap:8px; }
+  .conv-av{ width:26px; height:26px; font-size:11px; }
+  .conv-meta{ font-size:10.5px; margin-bottom:3px; }
+  .conv-text{ font-size:14px; line-height:1.45; padding:10px 12px; border-radius:14px; }
+  .conv-thread{ gap:10px; }
+}
 
 /* empty state — relationship framing, not an apology */
 .conv-empty{ text-align:center; padding:48px 24px; }
@@ -2489,10 +2504,20 @@ function renderMessages(msgs) {
       + '<div class="conv-empty-p">Send Eric a note below whenever you have a question or something to share.</div></div>';
   } else {
     html += '<div class="conv-thread">';
+    var prev = null;
     allMessages.forEach(function(m){
       var mine = m.from_who === "client";
       var initial = mine ? ((CLIENT && CLIENT.name) ? CLIENT.name[0] : "Y") : "E";
-      html += '<div class="conv-msg from-'+cEsc(m.from_who)+'">'
+      // Group with the previous message when it's the same sender within 8
+      // minutes — one avatar + one header per conversational turn, so a long
+      // exchange reads as a conversation instead of a stack of labeled cards.
+      var grouped = false;
+      if (prev && prev.from_who === m.from_who) {
+        var dt = new Date(m.created_at).getTime() - new Date(prev.created_at).getTime();
+        if (isFinite(dt) && dt >= 0 && dt < 8 * 60 * 1000) grouped = true;
+      }
+      prev = m;
+      html += '<div class="conv-msg from-'+cEsc(m.from_who)+(grouped?' grouped':'')+'">'
         + '<div class="conv-av '+(mine?"client":"")+'">'+cEsc(initial)+'</div>'
         + '<div class="conv-content">'
         + '<div class="conv-meta">'+cEsc(m.sender_name)+' \u00B7 '+formatDate(m.created_at)+'</div>'
