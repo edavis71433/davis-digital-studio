@@ -13167,7 +13167,7 @@ function anEngineNote(eng){
 // platform already trusts. Uploads drive the proven legacy uploadFiles()
 // (storage PUT → files row → client email notify) programmatically. ═══
 (function(){
-  var FSX={rows:[], clients:[], cid:'all', type:'all', q:'', sel:null, loaded:false};
+  var FSX={rows:[], clients:[], cid:'all', type:'all', q:'', sel:null, loaded:false, sort:'new'};
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(s){ return esc(s).replace(/'/g,'&#39;'); }
   function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
@@ -13219,6 +13219,7 @@ function anEngineNote(eng){
   window.fsxCl=function(cid){ FSX.cid=cid; FSX.sel=null; fsxRender(); };
   window.fsxType=function(t){ FSX.type=t; fsxRender(); };
   window.fsxQ=function(v){ FSX.q=v; fsxRender(); };
+  window.fsxSort=function(v){ FSX.sort=v; fsxRender(); };
   window.fsxSel=function(id){ FSX.sel=(FSX.sel===id?null:id); fsxRender(); };
   window.fsxPick=function(){
     if(FSX.cid==='all'){ toast('Pick a client folder first \u2014 files upload to a client\u2019s portal'); return; }
@@ -13248,7 +13249,11 @@ function anEngineNote(eng){
     var cName={}; FSX.clients.forEach(function(c){ cName[String(c.id)]=c.name; });
 
     var q=FSX.q.toLowerCase();
-    var list=FSX.rows.filter(function(f){
+    var sorted=FSX.rows.slice();
+    if(FSX.sort==='name') sorted.sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
+    else if(FSX.sort==='size') sorted.sort(function(a,b){ function mb(f){ var m=String(f.size||'').match(/([\d.]+)\s*(MB|KB)/i); return m?(Number(m[1])*(m[2].toUpperCase()==='MB'?1024:1)):0; } return mb(b)-mb(a); });
+    else sorted.sort(function(a,b){ return new Date(b.created_at)-new Date(a.created_at); });
+    var list=sorted.filter(function(f){
       if(FSX.cid!=='all'&&String(f.client_id)!==FSX.cid) return false;
       if(FSX.type!=='all'&&typeOf(f)!==FSX.type) return false;
       if(q&&String(f.name||'').toLowerCase().indexOf(q)===-1) return false;
@@ -13273,6 +13278,11 @@ function anEngineNote(eng){
       var n=t[0]==='all'?FSX.rows.length:counts[t[0]];
       return '<button class="tlx-chip'+(FSX.type===t[0]?' on':'')+'" onclick="fsxType(\''+t[0]+'\')">'+t[1]+(n?' \u00b7 '+n:'')+'</button>'; }).join('')
       +'<span style="flex:1;"></span>'
+      +'<select class="fi" style="margin:0;max-width:140px;" onchange="fsxSort(this.value)" aria-label="Sort files">'
+        +'<option value="new"'+(FSX.sort==='new'?' selected':'')+'>Sort: Newest</option>'
+        +'<option value="name"'+(FSX.sort==='name'?' selected':'')+'>Sort: Name</option>'
+        +'<option value="size"'+(FSX.sort==='size'?' selected':'')+'>Sort: Largest</option>'
+      +'</select>'
       +'<input class="opx-search" style="max-width:220px;" placeholder="Search files\u2026" value="'+att(FSX.q)+'" oninput="fsxQ(this.value)" aria-label="Search files">'
     +'</div>';
 
@@ -13579,7 +13589,7 @@ function anEngineNote(eng){
 // (waiting on you). New approvals drive the legacy pipeline (row + portal
 // notification + client email) programmatically. ═══
 (function(){
-  var APX={apps:[], reqs:[], clients:[], tab:'all', sel:null, loaded:false, showNew:false};
+  var APX={apps:[], reqs:[], clients:[], tab:'all', sel:null, loaded:false, showNew:false, q:''};
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(s){ return esc(s).replace(/'/g,'&#39;'); }
   function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
@@ -13621,6 +13631,7 @@ function anEngineNote(eng){
   window.apxTab=function(t){ APX.tab=t; apxRender(); };
   window.apxSel=function(k){ APX.sel=k; apxRender(); };
   window.apxNewToggle=function(){ APX.showNew=!APX.showNew; apxRender(); };
+  window.apxQ=function(v){ APX.q=v; apxRender(); };
 
   function items(){
     var out=[];
@@ -13675,12 +13686,18 @@ function anEngineNote(eng){
     +'</div>';
 
     var TABS=[['all','All'],['you','Waiting on you'],['client','Waiting on client'],['approved','Approved']];
-    var list=all.filter(function(x){ return APX.tab==='all'||x.bucket===APX.tab; });
+    var q2=APX.q.toLowerCase();
+    var list=all.filter(function(x){
+      if(!(APX.tab==='all'||x.bucket===APX.tab)) return false;
+      if(q2&&x.title.toLowerCase().indexOf(q2)===-1&&cName(x.client_id).toLowerCase().indexOf(q2)===-1) return false;
+      return true;
+    });
     var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
       var n=t[0]==='all'?all.length:all.filter(function(x){return x.bucket===t[0];}).length;
       return '<button class="ibx-tab'+(APX.tab===t[0]?' on':'')+'" onclick="apxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
     }).join('')
     +'<span style="flex:1;"></span>'
+    +'<input class="opx-search" style="max-width:200px;" placeholder="Search approvals\u2026" value="'+att(APX.q)+'" oninput="apxQ(this.value)" aria-label="Search approvals">'
     +'<button class="ibx-tab" onclick="apxNewToggle()">+ New approval request</button>'
     +'</div>';
 
@@ -13896,12 +13913,30 @@ function anEngineNote(eng){
       safe(function(){ return api('clients?select=*&limit=300'); }),
       safe(function(){ return api('invoices?select=id,name,amount,status,due_date,client_id&deleted_at=is.null&limit=200'); }),
       safe(function(){ return api('approvals?select=id,title,status,created_at,client_id&limit=200'); }),
-      safe(function(){ return api('files?select=id,client_id,name,url,type,created_at&order=created_at.desc&limit=300'); })
+      safe(function(){ return api('files?select=id,client_id,name,url,type,created_at&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('messages?select=client_id,from_who,created_at&order=created_at.desc&limit=800'); })
     ]);
     TSX.ready=(r[0]!==null);
     TSX.rows=r[0]||[]; TSX.growth=r[1]||[]; TSX.parts=r[2]||[];
     TSX.clients=(r[3]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
     TSX.inv=r[4]||[]; TSX.apps=r[5]||[]; TSX.files=r[6]||[];
+    TSX.lastMsg={}; (r[7]||[]).forEach(function(m){ var k=String(m.client_id); if(!TSX.lastMsg[k]) TSX.lastMsg[k]=m; });
+    // ── AUTOMATIC TASK GENERATION ──
+    // High-confidence real events (overdue invoice, stale approval) become
+    // tasks on their own; source_ref dedupe means each event creates exactly
+    // one task, ever — even across dismissals. Softer signals stay in
+    // ✦ Suggested for a human Accept. Server-side nightly version queued
+    // behind the engine clients-read fix.
+    if(TSX.ready){
+      var autos=suggestions().filter(function(s){ return s.source==='invoice'||s.source==='approval'; });
+      var made=0;
+      for(var ai=0; ai<autos.length; ai++){
+        var s=autos[ai];
+        var r2=await api('studio_tasks','POST',{title:s.title, client_id:s.client_id, priority:s.priority, impact:s.impact, status:'open', source:s.source, source_ref:s.ref});
+        if(r2!==null){ made++; var row=(Array.isArray(r2)&&r2[0]); if(row) TSX.rows.unshift(row); }
+      }
+      if(made) toast('✦ '+made+' task'+(made===1?'':'s')+' created automatically from real events');
+    }
     tsxRender();
   };
   window.tsxTab=function(t){ TSX.tab=t; TSX.sel=null; tsxRender(); };
@@ -13915,6 +13950,7 @@ function anEngineNote(eng){
   function allTasks(){
     var out=[];
     TSX.rows.forEach(function(t){
+      if(String(t.status||'').toLowerCase()==='dismissed') return;
       var pb=parseBody(t.body);
       out.push({key:'s:'+t.id, kind:'s', id:t.id, title:t.title||'Task', desc:pb.desc, subs:pb.subs, client_id:t.client_id,
         status:String(t.status||'open').toLowerCase(), priority:String(t.priority||'medium').toLowerCase(),
@@ -13946,6 +13982,29 @@ function anEngineNote(eng){
         if(!refs[ref]&&!TSX.dismissed[ref]) out.push({ref:ref, client_id:a.client_id, title:'Nudge \u201c'+(a.title||'approval')+'\u201d', why:'Approval has been waiting 2+ days \u2014 a friendly reminder keeps the project moving.', priority:'medium', impact:'milestone', source:'approval'});
       }
     });
+    TSX.clients.forEach(function(c){
+      var k=String(c.id);
+      if(!c.launched_at){
+        var ref='launch:'+k;
+        if(!refs[ref]&&!TSX.dismissed[ref]) out.push({ref:ref, client_id:c.id, title:'Move '+(c.name||'client')+' toward launch', why:'This client hasn\u2019t launched yet \u2014 launch is the moment reviews, referrals, and recurring value begin.', priority:'high', impact:'launch', source:'engine'});
+      }
+      var lm=TSX.lastMsg[k];
+      var silentD=lm?(Date.now()-new Date(lm.created_at))/86400000:null;
+      if(silentD!=null&&silentD>=14){
+        var ref2='checkin:'+k;
+        if(!refs[ref2]&&!TSX.dismissed[ref2]) out.push({ref:ref2, client_id:c.id, title:'Check in with '+(c.name||'client'), why:'No messages in '+Math.floor(silentD)+' days \u2014 a short, genuine note keeps the relationship warm.', priority:'medium', impact:'none', source:'engine'});
+      }
+    });
+    TSX.parts.forEach(function(p){
+      var hasTasks=TSX.growth.some(function(t){ return String(t.partnership_id)===String(p.id); });
+      if(!hasTasks){
+        var ref='roadmap:'+p.id;
+        if(!refs[ref]&&!TSX.dismissed[ref]){
+          var c=TSX.clients.find(function(x){ return String(x.id)===String(p.client_id); });
+          out.push({ref:ref, client_id:p.client_id, title:'Set the first roadmap tasks for '+((c&&c.name)||'this partnership'), why:'Their Growth partnership has no tasks yet \u2014 the roadmap page stays empty until the first ones exist.', priority:'medium', impact:'milestone', source:'engine'});
+        }
+      }
+    });
     return out;
   }
 
@@ -13975,6 +14034,7 @@ function anEngineNote(eng){
     if(!TSX.sel){
       var firstOpen=sortPool(all.filter(function(t){return t.status!=='done';}))[0];
       if(firstOpen) TSX.sel=firstOpen.key;
+      else if(sugg.length){ TSX.tab='sugg'; TSX.sel='sug:'+sugg[0].ref; }
     }
     var todayStr=new Date().toDateString();
     var q=TSX.q.toLowerCase();
@@ -14037,6 +14097,7 @@ function anEngineNote(eng){
         +(t.due?' \u00b7 due '+esc(String(t.due).slice(0,10)):'')+(t.subs.length?' \u00b7 '+subDone+'/'+t.subs.length+' subtasks':'')+'</div>'
         +'<div style="margin-top:7px;">'+(od?'<span class="ibx-chip" style="color:#c0392b;background:rgba(192,57,43,.08);">OVERDUE</span> ':'')
         +(t.status==='doing'?'<span class="ibx-chip" style="color:#2c6fb7;background:rgba(44,111,183,.08);">IN PROGRESS</span> ':'')
+        +(t.kind==='s'&&t.source!=='manual'?'<span class="ibx-chip" style="color:var(--p);background:rgba(91,63,160,.08);">\u2726 AUTO</span> ':'')
         +prChip(t.priority)+' '+imChip(t.impact)+'</div></div>'
       +'</div>';
     }
@@ -14044,12 +14105,12 @@ function anEngineNote(eng){
     var listHtml='';
     if(TSX.tab==='sugg'){
       listHtml=sugg.length?sugg.map(function(s,ix){
-        return '<div class="apx-item"><div style="flex:1;min-width:0;">'
+        return '<div class="apx-item'+(TSX.sel==='sug:'+s.ref?' on':'')+'" onclick="tsxSel(\'sug:'+att(s.ref)+'\')"><div style="flex:1;min-width:0;">'
           +'<div style="font-size:14px;font-weight:700;color:var(--ink);">\u2726 '+esc(s.title)+'</div>'
           +'<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;">'+esc(cName(s.client_id))+' \u00b7 '+esc(s.why)+'</div>'
           +'<div style="margin-top:8px;display:flex;gap:8px;">'
-            +'<button class="bf-act primary" style="padding:7px 14px;font-size:12px;" onclick="tsxAccept('+ix+')">Accept \u2192 becomes a task</button>'
-            +'<button class="ibx-pill" onclick="tsxDismiss(\''+att(s.ref)+'\')">Dismiss</button>'
+            +'<button class="bf-act primary" style="padding:7px 14px;font-size:12px;" onclick="event.stopPropagation();tsxAccept('+ix+')">Accept \u2192 becomes a task</button>'
+            +'<button class="ibx-pill" onclick="event.stopPropagation();tsxDismiss(\''+att(s.ref)+'\')">Dismiss</button>'
           +'</div></div></div>';
       }).join('')
       :'<div class="grx-empty" style="margin-top:14px;">No suggestions right now \u2014 they appear when real signals fire (overdue invoices, stale approvals).</div>';
@@ -14071,6 +14132,7 @@ function anEngineNote(eng){
 
     // ── detail ──
     var t2=allTasks().find(function(x){ return x.key===TSX.sel; });
+    var sugSel=(!t2&&String(TSX.sel||'').indexOf('sug:')===0)?sugg.find(function(s){ return 'sug:'+s.ref===TSX.sel; }):null;
     var detail='';
     if(t2){
       var srcWhy={manual:'You created this yourself.', 'growth roadmap':'Part of the client\u2019s growth roadmap \u2014 completing it moves their partnership progress ring.',
@@ -14164,9 +14226,23 @@ function anEngineNote(eng){
         +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS WHEN YOU COMPLETE IT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">1. Stamped done with today\u2019s date<br>2. A Timeline event is written to the client\u2019s story'+(t2.kind==='g'?'<br>3. Their Growth progress ring moves':'')+'</div></div>'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
           +(t2.status!=='done'?'<button class="bf-act primary" onclick="tsxDone(\''+t2.key+'\',true)">\u2713 Complete</button>':'')
+          +(t2.kind==='s'&&t2.source!=='manual'&&t2.status!=='done'?'<button class="ibx-pill" onclick="tsxDismissTask(\''+t2.key+'\')">Not relevant \u2014 dismiss</button>':'')
           +(t2.client_id?'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>':'')
           +(t2.client_id?'<button class="ibx-pill" onclick="go(\'timeline\');setTimeout(function(){try{tlxOpen(\''+att(String(t2.client_id))+'\')}catch(e){}},300);">Timeline \u2192</button>':'')
           +(t2.client_id?'<button class="ibx-pill" onclick="go(\'approvals\');">Approvals \u2192</button>':'')
+        +'</div>'
+      +'</div>';
+    } else if(sugSel){
+      var six=sugg.indexOf(sugSel);
+      detail='<div class="grx-card">'
+        +'<div style="font-size:17px;font-weight:750;color:var(--ink);">\u2726 '+esc(sugSel.title)+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">'+esc(cName(sugSel.client_id))+'</div>'
+        +'<div class="msx-snap" style="margin-top:12px;">\u2726 <b>Why the platform suggests this</b> \u00b7 '+esc(sugSel.why)+'</div>'
+        +'<div class="ivx-block"><div class="ivx-bh">IF ACCEPTED</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">1. Becomes a real task \u2014 '+esc(sugSel.priority)+' priority'+(sugSel.impact!=='none'?', declared '+esc(sugSel.impact)+' impact':'')+'<br>2. Ranked into the queue by consequence<br>3. Completing it writes to the client\u2019s timeline</div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
+          +'<button class="bf-act primary" onclick="tsxAccept('+six+')">Accept \u2192 becomes a task</button>'
+          +'<button class="ibx-pill" onclick="tsxDismiss(\''+att(sugSel.ref)+'\')">Dismiss</button>'
+          +(sugSel.client_id?'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(sugSel.client_id))+'\')}catch(e){}},400);">Conversation \u2192</button>':'')
         +'</div>'
       +'</div>';
     } else {
@@ -14183,8 +14259,10 @@ function anEngineNote(eng){
       +tabs
       +newForm
       +(t2?('<div class="msx-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);"><div>'+listHtml+'</div><div>'+detail+'</div><div>'+rail+'<div id="tsxProjMount"></div></div></div>')
-           :('<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>'));
+        :sugSel?('<div class="msx-grid" style="grid-template-columns:minmax(260px,.9fr) minmax(0,1.3fr) minmax(240px,.8fr);"><div>'+listHtml+'</div><div>'+detail+'</div><div><div id="tsxProjMount"></div><div id="tsxFilesMount"></div></div></div>')
+        :('<div class="apx-grid"><div>'+listHtml+'</div><div>'+detail+'</div></div>'));
     if(t2&&t2.client_id){ try{ ddsProjCtx('tsxProjMount', String(t2.client_id)); }catch(e){} }
+    if(sugSel&&sugSel.client_id){ try{ ddsProjCtx('tsxProjMount', String(sugSel.client_id)); }catch(e){} try{ ddsFilesCard('tsxFilesMount', String(sugSel.client_id)); }catch(e){} }
   }
 
   window.tsxNewSave=async function(){
@@ -14264,6 +14342,15 @@ function anEngineNote(eng){
     toast('\u2713 Accepted \u2014 it\u2019s a real task now'); tsxLoad();
   };
   window.tsxDismiss=function(ref){ TSX.dismissed[ref]=1; toast('Dismissed for this session'); tsxRender(); };
+  window.tsxDismissTask=async function(key){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
+    var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{status:'dismissed'});
+    if(r===null){ toast('Couldn\u2019t dismiss'); return; }
+    var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.status='dismissed';
+    TSX.sel=null;
+    toast('Dismissed \u2014 this event won\u2019t create a task again');
+    tsxRender();
+  };
   window.tsxNudgeDraft=function(key){
     var t=allTasks().find(function(x){return x.key===key;}); if(!t||!t.client_id) return;
     var c=TSX.clients.find(function(x){return String(x.id)===String(t.client_id);});
