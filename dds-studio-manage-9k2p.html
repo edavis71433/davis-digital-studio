@@ -11757,7 +11757,7 @@ function anEngineNote(eng){
 // disclosed formula over real signals, never a black box. Legacy pages
 // preserved underneath (Classic view). ═══
 (function(){
-  var RHX={rows:[], msgs:{}, inv:{}, eng:{}, q:'', hf:'all', page:1, loaded:false, legacy:false, engSentence:''};
+  var RHX={rows:[], msgs:{}, inv:{}, eng:{}, q:'', hf:'all', sf:'all', page:1, loaded:false, legacy:false, engSentence:''};
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(s){ return esc(s).replace(/'/g,'&#39;'); }
@@ -11840,6 +11840,7 @@ function anEngineNote(eng){
 
   window.rhxQ=function(v){ RHX.q=v; RHX.page=1; rhxRender(); };
   window.rhxHf=function(v){ RHX.hf=v; RHX.page=1; rhxRender(); };
+  window.rhxSf=function(v){ RHX.sf=v; RHX.page=1; rhxRender(); };
   window.rhxPg=function(d){ RHX.page+=d; rhxRender(); };
 
   function rhxRender(){
@@ -11856,7 +11857,7 @@ function anEngineNote(eng){
     var stats='<div class="rhx-stats">'
       +'<div class="rhx-st"><div class="rhx-sn">'+rows.length+'</div><div class="rhx-sl">Active relationships</div></div>'
       +'<div class="rhx-st"><div class="rhx-sn">'+money(totalMrr)+'</div><div class="rhx-sl">Monthly recurring revenue</div></div>'
-      +'<div class="rhx-st"><div class="rhx-sn'+(needN?'" style="color:#9a7a1a;':'"')+'>'+needN+'</div><div class="rhx-sl">Need attention</div></div>'
+      +'<div class="rhx-st"><div class="rhx-sn" style="'+(needN?'color:#9a7a1a;':'')+'">'+needN+'</div><div class="rhx-sl">Need attention</div></div>'
       +'<div class="rhx-st"><div class="rhx-sn">'+onbN+'</div><div class="rhx-sl">Onboarding</div></div>'
     +'</div>';
 
@@ -11865,6 +11866,8 @@ function anEngineNote(eng){
       if(RHX.hf==='attn'&&e.h.n>=70) return false;
       if(RHX.hf==='exc'&&e.h.n<85) return false;
       if(RHX.hf==='onb'&&e.c.launched_at) return false;
+      if(RHX.sf==='active'&&!e.c.launched_at) return false;
+      if(RHX.sf==='onb'&&e.c.launched_at) return false;
       if(q){
         var iv=RHX.inv[String(e.c.id)]||{list:[]};
         var hay=(String(e.c.name||'')+' '+String(e.c.contact_email||e.c.email||'')+' '+String(e.c.website||'')+' '+String(e.c.phone||'')+' '+String(e.c.notes||'')+' '+iv.list.map(function(i){return i.name;}).join(' ')).toLowerCase();
@@ -11878,6 +11881,11 @@ function anEngineNote(eng){
 
     var bar='<div class="rhx-bar">'
       +'<input class="opx-search" style="flex:1;min-width:220px;" placeholder="Search clients, emails, invoices, notes\u2026" value="'+att(RHX.q)+'" oninput="rhxQ(this.value)" aria-label="Search relationships">'
+      +'<select class="fi" style="margin:0;max-width:150px;" onchange="rhxSf(this.value)" aria-label="Status filter">'
+        +'<option value="all"'+(RHX.sf==='all'?' selected':'')+'>All status</option>'
+        +'<option value="active"'+(RHX.sf==='active'?' selected':'')+'>Launched</option>'
+        +'<option value="onb"'+(RHX.sf==='onb'?' selected':'')+'>Onboarding</option>'
+      +'</select>'
       +'<select class="fi" style="margin:0;max-width:170px;" onchange="rhxHf(this.value)" aria-label="Health filter">'
         +'<option value="all"'+(RHX.hf==='all'?' selected':'')+'>All health</option>'
         +'<option value="attn"'+(RHX.hf==='attn'?' selected':'')+'>Needs attention</option>'
@@ -11894,7 +11902,8 @@ function anEngineNote(eng){
       var svc=c.contract_package||c.plan||(mrr?'Monthly partnership':'Project client');
       return '<div class="rhx-row" onclick="rhxOpen(\''+att(String(c.id))+'\')">'
         +'<div class="rhx-av">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'
-        +'<div class="rhx-col" style="flex:1.4;"><div class="rhx-nm">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(svc)+'</div></div>'
+        +'<div class="rhx-col" style="flex:1.4;"><div class="rhx-nm">'+esc(c.name||'Client')+'</div><div class="rhx-svc">'+esc(svc)+'</div>'
+          +'<span class="ibx-chip" style="display:inline-block;margin-top:6px;'+(c.launched_at?'color:#0e7a6e;background:#e4f5f2;':'color:#9a7a1a;background:#fdf6e3;')+'">'+(c.launched_at?'ACTIVE CLIENT':'ONBOARDING')+'</span></div>'
         +'<div class="rhx-ring" style="border-color:'+h.c+';color:'+h.c+';" title="'+att(h.why)+'"><span>'+h.n+'</span><span class="rhx-rl">'+esc(h.l)+'</span></div>'
         +'<div class="rhx-col"><div class="rhx-kn">'+money(iv.paidSum||0)+'</div><div class="rhx-kl">Revenue to date</div>'
           +'<div class="rhx-kn" style="margin-top:6px;">'+(mrr?money(mrr)+'/mo':'\u2014')+'</div><div class="rhx-kl">MRR</div></div>'
@@ -11906,8 +11915,8 @@ function anEngineNote(eng){
     }).join('')
     :'<div style="padding:26px 8px;font-size:13.5px;color:var(--muted);">'+(rows.length?'No relationships match.':'No clients yet \u2014 convert your first from <a href="#" onclick="go(\'opportunities\');return false;" style="color:var(--p);">Opportunities</a>.')+'</div>';
 
-    var pager=total>PAGE?('<div style="display:flex;align-items:center;gap:10px;padding:14px 6px;font-size:12.5px;color:var(--muted);">Showing '+(start+1)+'\u2013'+(start+pageList.length)+' of '+total
-      +'<span style="flex:1;"></span>'+(RHX.page>1?'<button class="ibx-pill" onclick="rhxPg(-1)">\u2190</button>':'')+(RHX.page<maxP?'<button class="ibx-pill" onclick="rhxPg(1)">\u2192</button>':'')+'</div>'):'';
+    var pager='<div style="display:flex;align-items:center;gap:10px;padding:14px 6px;font-size:12.5px;color:var(--muted);">Showing '+(total?(start+1)+'\u2013'+(start+pageList.length):'0')+' of '+total+' client'+(total===1?'':'s')
+      +'<span style="flex:1;"></span>'+(RHX.page>1?'<button class="ibx-pill" onclick="rhxPg(-1)">\u2190</button>':'')+(RHX.page<maxP?'<button class="ibx-pill" onclick="rhxPg(1)">\u2192</button>':'')+'</div>';
 
     root.innerHTML=
       '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Relationship Hub</div>'
@@ -11992,6 +12001,15 @@ function anEngineNote(eng){
   };
 
   // merge: both nav destinations land on the Hub; legacy loaders preserved
+  try{
+    document.querySelectorAll('button[onclick*="go(\'clients\')"] span, button[onclick*="go(\'clients\')"]').forEach(function(b){
+      if(b.tagName==='SPAN'){ b.textContent='Relationship Hub'; }
+      else if(!b.querySelector('span')){ var t=b.childNodes; for(var i2=0;i2<t.length;i2++){ if(t[i2].nodeType===3&&t[i2].textContent.trim()){ t[i2].textContent=' Relationship Hub'; } } }
+    });
+    document.querySelectorAll('button[onclick*="go(\'hub\')"]').forEach(function(b){
+      if(b.closest('nav')||b.className.indexOf('sn')>-1||b.parentElement.tagName==='NAV') b.style.display='none'; else b.style.display='none';
+    });
+  }catch(e){}
   window.loadClientsLegacy=window.loadClients;
   window.loadHubLegacy=window.loadHub;
   window.loadClients=rhxLoad;
