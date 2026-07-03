@@ -177,6 +177,13 @@ body{font-family:var(--sans);background:var(--cream);color:var(--ink);-webkit-fo
 .drawer-head{display:none;}
 @media(max-width:768px){
   .shell{grid-template-columns:1fr;}
+  /* Defensive width hardening: nothing may render wider than the phone.
+     overflow-x:hidden on body HIDES width bugs (clipped badges/text at the
+     right edge) instead of surfacing them — these rules prevent the bug class. */
+  .main{padding-left:14px;padding-right:14px;}
+  .page,.pd,.card,.cb{min-width:0;max-width:100%;}
+  .cb img,.cb svg{max-width:100%;height:auto;}
+  .pd p{overflow-wrap:anywhere;}
   /* Client + prospect search — previously undersized/competing with buttons
      on mobile, easy to miss entirely. Now full-width and always first. */
   #hubSearch{min-width:100%;order:-1;margin-bottom:4px;}
