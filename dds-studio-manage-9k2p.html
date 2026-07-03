@@ -4407,7 +4407,7 @@ function oppxRender(){
   if(!root) return;
   var q=OPPX.q;
   var S=oppxPrep();
-  Object.keys(S).forEach(function(k){ S[k]=S[k].filter(function(x){ return oppxMatchQ(x,q); }); });
+  Object.keys(S).forEach(function(k){ if(!Array.isArray(S[k])) return; S[k]=S[k].filter(function(x){ return oppxMatchQ(x,q); }); });
 
   var FILTERS=[['all','All'],['hot','Hot leads'],['follow','Follow-ups'],['grow','Grow'],['atrisk','At risk'],['won','Won'],['lost','Lost']];
   var counts={ all:S.hot.length+S.follow.length+S.grow.length+S.risk.length, hot:S.hot.length, follow:S.follow.length, grow:S.grow.length, atrisk:S.risk.length, won:S.won.length, lost:S.lost.length };
