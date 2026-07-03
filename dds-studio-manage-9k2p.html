@@ -15021,7 +15021,9 @@ window.ddsFilesCard=async function(mountId, clientId){
     var r=await Promise.all([
       safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&select=name,amount,paid_at&deleted_at=is.null&paid_at=gte.'+encodeURIComponent(iso)+'&limit=50'); }),
       safe(function(){ return api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id&limit=1'); }),
-      safe(function(){ return api('files?client_id=eq.'+encodeURIComponent(cid)+'&select=name&created_at=gte.'+encodeURIComponent(iso)+'&limit=50'); })
+      safe(function(){ return api('files?client_id=eq.'+encodeURIComponent(cid)+'&select=name&created_at=gte.'+encodeURIComponent(iso)+'&limit=50'); }),
+      safe(function(){ return api('timeline?client_id=eq.'+encodeURIComponent(cid)+'&select=title,kind,type,status,created_at,updated_at&limit=200'); }),
+      safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,updated_at,created_at&limit=100'); })
     ]);
     var doneTasks=[];
     if(r[1]&&r[1][0]){
@@ -15047,8 +15049,32 @@ window.ddsFilesCard=async function(mountId, clientId){
     var next = (an&&an.executive_brief&&(an.executive_brief.recommended_action||an.executive_brief.recommendation))
       || (warns[0]?('Focus for next period: '+warns[0].label+' \u2014 '+String(warns[0].text||'').split('.')[0]+'.'):'Continue the current roadmap \u2014 consistency is what compounds.');
     var period=mStart.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    // ── OS-output sections: the other modules feed the report ──
+    var tlRows=r[3]||[];
+    var storyRows=tlRows.filter(function(t){ var k=String(t.kind||t.type||'').toLowerCase(); return (k==='milestone'||k==='launch')&&(t.created_at>=iso); })
+      .map(function(t){ return String(t.title||'Milestone'); });
+    tlRows.filter(function(t){ return !(t.kind||t.type)&&String(t.status||'').toLowerCase()==='done'&&String(t.updated_at||t.created_at||'')>=iso; })
+      .forEach(function(t){ storyRows.push('Phase completed: '+String(t.title||'Phase')); });
+    var cleared=(r[4]||[]).filter(function(a){ var s=String(a.status||'').toLowerCase(); return (s==='approved'||s==='declined')&&String(a.updated_at||a.created_at||'')>=iso; })
+      .map(function(a){ return {title:String(a.title||'Approval'), approved:String(a.status).toLowerCase()==='approved'}; });
+    var receipts=[];
+    try{
+      var vj=await visEdge({type:'visibility_list'});
+      var hostC=(RPX.clients.find(function(x){return String(x.id)===String(cid);})||{}).website||'';
+      hostC=String(hostC).replace(/^https?:\/\//,'').replace(/\/.*$/,'').toLowerCase();
+      ((vj&&vj.data)||[]).forEach(function(row){
+        var h=String((row.site&&row.site.url)||'').replace(/^https?:\/\//,'').replace(/\/.*$/,'').toLowerCase();
+        if(!hostC||!h||(h!==hostC&&h.indexOf(hostC)===-1&&hostC.indexOf(h)===-1)) return;
+        var Lv=row.latest, Pv=row.previous; if(!Lv||!Pv) return;
+        [['Site performance','performance'],['Search visibility','visibility'],['Mobile experience','mobile'],['Local presence','local']].forEach(function(pair){
+          if(Lv[pair[1]]!=null&&Pv[pair[1]]!=null&&Lv[pair[1]]>Pv[pair[1]]) receipts.push(pair[0]+' improved '+(Lv[pair[1]]-Pv[pair[1]])+' points');
+        });
+        if(Lv.https===true) receipts.push('HTTPS verified secure');
+      });
+    }catch(e){}
     var data={ period:period, summary:summary, highlights:highlights.slice(0,6), watch:(warns[0]?{label:warns[0].label,text:String(warns[0].text||'').split('.')[0]}:null), next:next,
-      confidence:(an&&an.executive_brief&&an.executive_brief.confidence)||'low', tasksDone:doneTasks.length };
+      confidence:(an&&an.executive_brief&&an.executive_brief.confidence)||'low', tasksDone:doneTasks.length,
+      story:storyRows.slice(0,5), cleared:cleared.slice(0,5), receipts:receipts.slice(0,6) };
     var row=await api('client_reports','POST',{ client_id:cid, title:period+' Performance Report', kind:'monthly', status:'draft', body:JSON.stringify(data) });
     if(row===null){ toast('Couldn\u2019t save \u2014 run 09-reports.sql + redeploy clever-api'); return; }
     RPX.showNew=false;
@@ -15081,6 +15107,8 @@ window.ddsFilesCard=async function(mountId, clientId){
       +'<div class="brand">Davis Digital Studio</div><h1>'+esc(rep.title||'Performance Report')+'</h1>'
       +'<div style="color:#6b6276;font-size:13px;">Prepared for '+esc(cName(rep.client_id))+' \u00b7 '+esc(d.period||'')+'</div>'
       +'<h2>Executive summary</h2><ul>'+(d.summary||[]).map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'
+      +((d.story&&d.story.length)?('<h2>Timeline highlights</h2><ul>'+d.story.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'):'')
+      +((d.receipts&&d.receipts.length)?('<h2>Maintenance receipts</h2><ul>'+d.receipts.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'):'')
       +((d.highlights&&d.highlights.length)?('<h2>Key highlights</h2>'+d.highlights.map(function(h){ return '<div class="hl"><span>'+esc(h.label)+'</span><b>'+esc(String(h.value))+(h.pct!=null?' <span style="color:'+(h.up?'#1a7e49':'#c0392b')+';">'+(h.up?'\u25B2':'\u25BC')+Math.abs(h.pct)+'%</span>':'')+'</b></div>'; }).join('')):'')
       +(d.next?'<div class="next"><b>What\u2019s next \u00b7</b> '+esc(d.next)+'</div>':'')
       +'<div style="margin-top:30px;color:#6b6276;font-size:12px;">Every number in this report is measured, never estimated. \u2014 Eric Davis, Davis Digital Studio</div>'
@@ -15162,6 +15190,9 @@ window.ddsFilesCard=async function(mountId, clientId){
         +((d.highlights&&d.highlights.length)?('<div class="ivx-block"><div class="ivx-bh">KEY HIGHLIGHTS</div>'
           +d.highlights.map(function(h){ return '<div class="rpx-hl"><span>'+esc(h.label)+'</span><span style="flex:1;"></span><b>'+esc(String(h.value))+'</b>'+(h.pct!=null?' <span style="font-size:11.5px;font-weight:700;color:'+(h.up?'#1a7e49':'#c0392b')+';">'+(h.up?'\u2191':'\u2193')+Math.abs(h.pct)+'%</span>':'')+'</div>'; }).join('')
         +'</div>'):'')
+        +((d.story&&d.story.length)?('<div class="ivx-block"><div class="ivx-bh">TIMELINE HIGHLIGHTS</div>'+d.story.map(function(s){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.6;padding:2px 0;">\u2605 '+esc(s)+'</div>'; }).join('')+'</div>'):'')
+        +((d.cleared&&d.cleared.length)?('<div class="ivx-block"><div class="ivx-bh">DECISIONS CLEARED</div>'+d.cleared.map(function(a){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.6;padding:2px 0;">'+(a.approved?'\u2713':'\u2717')+' '+esc(a.title)+' \u2014 '+(a.approved?'approved':'declined')+'</div>'; }).join('')+'</div>'):'')
+        +((d.receipts&&d.receipts.length)?('<div class="ivx-block"><div class="ivx-bh">MAINTENANCE RECEIPTS \u2014 site health</div>'+d.receipts.map(function(s){ return '<div class="grx-ok">'+esc(s)+'</div>'; }).join('')+'</div>'):'')
         +(d.watch?'<div class="ivx-block"><div class="ivx-bh">WATCHING</div><div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'+esc(d.watch.label)+' \u2014 '+esc(d.watch.text)+'.</div></div>':'')
         +(d.next?'<div class="msx-snap" style="margin-top:14px;">\u2726 <b>What\u2019s next</b> \u00b7 '+esc(d.next)+'</div>':'')
       +'</div>';
@@ -15200,6 +15231,70 @@ window.ddsFilesCard=async function(mountId, clientId){
   window.loadReports=rpxLoad;
   var _go4=window.go;
   window.go=function(dest){ var r=_go4.apply(this,arguments); try{ if(dest==='reports') rpxLoad(); }catch(e){} return r; };
+})();
+</script>
+
+<script>
+// ═══ TODAY add-on: capacity ("how busy am I?") + momentum ("ahead or behind?")
+// computed from live queues: studio+growth tasks, pending approvals, client
+// messages needing reply. Mounts atop the Today page without touching it. ═══
+(function(){
+  async function todayCap(){
+    var page=document.getElementById('page-today'); if(!page) return;
+    var mount=document.getElementById('tdxCap');
+    if(!mount){ mount=document.createElement('div'); mount.id='tdxCap';
+      var anchor=page.querySelector('.pt'); 
+      if(anchor&&anchor.parentNode===page) page.insertBefore(mount, anchor.nextSibling); else page.insertBefore(mount, page.firstChild);
+    }
+    function safe(fn){ return fn().catch(function(){ return null; }); }
+    var todayStr=new Date().toDateString();
+    var wk=new Date(Date.now()-7*86400000).toISOString();
+    var wk2=new Date(Date.now()-14*86400000).toISOString();
+    var r=await Promise.all([
+      safe(function(){ return api('studio_tasks?select=status,due_date,done_at&limit=400'); }),
+      safe(function(){ return api('growth_tasks?select=status&limit=300'); }),
+      safe(function(){ return api('approvals?select=status&limit=200'); }),
+      safe(function(){ return api('messages?select=client_id,from_who,created_at&order=created_at.desc&limit=400'); })
+    ]);
+    var st=(r[0]||[]).filter(function(t){ return t.status!=='dismissed'; });
+    var open=st.filter(function(t){ return t.status!=='done'; }).length
+      +((r[1]||[]).filter(function(t){ var s=String(t.status||'').toLowerCase(); return s!=='done'&&s!=='completed'; }).length);
+    var dueNow=st.filter(function(t){ return t.status!=='done'&&t.due_date&&new Date(t.due_date)<=new Date(todayStr+' 23:59'); }).length;
+    var appr=(r[2]||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; }).length;
+    var lastBy={}; ((r[3])||[]).forEach(function(m){ var k=String(m.client_id); if(!lastBy[k]) lastBy[k]=m; });
+    var needReply=Object.keys(lastBy).filter(function(k){ var m=lastBy[k]; return String(m.from_who||'').toLowerCase()!=='eric'&&(Date.now()-new Date(m.created_at))<45*86400000; }).length;
+    var doneThis=st.filter(function(t){ return t.status==='done'&&t.done_at&&t.done_at>=wk; }).length;
+    var donePrev=st.filter(function(t){ return t.status==='done'&&t.done_at&&t.done_at>=wk2&&t.done_at<wk; }).length;
+    var load=dueNow+appr+needReply;
+    var busy = load===0?'Clear runway \u2014 nothing is due, waiting, or unanswered. Build something.'
+      : load<=3?'Light day \u2014 '+load+' thing'+(load===1?'':'s')+' need'+(load===1?'s':'')+' you: '+dueNow+' due, '+appr+' approval'+(appr===1?'':'s')+' waiting, '+needReply+' repl'+(needReply===1?'y':'ies')+' owed.'
+      : load<=7?'Real day \u2014 '+load+' items on the clock ('+dueNow+' due \u00b7 '+appr+' approvals \u00b7 '+needReply+' replies). Top of Tasks first.'
+      : 'Heavy day \u2014 '+load+' items. Triage by impact: overdue revenue first, then approvals, then replies.';
+    var mom = (doneThis===0&&donePrev===0)?''
+      : doneThis>donePrev?'\u25B2 Momentum: '+doneThis+' completed this week vs '+donePrev+' last \u2014 you\u2019re ahead of your own pace.'
+      : doneThis<donePrev?'\u25BC Pace dipped: '+doneThis+' done this week vs '+donePrev+' last. One completion resets the trend.'
+      : '\u25A0 Steady: '+doneThis+' completed, same as last week.';
+    mount.innerHTML='<div class="grx-card" style="margin:12px 0 4px;"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">'
+      +'<div style="flex:1;min-width:240px;"><div style="font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);">TODAY\u2019S CAPACITY</div>'
+      +'<div style="font-size:13px;color:var(--ink);line-height:1.55;margin-top:4px;">'+busy+'</div>'
+      +(mom?'<div style="font-size:12px;color:var(--muted);margin-top:5px;">'+mom+'</div>':'')+'</div>'
+      +'<div style="display:flex;gap:14px;">'
+        +'<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:'+(dueNow?'#c0392b':'var(--ink)')+';">'+dueNow+'</div><div style="font-size:10.5px;color:var(--muted);">Due today</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ink);">'+appr+'</div><div style="font-size:10.5px;color:var(--muted);">Approvals</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ink);">'+needReply+'</div><div style="font-size:10.5px;color:var(--muted);">Replies owed</div></div>'
+        +'<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--ink);">'+open+'</div><div style="font-size:10.5px;color:var(--muted);">Open tasks</div></div>'
+      +'</div>'
+    +'</div></div>';
+  }
+  ['loadToday','loadTodayPage','renderToday','loadTodayX'].forEach(function(fn){
+    if(typeof window[fn]==='function'){
+      var orig=window[fn];
+      window[fn]=async function(){ var r=await orig.apply(this,arguments); try{ await todayCap(); }catch(e){} return r; };
+    }
+  });
+  var _go5=window.go;
+  window.go=function(dest){ var r=_go5.apply(this,arguments); try{ if(dest==='today') setTimeout(todayCap,600); }catch(e){} return r; };
+  setTimeout(function(){ try{ var p=document.getElementById('page-today'); if(p&&p.offsetParent!==null) todayCap(); }catch(e){} }, 1500);
 })();
 </script>
 </body>
