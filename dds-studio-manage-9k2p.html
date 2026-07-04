@@ -16707,5 +16707,351 @@ window.ddsFilesCard=async function(mountId, clientId){
   setTimeout(function(){ try{ var p=document.getElementById('page-today'); if(p&&p.offsetParent!==null) todayCap(); }catch(e){} }, 1500);
 })();
 </script>
+
+<style>
+/* COMMUNICATION CENTER — templates as client experiences, not documents. */
+#page-templates #tpxRoot{max-width:1380px;}
+.tpx-grid{display:grid;grid-template-columns:minmax(230px,.75fr) minmax(0,1.6fr) minmax(250px,.85fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1150px){.tpx-grid{grid-template-columns:1fr;}}
+.tpx-cat{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 8px 4px;}
+.tpx-it{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;cursor:pointer;font-size:12.5px;color:var(--ink);}
+.tpx-it:hover{background:rgba(91,63,160,.05);}
+.tpx-it.on{background:rgba(91,63,160,.09);font-weight:650;}
+.tpx-it .fav{color:#c4731a;font-size:11px;flex:none;}
+.tpx-body{width:100%;min-height:320px;padding:14px 16px;border:1px solid rgba(91,63,160,.14);border-radius:12px;font-size:13.5px;line-height:1.65;font-family:inherit;box-sizing:border-box;resize:vertical;outline:none;}
+.tpx-var{display:inline-block;font-size:10.5px;font-weight:700;color:var(--p);background:rgba(91,63,160,.07);border:1px solid rgba(91,63,160,.14);padding:3px 9px;border-radius:100px;cursor:pointer;margin:0 5px 5px 0;}
+.tpx-var:hover{background:rgba(91,63,160,.14);}
+.tpx-prev{border:1px solid rgba(41,25,66,.09);border-radius:16px;padding:26px 28px;background:#fff;box-shadow:0 2px 14px rgba(41,25,66,.04);transition:max-width .2s;}
+.tpx-prev.dark{background:#1d1530;color:#efeaf8;border-color:#352a4e;}
+.tpx-prev.dark .tpx-pv-body{color:#e6dff3;}
+.tpx-prev.mobile{max-width:390px;margin:0 auto;}
+.tpx-pv-body{font-size:14px;line-height:1.7;color:var(--ink);white-space:pre-wrap;}
+.tpx-prev.dark .tpx-pv-body{color:#e6dff3;}
+.tpx-unf{background:#fdf6e3;color:#9a7a1a;border-radius:4px;padding:0 3px;font-weight:650;}
+.tpx-aib{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:1px solid rgba(91,63,160,.12);border-radius:11px;padding:9px 12px;font-size:12.5px;color:var(--ink);cursor:pointer;margin-bottom:7px;font-family:inherit;}
+.tpx-aib:hover{border-color:rgba(91,63,160,.35);background:rgba(91,63,160,.03);}
+.tpx-aib:disabled{opacity:.5;cursor:default;}
+.tpx-rec{padding:9px 0;border-top:1px solid rgba(41,25,66,.06);font-size:12px;line-height:1.5;}
+</style>
+<script>
+// ═══ COMMUNICATION CENTER ═══
+// Templates as client experiences. Three columns: library (categories,
+// search, favorites, recent) · editor + rendered preview (variables filled
+// from a real client; desktop/mobile/dark) · assistant rail (AI rewrites,
+// grounded recommendations from live records, usage-based performance,
+// quick actions). Every template carries its purpose, its moment, and —
+// where a real signal exists — the trigger that recommends it.
+(function(){
+  var TPX={rows:[],clients:[],invoices:[],msgs:[],sel:null,cat:'all',q:'',mode:'preview',dev:'desktop',dark:false,clientId:'',recent:[],loaded:false,busy:false};
+  function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(x){ return esc(x).replace(/'/g,'&#39;'); }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  var PORTAL='https://davisdigitalstudio.com/portal';
+  var VARS=['first_name','business_name','project_name','invoice_amount','approval_link','client_portal','meeting_date','website','quote_link'];
+
+  function ensureRoot(){
+    var page=document.getElementById('page-templates'); if(!page) return null;
+    var root=document.getElementById('tpxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._tpxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='tpxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+
+  async function tpxApi(type,payload){
+    var jwt=await adminJwt(); if(!jwt){ try{showLogin();}catch(e){} throw new Error('no session'); }
+    var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},payload||{}))});
+    var j={}; try{ j=await res.json(); }catch(e){}
+    if(j&&j.error) throw new Error(j.detail||j.error);
+    return j;
+  }
+
+  window.tpxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:80px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('email_templates?archived=eq.false&select=*&order=category.asc,name.asc&limit=200'); }),
+      safe(function(){ return api('clients?select=id,name,project_name,website,launched_at,renews_at,monthly_amount,created_at&order=name.asc&limit=300'); }),
+      safe(function(){ return api('invoices?deleted_at=is.null&select=client_id,name,amount,status,due_date,paid_at&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('messages?select=client_id,from_who,created_at&order=created_at.desc&limit=600'); })
+    ]);
+    if(r[0]===null){
+      root.innerHTML='<div class="pt">Communication Center</div><div class="ibx-sub">The email_templates table isn\u2019t set up yet \u2014 run <b>create-email-templates.sql</b> in Supabase (one time), then refresh. It creates the table and seeds twelve purposeful lifecycle templates.</div><button class="ibx-pill" style="margin-top:12px;" onclick="tpxLoad()">\u21bb Retry</button>';
+      return;
+    }
+    TPX.rows=r[0]||[]; TPX.clients=r[1]||[]; TPX.invoices=r[2]||[]; TPX.msgs=r[3]||[];
+    if(!TPX.sel&&TPX.rows.length) TPX.sel=String(TPX.rows[0].id);
+    TPX.loaded=true;
+    tpxRender();
+  };
+
+  function cur(){ return TPX.rows.find(function(t){ return String(t.id)===String(TPX.sel); })||null; }
+  function client(){ return TPX.clients.find(function(c){ return String(c.id)===String(TPX.clientId); })||null; }
+
+  // ── variables, filled from the chosen client's real record ──
+  function varMap(){
+    var c=client(); var m={client_portal:PORTAL, approval_link:PORTAL, quote_link:PORTAL, meeting_date:''};
+    if(c){
+      m.business_name=c.name||''; m.first_name=String(c.name||'').split(' ')[0]||'';
+      m.project_name=c.project_name||''; m.website=c.website||'';
+      var unpaid=TPX.invoices.filter(function(i){ return String(i.client_id)===String(c.id)&&i.status!=='paid'&&i.status!=='draft'; })
+        .map(function(i){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; }).sort(function(a,b){return b-a;})[0];
+      if(unpaid) m.invoice_amount='$'+Math.round(unpaid).toLocaleString();
+    }
+    return m;
+  }
+  function fill(text){
+    var m=varMap();
+    return String(text||'').replace(/\{\{\s*([a-z_]+)\s*\}\}/g,function(_,k){
+      return (m[k]!==undefined&&m[k]!=='')?('\u0001'+m[k]+'\u0002'):('\u0003{{'+k+'}}\u0004');
+    });
+  }
+  function fillHtml(text){
+    // escape first, then swap sentinels: filled = plain; unfilled = amber
+    return esc(fill(text))
+      .replace(/\u0001/g,'').replace(/\u0002/g,'')
+      .replace(/\u0003/g,'<span class="tpx-unf">').replace(/\u0004/g,'</span>');
+  }
+  function fillPlain(text){ return fill(text).replace(/[\u0001-\u0004]/g,''); }
+
+  // ── grounded recommendations from real records ──
+  function recs(){
+    var out=[], now=Date.now(), D=86400000;
+    var byTpl={}; TPX.rows.forEach(function(t){ if(t.auto_signal) byTpl[t.auto_signal]=t; });
+    var lastMsg={}; TPX.msgs.forEach(function(m){ var k=String(m.client_id); if(!lastMsg[k]) lastMsg[k]=m; });
+    TPX.clients.forEach(function(c){
+      var cid=String(c.id);
+      if(byTpl.invoice_overdue){
+        var od=TPX.invoices.find(function(i){ return String(i.client_id)===cid&&i.status!=='paid'&&i.status!=='draft'&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
+        if(od) out.push({c:c,t:byTpl.invoice_overdue,why:'invoice overdue'});
+      }
+      if(byTpl.invoice_paid&&c.launched_at&&(now-new Date(c.launched_at))/D<=21) out.push({c:c,t:byTpl.invoice_paid,why:'launched '+Math.floor((now-new Date(c.launched_at))/D)+'d ago \u2014 warm review window'});
+      if(byTpl.quiet_client){
+        var m=lastMsg[cid];
+        if(m&&(now-new Date(m.created_at))/D>=14&&(now-new Date(m.created_at))/D<=60) out.push({c:c,t:byTpl.quiet_client,why:'quiet '+Math.floor((now-new Date(m.created_at))/D)+' days'});
+      }
+      if(byTpl.renewal_window&&c.renews_at){
+        var rd=(new Date(c.renews_at)-now)/D;
+        if(rd>=0&&rd<=45) out.push({c:c,t:byTpl.renewal_window,why:'renews in '+Math.round(rd)+'d'});
+      }
+    });
+    return out.slice(0,5);
+  }
+
+  window.tpxSel=function(id){ TPX.sel=String(id); TPX.mode='preview'; TPX.recent=[String(id)].concat(TPX.recent.filter(function(x){return x!==String(id);})).slice(0,5); tpxRender(); };
+  window.tpxCat=function(c){ TPX.cat=c; tpxRender(); };
+  window.tpxQ=function(v){ TPX.q=String(v||'').toLowerCase(); tpxRender(); };
+  window.tpxMode=function(m){ if(TPX.mode==='edit'&&m!=='edit') tpxCapture(); TPX.mode=m; tpxRender(); };
+  window.tpxDev=function(d){ TPX.dev=d; tpxRender(); };
+  window.tpxDark=function(){ TPX.dark=!TPX.dark; tpxRender(); };
+  window.tpxClient=function(v){ TPX.clientId=v; tpxRender(); };
+  window.tpxRecOpen=function(tid,cid){ TPX.clientId=String(cid); tpxSel(tid); };
+
+  function tpxCapture(){
+    var t=cur(); if(!t) return;
+    var sEl=document.getElementById('tpxSubj'), bEl=document.getElementById('tpxBody'), nEl=document.getElementById('tpxName');
+    if(sEl) t.subject=sEl.value; if(bEl) t.body=bEl.value; if(nEl) t.name=nEl.value;
+  }
+  window.tpxSave=async function(){
+    tpxCapture(); var t=cur(); if(!t) return;
+    var r=await api('email_templates?id=eq.'+encodeURIComponent(t.id),'PATCH',{name:t.name,subject:t.subject,body:t.body,updated_at:new Date().toISOString()});
+    if(r===null){ toast('Save failed'); return; }
+    toast('\u2713 Saved'); TPX.mode='preview'; tpxRender();
+  };
+  window.tpxFav=async function(){
+    var t=cur(); if(!t) return;
+    t.favorite=!t.favorite;
+    await api('email_templates?id=eq.'+encodeURIComponent(t.id),'PATCH',{favorite:t.favorite});
+    tpxRender();
+  };
+  window.tpxDup=async function(){
+    var t=cur(); if(!t) return;
+    var r=await api('email_templates','POST',{name:t.name+' (copy)',category:t.category,subject:t.subject,body:t.body,purpose:t.purpose,when_to_send:t.when_to_send,auto_signal:null});
+    if(r===null){ toast('Duplicate failed'); return; }
+    toast('\u2713 Duplicated'); tpxLoad();
+  };
+  window.tpxArch=async function(){
+    var t=cur(); if(!t) return;
+    if(!confirm('Archive \u201c'+t.name+'\u201d? It disappears from the library (recoverable in the database).')) return;
+    await api('email_templates?id=eq.'+encodeURIComponent(t.id),'PATCH',{archived:true});
+    TPX.sel=null; toast('\u2713 Archived'); tpxLoad();
+  };
+  window.tpxNew=async function(){
+    var name=prompt('Template name:'); if(!name) return;
+    var r=await api('email_templates','POST',{name:name,category:'General',subject:'',body:'Hi {{first_name}},\n\n',purpose:'',when_to_send:''});
+    if(r===null){ toast('Create failed'); return; }
+    toast('\u2713 Created'); await tpxLoad();
+    var made=TPX.rows.find(function(x){return x.name===name;}); if(made){ TPX.sel=String(made.id); TPX.mode='edit'; tpxRender(); }
+  };
+  window.tpxCopy=async function(){
+    var t=cur(); if(!t) return;
+    var txt='Subject: '+fillPlain(t.subject)+'\n\n'+fillPlain(t.body);
+    try{ await navigator.clipboard.writeText(txt); toast('\u2713 Copied'+(client()?' \u2014 filled for '+client().name:'')); }catch(e){ toast('Copy failed'); }
+    // real usage tracking: copy = used
+    t.usage_count=(Number(t.usage_count)||0)+1; t.last_used_at=new Date().toISOString();
+    api('email_templates?id=eq.'+encodeURIComponent(t.id),'PATCH',{usage_count:t.usage_count,last_used_at:t.last_used_at});
+  };
+  window.tpxTest=async function(){
+    var t=cur(); if(!t) return;
+    var btn=document.getElementById('tpxTestBtn'); if(btn){ btn.disabled=true; btn.textContent='Sending\u2026'; }
+    try{
+      await tpxApi('template_test_send',{subject:fillPlain(t.subject),body:fillPlain(t.body)});
+      toast('\u2713 Test sent to your inbox');
+    }catch(e){ toast('Test failed: '+e.message); }
+    if(btn){ btn.disabled=false; btn.textContent='Test send \u2192 me'; }
+  };
+  window.tpxVar=function(k){
+    var bEl=document.getElementById('tpxBody');
+    if(!bEl){ TPX.mode='edit'; tpxRender(); bEl=document.getElementById('tpxBody'); if(!bEl) return; }
+    var v='{{'+k+'}}';
+    var st=bEl.selectionStart||bEl.value.length;
+    bEl.value=bEl.value.slice(0,st)+v+bEl.value.slice(bEl.selectionEnd||st);
+    bEl.focus(); bEl.selectionStart=bEl.selectionEnd=st+v.length;
+  };
+  window.tpxAi=async function(action){
+    var t=cur(); if(!t||TPX.busy) return;
+    tpxCapture();
+    var lang='';
+    if(action==='translate'){ lang=prompt('Translate to which language?','Spanish'); if(!lang) return; }
+    if(action==='personalize'&&!TPX.clientId){ toast('Pick a client first \u2014 personalize uses their real record.'); return; }
+    TPX.busy=true; tpxRender();
+    try{
+      var r=await tpxApi('template_ai_edit',{action:action,subject:t.subject,body:t.body,language:lang,clientId:TPX.clientId||undefined});
+      var d=(r&&r.data)||null;
+      if(!d){ toast('AI edit unavailable'); }
+      else{
+        t.__prevSubject=t.subject; t.__prevBody=t.body;
+        t.subject=d.subject; t.body=d.body;
+        toast('\u2713 Rewritten \u2014 Undo available, Save to keep');
+      }
+    }catch(e){ toast('AI edit failed: '+e.message); }
+    TPX.busy=false; TPX.mode='edit'; tpxRender();
+  };
+  window.tpxUndo=function(){
+    var t=cur(); if(!t||t.__prevBody===undefined) return;
+    t.subject=t.__prevSubject; t.body=t.__prevBody;
+    delete t.__prevSubject; delete t.__prevBody;
+    tpxRender();
+  };
+
+  function tpxRender(){
+    var root=document.getElementById('tpxRoot'); if(!root) return;
+    var q=TPX.q;
+    var rows=TPX.rows.filter(function(t){
+      if(TPX.cat==='fav'&&!t.favorite) return false;
+      if(TPX.cat==='recent'&&TPX.recent.indexOf(String(t.id))===-1) return false;
+      if(TPX.cat!=='all'&&TPX.cat!=='fav'&&TPX.cat!=='recent'&&t.category!==TPX.cat) return false;
+      if(q&&(String(t.name||'')+' '+String(t.subject||'')+' '+String(t.category||'')).toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    });
+    var cats={}; TPX.rows.forEach(function(t){ cats[t.category]=(cats[t.category]||0)+1; });
+    var favN=TPX.rows.filter(function(t){return t.favorite;}).length;
+
+    var lib='<div class="grx-card" style="padding:14px;">'
+      +'<input class="opx-search" style="width:100%;box-sizing:border-box;margin-bottom:4px;" placeholder="Search templates\u2026" value="'+att(TPX.q)+'" oninput="tpxQ(this.value)" aria-label="Search templates">'
+      +'<div class="tpx-it'+(TPX.cat==='all'?' on':'')+'" onclick="tpxCat(\'all\')">\u25A6 All templates<span style="margin-left:auto;color:var(--muted);font-size:11px;">'+TPX.rows.length+'</span></div>'
+      +(favN?'<div class="tpx-it'+(TPX.cat==='fav'?' on':'')+'" onclick="tpxCat(\'fav\')">\u2605 Favorites<span style="margin-left:auto;color:var(--muted);font-size:11px;">'+favN+'</span></div>':'')
+      +(TPX.recent.length?'<div class="tpx-it'+(TPX.cat==='recent'?' on':'')+'" onclick="tpxCat(\'recent\')">\u23F1 Recent</div>':'')
+      +Object.keys(cats).sort().map(function(c){
+        var inCat=rows.filter(function(t){return t.category===c;});
+        var head='<div class="tpx-cat" style="cursor:pointer;" onclick="tpxCat(\''+att(c)+'\')">'+esc(c)+' \u00b7 '+cats[c]+'</div>';
+        var items=(TPX.cat==='all'||TPX.cat===c||TPX.cat==='fav'||TPX.cat==='recent')?inCat.map(function(t){
+          return '<div class="tpx-it'+(String(t.id)===String(TPX.sel)?' on':'')+'" onclick="tpxSel(\''+att(String(t.id))+'\')">'
+            +(t.favorite?'<span class="fav">\u2605</span>':'')
+            +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(t.name)+'</span>'
+            +(Number(t.usage_count)>0?'<span style="font-size:10px;color:var(--muted);flex:none;">'+t.usage_count+'\u00d7</span>':'')
+          +'</div>';
+        }).join(''):'';
+        return items?head+items:'';
+      }).join('')
+      +'<button class="ibx-pill" style="width:100%;margin-top:12px;justify-content:center;" onclick="tpxNew()">+ New template</button>'
+    +'</div>';
+
+    var t=cur(); var center='';
+    if(!t){
+      center='<div class="grx-card"><div class="grx-empty">Pick a template \u2014 or create the first one.</div></div>';
+    } else {
+      var cSel='<select class="fi" style="margin:0;max-width:210px;font-size:12px;" onchange="tpxClient(this.value)" aria-label="Fill for client"><option value="">Fill variables for\u2026</option>'
+        +TPX.clients.map(function(c){ return '<option value="'+att(String(c.id))+'"'+(String(c.id)===String(TPX.clientId)?' selected':'')+'>'+esc(c.name||'Client')+'</option>'; }).join('')+'</select>';
+      var head='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;">'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:17px;font-weight:750;color:var(--ink);">'+esc(t.name)+' '+(t.favorite?'<span style="color:#c4731a;font-size:13px;">\u2605</span>':'')+'</div>'
+          +(t.purpose?'<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;"><b style="color:var(--p);font-size:10px;">WHY:</b> '+esc(t.purpose)+(t.when_to_send?' <b style="color:var(--p);font-size:10px;">\u00b7 WHEN:</b> '+esc(t.when_to_send):'')+(t.auto_signal?' <span style="font-size:10px;font-weight:800;color:#1a7e49;background:#e7f6ee;padding:2px 8px;border-radius:100px;">AUTO-RECOMMENDED</span>':'')+'</div>':'')
+        +'</div>'+cSel+'</div>';
+      var tabs='<div class="ivx-tabs" style="margin-top:12px;">'
+        +'<button class="ibx-tab'+(TPX.mode==='preview'?' on':'')+'" onclick="tpxMode(\'preview\')">Preview</button>'
+        +'<button class="ibx-tab'+(TPX.mode==='edit'?' on':'')+'" onclick="tpxMode(\'edit\')">Edit</button>'
+        +'<span style="flex:1;"></span>'
+        +(TPX.mode==='preview'?('<button class="ibx-tab'+(TPX.dev==='desktop'?' on':'')+'" onclick="tpxDev(\'desktop\')">Desktop</button>'
+        +'<button class="ibx-tab'+(TPX.dev==='mobile'?' on':'')+'" onclick="tpxDev(\'mobile\')">Mobile</button>'
+        +'<button class="ibx-tab'+(TPX.dark?' on':'')+'" onclick="tpxDark()">'+(TPX.dark?'\u263E Dark':'\u2600 Light')+'</button>'):'')
+      +'</div>';
+      var pane='';
+      if(TPX.mode==='edit'){
+        pane='<div style="margin-top:12px;">'
+          +'<input class="fi" id="tpxName" style="margin-bottom:8px;font-weight:650;" value="'+att(t.name)+'" aria-label="Template name">'
+          +'<input class="fi" id="tpxSubj" style="margin-bottom:8px;" placeholder="Subject" value="'+att(t.subject)+'" aria-label="Subject">'
+          +'<textarea class="tpx-body" id="tpxBody" aria-label="Email body">'+esc(t.body)+'</textarea>'
+          +'<div style="margin-top:8px;"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted);">VARIABLES \u2014 click to insert at cursor</span><div style="margin-top:5px;">'
+            +VARS.map(function(v){ return '<span class="tpx-var" onclick="tpxVar(\''+v+'\')">{{'+v+'}}</span>'; }).join('')+'</div></div>'
+          +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+            +'<button class="bf-act primary" onclick="tpxSave()">Save</button>'
+            +(t.__prevBody!==undefined?'<button class="bf-act" onclick="tpxUndo()">\u21b6 Undo AI rewrite</button>':'')
+          +'</div>'
+        +'</div>';
+      } else {
+        pane='<div class="tpx-prev'+(TPX.dark?' dark':'')+(TPX.dev==='mobile'?' mobile':'')+'" style="margin-top:14px;">'
+          +'<div style="font-size:11px;font-weight:800;letter-spacing:.05em;color:'+(TPX.dark?'#b7a7dd':'var(--p)')+';">DAVIS DIGITAL STUDIO</div>'
+          +'<div style="font-size:16px;font-weight:750;margin:10px 0 14px;">'+fillHtml(t.subject)+'</div>'
+          +'<div class="tpx-pv-body">'+fillHtml(t.body)+'</div>'
+        +'</div>'
+        +((!client())?'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Amber = unfilled variable. Pick a client above and the preview fills with their real record \u2014 name, project, website, open balance.</div>':'')
+        +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+          +'<button class="bf-act primary" onclick="tpxCopy()">Copy '+(client()?'\u2014 filled for '+esc(client().name):'')+'</button>'
+          +'<button class="bf-act" id="tpxTestBtn" onclick="tpxTest()">Test send \u2192 me</button>'
+          +'<button class="ibx-pill" onclick="tpxFav()">'+(t.favorite?'\u2605 Unfavorite':'\u2606 Favorite')+'</button>'
+          +'<button class="ibx-pill" onclick="tpxDup()">Duplicate</button>'
+          +'<button class="ibx-pill" onclick="tpxArch()">Archive</button>'
+        +'</div>';
+      }
+      center='<div class="grx-card">'+head+tabs+pane+'</div>';
+    }
+
+    var AIB=[['professional','\u270e','Rewrite professionally'],['friendly','\u263a','Rewrite friendlier'],['shorten','\u2702','Shorten'],['expand','\u2795','Expand'],['clarity','\u25c9','Improve clarity'],['jargon','\u26d4','Remove jargon'],['persuasive','\u2605','More persuasive'],['personalize','\ud83d\udc64','Personalize for client'],['translate','\ud83c\udf10','Translate']];
+    var rail='<div class="grx-card"><div class="grx-h">\u2728 Writing assistant</div>'
+      +(TPX.busy?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">Rewriting\u2026</div>':AIB.map(function(a){
+        return '<button class="tpx-aib" '+(t?'':'disabled ')+'onclick="tpxAi(\''+a[0]+'\')"><span style="flex:none;">'+a[1]+'</span><span>'+a[2]+'</span></button>';
+      }).join(''))
+      +'<div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Edits keep your voice, your {{variables}}, and your legal footer. Undo is one click.</div>'
+    +'</div>';
+    var rc=recs();
+    rail+='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">\u2726 Send-this-now</div>'
+      +(rc.length?rc.map(function(x){
+        return '<div class="tpx-rec"><b>'+esc(x.c.name)+'</b> \u00b7 '+esc(x.why)
+          +'<div style="margin-top:4px;"><button class="ibx-pill" onclick="tpxRecOpen(\''+att(String(x.t.id))+'\',\''+att(String(x.c.id))+'\')">'+esc(x.t.name)+' \u2192</button></div></div>';
+      }).join(''):'<div style="font-size:12px;color:var(--muted);">Nothing to recommend right now \u2014 recommendations appear from real signals: overdue invoices, fresh launches, quiet clients, renewal windows.</div>')
+    +'</div>';
+    var top=TPX.rows.filter(function(x){return Number(x.usage_count)>0;}).sort(function(a,b){return (b.usage_count||0)-(a.usage_count||0);}).slice(0,4);
+    rail+='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Most used</div>'
+      +(top.length?top.map(function(x){
+        return '<div class="rhx-kv" style="cursor:pointer;" onclick="tpxSel(\''+att(String(x.id))+'\')"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(x.name)+'</span><b>'+x.usage_count+'\u00d7</b></div>';
+      }).join(''):'<div style="font-size:12px;color:var(--muted);">Usage counts build as you copy and test-send. Open and click rates need emails routed through the platform \u2014 available as a follow-up via Resend webhooks, never faked here.</div>')
+    +'</div>';
+
+    root.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Communication Center</div>'
+      +'<div class="ibx-sub">Every email here has a purpose, a moment, and \u2014 where a real signal exists \u2014 a trigger that recommends it.</div></div>'
+      +'<span style="flex:1;"></span><button class="bf-act primary" onclick="tpxNew()">+ New template</button></div>'
+      +'<div class="tpx-grid"><div>'+lib+'</div><div>'+center+'</div><div>'+rail+'</div></div>';
+  }
+
+  // own the surface
+  var _goT=window.go;
+  window.go=function(dest){ var r=_goT.apply(this,arguments); try{ if(dest==='templates') tpxLoad(); }catch(e){} return r; };
+})();
+</script>
+
 </body>
 </html>
