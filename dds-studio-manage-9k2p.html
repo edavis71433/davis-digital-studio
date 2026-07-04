@@ -12162,11 +12162,60 @@ function anEngineNote(eng){
       '<div class="pt">Invoices</div>'
       +'<div class="ibx-sub">Track payments, manage invoices, and keep cash flow moving.</div>'
       +stats
+      +'<div id="ivxHealth"></div>'
       +tabs
       +bulk
       +selHead
       +'<div style="margin-top:2px;">'+body+'</div>'
       +pager;
+    try{ ivxHealth(); }catch(e){}
+  }
+
+  // ── INVOICE HEALTH: score + verdict, next-3-month cash flow (recurring +
+  // scheduled invoices), and the at-risk list with a concrete suggestion each
+  // (auto-reminder status, offer a split plan, escalate to a call). Server
+  // route invoice_health; deterministic. Fail-soft: absent on any error. ──
+  var IVXH={loaded:false};
+  async function ivxHealth(){
+    var host=document.getElementById('ivxHealth'); if(!host) return;
+    if(IVXH.cache){ host.innerHTML=IVXH.cache; return; }
+    try{
+      var jwt=await adminJwt(); if(!jwt) return;
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'invoice_health'})});
+      var j=await r.json(); var d=(j&&j.data)||null;
+      if(!d) return;
+      var col=d.score>=90?'#1a7e49':d.score>=70?'#9a7a1a':'#c0392b';
+      var bg=d.score>=90?'#e7f6ee':d.score>=70?'#fdf6e3':'#fbecea';
+      var fc=(d.forecast||[]).map(function(m){
+        return '<div style="flex:1;min-width:100px;background:rgba(91,63,160,.04);border-radius:10px;padding:9px 11px;">'
+          +'<div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">'+esc(m.label)+'</div>'
+          +'<div style="font-size:16px;font-weight:750;color:var(--ink);">$'+(Number(m.total)||0).toLocaleString()+'</div>'
+          +'<div style="font-size:10px;color:var(--muted);">$'+(Number(m.committed)||0).toLocaleString()+' recurring'+(m.scheduled?' + $'+(Number(m.scheduled)||0).toLocaleString()+' invoiced':'')+'</div>'
+        +'</div>';
+      }).join('');
+      var risks=(d.at_risk||[]).slice(0,4).map(function(a){
+        var rc=a.risk==='high'?'#c0392b':a.risk==='medium'?'#9a7a1a':'#7a6d8e';
+        return '<div style="padding:8px 2px;border-top:1px solid rgba(41,25,66,.06);">'
+          +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">'
+          +'<span style="font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:100px;color:'+rc+';background:rgba(0,0,0,.04);text-transform:uppercase;">'+esc(a.risk)+'</span>'
+          +'<strong style="font-size:12.5px;">'+esc(a.client)+'</strong>'
+          +'<span style="font-size:11px;color:var(--muted);">$'+(Number(a.amount)||0).toLocaleString()+' \u00b7 '+a.overdue_days+'d overdue'+(a.reminders?' \u00b7 '+a.reminders+' auto-reminder'+(a.reminders===1?'':'s')+' sent':'')+'</span>'
+          +'<button class="ibx-pill" style="margin-left:auto;" onclick="ivxRemind(\''+att(String(a.id))+'\')">Draft the chase</button>'
+          +'</div>'
+          +(a.suggestion?'<div style="font-size:11.5px;color:var(--ink);margin-top:3px;"><b style="color:var(--p);font-size:10px;">SUGGESTION:</b> '+esc(a.suggestion)+'</div>':'')
+        +'</div>';
+      }).join('');
+      var html='<div style="background:#fff;border:1px solid rgba(41,25,66,.08);border-radius:14px;padding:13px 16px;margin:12px 0 4px;">'
+        +'<div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;">'
+        +'<span style="font-size:18px;font-weight:800;color:'+col+';background:'+bg+';padding:3px 12px;border-radius:11px;">'+d.score+'</span>'
+        +'<div><div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);">Invoice health</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);">'+esc(d.verdict||'')+'</div></div></div>'
+        +(fc?'<div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:10px;"><div style="flex-basis:100%;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:-4px;">Cash flow, next 3 months</div>'+fc+'</div>':'')
+        +(risks?'<div style="margin-top:10px;"><div style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);">At risk</div>'+risks+'</div>':'')
+      +'</div>';
+      IVXH.cache=html;
+      host.innerHTML=html;
+    }catch(e){ /* strip simply doesn't render */ }
   }
 
   window.ivxPanel=function(id){
@@ -12521,8 +12570,10 @@ function anEngineNote(eng){
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;">'
         +'<button class="bf-act" onclick="qbxPdf(0)">\u2913 Download PDF</button>'
         +'<button class="bf-act" onclick="qbxPdf(1)">Preview full proposal</button>'
+        +'<button class="bf-act" onclick="qbxShare()">\ud83d\udd17 Save &amp; share link</button>'
         +'<button class="bf-act primary" onclick="qbxSend()">Review &amp; send \u2192</button>'
       +'</div>'
+      +'<div id="qbxShareOut" style="display:none;font-size:12.5px;margin-top:10px;word-break:break-all;"></div>'
     +'</div>';
 
     root.innerHTML=
@@ -12533,7 +12584,17 @@ function anEngineNote(eng){
         +'<div>'+clientCard+recBlock()+svcCard+'</div>'
         +'<div>'+sumCard+tlCard+insCard+'</div>'
         +'<div>'+prev+'</div>'
+      +'</div>'
+      +'<div class="qbx-grid" style="grid-template-columns:1fr 1fr;margin-top:18px;">'
+        +'<div class="qbx-card"><div class="qbx-h">\u2728 Build with AI</div>'
+          +'<textarea id="qbxAiBrief" class="fi" rows="2" placeholder=\'Describe the scope: "5-page site for a Pasadena bakery with online ordering and basic SEO"\' style="margin:0 0 8px;"></textarea>'
+          +'<button class="bf-act" onclick="qbxAiBuild()">Build quote</button>'
+          +'<div style="font-size:11px;color:var(--muted);margin-top:6px;">Scope from your words; pricing anchored to your paid-invoice history. One click to save &amp; share the result.</div>'
+          +'<div id="qbxAiOut" style="margin-top:10px;"></div>'
+        +'</div>'
+        +'<div class="qbx-card"><div class="qbx-h">\ud83d\udce4 Sent quotes <button class="ibx-pill" style="margin-left:auto;" onclick="qbxTracker()">\u21bb</button></div><div id="qbxTrack"></div></div>'
       +'</div>';
+    try{ qbxTracker(); }catch(e){}
   }
 
   // drive the existing branded PDF engine
@@ -12549,6 +12610,103 @@ function anEngineNote(eng){
     QBX.custom.forEach(function(c){ window.quoteLines.push({id:id++, desc:c.name+(c.mo?' (monthly)':''), qty:1, rate:'$'+(Number(c.p)||0)+(c.mo?'/mo':'')}); });
     try{ renderQuoteLines(); }catch(e){}
   }
+  // ── SAVE & SHARE: persists the current selection as a hosted, tracked
+  // quote (quote_save). The link is a client-facing page served by the edge
+  // function; every open is logged and shows up in the tracker below.
+  // Monthly items are labeled in their line; the hosted total sums the listed
+  // amounts, so the notes carry the billing terms.
+  window.qbxShare=async function(){
+    var lines=[];
+    selected().forEach(function(sv){ lines.push({item:sv.name+(sv.mo?' (monthly)':''), desc:sv.w||'', amount:Number(QBX.price[sv.k])||0}); });
+    QBX.custom.forEach(function(c){ lines.push({item:(c.name||'Custom item')+(c.mo?' (monthly)':''), desc:'', amount:Number(c.p)||0}); });
+    lines=lines.filter(function(l){return l.item;});
+    var out=document.getElementById('qbxShareOut');
+    if(!QBX.cname){ toast('Pick or name the client first.'); return; }
+    if(!lines.length){ toast('Pick at least one service first.'); return; }
+    if(out){ out.style.display='block'; out.style.color='var(--muted)'; out.textContent='Saving\u2026'; }
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var srv=sums();
+      var quote={ client_name:QBX.cname, client_email:QBX.cemail||'', project:QBX.project||((QBX.cname||'')+' \u2014 Website'),
+        lines:lines, notes:'50% deposit to begin. Remaining balance due at launch.'+(srv.mo?' Monthly items bill monthly after launch.':''), pricing_explainer:'', expires:'' };
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_save',quote:quote})});
+      var j=await r.json();
+      if(j&&j.data&&j.data.share_url){
+        if(out){ out.style.color='var(--green)'; out.innerHTML='\u2713 Saved. <a href="'+att(j.data.share_url)+'" target="_blank" rel="noopener" style="color:var(--p);">'+esc(j.data.share_url)+'</a> <button class="ibx-pill" onclick="navigator.clipboard.writeText(\''+att(j.data.share_url)+'\');toast(\'\u2713 Link copied\')">Copy</button>'; }
+        try{ qbxTracker(); }catch(e){}
+      } else if(out){ out.style.color='var(--red)'; out.textContent=(j&&(j.detail||j.error))||'Save failed.'; }
+    }catch(e){ if(out){ out.style.color='var(--red)'; out.textContent='Save failed: '+e.message; } }
+  };
+
+  // ── SENT QUOTES TRACKER + AI BUILD: rendered below the builder grid. The
+  // tracker shows engagement (never opened / viewed / ignored) with a
+  // follow-up nudge per quote. The AI builder takes a typed brief or a lead
+  // conversation and produces a shareable quote in one step. ──
+  window.qbxTracker=async function(){
+    var host=document.getElementById('qbxTrack'); if(!host) return;
+    host.innerHTML='<div class="bf-skel" style="height:40px;border-radius:12px;"></div>';
+    try{
+      var jwt=await adminJwt(); if(!jwt){ host.innerHTML=''; return; }
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_list'})});
+      var j=await r.json(); var qs=(j&&j.data&&j.data.quotes)||null;
+      if(!qs){ host.innerHTML='<div style="font-size:12px;color:var(--muted);">'+esc((j&&(j.detail||j.error))||'Tracker unavailable.')+'</div>'; return; }
+      if(!qs.length){ host.innerHTML='<div style="font-size:12px;color:var(--muted);">Saved quotes with open-tracking land here. Use \ud83d\udd17 Save &amp; share link above.</div>'; return; }
+      var eng=function(q){
+        var m={accepted:{c:'#1a7e49',bg:'#e7f6ee'},viewed:{c:'#1a7e49',bg:'#e7f6ee'},never_opened:{c:'#7a6d8e',bg:'#f3f0fa'},ignored:{c:'#c0392b',bg:'#fbecea'}}[q.engagement]||{c:'#7a6d8e',bg:'#f3f0fa'};
+        return '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;color:'+m.c+';background:'+m.bg+';white-space:nowrap;">'+esc(q.engagement_label||'')+'</span>';
+      };
+      host.innerHTML=qs.slice(0,10).map(function(q){
+        return '<div style="padding:9px 2px;border-top:1px solid rgba(41,25,66,.06);">'
+          +'<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">'
+          +'<strong style="font-size:12.5px;">'+esc(q.client_name||'')+'</strong>'
+          +'<span style="font-size:11px;color:var(--muted);">$'+(Number(q.total)||0).toLocaleString()+' \u00b7 '+q.age_days+'d ago</span>'
+          +eng(q)
+          +'<button class="ibx-pill" style="margin-left:auto;" onclick="navigator.clipboard.writeText(\''+att(q.share_url)+'\');toast(\'\u2713 Link copied\')">Copy link</button>'
+          +'</div>'
+          +(q.followup?'<div style="font-size:11.5px;color:var(--ink);margin-top:3px;"><b style="color:var(--p);font-size:10px;">FOLLOW UP:</b> '+esc(q.followup)+'</div>':'')
+        +'</div>';
+      }).join('');
+    }catch(e){ host.innerHTML=''; }
+  };
+  window.qbxAiBuild=async function(){
+    var brief=(document.getElementById('qbxAiBrief')||{}).value||'';
+    var out=document.getElementById('qbxAiOut'); if(!out) return;
+    if(String(brief).trim().length<8){ out.innerHTML='<span style="color:var(--red);font-size:12px;">Describe the scope in a sentence or two first.</span>'; return; }
+    out.innerHTML='<span style="color:var(--muted);font-size:12px;">Reading scope and your pricing history\u2026</span>';
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_ai_build',brief:String(brief).slice(0,1500)})});
+      var j=await r.json(); var d=(j&&j.data)||null;
+      if(!d||!d.lines||!d.lines.length){ out.innerHTML='<span style="color:var(--red);font-size:12px;">'+esc((j&&(j.detail||j.error))||'Build failed.')+'</span>'; return; }
+      window.__qbxAi=d;
+      var tot=d.lines.reduce(function(a,l){return a+(Number(l.amount)||0);},0);
+      out.innerHTML='<div style="font-size:12px;color:var(--ink);">'
+        +d.lines.map(function(l){ return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;"><span>'+esc(l.item)+(l.desc?' <span style="color:var(--muted);">\u2014 '+esc(l.desc)+'</span>':'')+'</span><b>$'+(Number(l.amount)||0).toLocaleString()+'</b></div>'; }).join('')
+        +'<div style="display:flex;justify-content:space-between;border-top:1px solid rgba(41,25,66,.1);margin-top:5px;padding-top:5px;"><b>Total</b><b>$'+tot.toLocaleString()+'</b></div>'
+        +(d.pricing_explainer?'<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">'+esc(d.pricing_explainer)+'</div>':'')
+        +'<button class="bf-act primary" style="margin-top:9px;" onclick="qbxAiShare()">Save &amp; share this quote \u2192</button>'
+      +'</div>';
+    }catch(e){ out.innerHTML='<span style="color:var(--red);font-size:12px;">Build failed: '+esc(e.message)+'</span>'; }
+  };
+  window.qbxAiShare=async function(){
+    var d=window.__qbxAi; if(!d) return;
+    var name=QBX.cname||d.client_name||prompt('Client / business name for this quote:')||'';
+    if(!name){ toast('A client name is required.'); return; }
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var quote={ client_name:name, client_email:QBX.cemail||d.client_email||'', project:d.project||name+' \u2014 Website',
+        lines:d.lines, notes:d.notes||'', pricing_explainer:d.pricing_explainer||'', expires:'' };
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_save',quote:quote})});
+      var j=await r.json();
+      if(j&&j.data&&j.data.share_url){
+        toast('\u2713 Quote saved');
+        var out=document.getElementById('qbxAiOut');
+        if(out) out.innerHTML='\u2713 Saved. <a href="'+att(j.data.share_url)+'" target="_blank" rel="noopener" style="color:var(--p);font-size:12px;word-break:break-all;">'+esc(j.data.share_url)+'</a> <button class="ibx-pill" onclick="navigator.clipboard.writeText(\''+att(j.data.share_url)+'\');toast(\'\u2713 Link copied\')">Copy</button>';
+        try{ qbxTracker(); }catch(e){}
+      } else toast('Save failed: '+((j&&(j.detail||j.error))||'unknown'));
+    }catch(e){ toast('Save failed: '+e.message); }
+  };
+
   window.qbxPdf=function(previewOnly){
     if(!selected().length&&!QBX.custom.length){ toast('Pick at least one service first.'); return; }
     qbxFill();
