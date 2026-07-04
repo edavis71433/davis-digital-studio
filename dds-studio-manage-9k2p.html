@@ -17616,5 +17616,253 @@ window.ddsCommOpen=function(tid,cid){
 })();
 </script>
 
+
+<style>
+/* AGENCY WORKSPACE — managing trust, not users. */
+#page-team #tmxRoot{max-width:1380px;}
+.tmx-grid{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(0,1.4fr) minmax(250px,.85fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1150px){.tmx-grid{grid-template-columns:1fr;}}
+.tmx-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;}
+.tmx-row:hover{background:rgba(91,63,160,.04);}
+.tmx-row.on{background:rgba(91,63,160,.08);}
+.tmx-role{font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:100px;flex:none;}
+.tmx-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+.tmx-perm{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(41,25,66,.05);font-size:12.5px;color:var(--ink);}
+.tmx-tier{display:inline-flex;align-items:center;font-size:11px;font-weight:650;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,.14);cursor:pointer;margin:0 6px 6px 0;background:#fff;color:var(--ink);}
+.tmx-tier.on{background:rgba(91,63,160,.09);border-color:rgba(91,63,160,.3);color:var(--p);}
+</style>
+<script>
+// ═══ AGENCY WORKSPACE ═══
+// Team & Access rebuilt around the platform's REAL trust model: the
+// memberships table, the four-tier role rank (owner > admin > staff >
+// readonly), and the ROUTE_MIN_ROLE enforcement map inside the edge
+// function. The role matrix here is a rendering of actual enforcement —
+// route counts come from the server, capability lines describe what the
+// tiers genuinely gate. Client portal access is real too: contacts with
+// auth identities, and the portal's own table scopes. Anything the
+// platform doesn't store (2FA state, devices, sessions, failed logins)
+// is named as absent, never simulated.
+(function(){
+  var TMX={members:[],perm:null,clients:[],contacts:[],sel:null,view:'team',loaded:false};
+  function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(x){ return esc(x).replace(/'/g,'&#39;'); }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function ago(d){ try{ var s=(Date.now()-new Date(d))/1000; if(s<3600) return Math.max(1,Math.round(s/60))+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }catch(e){ return ''; } }
+  function ini(n){ var p=String(n||'?').trim().split(/[\s@]+/); return ((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase(); }
+  var ROLE_STYLE={owner:['#5b3fa0','rgba(91,63,160,.1)'],admin:['#1a5c7e','rgba(26,92,126,.1)'],staff:['#1a7e49','#e7f6ee'],readonly:['#7a6d8e','#f3f0fa']};
+  // human-readable capability lines per tier — describing what ROUTE_MIN_ROLE
+  // actually gates at each rank (verified against the map, not invented)
+  var TIER_DESC={
+    readonly:{label:'Read-only', who:'Future: auditors, trainees', can:['See dashboards and records','Nothing else \u2014 no sends, no edits, no money']},
+    staff:{label:'Staff', who:'Future: PMs, designers, account managers', can:['Run the day to day: leads, clients, projects, messages','Generate quotes, reports, and AI drafts','Work approvals, tasks, files, and site checks'], cant:['Invite or remove people','Change anyone\u2019s role']},
+    admin:{label:'Admin', who:'Future: operations manager', can:['Everything staff can','Higher-risk operations and destructive actions'], cant:['Manage the team itself']},
+    owner:{label:'Owner', who:'Eric \u2014 and only deliberate successors', can:['Everything, including inviting, removing, and re-roling people','The team page itself is owner-gated']}
+  };
+
+  function ensureRoot(){
+    var page=document.getElementById('page-team'); if(!page) return null;
+    var root=document.getElementById('tmxRoot');
+    if(!root){
+      Array.prototype.forEach.call(page.children,function(ch){ ch.dataset._tmxHidden='1'; ch.style.display='none'; });
+      root=document.createElement('div'); root.id='tmxRoot';
+      page.insertBefore(root, page.firstChild);
+    }
+    return root;
+  }
+  async function tmxEdge(type,payload){
+    var jwt=await adminJwt(); if(!jwt) throw new Error('no session');
+    var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},payload||{}))});
+    var j=await res.json(); if(j&&j.error) throw new Error(j.message||j.detail||j.error); return j;
+  }
+
+  window.tmxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:300px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:80px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return tmxEdge('team_list',{}); }),
+      safe(function(){ return api('contacts?deleted_at=is.null&auth_user_id=not.is.null&select=id,name,email,stage,created_at&limit=300'); }),
+      safe(function(){ return api('clients?deleted_at=is.null&select=id,name,contact_email,email&limit=300'); })
+    ]);
+    if(r[0]===null){
+      root.innerHTML='<div class="pt">Team &amp; Access</div><div class="ibx-sub">Couldn\u2019t reach team_list \u2014 this page is owner-gated; make sure you\u2019re signed in as the owner, then <button class="ibx-pill" onclick="tmxLoad()">retry</button>.</div>';
+      return;
+    }
+    TMX.members=(r[0]&&r[0].data)||[];
+    TMX.perm=(r[0]&&r[0].permission_model)||null;
+    TMX.contacts=r[1]||[];
+    TMX.clients=r[2]||[];
+    if(!TMX.sel&&TMX.members.length) TMX.sel=String(TMX.members[0].id);
+    TMX.loaded=true;
+    tmxRender();
+  };
+
+  window.tmxSel=function(id){ TMX.sel=String(id); TMX.view='team'; tmxRender(); };
+  window.tmxView=function(v){ TMX.view=v; tmxRender(); };
+  function curM(){ return TMX.members.find(function(m){ return String(m.id)===String(TMX.sel); })||null; }
+
+  window.tmxInvite=async function(){
+    var em=(document.getElementById('tmxEm')||{}).value||'';
+    var nm=(document.getElementById('tmxNm')||{}).value||'';
+    var rl=(document.getElementById('tmxRl')||{}).value||'staff';
+    if(!/.+@.+\..+/.test(em)){ toast('Enter a valid email'); return; }
+    var btn=document.getElementById('tmxInvBtn'); if(btn){ btn.disabled=true; btn.textContent='Sending\u2026'; }
+    try{
+      await tmxEdge('team_invite',{email:em,name:nm,role:rl});
+      toast('\u2713 Invite sent \u2014 they set their own password; you never see it');
+      tmxLoad();
+    }catch(e){ toast('Invite failed: '+e.message); if(btn){ btn.disabled=false; btn.textContent='Send invite \u2192'; } }
+  };
+  window.tmxSetRole=async function(id,role){
+    try{ await tmxEdge('team_set_role',{id:id,role:role}); toast('\u2713 Role updated \u2014 takes effect on their next request'); tmxLoad(); }
+    catch(e){ toast('Role change failed: '+e.message); tmxRender(); }
+  };
+  window.tmxRemove=async function(id,email){
+    if(!confirm('Remove '+email+'? Their access ends immediately.')) return;
+    try{ await tmxEdge('team_remove',{id:id}); toast('\u2713 Access revoked'); TMX.sel=null; tmxLoad(); }
+    catch(e){ toast('Remove failed: '+e.message); }
+  };
+
+  function tmxRender(){
+    var root=document.getElementById('tmxRoot'); if(!root) return;
+    var M=TMX.members;
+    var pendingN=M.filter(function(m){ return m.pending; }).length;
+    var activeN=M.length-pendingN;
+    // portal users linked to actual client records
+    var clientEmails={}; TMX.clients.forEach(function(c){ [c.contact_email,c.email].forEach(function(e){ if(e) clientEmails[String(e).toLowerCase()]=c.name; }); });
+    var portalUsers=TMX.contacts.map(function(ct){ return {name:ct.name||ct.email, email:ct.email, client:clientEmails[String(ct.email||'').toLowerCase()]||null, since:ct.created_at}; });
+
+    var stats='<div class="cx-stats">'
+      +'<div class="cx-st"><div class="cx-sn">'+M.length+'</div><div class="cx-sl">Admin accounts</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+activeN+'</div><div class="cx-sl">Have signed in</div></div>'
+      +'<div class="cx-st"><div class="cx-sn" style="'+(pendingN?'color:#c4731a;':'')+'">'+pendingN+'</div><div class="cx-sl">Pending invitations</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+portalUsers.length+'</div><div class="cx-sl">Client portal users</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+(TMX.perm?TMX.perm.total_privileged_routes:'\u2014')+'</div><div class="cx-sl">Permission-gated operations</div></div>'
+    +'</div>';
+
+    // ── LEFT: people + invite ──
+    var left='<div class="grx-card" style="padding:14px;">'
+      +'<div class="grx-h" style="margin-bottom:6px;">People with admin access</div>'
+      +M.map(function(m){
+        var rs=ROLE_STYLE[m.role]||ROLE_STYLE.readonly;
+        return '<div class="tmx-row'+(String(m.id)===String(TMX.sel)&&TMX.view==='team'?' on':'')+'" onclick="tmxSel(\''+att(String(m.id))+'\')">'
+          +'<div class="cx-av">'+esc(ini(m.name||m.email))+'</div>'
+          +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(m.name||m.email||'Member')+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);">'+(m.pending?'<span style="color:#c4731a;font-weight:650;">Invite pending</span>':(m.last_sign_in_at?'Active '+esc(ago(m.last_sign_in_at)):''))+'</div></div>'
+          +'<span class="tmx-role" style="color:'+rs[0]+';background:'+rs[1]+';">'+esc(String(m.role||'').toUpperCase())+'</span>'
+        +'</div>';
+      }).join('')
+      +'<div style="border-top:1px solid rgba(41,25,66,.06);margin-top:10px;padding-top:12px;">'
+        +'<div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;">INVITE \u2014 they set their own password; you never see it</div>'
+        +'<input class="fi" id="tmxEm" placeholder="name@example.com" style="margin-bottom:6px;" aria-label="Invite email">'
+        +'<input class="fi" id="tmxNm" placeholder="Name (optional)" style="margin-bottom:6px;" aria-label="Invite name">'
+        +'<select class="fi" id="tmxRl" style="margin-bottom:8px;" aria-label="Role"><option value="staff">Staff \u2014 runs the day to day</option><option value="admin">Admin \u2014 staff + high-risk operations</option><option value="readonly">Read-only \u2014 look, never touch</option></select>'
+        +'<div style="font-size:10px;color:var(--muted);margin:-2px 0 8px;">Owner can\u2019t be granted from here \u2014 by design, the API refuses it.</div>'
+        +'<button class="bf-act primary" id="tmxInvBtn" style="width:100%;" onclick="tmxInvite()">Send invite \u2192</button>'
+      +'</div>'
+    +'</div>';
+
+    // ── CENTER: member workspace / role matrix / client access ──
+    var views='<div class="ivx-tabs" style="margin-bottom:2px;">'
+      +'<button class="ibx-tab'+(TMX.view==='team'?' on':'')+'" onclick="tmxView(\'team\')">Member</button>'
+      +'<button class="ibx-tab'+(TMX.view==='roles'?' on':'')+'" onclick="tmxView(\'roles\')">Roles &amp; permissions</button>'
+      +'<button class="ibx-tab'+(TMX.view==='clients'?' on':'')+'" onclick="tmxView(\'clients\')">Client access</button>'
+    +'</div>';
+    var center='';
+    if(TMX.view==='roles'){
+      var rc=(TMX.perm&&TMX.perm.route_counts)||{};
+      center='<div class="grx-card">'+views
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;background:rgba(91,63,160,.05);border-radius:12px;padding:12px 14px;margin-top:10px;">This matrix renders the platform\u2019s <b>actual enforcement</b> \u2014 every privileged operation in the edge function declares a minimum role, and the counts below come from that live map. Change the code, and this page changes with it.</div>'
+        +['readonly','staff','admin','owner'].map(function(t){
+          var d=TIER_DESC[t], rs=ROLE_STYLE[t];
+          var cum=0; var order=['readonly','staff','admin','owner'];
+          order.slice(0,order.indexOf(t)+1).forEach(function(x){ cum+=(rc[x]||0); });
+          var holders=M.filter(function(m){ return m.role===t; }).length;
+          return '<div class="ivx-block"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+            +'<span class="tmx-role" style="color:'+rs[0]+';background:'+rs[1]+';font-size:11px;padding:4px 12px;">'+d.label.toUpperCase()+'</span>'
+            +'<span style="font-size:11.5px;color:var(--muted);">'+esc(d.who)+' \u00b7 '+holders+' account'+(holders===1?'':'s')+' \u00b7 unlocks '+cum+' of '+(TMX.perm?TMX.perm.total_privileged_routes:'?')+' gated operations</span></div>'
+            +d.can.map(function(c){ return '<div class="tmx-perm"><span style="color:#1a7e49;flex:none;">\u2713</span>'+esc(c)+'</div>'; }).join('')
+            +((d.cant||[]).map(function(c){ return '<div class="tmx-perm"><span style="color:#c0392b;flex:none;">\u2717</span>'+esc(c)+'</div>'; }).join(''))
+          +'</div>';
+        }).join('')
+      +'</div>';
+    } else if(TMX.view==='clients'){
+      center='<div class="grx-card">'+views
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;background:rgba(91,63,160,.05);border-radius:12px;padding:12px 14px;margin-top:10px;">What a portal login can actually see: <b>only their own record\u2019s scope</b> \u2014 their projects, approvals, files, messages, invoices, reports, and growth workspace. Scoping is enforced server-side by contact identity; a client can never query another client\u2019s data.</div>'
+        +(portalUsers.length?portalUsers.map(function(u){
+          return '<div class="tmx-row" style="cursor:default;">'
+            +'<div class="cx-av">'+esc(ini(u.name))+'</div>'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:650;color:var(--ink);">'+esc(u.name)+'</div>'
+            +'<div style="font-size:11px;color:var(--muted);">'+esc(u.email||'')+(u.client?' \u00b7 linked to '+esc(u.client):' \u00b7 <span style="color:#c4731a;">not linked to a client record</span>')+'</div></div>'
+            +'<span style="font-size:11px;color:var(--muted);flex:none;">since '+esc(u.since?new Date(u.since).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'\u2014')+'</span>'
+          +'</div>';
+        }).join(''):'<div class="grx-empty" style="margin-top:12px;">No client portal identities yet.</div>')
+      +'</div>';
+    } else {
+      var m=curM();
+      if(!m){ center='<div class="grx-card">'+views+'<div class="grx-empty" style="margin-top:12px;">Pick a person.</div></div>'; }
+      else{
+        var rs2=ROLE_STYLE[m.role]||ROLE_STYLE.readonly;
+        var isOwnerRow=(m.role==='owner');
+        var d2=TIER_DESC[m.role]||TIER_DESC.readonly;
+        center='<div class="grx-card">'+views
+          +'<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px;">'
+            +'<div class="cx-hav">'+esc(ini(m.name||m.email))+'</div>'
+            +'<div style="flex:1;min-width:200px;"><div style="font-size:18px;font-weight:750;color:var(--ink);">'+esc(m.name||m.email||'Member')+' <span class="tmx-role" style="color:'+rs2[0]+';background:'+rs2[1]+';vertical-align:middle;">'+esc(String(m.role).toUpperCase())+'</span></div>'
+            +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(m.email||'')+' \u00b7 added '+esc(m.created_at?new Date(m.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'\u2014')+'</div></div>'
+          +'</div>'
+          +'<div class="ivx-block"><div class="ivx-bh">ACCESS \u2014 the five-second read</div>'
+            +'<div class="cx-kv"><span>Status</span><b style="color:'+(m.pending?'#c4731a':'#1a7e49')+';">'+(m.pending?'Invite pending \u2014 never signed in':'Active')+'</b></div>'
+            +'<div class="cx-kv"><span>Last sign-in</span><b>'+(m.last_sign_in_at?esc(ago(m.last_sign_in_at)):'\u2014 never')+'</b></div>'
+            +'<div class="cx-kv"><span>Can do</span><b style="font-weight:500;text-align:right;max-width:60%;">'+esc(d2.can[0])+'</b></div>'
+            +((d2.cant&&d2.cant[0])?'<div class="cx-kv"><span>Cannot</span><b style="font-weight:500;text-align:right;max-width:60%;">'+esc(d2.cant[0])+'</b></div>':'')
+          +'</div>'
+          +'<div class="ivx-block"><div class="ivx-bh">CHANGE ACCESS \u2014 takes effect on their next request</div>'
+            +(isOwnerRow&&M.filter(function(x){return x.role==='owner';}).length===1
+              ?'<div style="font-size:12.5px;color:var(--ink);">This is the only owner account \u2014 it can\u2019t be demoted or removed. That\u2019s a safety rail, not a limitation.</div>'
+              :('<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+                +'<select class="fi" style="margin:0;max-width:220px;" onchange="tmxSetRole(\''+att(String(m.id))+'\',this.value)">'
+                  +['readonly','staff','admin'].map(function(t){ return '<option value="'+t+'"'+(m.role===t?' selected':'')+'>'+TIER_DESC[t].label+'</option>'; }).join('')
+                +'</select>'
+                +'<button class="ibx-pill" style="color:#c0392b;" onclick="tmxRemove(\''+att(String(m.id))+'\',\''+att(m.email||'')+'\')">Revoke access</button>'
+              +'</div>'))
+          +'</div>'
+        +'</div>';
+      }
+    }
+
+    // ── RIGHT: workspace intelligence — derived, explained, honest ──
+    var notes=[];
+    M.forEach(function(m){
+      if(m.pending){ var dd=m.created_at?Math.floor((Date.now()-new Date(m.created_at))/86400000):null;
+        if(dd!=null&&dd>=7) notes.push({t:esc(m.email||'An invite')+' was sent '+dd+' days ago and never accepted \u2014 stale invites are standing risk; revoke or resend.'});
+      } else if(m.last_sign_in_at){
+        var dl=Math.floor((Date.now()-new Date(m.last_sign_in_at))/86400000);
+        if(dl>=14&&m.role!=='owner') notes.push({t:esc(m.name||m.email)+' hasn\u2019t signed in for '+dl+' days \u2014 if the engagement ended, so should the access.'});
+      }
+    });
+    var unlinked=portalUsers.filter(function(u){ return !u.client; }).length;
+    if(unlinked) notes.push({t:unlinked+' portal identit'+(unlinked===1?'y isn\u2019t':'ies aren\u2019t')+' linked to a client record \u2014 worth reviewing what they can reach.'});
+    if(!notes.length) notes.push({t:'Nothing risky right now: every account is either active or the protected owner. Least-privilege is holding.'});
+    var rail='<div class="grx-card"><div class="grx-h">\u2726 Access intelligence</div>'
+      +notes.slice(0,4).map(function(n){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.6;padding:8px 0;border-top:1px solid rgba(41,25,66,.05);">'+n.t+'</div>'; }).join('')
+    +'</div>';
+    rail+='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Security posture \u2014 stated honestly</div>'
+      +'<div class="cx-kv"><span>Passwords</span><b style="font-weight:500;">Set by each person; never visible to you</b></div>'
+      +'<div class="cx-kv"><span>Permission enforcement</span><b style="font-weight:500;">Server-side, per operation</b></div>'
+      +'<div class="cx-kv"><span>Client data scoping</span><b style="font-weight:500;">Per-identity, server-side</b></div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.55;">Not tracked by the platform (and therefore not shown): 2FA state, device history, session lists, failed sign-ins. Those live in Supabase\u2019s auth dashboard \u2014 a security-score number here would be decoration, and this page doesn\u2019t decorate.</div>'
+    +'</div>';
+
+    root.innerHTML='<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Team &amp; Access</div>'
+      +'<div class="ibx-sub">Managing trust: who can reach the studio\u2019s operations, what each tier genuinely unlocks, and what every client login can see.</div></div></div>'
+      +stats
+      +'<div class="tmx-grid"><div>'+left+'</div><div>'+center+'</div><div>'+rail+'</div></div>';
+  }
+
+  var _goTm=window.go;
+  window.go=function(dest){ var r=_goTm.apply(this,arguments); try{ if(dest==='team') tmxLoad(); }catch(e){} return r; };
+})();
+</script>
+
 </body>
 </html>
