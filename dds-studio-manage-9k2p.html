@@ -16921,13 +16921,20 @@ window.ddsFilesCard=async function(mountId, clientId){
         var t2=new Date(i.paid_at); if(t2>=a&&t2<b){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); if(isFinite(n)) valueShown+=n; }
       });
     });
+    // vs-last-month deltas from the rows themselves — real comparisons only
+    var lmStart=new Date(mNow.getFullYear(),mNow.getMonth()-1,1).toISOString();
+    var lastM=RPX.rows.filter(function(x){ return x.created_at>=lmStart&&x.created_at<mIso; });
+    var dvThis=RPX.rows.filter(function(x){ return x.status==='delivered'&&x.created_at>=mIso; }).length;
+    var dvLast=lastM.filter(function(x){ return x.status==='delivered'; }).length;
+    var genPct=lastM.length?((thisM.length-lastM.length)/lastM.length*100):null;
+    var dvPct=dvLast?((dvThis-dvLast)/dvLast*100):null;
     var stats='<div class="ivx-stats">'
-      +'<div class="ivx-st"><div class="ivx-sn">'+(RPX.rows.length-delivered.length)+'</div><div class="ivx-sl">Waiting your review</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+delivered.length+'</div><div class="ivx-sl">Delivered to clients</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+thisM.length+'</div><div class="ivx-sl">This month</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+(sat!=null?sat.toFixed(1)+'<span style="font-size:13px;color:var(--muted);">/10</span>':'\u2014')+'</div><div class="ivx-sl">Avg client satisfaction'+(sat!=null?'':' \u00b7 no surveys yet')+'</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+(valueShown?'$'+Math.round(valueShown).toLocaleString():'\u2014')+'</div><div class="ivx-sl">Value shown in delivered reports</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+RPX.rows.length+'</div><div class="ivx-sl">Generated all-time</div></div>'
+      +ddsStatTile({icon:'\u270e',color:'#9a7a1a',bg:'#fdf6e3',value:(RPX.rows.length-delivered.length),label:'Waiting your review',deltaText:(RPX.rows.length-delivered.length)?'the actionable number':'nothing pending'})
+      +ddsStatTile({icon:'\u2713',color:'#1a7e49',bg:'#e7f6ee',value:delivered.length,label:'Delivered to clients',deltaPct:dvPct})
+      +ddsStatTile({icon:'\u25a4',value:thisM.length,label:'Generated this month',deltaPct:genPct})
+      +ddsStatTile({icon:'\u2665',color:'#c0392b',bg:'#fbecea',value:(sat!=null?sat.toFixed(1)+'<span style="font-size:13px;color:var(--muted);">/10</span>':'\u2014'),label:'Avg client satisfaction',deltaText:(sat!=null?sv.length+' surveys, 90 days':'no surveys yet')})
+      +ddsStatTile({icon:'$',color:'#1a5c7e',bg:'rgba(26,92,126,.08)',value:(valueShown?'$'+Math.round(valueShown).toLocaleString():'\u2014'),label:'Value shown in delivered reports',deltaText:'paid in reported periods'})
+      +ddsStatTile({icon:'\u29c9',value:RPX.rows.length,label:'Generated all-time'})
     +'</div>';
 
     var TABS=[['all','All reports'],['draft','Drafts'],['delivered','Delivered'],['scheduled','Scheduled']];
@@ -18222,6 +18229,44 @@ window.ddsCommOpen=function(tid,cid){
   var _goTm=window.go;
   window.go=function(dest){ var r=_goTm.apply(this,arguments); try{ if(dest==='team') tmxLoad(); }catch(e){} return r; };
 })();
+</script>
+
+
+<style>
+/* ═══ DESIGN-LANGUAGE PASS ═══ mockup-scale tiles, cards, and tabs — applied
+   to the shared primitives so every tab updates at once. */
+.ivx-st,.cx-st{border-radius:16px;padding:18px 20px;min-width:172px;box-shadow:0 1px 3px rgba(41,25,66,.04);transition:box-shadow .15s,transform .15s;}
+.ivx-st:hover,.cx-st:hover{box-shadow:0 4px 14px rgba(41,25,66,.07);}
+.ivx-sn,.cx-sn{font-size:24px;letter-spacing:-.01em;}
+.ivx-sl,.cx-sl{font-size:11px;letter-spacing:.01em;margin-top:3px;}
+.grx-card{border-radius:16px;box-shadow:0 1px 3px rgba(41,25,66,.04);}
+.ibx-tab{font-weight:550;padding:10px 14px;}
+.ibx-tab.on{font-weight:650;}
+/* mockup tile anatomy: icon circle · number+delta · label */
+.dds-tile{display:flex;align-items:flex-start;gap:12px;}
+.dds-tico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+.dds-tdelta{font-size:10.5px;font-weight:700;margin-top:3px;}
+</style>
+<script>
+// shared stat tile: icon circle + value + label + honest delta.
+// delta renders ONLY when a real prior-period number was computable — no
+// arrow theater. deltaPct null = no delta line at all.
+window.ddsStatTile=function(opts){
+  function esc(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+  var d='';
+  if(opts.deltaPct!=null&&isFinite(opts.deltaPct)){
+    var up=opts.deltaPct>=0;
+    var good=(opts.downIsGood?!up:up);
+    d='<div class="dds-tdelta" style="color:'+(good?'#1a7e49':'#c0392b')+';">'+(up?'\u2191':'\u2193')+Math.abs(Math.round(opts.deltaPct))+'% '+esc(opts.deltaLabel||'vs last month')+'</div>';
+  } else if(opts.deltaText){
+    d='<div class="dds-tdelta" style="color:var(--muted);font-weight:500;">'+esc(opts.deltaText)+'</div>';
+  }
+  return '<div class="ivx-st dds-tile">'
+    +'<div class="dds-tico" style="color:'+(opts.color||'var(--p)')+';background:'+(opts.bg||'rgba(91,63,160,.08)')+';">'+(opts.icon||'\u25a4')+'</div>'
+    +'<div style="min-width:0;"><div class="ivx-sn">'+opts.value+'</div>'
+    +'<div class="ivx-sl">'+esc(opts.label||'')+'</div>'+d+'</div>'
+  +'</div>';
+};
 </script>
 
 </body>
