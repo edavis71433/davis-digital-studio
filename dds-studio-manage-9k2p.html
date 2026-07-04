@@ -2161,6 +2161,11 @@ function closeDrawer(){
   var sb=document.getElementById("adminSidebar"), sc=document.getElementById("drawerScrim");
   sb.classList.remove("open"); sc.classList.remove("open"); document.body.style.overflow="";
 }
+// ═══ NAVIGATION HOOK REGISTRY ═══ modules register interest in navigation
+// here instead of monkey-patching window.go. One dispatcher, ordered hooks,
+// debuggable composition (DDS_NAV_HOOKS is inspectable at runtime).
+window.DDS_NAV_HOOKS = window.DDS_NAV_HOOKS || [];
+window.ddsOnNav = function(fn, label){ try{ fn._navLabel = label || 'hook'; }catch(e){} window.DDS_NAV_HOOKS.push(fn); };
 function go(page) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".sn").forEach(b => b.classList.remove("active"));
@@ -2183,6 +2188,9 @@ function go(page) {
   if (page === "analytics") loadAnalytics();
   if (page === "invoices") { try { loadInvoiceCommand(); } catch(e){} try { loadInvoiceHealth(); } catch(e){} }
   try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
+
+  // run registered navigation hooks (replaces 12 window.go monkey-patches)
+  (window.DDS_NAV_HOOKS||[]).forEach(function(h){ try{ h(page); }catch(e){} });
 }
 
 // ── LEADS ──
@@ -9321,7 +9329,7 @@ document.addEventListener("DOMContentLoaded", function() {
   /* refresh The Brief automatically when landing on the home page */
   var _origGo = window.go;
   if (typeof _origGo==="function"){
-    window.go = function(page){ _origGo.apply(this, arguments); if (page==="overview"){ setTimeout(function(){ try{ loadBrief(); }catch(e){} }, 60); } };
+    ddsOnNav(function(page){ if (page==="overview"){ setTimeout(function(){ try{ loadBrief(); }catch(e){} }, 60); } }, 'brief');
   }
 
   /* expose a small namespace for inline handlers */
@@ -13018,7 +13026,7 @@ function anEngineNote(eng){
   window.loadQuoteStudio=qbxLoad;
   // page hook: go('quote') has no loader today (static form), so hook nav
   var _go=window.go;
-  window.go=function(dest){ var r=_go.apply(this,arguments); try{ if(dest==='quote'){ qbxLoad(); loadSentQuotes(); } }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='quote'){ qbxLoad(); loadSentQuotes(); } }, 'quotes');
 })();
 </script>
 
@@ -15491,7 +15499,7 @@ function anEngineNote(eng){
 
   // nav hook (page had no loader of its own)
   var _go2=window.go;
-  window.go=function(dest){ var r=_go2.apply(this,arguments); try{ if(dest==='approvals') apxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='approvals') apxLoad(); }, 'approvals');
 })();
 </script>
 
@@ -16064,7 +16072,7 @@ function anEngineNote(eng){
   };
 
   var _go3=window.go;
-  window.go=function(dest){ var r=_go3.apply(this,arguments); try{ if(dest==='tasks') tsxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='tasks') tsxLoad(); }, 'tasks');
 })();
 </script>
 
@@ -17134,7 +17142,7 @@ window.ddsFilesCard=async function(mountId, clientId){
   window.loadReportsLegacy=window.loadReports;
   window.loadReports=rpxLoad;
   var _go4=window.go;
-  window.go=function(dest){ var r=_go4.apply(this,arguments); try{ if(dest==='reports') rpxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='reports') rpxLoad(); }, 'reports');
 })();
 </script>
 
@@ -17197,7 +17205,7 @@ window.ddsFilesCard=async function(mountId, clientId){
     }
   });
   var _go5=window.go;
-  window.go=function(dest){ var r=_go5.apply(this,arguments); try{ if(dest==='today') setTimeout(todayCap,600); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='today') setTimeout(todayCap,600); }, 'today');
   setTimeout(function(){ try{ var p=document.getElementById('page-today'); if(p&&p.offsetParent!==null) todayCap(); }catch(e){} }, 1500);
 })();
 </script>
@@ -17639,7 +17647,7 @@ window.ddsCommOpen=function(tid,cid){
 
   // own the surface
   var _goT=window.go;
-  window.go=function(dest){ var r=_goT.apply(this,arguments); try{ if(dest==='templates') tpxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='templates') tpxLoad(); }, 'templates');
 })();
 </script>
 
@@ -18006,7 +18014,7 @@ window.ddsCommOpen=function(tid,cid){
 
   // surface ownership: nav dispatch
   var _goC=window.go;
-  window.go=function(dest){ var r=_goC.apply(this,arguments); try{ if(dest==='contacts') cxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='contacts') cxLoad(); }, 'contacts');
 })();
 </script>
 
@@ -18290,7 +18298,7 @@ window.ddsCommOpen=function(tid,cid){
   }
 
   var _goTm=window.go;
-  window.go=function(dest){ var r=_goTm.apply(this,arguments); try{ if(dest==='team') tmxLoad(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='team') tmxLoad(); }, 'team');
 })();
 </script>
 
@@ -18471,15 +18479,13 @@ window.ddsStatTile=function(opts){
 
   // ── READ SIDE ── every client-aware page inherits the focus on entry
   var _goFx=window.go;
-  window.go=function(dest){
-    var r=_goFx.apply(this,arguments);
+  ddsOnNav(function(dest){
     try{
       paint();
-      if(FX.cid&&APPLY[dest]){ FX.applying=true; var p=APPLY[dest](FX.cid); 
+      if(FX.cid&&APPLY[dest]){ FX.applying=true; var p=APPLY[dest](FX.cid);
         if(p&&p.then){ p.then(function(){ FX.applying=false; }); } else setTimeout(function(){ FX.applying=false; },800); }
     }catch(e){ FX.applying=false; }
-    return r;
-  };
+  }, 'focusmode');
 
   // restore on load
   if(FX.cid) setTimeout(paint,600);
@@ -18539,7 +18545,7 @@ window.ddsStatTile=function(opts){
         +'<div style="margin-top:8px;opacity:.7;">re-scans on nav \u00b7 remove ?debugw=1 to hide</div>';
     }
     setTimeout(scan,1200);
-    var _goW=window.go; if(typeof _goW==='function') window.go=function(){ var r=_goW.apply(this,arguments); setTimeout(scan,900); return r; };
+    ddsOnNav(function(){ setTimeout(scan,900); }, 'widthdebug');
     window.addEventListener('resize',function(){ setTimeout(scan,300); });
   }catch(e){}
 })();
@@ -18674,23 +18680,26 @@ window.ddsStatTile=function(opts){
     var interval=(it&&it._interval)||null; // board doesn't send interval; fall back to +1yr
     var d=new Date(base.getTime()); d.setFullYear(d.getFullYear()+1);
     suggest=d.toISOString().slice(0,10);
-    var val=prompt('Record renewal for '+name+'.\n\nSuggested next renewal date (from a one-year cadence). Confirm or edit \u2014 you decide, not the system:', suggest);
+    ddsPrompt('Suggested next renewal date (from a one-year cadence). Confirm or edit \u2014 you decide, not the system.', suggest, 'Record renewal \u00b7 '+name, 'Record renewal').then(function(val){
     if(!val) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(val)){ toast('Use YYYY-MM-DD'); return; }
     edge('lifecycle_renew',{clientId:cid, next_renews_at:val}).then(function(){
       toast('\u2713 Renewal recorded \u2014 timeline updated, next date set'); loadLifecycle();
     }).catch(function(e){ toast('Couldn\u2019t save: '+e.message); });
+    });
   };
   window.lcReferral=function(cid,name){
-    if(!confirm('Log that you asked '+name+' for a referral?\n\nThis adds a timeline moment and opens a referral opportunity in your pipeline.')) return;
+    ddsConfirm('This adds a timeline moment and opens a referral opportunity in your pipeline.', 'Log referral ask \u00b7 '+name, 'Log it').then(function(okd){
+    if(!okd) return;
     edge('lifecycle_referral',{clientId:cid}).then(function(){
       toast('\u2713 Referral logged \u2014 it\u2019s now in your pipeline'); loadLifecycle();
     }).catch(function(e){ toast('Couldn\u2019t save: '+e.message); });
+    });
   };
   function findItem(cid){ if(!LC.data) return null; var b=LC.data.board||{}; for(var k in b){ var f=(b[k]||[]).find(function(x){return String(x.id)===String(cid);}); if(f) return f; } return null; }
 
   var _goLc=window.go;
-  window.go=function(dest){ var r=_goLc.apply(this,arguments); try{ if(dest==='lifecycle') loadLifecycle(); }catch(e){} return r; };
+  ddsOnNav(function(dest){ if(dest==='lifecycle') loadLifecycle(); }, 'lifecycle');
 })();
 </script>
 
@@ -18714,6 +18723,73 @@ window.ddsStatTile=function(opts){
   .opx3-panel{height:100dvh;}
 }
 </style>
+
+
+<style>
+.dds-modal-bg{ position:fixed; inset:0; z-index:10000; background:rgba(26,21,53,.45); display:flex; align-items:center; justify-content:center; padding:20px; }
+.dds-modal{ background:#fff; border-radius:18px; max-width:440px; width:100%; padding:24px; box-shadow:0 24px 70px rgba(26,21,53,.3); }
+.dds-modal h3{ font-family:var(--serif); font-weight:500; font-size:18px; color:var(--ink); margin:0 0 8px; }
+.dds-modal p{ font-size:13.5px; color:var(--muted); line-height:1.6; margin:0 0 16px; white-space:pre-wrap; }
+.dds-modal input{ width:100%; padding:12px 14px; border:1.5px solid rgba(91,63,160,.18); border-radius:10px; font-size:16px; margin-bottom:16px; font-family:var(--sans); }
+.dds-modal .row{ display:flex; gap:10px; justify-content:flex-end; }
+.dds-modal button{ border-radius:10px; padding:11px 20px; font-size:13.5px; font-weight:650; cursor:pointer; min-height:44px; font-family:var(--sans); }
+.dds-modal .ok{ background:var(--p); color:#fff; border:none; }
+.dds-modal .no{ background:#fff; color:var(--muted); border:1.5px solid rgba(91,63,160,.15); }
+</style>
+<script>
+// ═══ MODAL SYSTEM ═══ replaces native prompt()/confirm(): styled, Promise-
+// based, keyboard-complete (Enter confirms, Escape cancels), works in in-app
+// browsers where native dialogs are blocked.
+(function(){
+  function build(title, msg, withInput, def, okLabel){
+    return new Promise(function(resolve){
+      var bg=document.createElement('div'); bg.className='dds-modal-bg'; bg.setAttribute('role','dialog'); bg.setAttribute('aria-modal','true');
+      var m=document.createElement('div'); m.className='dds-modal';
+      m.innerHTML='<h3></h3><p></p>'+(withInput?'<input type="text" autocomplete="off">':'')+
+        '<div class="row"><button class="no">Cancel</button><button class="ok"></button></div>';
+      m.querySelector('h3').textContent=title||'Confirm';
+      m.querySelector('p').textContent=msg||'';
+      m.querySelector('.ok').textContent=okLabel||'Confirm';
+      var inp=withInput?m.querySelector('input'):null;
+      if(inp&&def!=null) inp.value=def;
+      bg.appendChild(m); document.body.appendChild(bg);
+      var prevFocus=document.activeElement;
+      function done(v){ bg.remove(); try{ prevFocus&&prevFocus.focus&&prevFocus.focus(); }catch(e){} resolve(v); }
+      m.querySelector('.ok').onclick=function(){ done(withInput?(inp.value||''):true); };
+      m.querySelector('.no').onclick=function(){ done(withInput?null:false); };
+      bg.addEventListener('click',function(e){ if(e.target===bg) done(withInput?null:false); });
+      bg.addEventListener('keydown',function(e){
+        if(e.key==='Escape'){ e.preventDefault(); done(withInput?null:false); }
+        if(e.key==='Enter'){ e.preventDefault(); done(withInput?(inp.value||''):true); }
+      });
+      setTimeout(function(){ (inp||m.querySelector('.ok')).focus(); },30);
+    });
+  }
+  window.ddsConfirm=function(msg,title,okLabel){ return build(title,msg,false,null,okLabel); };
+  window.ddsPrompt=function(msg,def,title,okLabel){ return build(title,msg,true,def,okLabel); };
+})();
+</script>
+
+
+<script>
+// ═══ CACHE-BUST HANDSHAKE ═══ stale cached HTML calling renamed routes is a
+// silent breakage class. On boot, compare our embedded build with the server;
+// on mismatch, hard-reload ONCE with a cache-busting query.
+(function(){
+  var MY_BUILD='2026-07-04.1';
+  setTimeout(async function(){
+    try{
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},body:JSON.stringify({type:'version'})});
+      var j=await r.json(); var server=j&&j.data&&j.data.build;
+      if(server&&server!==MY_BUILD&&!/[?&]_vb=/.test(location.search)){
+        var k='dds_vb_'+server;
+        if(!sessionStorage.getItem(k)){ sessionStorage.setItem(k,'1');
+          location.href=location.pathname+(location.search?location.search+'&':'?')+'_vb='+encodeURIComponent(server)+location.hash; }
+      }
+    }catch(e){}
+  },2500);
+})();
+</script>
 
 </body>
 </html>

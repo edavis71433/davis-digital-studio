@@ -1700,6 +1700,7 @@ async function initPortal() {
 
   // Each step is independently guarded so one failing query or undefined
   // helper can never stop the portal from loading. These feed the OTHER views.
+  try { await readVisitStamp(); } catch(e){} // server stamp BEFORE rooms fetch
   try { await loadAll(); } catch(e){ console.error("loadAll:", e); }
   try { await loadGrowth(); } catch(e){ console.error("loadGrowth:", e); }
   // (Project spine card was replaced by the Digital HQ; its loader is no longer called.)
@@ -2001,7 +2002,7 @@ document.addEventListener("click", function(e){
 async function loadTimeline() {
   renderLoading("timelineBody", 3);
   var brief = null;
-  try { var r = await gpApi('client_progress', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); brief = (r && r.data) ? r.data : null; }
+  try { var r = await gpApi('client_progress', { lastVisit: lastVisitValue() }); brief = (r && r.data) ? r.data : null; }
   catch(e){ console.error('client_progress:', e); }
   if (!brief) { renderError("timelineBody", "loadTimeline()"); return; }
   window._progress = brief;
@@ -2127,7 +2128,7 @@ var allFiles = [];
 async function loadFiles() {
   renderLoading("fileList", 3);
   var brief = null;
-  try { var r = await gpApi('client_deliveries', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); brief = (r && r.data) ? r.data : null; }
+  try { var r = await gpApi('client_deliveries', { lastVisit: lastVisitValue() }); brief = (r && r.data) ? r.data : null; }
   catch(e){ console.error('client_deliveries:', e); }
   if (!brief) { renderError("fileList", "loadFiles()"); return; }
   window._deliveries = brief;
@@ -2479,7 +2480,7 @@ var allMessages = [];
 async function loadMessages() {
   renderLoading("msgThread", 3);
   var payload = null;
-  try { var r = await gpApi('client_conversation', { lastVisit: (function(){ try{ return localStorage.getItem('hq_last_visit'); }catch(e){ return null; } })() }); payload = (r && r.data) ? r.data : null; }
+  try { var r = await gpApi('client_conversation', { lastVisit: lastVisitValue() }); payload = (r && r.data) ? r.data : null; }
   catch(e){ console.error('client_conversation:', e); }
   if (!payload) { renderError("msgThread", "loadMessages()"); return; }
   allMessages = payload.messages || [];
@@ -3024,6 +3025,30 @@ function stopMsgPoll() {
 async function updateLastSeen() {
   if (!CLIENT) return;
   await sb.from("clients").update({last_seen_at: new Date().toISOString()}).eq("id", CLIENT.id);
+}
+
+// ═══ SERVER-SIDE VISIT STAMP ═══ NEW badges and the changed-diff used to key
+// off localStorage, which is per-device: phone and laptop disagreed. The stamp
+// now lives on the client row (portal_seen_at); localStorage remains only as
+// an offline fallback.
+window.DDS_LAST_VISIT = null;
+async function readVisitStamp() {
+  try {
+    if (!CLIENT) return null;
+    var r = await sb.from("clients").select("portal_seen_at").eq("id", CLIENT.id).limit(1);
+    var v = r && r.data && r.data[0] && r.data[0].portal_seen_at;
+    if (v) { window.DDS_LAST_VISIT = v; return v; }
+  } catch(e){}
+  try { return localStorage.getItem('hq_last_visit'); } catch(e){ return null; }
+}
+async function writeVisitStamp() {
+  var now = new Date().toISOString();
+  try { if (CLIENT) await sb.from("clients").update({ portal_seen_at: now }).eq("id", CLIENT.id); } catch(e){}
+  try { localStorage.setItem('hq_last_visit', now); } catch(e){}
+}
+function lastVisitValue() {
+  if (window.DDS_LAST_VISIT) return window.DDS_LAST_VISIT;
+  try { return localStorage.getItem('hq_last_visit'); } catch(e){ return null; }
 }
 
 function cap(str) { return str ? str.charAt(0).toUpperCase()+str.slice(1) : ""; }
@@ -4358,7 +4383,7 @@ async function loadHQ(){
   if(!b){ renderHQFallback(); return; }
   if(d.state==='onboarding'){ renderHQOnboarding(b); }
   else { renderHQ(b); }
-  try{ localStorage.setItem('hq_last_visit', new Date().toISOString()); }catch(e){}
+  writeVisitStamp(); // server-side + localStorage fallback
 }
 
 // THE BRIEFING. A thin consumer of brief.* — the seven client questions, in the
@@ -4580,12 +4605,30 @@ function renderHQFallback(){
     if(typeof sb==='undefined'||!window.CLIENT){ o.innerHTML='<div style="color:#ff6b6b;">No authenticated client session. Log in first, then add ?rlstest=1.</div>'; return; }
     var myId=String(CLIENT.id);
     // client-scoped tables the portal reads, with the column that scopes them
-    var readTables=[
+    // AUTO-DISCOVERY: derive the table list from the live PostgREST schema so
+    // tables added AFTER a verification run (the client_renewals lesson) are
+    // probed automatically instead of silently untested. Falls back to the
+    // known list if the schema endpoint is unreadable.
+    var KNOWN=[
       ['clients','id'],['approvals','contact_id'],['files','client_id'],
       ['messages','contact_id'],['invoices','client_id'],['notifications','client_id'],
       ['activity_log','client_id'],['client_requests','client_id'],['intake_forms','client_id'],
       ['client_onboarding','client_id'],['file_comments','client_id']
     ];
+    var readTables=KNOWN.slice();
+    try{
+      var sch=await fetch(SUPABASE_URL+'/rest/v1/',{headers:{'apikey':SUPABASE_KEY}});
+      var spec=await sch.json();
+      var defs=(spec&&(spec.definitions||spec.components&&spec.components.schemas))||{};
+      var known={}; KNOWN.forEach(function(t){ known[t[0]]=1; });
+      Object.keys(defs).forEach(function(t){
+        if(known[t]) return;
+        var props=(defs[t]&&(defs[t].properties||{}))||{};
+        var col = props.client_id?'client_id':(props.contact_id?'contact_id':(props.id?'id':null));
+        if(col) readTables.push([t,col]);
+      });
+      line('schema \u00b7 discovered '+readTables.length+' probe-able tables ('+(readTables.length-KNOWN.length)+' beyond the known list)', true);
+    }catch(e){ line('schema discovery unavailable \u2014 using known list of '+KNOWN.length, true); }
     // READ ISOLATION — pull rows and confirm none belong to another client
     for(var i=0;i<readTables.length;i++){
       var t=readTables[i][0], col=readTables[i][1];
@@ -4678,6 +4721,27 @@ function renderHQFallback(){
     window.addEventListener('resize',function(){setTimeout(scan,300);});
     var _n=window.nav; if(typeof _n==='function') window.nav=function(){var r=_n.apply(this,arguments);setTimeout(scan,800);return r;};
   }catch(e){}
+})();
+</script>
+
+
+<script>
+// ═══ CACHE-BUST HANDSHAKE ═══ stale cached HTML calling renamed routes is a
+// silent breakage class. On boot, compare our embedded build with the server;
+// on mismatch, hard-reload ONCE with a cache-busting query.
+(function(){
+  var MY_BUILD='2026-07-04.1';
+  setTimeout(async function(){
+    try{
+      var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
+      var j=await r.json(); var server=j&&j.data&&j.data.build;
+      if(server&&server!==MY_BUILD&&!/[?&]_vb=/.test(location.search)){
+        var k='dds_vb_'+server;
+        if(!sessionStorage.getItem(k)){ sessionStorage.setItem(k,'1');
+          location.href=location.pathname+(location.search?location.search+'&':'?')+'_vb='+encodeURIComponent(server)+location.hash; }
+      }
+    }catch(e){}
+  },2500);
 })();
 </script>
 
