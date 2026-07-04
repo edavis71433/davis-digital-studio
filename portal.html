@@ -4072,7 +4072,7 @@ function gpRecCard(r){
   var rid = esc(r.id);
   var detail = r.detail || '';
   var why = r.why || '';
-  var whyNow = r.ai_reasoning ? '<div class="gp-qa"><div class="gp-q">Why now</div><div class="gp-a">'+esc(r.ai_reasoning)+'</div></div>' : '';
+  var whyNow = ''; // ai_reasoning is internal-only and never ships; branch deleted
 
   var actions = '';
   if (status === 'shared') {
