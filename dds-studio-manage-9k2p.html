@@ -16439,7 +16439,8 @@ window.ddsFilesCard=async function(mountId, clientId){
       safe(function(){ return api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id&limit=1'); }),
       safe(function(){ return api('files?client_id=eq.'+encodeURIComponent(cid)+'&select=name&created_at=gte.'+encodeURIComponent(iso)+'&limit=50'); }),
       safe(function(){ return api('timeline?client_id=eq.'+encodeURIComponent(cid)+'&select=title,kind,type,status,created_at,updated_at&limit=200'); }),
-      safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,updated_at,created_at&limit=100'); })
+      safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,updated_at,created_at&limit=100'); }),
+      safe(function(){ return api('messages?client_id=eq.'+encodeURIComponent(cid)+'&created_at=gte.'+encodeURIComponent(iso)+'&select=id&limit=200'); })
     ]);
     var doneTasks=[], workDone=[];
     if(r[1]&&r[1][0]){
@@ -16492,6 +16493,8 @@ window.ddsFilesCard=async function(mountId, clientId){
       });
     }catch(e){}
     workDone.forEach(function(w){ if(receipts.length<12) receipts.push(String(w.title||'Work completed')); });
+    var msgN=(r[5]||[]).length;
+    if(msgN>=3) receipts.push('Stayed in close touch \u2014 '+msgN+' messages exchanged this period');
     var data={ period:period, summary:summary, highlights:highlights.slice(0,6), watch:(warns[0]?{label:warns[0].label,text:String(warns[0].text||'').split('.')[0]}:null), next:next,
       confidence:(an&&an.executive_brief&&an.executive_brief.confidence)||'low', tasksDone:doneTasks.length,
       story:storyRows.slice(0,5), cleared:cleared.slice(0,5), receipts:receipts.slice(0,10) };
