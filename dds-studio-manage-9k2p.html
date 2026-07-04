@@ -18277,5 +18277,159 @@ window.ddsStatTile=function(opts){
 };
 </script>
 
+
+<style>
+/* ═══ FOCUS MODE ═══ the OS's connective tissue: one client, everywhere. */
+#ddsRibbon{display:none;position:sticky;top:0;z-index:40;background:#fff;border:1px solid rgba(41,25,66,.08);border-radius:14px;padding:9px 14px;margin:0 0 14px;box-shadow:0 2px 10px rgba(41,25,66,.06);align-items:center;gap:8px;flex-wrap:wrap;}
+#ddsRibbon.on{display:flex;}
+.fx-av{width:32px;height:32px;border-radius:50%;background:var(--p,#5b3fa0);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;}
+.fx-name{font-weight:750;font-size:13.5px;color:var(--ink);}
+.fx-meta{font-size:11px;color:var(--muted);margin-right:4px;}
+.fx-meta b{color:#1a7e49;font-weight:700;}
+.fx-act{font-size:10px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:100px;flex:none;}
+.fx-tab{border:none;background:none;font-size:11.5px;color:var(--muted);padding:6px 9px;border-radius:8px;cursor:pointer;font-weight:550;}
+.fx-tab:hover{background:rgba(91,63,160,.06);color:var(--p);}
+.fx-tab.on{background:rgba(91,63,160,.1);color:var(--p);font-weight:700;}
+.fx-x{margin-left:auto;border:1px solid rgba(41,25,66,.12);background:#fff;color:var(--ink);font-size:11px;padding:5px 12px;border-radius:100px;cursor:pointer;flex:none;}
+.fx-x:hover{border-color:var(--p);color:var(--p);}
+@media(max-width:760px){.fx-meta{display:none;}}
+</style>
+<script>
+// ═══ FOCUS MODE ═══
+// One global client context, set anywhere a client is opened — the palette,
+// Today's links, the Hub, Timeline, Messages, Growth, Files, Analytics —
+// and inherited by every client-aware page until Eric explicitly returns to
+// triage. The ribbon is the context made visible: health from the real
+// pulse engine, the current project, and the two outstanding-action counts
+// that actually exist in the data (waiting approvals, unpaid invoices).
+// Triage-first stays the operating system; Focus Mode is its connective
+// tissue — the Universal Workspace's best idea without its architecture.
+(function(){
+  var FX={cid:null,name:'',cache:{},applying:false};
+  try{ var saved=JSON.parse(localStorage.getItem('dds_focus')||'null'); if(saved&&saved.cid){ FX.cid=String(saved.cid); FX.name=saved.name||''; } }catch(e){}
+  function esc(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+  function persist(){ try{ localStorage.setItem('dds_focus', JSON.stringify(FX.cid?{cid:FX.cid,name:FX.name}:null)); }catch(e){} }
+
+  // pages that understand a client, and how to hand them the focus
+  var APPLY={
+    hub:      function(cid){ if(typeof openHubClient==='function') openHubClient(cid); },
+    timeline: function(cid){ if(typeof tlxOpen==='function'&&!(window.TLX&&String(TLX.cid)===String(cid))) tlxOpen(cid); },
+    messages: function(cid){ if(typeof msxOpen==='function'&&!(window.MSX&&String(MSX.cid)===String(cid))) msxOpen(cid); },
+    files:    function(cid){ if(typeof fsxCl==='function'&&!(window.FSX&&String(FSX.cid)===String(cid))) fsxCl(cid); },
+    analytics:function(cid){ if(typeof anSelectClient==='function'&&!(window.ANALYTICS&&String(ANALYTICS.clientId)===String(cid))) anSelectClient(cid); },
+    growth:   async function(cid){
+      if(typeof grxOpen!=='function') return;
+      if(window.GRX&&GRX.d&&GRX.d.partnership&&String(GRX.d.partnership.client_id)===String(cid)) return;
+      try{ var r=await api('partnerships?client_id=eq.'+encodeURIComponent(cid)+'&select=id&limit=1');
+        if(r&&r[0]) grxOpen(r[0].id); }catch(e){}
+    },
+    visibility:function(cid){ // best effort: SMX rows load async; retry briefly
+      var tries=0;(function pick(){
+        try{ if(window.SMX&&SMX.rows&&SMX.rows.length){
+          var hit=SMX.rows.find(function(r0){ var c=(typeof clientFor==='function')&&clientFor(r0.site&&r0.site.url); return c&&String(c.id)===String(cid); });
+          if(hit&&typeof smxSel==='function'){ smxSel(String((hit.site&&(hit.site.id||hit.site.url))||'')); return; }
+        } }catch(e){}
+        if(++tries<8) setTimeout(pick,400);
+      })();
+    }
+  };
+  var TABS=[['hub','Hub'],['timeline','Timeline'],['messages','Messages'],['files','Files'],['approvals','Approvals'],['growth','Growth'],['analytics','Analytics'],['visibility','Sites'],['reports','Reports']];
+
+  function mount(){
+    var main=document.getElementById('main'); if(!main) return null;
+    var r=document.getElementById('ddsRibbon');
+    if(!r){ r=document.createElement('div'); r.id='ddsRibbon'; main.insertBefore(r, main.firstChild); }
+    return r;
+  }
+  function curPage(){ var p=document.querySelector('.page.active'); return p?p.id.replace('page-',''):''; }
+
+  async function facts(cid){
+    // health + project + the outstanding numbers, cached 5 minutes
+    var c=FX.cache[cid];
+    if(c&&(Date.now()-c.at)<300000) return c.v;
+    var out={health:null,label:'',project:'',progress:null,appr:0,inv:0};
+    try{
+      var rows=await api('clients?id=eq.'+encodeURIComponent(cid)+'&select=name,project_name,progress&limit=1');
+      if(rows&&rows[0]){ out.project=rows[0].project_name||''; out.progress=(rows[0].progress!=null?Number(rows[0].progress):null); if(!FX.name) FX.name=rows[0].name||''; }
+    }catch(e){}
+    try{
+      var jwt=await adminJwt();
+      if(jwt){ var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'client_pulse',clientId:cid})});
+        var j=await res.json(); var d=j&&j.data;
+        if(d&&d.relationship_health!=null){ out.health=Math.round(d.relationship_health); out.label=d.rh_note||''; } }
+    }catch(e){}
+    try{ var ap=await api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&status=not.in.(approved,declined)&select=id&limit=50'); out.appr=(ap||[]).length; }catch(e){}
+    try{ var iv=await api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&deleted_at=is.null&status=not.in.(paid,draft)&select=id&limit=50'); out.inv=(iv||[]).length; }catch(e){}
+    FX.cache[cid]={at:Date.now(),v:out};
+    return out;
+  }
+
+  async function paint(){
+    var r=mount(); if(!r) return;
+    if(!FX.cid){ r.classList.remove('on'); r.innerHTML=''; return; }
+    var page=curPage();
+    r.classList.add('on');
+    r.innerHTML='<div class="fx-av">'+esc((FX.name||'?').charAt(0).toUpperCase())+'</div>'
+      +'<span class="fx-name">'+esc(FX.name||'Client')+'</span>'
+      +'<span class="fx-meta" id="fxMeta">\u2026</span>'
+      +TABS.map(function(t){ return '<button class="fx-tab'+(page===t[0]?' on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'; }).join('')
+      +'<button class="fx-x" onclick="ddsFocusClear()">\u2715 Back to triage</button>';
+    var f=await facts(FX.cid);
+    var meta=document.getElementById('fxMeta'); if(!meta||!FX.cid) return;
+    var bits=[];
+    if(f.health!=null) bits.push('Health <b>'+f.health+'</b>');
+    if(f.project) bits.push(esc(f.project)+(f.progress!=null?' \u00b7 '+f.progress+'%':''));
+    var acts='';
+    if(f.appr) acts+='<span class="fx-act" style="color:#9a7a1a;background:#fdf6e3;cursor:pointer;" onclick="go(\'approvals\')">'+f.appr+' waiting approval'+(f.appr===1?'':'s')+'</span> ';
+    if(f.inv) acts+='<span class="fx-act" style="color:#c0392b;background:#fbecea;cursor:pointer;" onclick="go(\'invoices\')">'+f.inv+' unpaid</span>';
+    if(!acts) acts='<span class="fx-act" style="color:#1a7e49;background:#e7f6ee;">nothing outstanding</span>';
+    meta.innerHTML=bits.join(' \u00b7 ')+(bits.length?' \u00b7 ':'')+acts;
+    // refresh the name in storage if it was learned late
+    persist();
+  }
+
+  window.ddsFocusSet=function(cid,name,nav){
+    if(!cid) return;
+    var changed=String(FX.cid)!==String(cid);
+    FX.cid=String(cid); if(name) FX.name=name;
+    if(changed) delete FX.cache[FX.cid];
+    persist(); paint();
+    if(nav) go(nav);
+  };
+  window.ddsFocusClear=function(){ FX.cid=null; FX.name=''; persist(); paint(); go('overview'); };
+
+  // ── WRITE SIDE ── opening a client anywhere sets the focus, quietly
+  function learnName(cid){ try{ var pools=[window.TLX&&TLX.clients,window.MSX&&MSX.clients,window.ANALYTICS&&ANALYTICS.clients,window.CX&&CX.people]; for(var i=0;i<pools.length;i++){ var c=(pools[i]||[]).find(function(x){return String(x.id)===String(cid);}); if(c&&c.name){ FX.name=c.name; return; } } }catch(e){} }
+  function hook(fnName){
+    var orig=window[fnName]; if(typeof orig!=='function') return;
+    window[fnName]=function(){ var a=arguments[0];
+      try{ if(a!=null&&!FX.applying){ var cid=(a&&a.id)?a.id:a; if(cid&&fnName!=='grxOpen'){ FX.cid=String(cid); learnName(cid); persist(); paint(); } } }catch(e){}
+      return orig.apply(this,arguments); };
+  }
+  ['openHubClient','tlxOpen','msxOpen','fsxCl','anSelectClient'].forEach(hook);
+  // growth opens by partnership id — resolve to the client after the fact
+  (function(){ var orig=window.grxOpen; if(typeof orig!=='function') return;
+    window.grxOpen=function(){ var r=orig.apply(this,arguments);
+      setTimeout(function(){ try{ if(!FX.applying&&window.GRX&&GRX.d&&GRX.d.partnership&&GRX.d.partnership.client_id){ FX.cid=String(GRX.d.partnership.client_id); learnName(FX.cid); persist(); paint(); } }catch(e){} },600);
+      return r; };
+  })();
+
+  // ── READ SIDE ── every client-aware page inherits the focus on entry
+  var _goFx=window.go;
+  window.go=function(dest){
+    var r=_goFx.apply(this,arguments);
+    try{
+      paint();
+      if(FX.cid&&APPLY[dest]){ FX.applying=true; var p=APPLY[dest](FX.cid); 
+        if(p&&p.then){ p.then(function(){ FX.applying=false; }); } else setTimeout(function(){ FX.applying=false; },800); }
+    }catch(e){ FX.applying=false; }
+    return r;
+  };
+
+  // restore on load
+  if(FX.cid) setTimeout(paint,600);
+})();
+</script>
+
 </body>
 </html>
