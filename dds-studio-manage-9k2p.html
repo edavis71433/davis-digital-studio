@@ -1080,6 +1080,17 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <div class="cb-info"><div class="cb-label">Updating timeline for</div><div class="cb-name" id="bname-timeline">—</div></div>
         </div>
         <div class="card"><div class="ch"><div class="ct">📋 Phase Status</div></div><div class="cb" id="tlBody"><p style="font-size:13px;color:var(--muted);">Select a client above.</p></div></div>
+        <div class="card" style="margin-top:16px;">
+          <div class="ch"><div class="ct">📖 Project story &amp; history</div><button class="sbtn sec" id="tlExportBtn" onclick="exportClientTimeline()" style="font-size:11.5px;padding:5px 12px;margin-left:auto;display:none;">⬇ Export CSV</button></div>
+          <div class="cb">
+            <div id="tlStory" style="font-size:13.5px;line-height:1.6;color:var(--ink);background:rgba(91,63,160,0.05);border-radius:10px;padding:12px 15px;margin-bottom:12px;display:none;"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+              <input id="tlSearch" placeholder="Search the history…" oninput="tlSearchDebounced()" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:9px;font-size:12.5px;outline:none;">
+              <div id="tlKinds" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            </div>
+            <div id="tlStream"><p style="font-size:12.5px;color:var(--muted);">Select a client to see their full history — assembled automatically from messages, invoices, files, approvals, and work.</p></div>
+          </div>
+        </div>
         <div class="card" id="advanceStageCard" style="margin-top:16px;border:1.5px solid rgba(91,63,160,0.25);">
           <div class="ch">
             <div class="ct">
@@ -3122,7 +3133,7 @@ function onClientChange(id, context) {
   // Load context-specific data
   if (context === "messages") loadMessages(client);
   if (context === "files") loadFiles(client);
-  if (context === "timeline") loadTimeline(client);
+  if (context === "timeline") { loadTimeline(client); try{ loadClientStory(client); }catch(e){} }
   if (context === "invoices") loadInvoices(client);
 }
 
@@ -6669,6 +6680,82 @@ async function addApproval() {
 }
 
 // ── TIMELINE ──
+// ── CLIENT STORY & HISTORY: the derived timeline. Everything below comes
+// from the client_timeline route, which assembles it from real records —
+// nothing here is manually maintained. Milestones are highlighted; search
+// and filters run server-side; export is generated from the loaded data.
+var TLS={client:null,q:'',kinds:[],data:null,timer:null};
+function tlSearchDebounced(){
+  clearTimeout(TLS.timer);
+  TLS.timer=setTimeout(function(){ TLS.q=(document.getElementById('tlSearch').value||'').trim(); if(TLS.client) fetchClientStory(); },350);
+}
+async function loadClientStory(client){
+  TLS.client=client; TLS.q=''; TLS.kinds=[];
+  var se=document.getElementById('tlSearch'); if(se) se.value='';
+  await fetchClientStory();
+}
+async function fetchClientStory(){
+  var stream=document.getElementById('tlStream'); var storyEl=document.getElementById('tlStory');
+  var kindsEl=document.getElementById('tlKinds'); var exp=document.getElementById('tlExportBtn');
+  if(!stream||!TLS.client) return;
+  stream.innerHTML='<div class="bf-skel" style="height:48px;border-radius:10px;"></div>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ stream.innerHTML=''; return; }
+    var payload={type:'client_timeline',client_id:String(TLS.client.id)};
+    if(TLS.q) payload.q=TLS.q;
+    if(TLS.kinds.length) payload.kinds=TLS.kinds;
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(payload)});
+    var j=await r.json(); var d=(j&&j.data)||null;
+    if(!d){ stream.innerHTML='<p style="font-size:12.5px;color:#9a2d2d;">Could not load: '+escHtml((j&&j.error)||'unknown')+'</p>'; return; }
+    TLS.data=d;
+    if(storyEl){ storyEl.style.display=d.story?'block':'none'; storyEl.textContent=d.story||''; }
+    if(exp) exp.style.display=(d.items&&d.items.length)?'inline-block':'none';
+    // kind filter chips
+    if(kindsEl){
+      var LBL={message:'Messages',file:'Files',invoice:'Invoices',payment:'Payments',approval:'Approvals',work:'Work',event:'Events',tool:'Tool runs',admin:'Admin',milestone:'Milestones'};
+      kindsEl.innerHTML=(d.kinds_present||[]).map(function(k){
+        var on=TLS.kinds.indexOf(k)>-1;
+        return '<button onclick="tlToggleKind(\''+escAttr(k)+'\')" style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;border:1px solid rgba(91,63,160,0.2);cursor:pointer;background:'+(on?'var(--p)':'transparent')+';color:'+(on?'#fff':'var(--p)')+';">'+escHtml(LBL[k]||k)+'</button>';
+      }).join('');
+    }
+    // stream
+    if(!(d.items&&d.items.length)){ stream.innerHTML='<p style="font-size:12.5px;color:var(--muted);">'+(TLS.q||TLS.kinds.length?'Nothing matches this search/filter.':'No history yet for this client.')+'</p>'; return; }
+    var fmt=function(iso){ var dt=new Date(iso); return (dt.getMonth()+1)+'/'+dt.getDate()+'/'+String(dt.getFullYear()).slice(2); };
+    var KC={message:'#5b3fa0',payment:'#1a7e49',invoice:'#9a7a1a',approval:'#c4731a',work:'#1a7e49',file:'#7a6d8e',event:'#7a6d8e',tool:'#5b3fa0',admin:'#7a6d8e',milestone:'#c4731a'};
+    stream.innerHTML=d.items.map(function(it){
+      var mile=it.milestone?'<span style="font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#c4731a;background:rgba(196,115,26,0.1);padding:2px 8px;border-radius:100px;">★ '+escHtml(it.milestone_label||'Milestone')+'</span>':'';
+      return '<div style="display:flex;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid rgba(41,25,66,0.05);'+(it.milestone?'background:rgba(196,115,26,0.03);':'')+'">'
+        +'<span style="flex:none;font-size:11px;font-weight:700;color:var(--muted);min-width:56px;">'+escHtml(fmt(it.ts))+'</span>'
+        +'<span style="flex:none;width:8px;height:8px;border-radius:50%;background:'+(KC[it.kind]||'#7a6d8e')+';margin-top:3px;"></span>'
+        +'<span style="flex:1;min-width:0;font-size:13px;color:var(--ink);"><strong style="font-weight:600;">'+escHtml(it.title)+'</strong>'
+        +(it.detail?'<span style="color:var(--muted);"> — '+escHtml(it.detail)+'</span>':'')
+        +'</span>'+mile
+      +'</div>';
+    }).join('')
+    +(d.total>d.items.length?'<p style="font-size:11.5px;color:var(--muted);margin-top:8px;">Showing '+d.items.length+' of '+d.total+' events'+(TLS.q||TLS.kinds.length?' (filtered)':'')+'.</p>':'');
+  }catch(e){ stream.innerHTML='<p style="font-size:12.5px;color:#9a2d2d;">Could not load: '+escHtml(e.message)+'</p>'; }
+}
+function tlToggleKind(k){
+  var i=TLS.kinds.indexOf(k);
+  if(i>-1) TLS.kinds.splice(i,1); else TLS.kinds.push(k);
+  fetchClientStory();
+}
+function exportClientTimeline(){
+  var d=TLS.data; if(!d||!d.items||!d.items.length){ toast('Nothing to export yet.'); return; }
+  var csvEsc=function(v){ v=String(v==null?'':v); return '"'+v.replace(/"/g,'""')+'"'; };
+  var rows=[['date','kind','title','detail','actor','milestone']].concat(d.items.map(function(it){
+    return [it.ts,it.kind,it.title,it.detail,it.actor,it.milestone?(it.milestone_label||'yes'):''];
+  }));
+  var csv=rows.map(function(r){ return r.map(csvEsc).join(','); }).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=((d.client&&d.client.name)||'client').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-timeline.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+  toast('✓ Timeline exported');
+}
+
 async function loadTimeline(client) {
   try { window.__ddsSelectedClientEmail = (client.contact_email || client.email || "").toLowerCase(); if (typeof focusAdvanceStageOnSelected === "function") focusAdvanceStageOnSelected(); } catch(e){}
   var data = await api("timeline?select=*&client_id=eq."+client.id+"&order=sort_order");
