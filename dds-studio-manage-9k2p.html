@@ -1157,6 +1157,8 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <div class="ps">The money across every client — what's outstanding, what's overdue, and the move on each. Pick a client below to manage their invoices.</div>
         <!-- THE MONEY, RIGHT NOW — portfolio-wide command strip. Rendered by loadInvoiceCommand(). -->
         <div id="invCommand"></div>
+        <!-- INVOICE HEALTH — score, at-risk with a suggestion each, cash-flow forecast. Rendered by loadInvoiceHealth(). -->
+        <div id="invHealth"></div>
         <div class="client-select-wrap">
           <label>Select client</label>
           <select aria-label="Sel invoices" class="client-select" id="sel-invoices" onchange="onClientChange(this.value,'invoices')">
@@ -2156,7 +2158,7 @@ function go(page) {
   if (page === "growth") loadGrowth();
   if (page === "integrations") loadIntegrations();
   if (page === "analytics") loadAnalytics();
-  if (page === "invoices") { try { loadInvoiceCommand(); } catch(e){} }
+  if (page === "invoices") { try { loadInvoiceCommand(); } catch(e){} try { loadInvoiceHealth(); } catch(e){} }
   try { var mainEl = document.querySelector(".main"); if (mainEl) mainEl.scrollTo({top:0,behavior:"smooth"}); } catch(e){}
 }
 
@@ -6208,6 +6210,51 @@ function invcDue(d){
   return isNaN(t)?null:t;
 }
 function invcFmt(n){ return '$'+Math.round(n).toLocaleString(); }
+
+// ── INVOICE HEALTH: score + at-risk + 3-month cash-flow. Server-computed
+// (invoice_health), deterministic. Separate from the command strip on purpose:
+// the strip is "what's owed", this is "how healthy is the money, and where's
+// the risk". Each at-risk row carries its own suggested move.
+async function loadInvoiceHealth(){
+  var host=document.getElementById('invHealth'); if(!host) return;
+  if(!host.innerHTML) host.innerHTML='<div class="bf-skel" style="height:56px;border-radius:14px;margin-bottom:16px;"></div>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ host.innerHTML=''; return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'invoice_health'})});
+    var j=await r.json(); var d=(j&&j.data)||null;
+    if(!d){ host.innerHTML=''; return; }
+    var col=d.score>=90?'#1a7e49':d.score>=70?'#9a7a1a':'#c0392b';
+    var bg=d.score>=90?'#e7f6ee':d.score>=70?'#fdf6e3':'#fbecea';
+    var risks=(d.at_risk||[]).map(function(a){
+      var rc=a.risk==='high'?'#c0392b':a.risk==='medium'?'#9a7a1a':'#7a6d8e';
+      return '<div style="padding:10px 2px;border-top:1px solid rgba(41,25,66,0.06);">'
+        +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+        +'<span style="font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;color:'+rc+';background:rgba(0,0,0,0.04);text-transform:uppercase;letter-spacing:.04em;">'+escHtml(a.risk)+' risk</span>'
+        +'<strong style="font-size:13.5px;">'+escHtml(a.client)+'</strong>'
+        +'<span style="font-size:12px;color:var(--muted);">'+escHtml(a.name)+' · $'+(Number(a.amount)||0).toLocaleString()+' · '+a.overdue_days+'d overdue'+(a.reminders?' · '+a.reminders+' reminder'+(a.reminders===1?'':'s')+' sent':'')+'</span>'
+        +'<button class="tdx-pill tdx-pill-sm" style="margin-left:auto;" onclick="invChase(\''+escAttr(String(a.id))+'\')">Draft the chase</button>'
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--ink);margin-top:4px;"><strong style="color:var(--p);font-size:11px;">Suggestion:</strong> '+escHtml(a.suggestion||'')+'</div>'
+      +'</div>';
+    }).join('');
+    var fc=(d.forecast||[]).map(function(m){
+      return '<div style="flex:1;min-width:110px;background:rgba(91,63,160,0.04);border-radius:10px;padding:10px 12px;">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">'+escHtml(m.label)+'</div>'
+        +'<div style="font-size:17px;font-weight:700;color:var(--ink);">$'+(Number(m.total)||0).toLocaleString()+'</div>'
+        +'<div style="font-size:10.5px;color:var(--muted);">$'+(Number(m.committed)||0).toLocaleString()+' recurring'+(m.scheduled?' + $'+(Number(m.scheduled)||0).toLocaleString()+' invoiced':'')+'</div>'
+      +'</div>';
+    }).join('');
+    host.innerHTML='<div style="background:#fff;border:1px solid rgba(41,25,66,0.08);border-radius:14px;padding:14px 18px;margin-bottom:16px;">'
+      +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
+      +'<span style="font-size:20px;font-weight:800;color:'+col+';background:'+bg+';padding:4px 14px;border-radius:12px;">'+d.score+'</span>'
+      +'<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);">Invoice health</div>'
+      +'<div style="font-size:13.5px;color:var(--ink);">'+escHtml(d.verdict||'')+'</div></div>'
+      +'</div>'
+      +(fc?'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"><div style="flex-basis:100%;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:-4px;">Cash flow, next 3 months</div>'+fc+'</div>':'')
+      +(risks?'<div style="margin-top:12px;"><div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">At risk</div>'+risks+'</div>':'')
+    +'</div>';
+  }catch(e){ host.innerHTML=''; }
+}
 
 async function loadInvoiceCommand(){
   var host=document.getElementById('invCommand');
