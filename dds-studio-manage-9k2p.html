@@ -1036,6 +1036,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
           <div class="ch"><div class="ct">📁 Client Files</div></div>
           <div class="cb">
             <div class="uzone"><p>📤 Click or drag files here (PDF, DOC, PPT, PNG, JPG, up to 50MB)</p><input type="file" multiple onchange="uploadFiles(this.files)"></div>
+            <div id="fileControls" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+              <input id="fileSearch" placeholder="Search files…" oninput="renderFilesList()" style="flex:1;min-width:160px;padding:8px 12px;border:1px solid rgba(91,63,160,0.15);border-radius:9px;font-size:12.5px;outline:none;">
+              <div id="fileCats" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            </div>
             <div id="fileList"><p style="font-size:13px;color:var(--muted);">Select a client to see their files.</p></div>
           </div>
         </div>
@@ -6608,18 +6612,108 @@ async function emitClientMessageToFeed(client, text) {
 }
 
 // ── FILES ──
+// ── FILES: categorized, versioned, searchable, previewable — all derived at
+// render time from the rows that already exist. No schema changes: category
+// comes from the name/extension; versions are same-base-name uploads grouped
+// newest-first; "why it matters" is a plain-language line per category.
+// Names are ESCAPED everywhere (clients can upload; a filename is untrusted).
+var FILESV={data:[],cat:'all'};
+function fileCategory(name){
+  var n=String(name||'').toLowerCase();
+  if(/contract|agreement|sow|terms|nda/.test(n)) return 'Contract';
+  if(/invoice|receipt|payment|quote|estimate/.test(n)) return 'Billing';
+  if(/logo|brand|font|palette/.test(n)) return 'Brand';
+  if(/\.(png|jpe?g|gif|webp|svg|heic)$/.test(n)) return 'Image';
+  if(/\.(mp4|mov|webm|mp3|wav)$/.test(n)) return 'Media';
+  if(/\.(csv|xlsx?|numbers)$/.test(n)) return 'Data';
+  if(/\.(docx?|pages|txt|md|pdf)$/.test(n)) return 'Document';
+  if(/\.(zip|rar|7z|tar|gz)$/.test(n)) return 'Archive';
+  return 'Other';
+}
+function fileWhy(cat, f){
+  var m={
+    Contract:'The agreement governing this work — the reference when scope questions come up.',
+    Billing:'Money paperwork — keep for records and tax time.',
+    Brand:'Brand asset — the source of truth for how their business looks.',
+    Image:'Visual asset for the site or project.',
+    Media:'Audio/video asset for the project.',
+    Data:'Structured data — likely content or records feeding the site.',
+    Document:'Written content or reference for the project.',
+    Archive:'A bundle of files — expand to see what is inside.',
+    Other:''
+  };
+  var base=m[cat]||'';
+  if(f&&f.status==='pending') base+=(base?' ':'')+'Not reviewed yet.';
+  return base;
+}
+function fileBaseName(name){
+  // strip extension, then version-ish noise: trailing (1), -v2, _final, copy, timestamps
+  var n=String(name||'').toLowerCase().replace(/\.[a-z0-9]+$/,'');
+  return n.replace(/[\s_-]*(\(\d+\)|v\d+|final|copy|edited|new|\d{6,})[\s_-]*$/g,'').replace(/[^a-z0-9]+/g,' ').trim()||n;
+}
 async function loadFiles(client) {
   var data = await api("files?select=*&client_id=eq."+client.id+"&order=created_at.desc");
-  var el = document.getElementById("fileList");
-  if (!data||data.length===0) { el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No files yet.</p>"; return; }
-  el.innerHTML = data.map(f=>`
-    <div class="fitem">
-      <div class="ficon">${ficon(f.name)}</div>
-      <div class="finfo"><h4>${f.name}</h4><p>${f.from_who==="eric"?"From you":"From client"} · ${f.size||""} · ${fmtDate(f.created_at)}</p></div>
-      <span class="fbadge ${f.status}">${cap(f.status)}</span>
-      ${f.url?`<a href="${f.url}" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;margin-left:8px;" rel="noopener">Download</a>`:""}
-      <button onclick="deleteFile('${f.id}','${(f.storage_path||'').replace(/'/g,"\\'")}','${(f.name||'this file').replace(/'/g,"\\'")}')" style="font-size:11px;color:#c0392b;font-weight:600;background:none;border:none;cursor:pointer;margin-left:10px;padding:0;font-family:inherit;">Delete</button>
-    </div>`).join("");
+  FILESV.data=data||[]; FILESV.cat='all';
+  var se=document.getElementById('fileSearch'); if(se) se.value='';
+  var ctl=document.getElementById('fileControls'); if(ctl) ctl.style.display=(FILESV.data.length?'flex':'none');
+  renderFilesList();
+}
+function renderFilesList(){
+  var el=document.getElementById("fileList"); if(!el) return;
+  var data=FILESV.data;
+  if(!data.length){ el.innerHTML="<p style='font-size:13px;color:var(--muted);'>No files yet.</p>"; return; }
+  // category chips (built from what exists)
+  var cats={}; data.forEach(function(f){ var c=fileCategory(f.name); cats[c]=(cats[c]||0)+1; });
+  var catsEl=document.getElementById('fileCats');
+  if(catsEl){
+    var keys=Object.keys(cats).sort();
+    catsEl.innerHTML=['all'].concat(keys).map(function(c){
+      var on=FILESV.cat===c;
+      var label=c==='all'?('All ('+data.length+')'):(c+' ('+cats[c]+')');
+      return '<button onclick="FILESV.cat=\''+escAttr(c)+'\';renderFilesList()" style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;border:1px solid rgba(91,63,160,0.2);cursor:pointer;background:'+(on?'var(--p)':'transparent')+';color:'+(on?'#fff':'var(--p)')+';">'+escHtml(label)+'</button>';
+    }).join('');
+  }
+  var q=((document.getElementById('fileSearch')||{}).value||'').toLowerCase().trim();
+  var rows=data.filter(function(f){
+    var cat=fileCategory(f.name);
+    if(FILESV.cat!=='all'&&cat!==FILESV.cat) return false;
+    if(q&&(String(f.name||'')+' '+cat).toLowerCase().indexOf(q)===-1) return false;
+    return true;
+  });
+  if(!rows.length){ el.innerHTML="<p style='font-size:13px;color:var(--muted);'>Nothing matches.</p>"; return; }
+  // version groups: newest per base name, with older versions collapsed under it
+  var groups={}, order=[];
+  rows.forEach(function(f){
+    var k=fileBaseName(f.name);
+    if(!groups[k]){ groups[k]=[]; order.push(k); }
+    groups[k].push(f);
+  });
+  el.innerHTML=order.map(function(k){
+    var g=groups[k]; var f=g[0]; var older=g.slice(1);
+    var cat=fileCategory(f.name);
+    var isImg=/\.(png|jpe?g|gif|webp)$/i.test(String(f.name||''));
+    var thumb=(isImg&&f.url)?'<a href="'+escAttr(f.url)+'" target="_blank" rel="noopener"><img src="'+escAttr(f.url)+'" alt="" loading="lazy" style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid rgba(41,25,66,0.08);"></a>':'<div class="ficon">'+ficon(f.name)+'</div>';
+    var previewable=isImg||/\.pdf$/i.test(String(f.name||''));
+    var why=fileWhy(cat,f);
+    var main='<div class="fitem">'
+      +thumb
+      +'<div class="finfo"><h4>'+escHtml(f.name||'')+' <span style="font-size:10px;font-weight:700;color:var(--p);background:rgba(91,63,160,0.08);padding:2px 8px;border-radius:100px;">'+escHtml(cat)+'</span>'+(older.length?' <span style="font-size:10px;font-weight:700;color:#c4731a;background:rgba(196,115,26,0.1);padding:2px 8px;border-radius:100px;">v'+g.length+' \u00b7 '+older.length+' older</span>':'')+'</h4>'
+      +'<p>'+(f.from_who==="eric"?"From you":"From client")+' \u00b7 '+escHtml(f.size||"")+' \u00b7 '+escHtml(fmtDate(f.created_at))+'</p>'
+      +(why?'<p style="font-size:11px;color:var(--muted);margin-top:1px;">'+escHtml(why)+'</p>':'')
+      +'</div>'
+      +'<span class="fbadge '+escAttr(f.status||'')+'">'+escHtml(cap(f.status||''))+'</span>'
+      +(f.url?('<a href="'+escAttr(f.url)+'" target="_blank" style="font-size:11px;color:var(--p);font-weight:600;text-decoration:none;margin-left:8px;" rel="noopener">'+(previewable?'Preview':'Download')+'</a>'):"")
+      +'<button onclick="deleteFile(\''+escAttr(String(f.id))+'\',\''+escAttr(String(f.storage_path||''))+'\',\''+escAttr(String(f.name||'this file'))+'\')" style="font-size:11px;color:#c0392b;font-weight:600;background:none;border:none;cursor:pointer;margin-left:10px;padding:0;font-family:inherit;">Delete</button>'
+    +'</div>';
+    var vers=older.length?('<div style="margin:-4px 0 8px 54px;">'+older.map(function(v){
+      return '<div style="display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--muted);padding:3px 0;">'
+        +'<span>\u21b3 '+escHtml(v.name||'')+' \u00b7 '+escHtml(fmtDate(v.created_at))+'</span>'
+        +(v.url?('<a href="'+escAttr(v.url)+'" target="_blank" rel="noopener" style="color:var(--p);font-weight:600;text-decoration:none;">Open</a>'):"")
+        +'<button onclick="deleteFile(\''+escAttr(String(v.id))+'\',\''+escAttr(String(v.storage_path||''))+'\',\''+escAttr(String(v.name||'this file'))+'\')" style="font-size:10.5px;color:#c0392b;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;">Delete</button>'
+      +'</div>';
+    }).join('')+'</div>'):'';
+    return main+vers;
+  }).join("");
 }
 
 // Removes the file from the client's portal entirely — both the Supabase
