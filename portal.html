@@ -1183,7 +1183,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       <div style="padding:8px 0;">
         <!-- PRIMARY SPINE — the calm destinations -->
         <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg></span>Home</button>
-        <button class="nav-item" onclick="nav('work')" id="nav-work"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>The work<span class="nav-badge" id="badge-work" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('work')" id="nav-work"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>Our journal<span class="nav-badge" id="badge-work" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Conversation<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Billing</button>
         <button class="nav-item growth-only" style="display:none" onclick="nav('gp_priorities')" id="nav-gp_priorities"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>Growth<span class="nav-badge" id="badge-gp" style="display:none"></span></button>
@@ -1210,48 +1210,22 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       <!-- THE WORK — one room: decisions inline where they block work, the
            phase spine, and everything delivered. One object, one place. -->
       <div class="page-view" id="page-work">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">The work</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Everything about your project in one place — what needs you, where things stand, and what we’ve delivered.</p>
-
-        <section id="work-decisions" style="margin-bottom:34px;">
-          <h3 class="work-sec-h">Waiting on you</h3>
-          <p class="work-sec-sub">Decisions only you can make. When this is empty, everything is on us.</p>
-<div id="approvalsBody"></div>
-      
-        </section>
-
-        <section id="work-progress" style="margin-bottom:34px;">
-          <h3 class="work-sec-h">Where things stand</h3>
-          <p class="work-sec-sub">What we’re working on now, and what’s coming next.</p>
-<div id="timelineBody"></div>
-      
-        </section>
-
-        <section id="work-delivered" style="margin-bottom:34px;">
-          <h3 class="work-sec-h">Delivered</h3>
-          <p class="work-sec-sub">Everything we’ve completed for you — newest first — plus a place to send us anything we need.</p>
-<div class="card">
-          <div class="card-body">
-            <div id="uploadProgressWrap" style="display:none;" class="upload-progress">
-              <p>Uploading <strong id="uploadFileName"></strong>...</p>
-              <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadFill" style="width:0%"></div></div>
-            </div>
-            <div class="upload-zone" id="uploadZone" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-              <div class="uz-icon" style="font-size:20px;color:var(--p);">↑</div>
-              <p><strong>Click to upload</strong> or drag and drop</p>
-              <p style="font-size:11px;margin-top:4px;">PDF, DOC, PPT, PNG, JPG, MP4, up to 50MB</p>
-              <input type="file" multiple onchange="handleFiles(this.files)">
-            </div>
-            <div class="file-tabs">
-              <button class="file-tab active" onclick="filterFiles('all',this)">Delivered to you</button>
-              
-              <button class="file-tab" onclick="filterFiles('client',this)">Your uploads</button>
-            </div>
-            <div class="file-list" id="fileList"><div class="dlv-empty"><div class="dlv-empty-h">Loading your deliveries</div><div class="dlv-empty-p">One moment while we gather everything we've delivered for you.</div></div></div>
+        <div id="journalHead"><h1 class="jn-title">Our <em>journal.</em></h1></div>
+        <section id="work-decisions"><div id="approvalsBody"></div></section>
+        <section id="work-progress"><div id="timelineBody"></div></section>
+        <section id="work-delivered">
+          <div id="uploadProgressWrap" style="display:none;" class="upload-progress">
+            <p>Uploading <strong id="uploadFileName"></strong>...</p>
+            <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadFill" style="width:0%"></div></div>
           </div>
-        </div>
-      
+          <div class="file-list" id="fileList"></div>
+          <div id="journalHandoff"></div>
+          <div style="display:none;">
+            <div class="upload-zone" id="uploadZone"></div>
+            <input type="file" id="jnFileInput" multiple onchange="handleFiles(this.files)">
+          </div>
         </section>
+        <div id="journalClose"></div>
       </div>
 
       <!-- GUIDE -->
@@ -2034,11 +2008,12 @@ function renderProgress(b){
   if (!host) return;
 
   if (!b.has_project) {
-    host.innerHTML = '<div class="prog-empty"><div class="prog-empty-h">'+pEsc(b.headline.line)+'</div></div>';
+    host.innerHTML = '<div class="jn-chap"><div class="jn-when">Now</div><div class="jn-line jn-mut">'+pEsc(b.headline.line)+'</div></div>';
     return;
   }
 
-  var html = '';
+  var html = '<div class="jn-chap"><div class="jn-when">Now</div>';
+  html += '';
 
   // ── CONFIDENCE HEADLINE ──
   html += '<div class="prog-headline prog-tone-'+pEsc(b.headline.tone)+'">'+pEsc(b.headline.line)+'</div>';
@@ -2112,7 +2087,7 @@ function renderProgress(b){
     html += '</div></div>';
   }
 
-  host.innerHTML = html;
+  host.innerHTML = html + '</div>';
 }
 
 // ── FILES ──
@@ -2171,9 +2146,23 @@ function renderFiles() {
 
   // ── YOUR REPORTS ── delivered monthly stories, readable right here.
   // Same rows Eric writes in the admin; this page only reads them.
+  var _oldReports = (brief.reports||[]).slice(1);
   if (brief.reports && brief.reports.length) {
-    html += '<div style="margin-bottom:18px;">';
-    brief.reports.forEach(function(rp){
+    var rp0 = brief.reports[0];
+    html += '<details class="jn-platewrap" '+(rp0.is_new?'open':'')+'>'
+      + '<summary class="jn-plate">'
+      + (rp0.is_new?'<span class="jn-pnew">NEW</span>':'')
+      + '<div class="jn-pmast">'+fEsc((CLIENT&&CLIENT.name)||'')+' \u00b7 Monthly \u00b7 No. '+brief.reports.length+'</div>'
+      + '<div class="jn-ptitle">'+fEsc(rp0.period||rp0.title)+', in plain language.</div>'
+      + '<div class="jn-pby">Prepared for you by Davis Digital'+(rp0.body?' \u00b7 a short read':'')+'</div>'
+      + '<div class="jn-popen">Unfold the report \u2192</div>'
+      + '</summary>'
+      + '<div class="jn-pbody">'+fEsc(rp0.body||'The full report is on its way.')+'</div>'
+      + '</details>';
+  }
+  if (false) {
+    html += '';
+    (brief.reports||[]).forEach(function(rp){
       var open = !!rp.is_new;
       html += '<details '+(open?'open ':'')+'style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;">'
         + '<summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;">'
@@ -2198,8 +2187,15 @@ function renderFiles() {
       html += '<div class="dlv-first">\u25C9 Start here</div>';
     }
 
+    if (f.created_at) html += '<div class="jn-when" style="margin:2px 0 10px;">'+fEsc(formatDate(f.created_at))+'</div>';
     html += '<div class="dlv-top">';
-    html += '<div class="dlv-thumb">'+fileIcon(f.name)+'</div>';
+    var _isImg = /\.(png|jpe?g|gif|webp)$/i.test(f.name||'');
+    if (_isImg && f.storage_path) {
+      html += '<div class="dlv-thumb jn-thumb" data-jnsp="'+fAttr(f.storage_path)+'">'+fileIcon(f.name)+'</div>';
+    } else {
+      var _ext=((f.name||'').split('.').pop()||'').toUpperCase().slice(0,4);
+      html += '<div class="dlv-thumb jn-docplate"><span class="jn-dm">'+fEsc(_ext||'FILE')+'</span></div>';
+    }
     html += '<div class="dlv-head">';
     // WHAT IS THIS — interpreted kind + the LITERAL filename (exact, unchanged)
     html += '<div class="dlv-kind">'+fEsc(d.kind)+(f.is_new?'<span class="dlv-new">New</span>':'')+'</div>';
@@ -2251,10 +2247,98 @@ function renderFiles() {
     html += '</div>'; // dlv-card
   });
 
+  
+  // ── the archive: the relationship's memory, compact and gray ──
+  var _launch = (CLIENT && CLIENT.launched_at) ? new Date(CLIENT.launched_at) : null;
+  if (_oldReports.length || _launch) {
+    html += '<div class="jn-month"><span>Earlier</span><i></i></div>';
+    _oldReports.forEach(function(rp){
+      html += '<details class="jn-arch"><summary class="jn-arch-s">'+fEsc(rp.period||rp.title)
+        + '\u2019s report <span class="jn-arch-go">Read it again \u2192</span></summary>'
+        + '<div class="jn-pbody jn-pbody-lt">'+fEsc(rp.body||'')+'</div></details>';
+    });
+    if (_launch) {
+      html += '<div class="jn-arch"><span class="jn-tick jn-tick-sm">\u2713</span>Your website went live \u2014 '
+        + fEsc(_launch.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}))
+        + '. Where it all started.</div>';
+    }
+  }
   host.innerHTML = html;
+  jnHydrateThumbs(); jnRenderHead(); jnRenderHandoff(); jnRenderClose();
 }
 
 // Your own uploads — literal, no interpretation. Simple and tidy.
+
+// ═══ OUR JOURNAL — presentation helpers. All data already on the page. ═══
+async function jnHydrateThumbs(){
+  var nodes=document.querySelectorAll('[data-jnsp]');
+  for (var el of Array.from(nodes)){
+    var sp=el.getAttribute('data-jnsp'); el.removeAttribute('data-jnsp');
+    try{
+      var { data } = await sb.storage.from('client-files').createSignedUrl(sp, 300);
+      if(data && data.signedUrl){ el.innerHTML='<img src="'+data.signedUrl+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">'; }
+    }catch(e){}
+  }
+}
+function jnRenderHead(){
+  var host=document.getElementById('journalHead'); if(!host) return;
+  var since='';
+  if(CLIENT && CLIENT.created_at){
+    var d=new Date(CLIENT.created_at);
+    since='Keeping it together since '+d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  }
+  var b=window._deliveries;
+  var bits=[];
+  if(b && b.reports && b.reports.length) bits.push(b.reports.length+(b.reports.length===1?' report':' reports'));
+  if(b && b.deliveries && b.deliveries.length) bits.push(b.deliveries.length+(b.deliveries.length===1?' thing delivered':' things delivered'));
+  host.innerHTML='<div class="jn-kicker">'+fEsc((CLIENT&&CLIENT.name)||'')+' \u00b7 Davis Digital</div>'
+    +'<h1 class="jn-title">Our <em>journal.</em></h1>'
+    +(since?'<div class="jn-since"><i></i>'+fEsc(since)+(bits.length?' \u00b7 '+fEsc(bits.join(' \u00b7 ')):'')+'</div>':'');
+}
+function jnRenderHandoff(){
+  var host=document.getElementById('journalHandoff'); if(!host || host.childNodes.length) return;
+  host.innerHTML='<div class="jn-handoff">'
+    +'<div class="jn-line" style="font-size:19px;">Have something for us?</div>'
+    +'<div class="jn-hbox">'
+    +'<button class="jn-hattach" aria-label="Attach a file" onclick="jnPick()">\uFF0B</button>'
+    +'<input id="jnNote" type="text" placeholder="Add a note with it, if you like\u2026" aria-label="Note to send with your file">'
+    +'<button class="jn-hsend" onclick="jnPick()">Send</button>'
+    +'</div>'
+    +'<div class="jn-hhint">Photos, menus, copy, ideas \u2014 it lands right here in the journal, and Eric sees it the same day.</div>'
+    +'</div>';
+}
+function jnPick(){
+  var n=document.getElementById('jnNote');
+  window._jnNote=(n && n.value.trim())||null;
+  var inp=document.getElementById('jnFileInput');
+  if(inp) inp.click();
+}
+function jnRenderClose(){
+  var host=document.getElementById('journalClose'); if(!host) return;
+  var pending=window._pendingApprovals||0;
+  var b=window._deliveries;
+  var newReport=!!(b && b.reports && b.reports[0] && b.reports[0].is_new);
+  var line, chips=[];
+  if(pending>0){
+    line='You\u2019ve seen where everything stands \u2014 and '+(pending===1?'one decision is':'a couple of decisions are')+' waiting on you. Want me to walk you through before you decide?';
+    chips=['Walk me through the decision','What happens after I decide?'];
+    if(newReport) chips.push('Give me the short version of the report');
+  } else if(newReport){
+    line='You just got '+fEsc((b.reports[0].period||'the latest'))+'\u2019s report \u2014 want the short version, or what\u2019s coming next?';
+    chips=['Give me the short version of the report','What\u2019s coming next?'];
+  } else {
+    line='That\u2019s everything as of today. Anything I can walk you through before you go?';
+    chips=['What are you working on right now?','What\u2019s coming next?'];
+  }
+  var ch=chips.slice(0,3).map(function(c){
+    return '<button class="jn-cchip" onclick="PortalAI.ask(\''+c.replace(/'/g,"\\'")+'\')">'+c+'</button>';
+  }).join('');
+  host.innerHTML='<div class="jn-close"><div class="jn-corb">\u2726</div><div>'
+    +'<div class="jn-cline">'+line+'</div>'
+    +'<div class="jn-cchips">'+ch+'</div>'
+    +'</div></div>';
+}
+
 function renderYourUploads(host, brief) {
   var ups = (brief && brief.your_uploads) ? brief.your_uploads : [];
   if (!ups.length) {
@@ -2392,7 +2476,7 @@ async function uploadFile(file) {
   var ext = file.name.split(".").pop().toUpperCase();
   var size = file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+" MB" : (file.size/1024).toFixed(0)+" KB";
   
-  const { error: dbErr } = await sb.from("files").insert({
+  const { data: newFile, error: dbErr } = await sb.from("files").insert({
     client_id: CLIENT.id,
     name: file.name,
     size: size,
@@ -2400,7 +2484,19 @@ async function uploadFile(file) {
     from_who: "client",
     status: "review",
     storage_path: path
-  });
+  }).select("id").single();
+
+  // journal hand-off: if a note rode along, attach it via the existing
+  // file_comments path (same mechanic as postFileComment).
+  if (!dbErr && newFile && window._jnNote) {
+    try {
+      await sb.from("file_comments").insert({
+        file_id: newFile.id, client_id: CLIENT.id, author: "client", comment: window._jnNote
+      });
+    } catch(e){}
+    window._jnNote = null;
+    var _jn = document.getElementById('jnNote'); if (_jn) _jn.value = '';
+  }
 
   fill.style.width = "100%";
 
@@ -2750,16 +2846,16 @@ function renderDecisions(brief){
   // ── all-clear: an explicit, confidence-building empty state ──
   if (brief.clear || !brief.decisions || !brief.decisions.length) {
     host.innerHTML =
-      '<div class="dec-clear">'
-      + '<div class="dec-clear-mark">\u2713</div>'
-      + '<div class="dec-clear-h">You\u2019re all caught up</div>'
-      + '<div class="dec-clear-p">' + dEsc(brief.clear_line || 'Nothing needs your decision right now.') + '</div>'
+      '<div class="jn-chap jn-today">'
+      + '<div class="jn-when">Today</div>'
+      + '<div class="jn-line jn-clearline"><span class="jn-tick">\u2713</span>Nothing is waiting on you.</div>'
+      + '<div class="jn-sub">' + dEsc(brief.clear_line || 'Every decision is made, every delivery is in. The next entry here will be something finished.') + '</div>'
       + '</div>';
     return;
   }
 
   // ── the calm framing line for the whole room (interpreted) ──
-  var html = '<div class="dec-intro">' + dEsc(brief.intro) + '</div>';
+  var html = '<div class="jn-chap jn-today">' + '<div class="jn-when">Today</div>' + '<div class="jn-line">' + dEsc(brief.intro || ((brief.decisions.length===1?'One decision is':brief.decisions.length+' decisions are')+' waiting on you.')) + '</div>';
 
   brief.decisions.forEach(function(d){
     html += '<div class="dec-card" id="appr-' + dEsc(d.id) + '">';
@@ -2815,7 +2911,7 @@ function renderDecisions(brief){
     html += '</div>'; // dec-card
   });
 
-  host.innerHTML = html;
+  host.innerHTML = html + '</div>';
 }
 
 async function approve(id) {
@@ -4525,7 +4621,7 @@ function renderHQFallback(){
 <!-- Mobile bottom nav -->
 <div style="display:none;" id="mobileNav" class="mobile-nav">
   <button onclick="nav('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg><span>Home</span></button>
-  <button onclick="nav('work')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg><span>The work</span></button>
+  <button onclick="nav('work')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg><span>Our journal</span></button>
   <button onclick="nav('messages')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Conversation</span></button>
   <button onclick="nav('invoices')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Billing</span></button>
   <button onclick="openMoreSheet()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>More</span></button>
@@ -4720,7 +4816,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.3';
+  var MY_BUILD='2026-07-04.4';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -4896,6 +4992,91 @@ button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px soli
   .lg .lg-date{ width:auto; padding:0 0 5px; }
   .lg .lg-cta{ width:100%; justify-content:center; }
   .lg .lg-entry.lg-needs .lg-t{ font-size:20px; }
+}
+
+/* ═══ OUR JOURNAL ═══ chapter grammar. Purple only where the client is
+   needed; green for done; gray for history. The plate is the one object. */
+.jn-kicker{ font-size:11px; font-weight:700; letter-spacing:.11em; color:var(--muted); opacity:.7; text-transform:uppercase; }
+.jn-title{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:400; font-size:34px; letter-spacing:-.65px; line-height:1.1; margin-top:8px; color:var(--ink); }
+.jn-title em{ font-style:italic; }
+.jn-since{ margin-top:12px; font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.jn-since i{ width:26px; height:1.5px; background:var(--hair,#ece7f2); display:inline-block; }
+#journalHead{ margin-bottom:34px; }
+
+.jn-when{ font-family:var(--mono,'Geist Mono',monospace); font-size:10.5px; color:#a49ab5; letter-spacing:.06em; text-transform:uppercase; margin-bottom:12px; }
+.jn-chap{ padding:26px 0; border-top:1px solid var(--hair,#ece7f2); }
+.jn-chap.jn-today{ padding:4px 0 40px; border-top:none; }
+.jn-chap.jn-today .jn-when{ color:var(--accent,#5b3fa0); font-weight:500; }
+.jn-line{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:450; font-size:21px; letter-spacing:-.3px; line-height:1.32; color:var(--ink); max-width:26ch; }
+.jn-chap.jn-today .jn-line{ font-size:24px; letter-spacing:-.4px; }
+.jn-line.jn-mut{ color:var(--muted); font-size:17px; }
+.jn-line.jn-clearline{ color:#1a7e49; }
+.jn-sub{ font-size:12.5px; color:var(--muted); line-height:1.65; margin-top:8px; max-width:50ch; }
+.jn-tick{ display:inline-flex; width:26px; height:26px; border-radius:50%; background:#1a7e49; color:#fff; align-items:center; justify-content:center; font-size:12px; margin-right:10px; vertical-align:-5px; }
+.jn-tick-sm{ width:20px; height:20px; font-size:9px; margin-right:8px; vertical-align:-4px; }
+
+/* decision cards, calmed inside the Today chapter */
+.jn-chap .dec-card{ border-radius:16px; border:1px solid var(--hair,#ece7f2); box-shadow:var(--e1); margin-top:16px; }
+
+/* progress internals: Today owns needs-state; hide the duplicate strip */
+.jn-chap .prog-needs{ display:none !important; }
+
+/* ═══ THE PLATE ═══ */
+.jn-platewrap{ margin:34px 0; border:none; }
+.jn-platewrap > summary{ list-style:none; }
+.jn-platewrap > summary::-webkit-details-marker{ display:none; }
+.jn-plate{ display:block; background:linear-gradient(150deg,#241a3d,#1c142e 60%); border-radius:20px; padding:32px 34px 28px; color:#faf8f5; box-shadow:0 12px 34px rgba(28,20,46,.14),0 34px 80px rgba(28,20,46,.18); cursor:pointer; position:relative; overflow:hidden; transition:transform .35s var(--ease), box-shadow .35s var(--ease); }
+.jn-plate:hover{ transform:translateY(-2px); }
+.jn-plate::after{ content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(139,111,208,.25),transparent 65%); pointer-events:none; }
+.jn-pmast{ font-family:var(--mono,'Geist Mono',monospace); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:rgba(250,248,245,.55); }
+.jn-ptitle{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:420; font-size:26px; letter-spacing:-.35px; margin-top:12px; line-height:1.18; max-width:18ch; }
+.jn-pby{ font-size:12px; color:rgba(250,248,245,.6); margin-top:12px; }
+.jn-popen{ margin-top:20px; display:inline-flex; align-items:center; gap:9px; font-size:13px; font-weight:620; color:#faf8f5; border-bottom:1.5px solid rgba(250,248,245,.35); padding-bottom:4px; transition:border-color .25s var(--ease); }
+.jn-plate:hover .jn-popen{ border-color:#faf8f5; }
+.jn-pnew{ position:absolute; top:22px; right:26px; font-size:9px; font-weight:800; letter-spacing:.08em; color:#8fe3b4; border:1px solid rgba(143,227,180,.4); border-radius:100px; padding:3px 10px; }
+.jn-pbody{ margin-top:16px; background:#fff; border:1px solid var(--hair,#ece7f2); border-radius:16px; padding:22px 24px; font-size:13.5px; line-height:1.75; color:var(--ink); white-space:pre-wrap; box-shadow:var(--e1); }
+.jn-pbody-lt{ box-shadow:none; }
+.jn-platewrap[open] .jn-popen{ opacity:.55; }
+
+/* real-image thumbnails + typographic doc plates */
+.jn-thumb{ overflow:hidden; }
+.jn-docplate{ background:#fff !important; border:1px solid var(--hair,#ece7f2) !important; display:flex; align-items:flex-end; justify-content:flex-start; padding:6px !important; }
+.jn-dm{ font-family:var(--mono,'Geist Mono',monospace); font-size:8px; letter-spacing:.12em; color:#a49ab5; }
+
+/* the archive */
+.jn-month{ margin:44px 0 6px; display:flex; align-items:center; gap:16px; }
+.jn-month span{ font-family:var(--mono,'Geist Mono',monospace); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#a49ab5; }
+.jn-month i{ flex:1; height:1px; background:var(--hair,#ece7f2); }
+.jn-arch{ padding:15px 0; border-top:1px dashed var(--hair,#ece7f2); font-size:14px; color:var(--muted); }
+.jn-arch-s{ cursor:pointer; list-style:none; font-size:14px; color:var(--muted); }
+.jn-arch-s::-webkit-details-marker{ display:none; }
+.jn-arch-go{ font-size:12px; color:#a49ab5; font-weight:560; border-bottom:1px solid var(--hair,#ece7f2); margin-left:10px; }
+.jn-arch-go:hover{ color:var(--accent,#5b3fa0); border-color:var(--accent,#5b3fa0); }
+
+/* the hand-off */
+.jn-handoff{ padding:36px 0 8px; border-top:1px solid var(--hair,#ece7f2); margin-top:18px; }
+.jn-handoff .jn-line{ font-family:var(--serif,'Fraunces',Georgia,serif); }
+.jn-hbox{ margin-top:15px; max-width:470px; border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:16px; padding:8px 8px 8px 16px; display:flex; align-items:center; gap:11px; box-shadow:var(--e1); }
+.jn-hbox input{ flex:1; border:none; outline:none; font-family:var(--sans,'Inter',sans-serif); font-size:13px; color:var(--ink); background:none; min-width:0; }
+.jn-hbox input::placeholder{ color:#a49ab5; }
+.jn-hattach{ width:40px; height:40px; border-radius:12px; border:1.5px dashed rgba(91,63,160,.35); background:rgba(91,63,160,.06); color:var(--accent,#5b3fa0); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex:none; }
+.jn-hsend{ background:var(--ink); color:#fff; border:none; border-radius:11px; padding:11px 16px; font-size:12.5px; font-weight:620; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); flex:none; min-height:40px; }
+.jn-hhint{ font-size:11.5px; color:#a49ab5; margin-top:9px; }
+
+/* the concierge closes the meeting */
+.jn-close{ margin-top:14px; padding:36px 0 6px; border-top:1px solid var(--hair,#ece7f2); display:flex; gap:15px; }
+.jn-corb{ width:40px; height:40px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#8b6fd0,var(--accent,#5b3fa0)); flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; box-shadow:0 6px 18px rgba(91,63,160,.3); }
+.jn-cline{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:16.5px; font-weight:440; line-height:1.45; max-width:36ch; color:var(--ink); }
+.jn-cchips{ margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.jn-cchip{ border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:100px; padding:9px 15px; font-size:12px; color:var(--muted); cursor:pointer; transition:all .18s var(--ease); font-family:var(--sans,'Inter',sans-serif); min-height:36px; }
+.jn-cchip:hover{ color:var(--accent,#5b3fa0); border-color:rgba(91,63,160,.35); background:rgba(91,63,160,.06); }
+
+@media(max-width:768px){
+  .jn-title{ font-size:27px; }
+  .jn-chap.jn-today .jn-line{ font-size:21px; }
+  .jn-plate{ padding:26px 24px 24px; }
+  .jn-ptitle{ font-size:22px; }
+  .jn-hbox{ max-width:none; }
 }
 </style>
 
