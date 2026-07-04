@@ -16868,7 +16868,26 @@ window.ddsCommOpen=function(tid,cid){
       safe(function(){ return api('messages?select=client_id,from_who,created_at&order=created_at.desc&limit=600'); })
     ]);
     if(r[0]===null){
-      root.innerHTML='<div class="pt">Communication Center</div><div class="ibx-sub">The email_templates table isn\u2019t set up yet \u2014 run <b>create-email-templates.sql</b> in Supabase (one time), then refresh. It creates the table and seeds twelve purposeful lifecycle templates.</div><button class="ibx-pill" style="margin-top:12px;" onclick="tpxLoad()">\u21bb Retry</button>';
+      // Diagnose on screen (DevTools are blocked on Eric's work machine):
+      // hit the table directly and show PostgREST's real answer.
+      var diag='';
+      try{
+        var jwt=await adminJwt();
+        var dr=await fetch(SB_URL+'/rest/v1/email_templates?select=id&limit=1',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(jwt||SB_KEY)}});
+        var dt=await dr.text();
+        if(dr.status===404||/relation .* does not exist|PGRST205|Could not find the table/i.test(dt)){
+          diag='<b>Confirmed: the table does not exist yet.</b> The v3 SQL (create-email-templates.sql) has not been run successfully. Open a fresh Supabase SQL tab, paste the WHOLE file, make sure nothing is highlighted, run once, then check: <span class="code" style="padding:2px 6px;">select count(*) from public.email_templates;</span> \u2192 should return 12.';
+        } else if(dr.status===401||dr.status===403||/permission denied|row-level security/i.test(dt)){
+          diag='<b>The table exists but this login can\u2019t read it</b> \u2014 the RLS policy is missing. Run just the last two policy statements from create-email-templates.sql (the drop policy / create policy pair).';
+        } else if(dr.ok){
+          diag='<b>Odd:</b> the direct check succeeded ('+dr.status+') but the page load failed \u2014 likely a brief network hiccup. Retry should work.';
+        } else {
+          diag='<b>Database said ('+dr.status+'):</b> <span style="word-break:break-all;">'+esc(String(dt).slice(0,300))+'</span>';
+        }
+      }catch(e){ diag='<b>Could not reach the database at all:</b> '+esc(e.message)+' \u2014 likely network; retry.'; }
+      root.innerHTML='<div class="pt">Communication Center</div>'
+        +'<div class="ibx-sub" style="max-width:760px;line-height:1.6;">'+diag+'</div>'
+        +'<button class="ibx-pill" style="margin-top:12px;" onclick="tpxLoad()">\u21bb Retry</button>';
       return;
     }
     TPX.rows=r[0]||[]; TPX.clients=r[1]||[]; TPX.invoices=r[2]||[]; TPX.msgs=r[3]||[];
