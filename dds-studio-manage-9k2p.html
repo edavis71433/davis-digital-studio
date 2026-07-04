@@ -12944,6 +12944,40 @@ function anEngineNote(eng){
   }
 
   // ── relationship workspace ──
+  // ── CLIENT PULSE (server signals brain): happiness trend from real survey
+  // sentiment, renewal likelihood inside the 60-day window, work-anniversary
+  // countdown, and the care-plan upsell gap. These are the reads rhx's own
+  // score can't see. One batched call, cached for the session; fail-soft. ──
+  var RHXP={cache:null, at:0};
+  async function rhxPulseFill(id){
+    var host=document.getElementById('rhxPulse'); if(!host) return;
+    try{
+      if(!RHXP.cache || (Date.now()-RHXP.at)>5*60*1000){
+        var jwt=await adminJwt(); if(!jwt) return;
+        var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'client_pulse'})});
+        var j=await r.json(); var rows=(j&&j.data&&j.data.clients)||null;
+        if(!rows) return;
+        RHXP.cache={}; rows.forEach(function(x){ RHXP.cache[String(x.id)]=x; }); RHXP.at=Date.now();
+      }
+      var pu=RHXP.cache[String(id)]; if(!pu) return;
+      var bits=[];
+      if(pu.happiness&&pu.happiness.recent!=null){
+        var ta=pu.happiness.trend==='up'?'\u2191':pu.happiness.trend==='down'?'\u2193':'\u2192';
+        var tc=pu.happiness.trend==='up'?'#1a7e49':pu.happiness.trend==='down'?'#c0392b':'var(--muted)';
+        bits.push('<div class="rhx-kv"><span>Happiness ('+pu.happiness.surveys+' survey'+(pu.happiness.surveys===1?'':'s')+')</span><b>'+pu.happiness.recent+'/10 <span style="color:'+tc+';">'+ta+'</span></b></div>');
+      }
+      if(pu.renewal){
+        var rl={likely:['Renewal likely','#1a7e49'],uncertain:['Renewal uncertain','#9a7a1a'],at_risk:['Renewal at risk','#c0392b'],unknown:['In renewal window','var(--muted)']}[pu.renewal.likelihood]||['Renewal','var(--muted)'];
+        bits.push('<div class="rhx-kv"><span>Renews in '+pu.renewal.days+'d</span><b style="color:'+rl[1]+';">'+rl[0]+'</b></div>');
+      }
+      if(pu.anniversary) bits.push('<div class="rhx-kv"><span>\ud83c\udf89 '+pu.anniversary.years+'-year '+(pu.anniversary.basis==='launch'?'launch':'client')+' anniversary</span><b>in '+pu.anniversary.days_until+'d</b></div>');
+      if(pu.relationship_health!=null) bits.push('<div class="rhx-kv"><span>Signals-brain relationship score</span><b>'+pu.relationship_health+(pu.rh_note?' \u00b7 '+esc(pu.rh_note):'')+'</b></div>');
+      var up=pu.upsell?'<div style="font-size:11.5px;color:var(--ink);margin-top:6px;"><b style="color:var(--p);font-size:10px;">OPPORTUNITY:</b> '+esc(pu.upsell)+'</div>':'';
+      if(!bits.length&&!up) return;
+      host.innerHTML='<div class="rhx-block"><div class="rhx-bh">HOW THIS CLIENT IS DOING</div>'+bits.join('')+up+'</div>';
+    }catch(e){ /* absent on error */ }
+  }
+
   window.rhxOpen=function(id){
     try{ oppxPanelClose(); }catch(e){}
     RHX.ptab='ov';
@@ -13005,6 +13039,7 @@ function anEngineNote(eng){
           +'<div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(next.t)+'</div>'
           +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.55;">'+esc(next.w)+'</div>'
           +'<button class="bf-act primary" style="margin-top:12px;" onclick="rhxMsg(\''+att(String(id))+'\')">Do it now \u2192</button></div>'
+        +'<div id="rhxPulse"></div>'
         +'<div class="rhx-block"><div class="rhx-bh">KEY STATS</div>'
           +'<div class="rhx-kv"><span>Revenue to date</span><b>'+money(iv.paidSum||0)+'</b></div>'
           +'<div class="rhx-kv"><span>Monthly recurring</span><b>'+(mrr?money(mrr)+'/mo':'\u2014')+'</b></div>'
@@ -13017,6 +13052,7 @@ function anEngineNote(eng){
           +'<button class="bf-act" onclick="rhxMsg(\''+att(String(id))+'\')">Message</button>'
           +'<button class="bf-act" onclick="rhxToGrowth(\''+att(String(id))+'\')">Growth partnership \u2192</button>'
         +'</div>';
+      try{ rhxPulseFill(String(id)); }catch(e){}
       try{
         var ev=[];
         (iv.list||[]).forEach(function(i){ if(i.paid_at) ev.push({i:'$',t:(i.name||'Invoice')+' paid', d:i.paid_at}); });
@@ -13279,6 +13315,54 @@ function anEngineNote(eng){
     grxDetail();
   };
 
+  // ── QUARTERLY STRATEGY: the quarter in one read, generated on demand by the
+  // gp_quarterly_strategy route from verified records (work log, recs, goals,
+  // paid invoices, metric moves). ROI is framed as what happened during the
+  // period, never causation. Cached per partnership per session. ──
+  var GRXS={};
+  function strategyCard(){
+    return '<div class="grx-card"><div class="grx-h">QUARTERLY STRATEGY</div><div id="grxStrat"><div class="bf-skel" style="height:48px;border-radius:12px;"></div></div></div>';
+  }
+  async function grxStratLoad(force){
+    var host=document.getElementById('grxStrat'); if(!host||!GRX.id) return;
+    var key=String(GRX.id);
+    if(GRXS[key]&&!force){ grxStratRender(GRXS[key]); return; }
+    host.innerHTML='<div style="font-size:12.5px;color:var(--muted);">Reading the quarter \u2014 goals, work, recommendations, invoices, and metrics\u2026</div>';
+    try{
+      var r=await gpApi2('gp_quarterly_strategy',{partnership_id:key});
+      var sd=(r&&r.data)||null;
+      if(!sd){ host.innerHTML='<div style="font-size:12.5px;color:var(--red);">Could not build the strategy right now.</div>'; return; }
+      GRXS[key]=sd; grxStratRender(sd);
+    }catch(e){ host.innerHTML='<div style="font-size:12.5px;color:var(--red);">Could not build the strategy: '+esc(e.message)+'</div>'; }
+  }
+  function grxStratRender(sd){
+    var host=document.getElementById('grxStrat'); if(!host) return;
+    var wins=(sd.wins||[]).map(function(w){ return '<div style="font-size:12.5px;padding:2px 0;"><span style="color:#1a7e49;font-weight:800;">\u2713</span> '+esc(w)+'</div>'; }).join('');
+    var pr=(sd.priorities||[]).map(function(x,i){
+      return '<div style="padding:8px 0;border-top:1px solid rgba(41,25,66,.06);"><div style="font-size:13px;font-weight:650;">'+(i+1)+'. '+esc(x.title)+(x.effort?' <span style="font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;">\u00b7 '+esc(x.effort)+'</span>':'')+'</div>'
+        +(x.why?'<div style="font-size:11.5px;color:var(--muted);margin-top:1px;">'+esc(x.why)+'</div>':'')+'</div>';
+    }).join('');
+    host.innerHTML=
+      '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px;">'
+        +'<span style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--p);">'+esc(sd.quarter||'')+'</span>'
+        +(sd.generator==='template'?'<span style="font-size:10px;color:var(--muted);">(assembled from records \u2014 AI unavailable)</span>':'')
+        +'<button class="ibx-pill" style="margin-left:auto;" onclick="grxStratLoad(1)">\u21bb Regenerate</button>'
+      +'</div>'
+      +'<div style="font-size:13.5px;line-height:1.6;color:var(--ink);">'+esc(sd.where_we_are||'')+'</div>'
+      +(sd.roi_line?'<div style="font-size:12px;background:rgba(91,63,160,.05);border-radius:10px;padding:9px 12px;margin-top:10px;line-height:1.55;"><b style="font-size:9.5px;color:var(--p);text-transform:uppercase;letter-spacing:.05em;">Investment &amp; return</b><br>'+esc(sd.roi_line)+'</div>':'')
+      +(wins?'<div style="margin-top:11px;"><div style="font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Wins this quarter</div>'+wins+'</div>':'')
+      +(pr?'<div style="margin-top:11px;"><div style="font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Next quarter\u2019s priorities</div>'+pr+'</div>':'')
+      +(sd.investment_recommendation?'<div style="font-size:12.5px;margin-top:11px;"><b style="color:var(--p);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Recommendation:</b> '+esc(sd.investment_recommendation)+'</div>':'');
+  }
+  // small authed caller (grx module has no gpApi in scope)
+  async function gpApi2(type,payload){
+    var jwt=await adminJwt(); if(!jwt) throw new Error('no session');
+    var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},payload||{}))});
+    var j={}; try{ j=await res.json(); }catch(_e){}
+    if(j&&j.error) throw new Error(j.error);
+    return j;
+  }
+
   function grxDetail(){
     var root=document.getElementById('grxRoot'); var d=GRX.d; if(!root||!d) return;
     var p=d.partnership;
@@ -13309,7 +13393,7 @@ function anEngineNote(eng){
     var openTasks=tasks.filter(function(t){ return !done(t); });
     var doneTasks=tasks.filter(done);
 
-    var TABS=[['ov','Overview'],['goals','Roadmap'],['tasks','Tasks'],['recs','Recommendations']];
+    var TABS=[['ov','Overview'],['strategy','Strategy'],['goals','Roadmap'],['tasks','Tasks'],['recs','Recommendations']];
     var tabs='<div class="grx-tabbar">'+TABS.map(function(t){
       return '<button class="grx-tab'+(GRX.dtab===t[0]?' on':'')+'" onclick="grxDtab(\''+t[0]+'\')">'+t[1]+'</button>';
     }).join('')+'</div>';
@@ -13328,7 +13412,8 @@ function anEngineNote(eng){
     }
 
     var main='';
-    if(GRX.dtab==='goals'){ main=goalsCard(true); }
+    if(GRX.dtab==='strategy'){ main=strategyCard(); setTimeout(function(){ try{ grxStratLoad(); }catch(e){} },0); }
+    else if(GRX.dtab==='goals'){ main=goalsCard(true); }
     else if(GRX.dtab==='tasks'){
       main='<div class="grx-card"><div class="grx-h">Tasks \u2014 '+tDone+' of '+tTot+' complete</div>'
         +(tasks.length?tasks.map(function(t){
