@@ -15564,6 +15564,23 @@ function anEngineNote(eng){
       +'<div class="ivx-st"><div class="ivx-sn">'+done7.length+'</div><div class="ivx-sl">Completed this week</div></div>'
       +(onTime!=null?'<div class="ivx-st"><div class="ivx-sn">'+onTime+'%</div><div class="ivx-sl">On-time rate</div></div>':'')
       +(sugg.length?'<div class="ivx-st"><div class="ivx-sn">\u2726 '+sugg.length+'</div><div class="ivx-sl">Suggested</div></div>':'')
+      +(function(){
+        // value attached to open work: unpaid balances of clients with open
+        // revenue tasks + monthly amounts of clients with open launch tasks.
+        // A precise number with a precise label — not "revenue impact" magic.
+        var toN=function(v){ var n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; };
+        var val=0, seen={};
+        open.forEach(function(t){
+          if(!t.client_id||seen[t.impact+':'+t.client_id]) return;
+          if(t.impact==='revenue'){ seen['revenue:'+t.client_id]=1;
+            (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t.client_id)&&i.status!=='paid'&&i.status!=='draft') val+=toN(i.amount); });
+          } else if(t.impact==='launch'){ seen['launch:'+t.client_id]=1;
+            var c=TSX.clients.find(function(x){return String(x.id)===String(t.client_id);});
+            if(c) val+=toN(c.monthly_amount);
+          }
+        });
+        return val?'<div class="ivx-st"><div class="ivx-sn">$'+Math.round(val).toLocaleString()+'</div><div class="ivx-sl">Attached to open work \u00b7 unpaid + monthly-at-launch</div></div>':'';
+      })()
     +'</div>';
 
     var sentence = overdue.length? overdue.length+' overdue \u2014 the queue is ranked by consequence, not age.'
@@ -15630,9 +15647,16 @@ function anEngineNote(eng){
         var ovs=pool.filter(function(t){return t.due&&new Date(t.due)<new Date(todayStr);});
         var tds=pool.filter(function(t){return t.due&&new Date(t.due).toDateString()===todayStr;});
         var rest=pool.filter(function(t){return ovs.indexOf(t)===-1&&tds.indexOf(t)===-1;});
+        var bLaunch=rest.filter(function(t){return t.impact==='launch';});
+        var bRev=rest.filter(function(t){return t.impact==='revenue';});
+        var bMile=rest.filter(function(t){return t.impact==='milestone';});
+        var bRest=rest.filter(function(t){return ['launch','revenue','milestone'].indexOf(t.impact)===-1;});
         listHtml=(ovs.length?'<div class="tsx-sec red">OVERDUE ('+ovs.length+')</div>'+ovs.map(row).join(''):'')
           +(tds.length?'<div class="tsx-sec" style="color:#9a7a1a;">DUE TODAY ('+tds.length+')</div>'+tds.map(row).join(''):'')
-          +(rest.length?'<div class="tsx-sec">RANKED BY IMPACT</div>'+rest.map(row).join(''):'');
+          +(bLaunch.length?'<div class="tsx-sec" style="color:#c0392b;">\ud83d\ude80 LAUNCH-BLOCKING ('+bLaunch.length+')</div>'+bLaunch.map(row).join(''):'')
+          +(bRev.length?'<div class="tsx-sec" style="color:#1a7e49;">\ud83d\udcb0 REVENUE ('+bRev.length+')</div>'+bRev.map(row).join(''):'')
+          +(bMile.length?'<div class="tsx-sec" style="color:#5b3fa0;">MILESTONE ('+bMile.length+')</div>'+bMile.map(row).join(''):'')
+          +(bRest.length?'<div class="tsx-sec">EVERYTHING ELSE</div>'+bRest.map(row).join(''):'');
         if(!pool.length) listHtml='<div class="grx-empty" style="margin-top:14px;">Nothing open. \u2726 Suggested has candidates when signals fire.</div>';
       } else {
         listHtml=pool.length?pool.map(row).join(''):'<div class="grx-empty" style="margin-top:14px;">Nothing here.</div>';
@@ -15657,8 +15681,25 @@ function anEngineNote(eng){
         +t2.subs.map(function(s,ix){
           return '<div class="grx-task" style="border:none;padding:6px 0;"><input type="checkbox" '+(s.done?'checked':'')+' style="width:16px;height:16px;accent-color:#1a7e49;cursor:pointer;" onchange="tsxSub(\''+t2.key+'\','+ix+',this.checked)"><span style="flex:1;'+(s.done?'color:var(--muted);text-decoration:line-through;':'')+'">'+esc(s.text)+'</span></div>';
         }).join('')
-        +'<div class="grx-add"><input class="fi" id="tsxSubIn" placeholder="Add subtask"><button class="bf-act" onclick="tsxSubAdd(\''+t2.key+'\')">Add</button></div>'
-      +'</div>'):'';
+        +'<div class="grx-add"><input class="fi" id="tsxSubIn" placeholder="Add subtask"><button class="bf-act" onclick="tsxSubAdd(\''+t2.key+'\')">Add</button>'
+        +(!t2.subs.length?'<button class="bf-act" onclick="tsxAiSteps(\''+t2.key+'\')" title="AI turns this task into 3-6 checkable steps \u2014 strictly within its stated scope">\u26a1 Break into steps</button>':'')
+        +'</div><div id="tsxAiOut" style="display:none;font-size:12px;margin-top:6px;"></div>'
+      +'</div>'):''
+      // business value line: only for impacts where a real number exists
+      +(function(){
+        if(!t2.client_id) return '';
+        var toN=function(v){ var n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; };
+        if(t2.impact==='revenue'){
+          var owed=0; (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t2.client_id)&&i.status!=='paid'&&i.status!=='draft') owed+=toN(i.amount); });
+          if(owed>0) return '<div class="ivx-block"><div class="ivx-bh">BUSINESS IMPACT \u2014 measured, not estimated</div><div style="font-size:13px;color:var(--ink);line-height:1.6;">$'+Math.round(owed).toLocaleString()+' is unpaid on this client \u2014 this task exists to move that money.</div></div>';
+        }
+        if(t2.impact==='launch'){
+          var c=TSX.clients.find(function(x){return String(x.id)===String(t2.client_id);});
+          var m=c?toN(c.monthly_amount):0;
+          return '<div class="ivx-block"><div class="ivx-bh">BUSINESS IMPACT \u2014 measured, not estimated</div><div style="font-size:13px;color:var(--ink);line-height:1.6;">Launch is the moment reviews, referrals, and '+(m?'$'+Math.round(m).toLocaleString()+'/mo of recurring value':'recurring value')+' begin \u2014 this task is on that path.</div></div>';
+        }
+        return '';
+      })();
 
       // ── right rail widgets (real data only) ──
       var relApps=TSX.apps.filter(function(a){ return String(a.client_id)===String(t2.client_id)&&String(a.status||'').toLowerCase()==='pending'; });
@@ -15818,6 +15859,31 @@ function anEngineNote(eng){
     if(r===null){ toast('Couldn\u2019t save'); return; }
     var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.body=body;
     tsxRender();
+  };
+  // ── ⚡ BREAK INTO STEPS ── AI expands one task into checkable subtasks,
+  // strictly within the task's stated scope, appended through the same
+  // machinery as manual subtasks. Studio tasks only (growth roadmap tasks
+  // keep their subtasks in the partnership workspace).
+  window.tsxAiSteps=async function(key){
+    var t=allTasks().find(function(x){return x.key===key;}); if(!t) return;
+    if(t.kind!=='s'){ toast('Roadmap tasks break down in the Growth workspace'); return; }
+    var out=document.getElementById('tsxAiOut');
+    if(out){ out.style.display='block'; out.style.color='var(--muted)'; out.textContent='Breaking this into steps\u2026'; }
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'task_breakdown',title:t.title,detail:t.desc||'',clientId:t.client_id||undefined})});
+      var j=await res.json();
+      if(j&&j.error){ if(out){ out.style.color='#9a2d2d'; out.textContent=j.error==='ai_unavailable'?'AI unavailable \u2014 add steps by hand above.':'Breakdown failed: '+(j.detail||j.error); } return; }
+      var steps=(j&&j.data&&j.data.steps)||[];
+      if(!steps.length){ if(out){ out.style.color='#9a2d2d'; out.textContent='No steps came back.'; } return; }
+      steps.forEach(function(st){ t.subs.push({done:false,text:String(st)}); });
+      var body=buildBody(t.desc, t.subs);
+      var r=await api('studio_tasks?id=eq.'+encodeURIComponent(t.id),'PATCH',{body:body});
+      if(r===null){ if(out){ out.style.color='#9a2d2d'; out.textContent='Steps generated but saving failed.'; } return; }
+      var row=TSX.rows.find(function(x){return String(x.id)===String(t.id);}); if(row) row.body=body;
+      toast('\u2713 '+steps.length+' steps added');
+      tsxRender();
+    }catch(e){ if(out){ out.style.color='#9a2d2d'; out.textContent='Breakdown failed: '+e.message; } }
   };
   window.tsxSubAdd=async function(key){
     var t=allTasks().find(function(x){return x.key===key;}); if(!t||t.kind!=='s') return;
