@@ -872,7 +872,10 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
     <div class="sidebar" id="adminSidebar">
       <div class="drawer-head">
         <span class="drawer-head-title">Menu</span>
-        <button class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">&times;</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button aria-label="Search and jump to anything" onclick="closeDrawer();DDS.openCmd();" style="border:1px solid rgba(91,63,160,.2);background:rgba(91,63,160,.06);color:var(--p);border-radius:9px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</button>
+          <button class="drawer-close" aria-label="Close menu" onclick="closeDrawer()">&times;</button>
+        </div>
       </div>
 
       <!-- 1 · TODAY -->
@@ -891,6 +894,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn" data-dest="clients" onclick="go('clients')" id="sn-clients"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/><path d="M12 14v3"/></svg> Clients</button>
       <button class="sn" data-dest="clients" onclick="go('hub')" id="sn-hub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> All clients</button>
       <button class="sn" data-dest="clients" onclick="go('growth')" id="sn-growth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Growth partnerships</button>
+      <button class="sn" data-dest="clients" onclick="go('lifecycle')" id="sn-lifecycle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 12a9 9 0 1 1-6.2-8.5"/><polyline points="21 3 21 9 15 9"/></svg> Lifecycle</button>
       <button class="sn" data-dest="clients" onclick="go('integrations')" id="sn-integrations"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Integrations</button>
       <button class="sn" data-dest="clients" onclick="go('analytics')" id="sn-analytics"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg> Analytics</button>
       <button class="sn" data-dest="clients" onclick="go('newclient')" id="sn-newclient" style="color:var(--p);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New client</button>
@@ -1888,6 +1892,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
       </div>
 
       <!-- EMAIL TEMPLATES -->
+      <div class="page" id="page-lifecycle"><div id="lifecycleBody"></div></div>
       <div class="page" id="page-growth"></div>
 
       <div class="page" id="page-integrations"><div id="integrationsBody"></div></div>
@@ -2225,7 +2230,7 @@ async function loadReports(){
   var ballOnYou = projects.filter(function(p){return p.ball_in_court==='agency' && p.stage!=='complete';}).length;
   // Revenue (sum of paid invoices)
   var paid = invoices.filter(function(i){return i.status==='paid';}).reduce(function(a,i){return a+(parseFloat(i.amount)||0);},0);
-  var outstanding = invoices.filter(function(i){return i.status!=='paid';}).reduce(function(a,i){return a+(parseFloat(i.amount)||0);},0);
+  var outstanding = invoices.filter(ddsIsOutstanding).reduce(function(a,i){return a+(parseFloat(i.amount)||0);},0); // canonical: drafts are not owed
 
   function statCard(val,label,color){ return '<div style="background:#fff;border:1px solid rgba(91,63,160,0.1);border-radius:12px;padding:18px;"><div style="font-size:28px;font-weight:700;color:'+(color||'var(--p)')+';line-height:1;">'+val+'</div><div style="font-size:12px;color:var(--muted);margin-top:5px;">'+label+'</div></div>'; }
 
@@ -3336,7 +3341,7 @@ async function openHubClient(id) {
   var hasMatchingContact = !!(res[8] && res[8].length);
   var hubOpps = (res[9]||[]).filter(function(o){ return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1; });
   var hubOppVal = hubOpps.reduce(function(s,o){ return s+(o.value_estimate?Number(o.value_estimate):0); },0);
-  var hubOverdueAmt = invs.filter(function(i){ return i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now(); })
+  var hubOverdueAmt = invs.filter(function(i){ return ddsIsOutstanding(i)&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now(); })
     .reduce(function(s,i){ return s+invcAmt(i.amount); },0);
   var leads = hubLeads.filter(function(l){
     return l.client_email && c.email && l.client_email.toLowerCase() === c.email.toLowerCase();
@@ -6128,7 +6133,7 @@ async function loadMsgContext(client, threadData){
     ]);
     var invs=results[0]||[], apprs=results[1]||[], opps=results[2]||[], cFiles=results[3]||[];
     var now=Date.now();
-    var overdue=invs.filter(function(i){ return i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<now; });
+    var overdue=invs.filter(function(i){ return ddsIsOutstanding(i)&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<now; });
     var overdueAmt=overdue.reduce(function(s,i){ return s+invcAmt(i.amount); },0);
     var pending=apprs.filter(function(a){ return !a.status||a.status==='pending'||a.status==='open'; }).length;
     var openOpps=(opps||[]).filter(function(o){ return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1; });
@@ -6376,7 +6381,7 @@ async function loadInvoiceCommand(){
     });
 
     var now=Date.now(), day=86400000;
-    var open=invs.filter(function(i){ return i.status!=='paid'; });
+    var open=invs.filter(ddsIsOutstanding); // canonical: drafts are not owed
     var outstanding=0; open.forEach(function(i){ outstanding+=invcAmt(i.amount); });
     var overdue=[], dueSoon=[];
     open.forEach(function(i){
@@ -6460,8 +6465,17 @@ async function invGenAndRefresh(id){
 // marks itself won on the next sync, no extra step)
 async function invMarkPaid(id){
   var linked=INVC.opps[id];
-  var r=await api('invoices?id=eq.'+id,'PATCH',{status:'paid'});
+  var r=await api('invoices?id=eq.'+id,'PATCH',{status:'paid', paid_at:new Date().toISOString()});
   if(r===null) return;
+  // PROPAGATION: a payment is a relationship moment. Write it to the one
+  // story surface (timeline) so Home\u2019s changed-diff, the relationship
+  // read, and the client\u2019s own view all inherit it from the same row.
+  try{ var inv=await api('invoices?id=eq.'+encodeURIComponent(id)+'&select=client_id,amount,name&limit=1');
+    if(inv&&inv[0]&&inv[0].client_id){
+      var amt=inv[0].amount!=null?(' ($'+Math.round(Number(String(inv[0].amount).replace(/[^0-9.]/g,'')))+')'):'';
+      await api('timeline','POST',{client_id:inv[0].client_id, kind:'payment', title:'Payment received'+amt, body:(inv[0].name||'Invoice')+' paid.'});
+    }
+  }catch(e){}
   toast(linked ? '\u2713 Paid \u2014 the linked opportunity will mark itself won' : '\u2713 Marked paid');
   INVC.loading=false; loadInvoiceCommand();
   var ctx=selectedClients['invoices'];
@@ -10309,7 +10323,7 @@ async function gpLoadCtx(p){
       api('opportunities?select=status,value_estimate&client_id=eq.'+p.client_id+'&deleted_at=is.null&limit=50').catch(function(){return [];})
     ]);
     const invs=res[0]||[], opps=res[1]||[];
-    const overdueAmt = invs.filter(i=>i.status!=='paid'&&i.status!=='draft'&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now())
+    const overdueAmt = invs.filter(i=>ddsIsOutstanding(i)&&invcDue(i.due_date)!=null&&invcDue(i.due_date)<Date.now())
       .reduce((s,i)=>s+invcAmt(i.amount),0);
     const openOpps=(opps||[]).filter(o=>['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1);
     const oppVal=openOpps.reduce((s,o)=>s+(o.value_estimate?Number(o.value_estimate):0),0);
@@ -11733,7 +11747,7 @@ function anEngineNote(eng){
     var mrr=0; act.forEach(function(c){ var v=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0; mrr+=v; });
     var openOpp=opps.filter(function(o){return ['surfaced','viewed','drafted','sent','followed_up'].indexOf(o.status)>-1;});
     var pipe=0; openOpp.forEach(function(o){ var v=Number(o.estimated_value)||0; if(v>0)pipe+=v; });
-    var unpaid=invoices.filter(function(i){return i.status&&i.status!=='paid';}).length;
+    var unpaid=invoices.filter(ddsIsOutstanding).length; // canonical: drafts are not owed
 
     // activity (real: payments, launches, wins)
     var acts=[];
@@ -13051,6 +13065,16 @@ function anEngineNote(eng){
   function mrrOf(c){ return Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0; }
 
   function health(c){
+    // CANONICAL FIRST: if the engine (client_pulse via ddsHealth) has a warm
+    // score for this client, that is the truth every surface shows. The local
+    // formula below is the labeled fallback for when the engine is cold.
+    try {
+      var eng = (window._ddsHealthWarm && window._ddsHealthWarm[String(c.id)]) || null;
+      if (eng && eng.score != null) {
+        var el = eng.score>=85?['Excellent','#1a7e49'] : eng.score>=70?['Healthy','#1a7e49'] : eng.score>=50?['Attention','#9a7a1a'] : ['At risk','#c0392b'];
+        return { n: eng.score, l: el[0], c: el[1], why: eng.note || 'From the relationship engine.' };
+      }
+    } catch(e){}
     var why=[], s=50;
     if(String(c.status||'').toLowerCase()==='active'){ s+=10; why.push('active engagement'); }
     var m=RHX.msgs[String(c.id)];
@@ -13132,6 +13156,16 @@ function anEngineNote(eng){
     var root=document.getElementById(RHX._rid||'rhxRootC'); if(!root||RHX.legacy) return;
     var rows=RHX.rows;
     var totalMrr=0, needN=0, onbN=0;
+    // warm the canonical health cache in the background, then repaint once —
+    // the engine score supersedes the local formula wherever it lands.
+    window._ddsHealthWarm = window._ddsHealthWarm || {};
+    (function(){ var pending=rows.slice(0,40); var done=0; if(!pending.length) return;
+      pending.forEach(function(c){
+        if(typeof ddsHealth!=='function'){ return; }
+        ddsHealth(c.id).then(function(v){ if(v) window._ddsHealthWarm[String(c.id)]=v; done++;
+          if(done===pending.length){ try{ rhxRender(); }catch(e){} } });
+      });
+    })();
     var enriched=rows.map(function(c){ var h=health(c); totalMrr+=mrrOf(c); if(h.n<70) needN++; if(!c.launched_at) onbN++; return {c:c,h:h}; });
     enriched.sort(function(a,b){ return a.h.n-b.h.n; }); // attention first
 
@@ -14147,15 +14181,26 @@ function anEngineNote(eng){
     // health (disclosed, same formula family)
     var mrr=Number(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))||0;
     var lastMsg=TLX.ev.find(function(e){ return e.k==='msg'; });
-    var hs=60, oks=[];
-    if(String(c.status||'').toLowerCase()!=='archived'){ hs+=10; }
-    if(lastMsg&&(Date.now()-new Date(lastMsg.d))/86400000<=14){ hs+=12; oks.push('Recent communication'); }
-    if(TLX.ev.some(function(e){return e.k==='pay'&&/paid/.test(e.title);})){ hs+=10; oks.push('Payments landing'); }
-    if(c.launched_at){ hs+=8; oks.push('Website launched'); }
-    if(TLX.ev.some(function(e){return e.k==='task';})){ hs+=6; oks.push('Roadmap work delivered'); }
-    if(mrr>0){ hs+=4; oks.push('Recurring revenue'); }
-    hs=Math.max(10,Math.min(98,hs));
-    var hl=hs>=85?['Excellent','#1a7e49']:hs>=70?['Healthy','#1a7e49']:hs>=50?['Steady','#9a7a1a']:['Quiet','#c0392b'];
+    // CANONICAL FIRST: the engine's score is the truth. Local formula below is
+    // the labeled fallback, used only until the warm cache lands.
+    window._ddsHealthWarm = window._ddsHealthWarm || {};
+    var engH = window._ddsHealthWarm[String(c.id)];
+    if(!engH && typeof ddsHealth==='function'){ ddsHealth(c.id).then(function(v){ if(v){ window._ddsHealthWarm[String(c.id)]=v; try{ tlxRender(); }catch(e){} } }); }
+    var hs, hl, oks=[];
+    if(engH && engH.score!=null){
+      hs=engH.score; if(engH.note) oks.push(engH.note);
+      hl=hs>=85?['Excellent','#1a7e49']:hs>=70?['Healthy','#1a7e49']:hs>=50?['Steady','#9a7a1a']:['Quiet','#c0392b'];
+    } else {
+      hs=60;
+      if(String(c.status||'').toLowerCase()!=='archived'){ hs+=10; }
+      if(lastMsg&&(Date.now()-new Date(lastMsg.d))/86400000<=14){ hs+=12; oks.push('Recent communication'); }
+      if(TLX.ev.some(function(e){return e.k==='pay'&&/paid/.test(e.title);})){ hs+=10; oks.push('Payments landing'); }
+      if(c.launched_at){ hs+=8; oks.push('Website launched'); }
+      if(TLX.ev.some(function(e){return e.k==='task';})){ hs+=6; oks.push('Roadmap work delivered'); }
+      if(mrr>0){ hs+=4; oks.push('Recurring revenue'); }
+      hs=Math.max(10,Math.min(98,hs));
+      hl=hs>=85?['Excellent','#1a7e49']:hs>=70?['Healthy','#1a7e49']:hs>=50?['Steady','#9a7a1a']:['Quiet','#c0392b'];
+    }
 
     // key milestones (real, dated or dash)
     var launched=TLX.ev.find(function(e){return e.title==='Website launched';});
@@ -15655,7 +15700,7 @@ function anEngineNote(eng){
         open.forEach(function(t){
           if(!t.client_id||seen[t.impact+':'+t.client_id]) return;
           if(t.impact==='revenue'){ seen['revenue:'+t.client_id]=1;
-            (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t.client_id)&&i.status!=='paid'&&i.status!=='draft') val+=toN(i.amount); });
+            (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t.client_id)&&ddsIsOutstanding(i)) val+=toN(i.amount); });
           } else if(t.impact==='launch'){ seen['launch:'+t.client_id]=1;
             var c=TSX.clients.find(function(x){return String(x.id)===String(t.client_id);});
             if(c) val+=toN(c.monthly_amount);
@@ -15772,7 +15817,7 @@ function anEngineNote(eng){
         if(!t2.client_id) return '';
         var toN=function(v){ var n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; };
         if(t2.impact==='revenue'){
-          var owed=0; (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t2.client_id)&&i.status!=='paid'&&i.status!=='draft') owed+=toN(i.amount); });
+          var owed=0; (TSX.inv||[]).forEach(function(i){ if(String(i.client_id)===String(t2.client_id)&&ddsIsOutstanding(i)) owed+=toN(i.amount); });
           if(owed>0) return '<div class="ivx-block"><div class="ivx-bh">BUSINESS IMPACT \u2014 measured, not estimated</div><div style="font-size:13px;color:var(--ink);line-height:1.6;">$'+Math.round(owed).toLocaleString()+' is unpaid on this client \u2014 this task exists to move that money.</div></div>';
         }
         if(t2.impact==='launch'){
@@ -16868,6 +16913,16 @@ window.ddsFilesCard=async function(mountId, clientId){
     if(m===null){ toast('Couldn\u2019t deliver'); return; }
     try{ await api('notifications','POST',{client_id:rep.client_id, type:'message', title:'Your '+(d.period||'monthly')+' report is ready', body:'Highlights + what\u2019s next \u2014 in your messages.', link_tab:'messages'}); }catch(e){}
     await api('client_reports?id=eq.'+encodeURIComponent(id),'PATCH',{status:'delivered', delivered_at:new Date().toISOString()});
+    // one truth, many surfaces: the delivery writes its own story rows —
+    // a timeline event (admin-side record) and a portal notification that
+    // deep-links into The Work's Delivered section. No fabricated chat
+    // message: the conversation stays "exactly as it was said."
+    try{ var _rw=RPX.rows.find(function(x){return String(x.id)===String(id);})||{};
+      if(_rw.client_id){
+        await api('timeline','POST',{client_id:_rw.client_id, kind:'report', title:'Monthly report delivered', body:(_rw.title||'Report')+' delivered to the client portal'});
+        await api('notifications','POST',{client_id:_rw.client_id, type:'report', title:'Your report is ready', body:(_rw.title||'Your monthly report')+' is waiting in your portal.', link_tab:'files'});
+      }
+    }catch(e){}
     toast('\u2713 Delivered to '+cName(rep.client_id)+'\u2019s portal');
     rpxLoad();
   };
@@ -17179,7 +17234,7 @@ window.ddsCommBrain=async function(){
     clients.forEach(function(c){
       var cid=String(c.id), nm=c.name||'A client';
       if(bySig.invoice_overdue){
-        var od=invoices.find(function(i){ return String(i.client_id)===cid&&i.status!=='paid'&&i.status!=='draft'&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
+        var od=invoices.find(function(i){ return String(i.client_id)===cid&&ddsIsOutstanding(i)&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
         if(od) out.push({t:bySig.invoice_overdue,cid:cid,cname:nm,rank:90,ask:'Invoice overdue \u2014 send '+nm+' a friendly payment reminder?'});
       }
       if(c.launched_at){
@@ -17331,7 +17386,7 @@ window.ddsCommOpen=function(tid,cid){
     if(c){
       m.business_name=c.name||''; m.first_name=String(c.name||'').split(' ')[0]||'';
       m.project_name=c.project_name||''; m.website=c.website||'';
-      var unpaid=TPX.invoices.filter(function(i){ return String(i.client_id)===String(c.id)&&i.status!=='paid'&&i.status!=='draft'; })
+      var unpaid=TPX.invoices.filter(function(i){ return String(i.client_id)===String(c.id)&&ddsIsOutstanding(i); })
         .map(function(i){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; }).sort(function(a,b){return b-a;})[0];
       if(unpaid) m.invoice_amount='$'+Math.round(unpaid).toLocaleString();
     }
@@ -17359,7 +17414,7 @@ window.ddsCommOpen=function(tid,cid){
     TPX.clients.forEach(function(c){
       var cid=String(c.id);
       if(byTpl.invoice_overdue){
-        var od=TPX.invoices.find(function(i){ return String(i.client_id)===cid&&i.status!=='paid'&&i.status!=='draft'&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
+        var od=TPX.invoices.find(function(i){ return String(i.client_id)===cid&&ddsIsOutstanding(i)&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
         if(od) out.push({c:c,t:byTpl.invoice_overdue,why:'invoice overdue'});
       }
       if(byTpl.invoice_paid&&c.launched_at&&(now-new Date(c.launched_at))/D<=21) out.push({c:c,t:byTpl.invoice_paid,why:'launched '+Math.floor((now-new Date(c.launched_at))/D)+'d ago \u2014 warm review window'});
@@ -17817,7 +17872,7 @@ window.ddsCommOpen=function(tid,cid){
         }catch(e){}
         if(!mv){
           var pend=(cache.apr||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; });
-          var owed=(cache.inv||[]).filter(function(i){ return i.status!=='paid'&&i.status!=='draft'; }).reduce(function(a,i){ return a+toN(i.amount); },0);
+          var owed=(cache.inv||[]).filter(function(i){ return ddsIsOutstanding(i); }).reduce(function(a,i){ return a+toN(i.amount); },0);
           if(pend.length) mv={txt:'Unblock the pending approval \u201c'+String(pend[0].title||'Approval')+'\u201d \u2014 it\u2019s the only thing waiting on them.'};
           else if(owed>0) mv={txt:'$'+Math.round(owed).toLocaleString()+' is outstanding \u2014 a gentle nudge keeps it from aging.'};
           else if(dsc!=null&&dsc>21) mv={txt:'Quiet for '+dsc+' days \u2014 a no-agenda check-in keeps this warm.'};
@@ -17877,7 +17932,7 @@ window.ddsCommOpen=function(tid,cid){
           var waits=[];
           (cache.apr||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; }).slice(0,3)
             .forEach(function(a){ waits.push(['They owe a decision','\u201c'+String(a.title||'Approval')+'\u201d pending '+ago(a.created_at)]); });
-          var owed=(cache.inv||[]).filter(function(i){ return i.status!=='paid'&&i.status!=='draft'; })
+          var owed=(cache.inv||[]).filter(function(i){ return ddsIsOutstanding(i); })
             .reduce(function(s2,i){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); return s2+(isFinite(n)?n:0); },0);
           if(owed>0) waits.push(['They owe payment','$'+Math.round(owed).toLocaleString()+' outstanding']);
           if((cache.tasks||[]).length) waits.push(['You owe work',(cache.tasks.length)+' open task'+(cache.tasks.length===1?'':'s')+' on your side']);
@@ -18487,6 +18542,155 @@ window.ddsStatTile=function(opts){
     var _goW=window.go; if(typeof _goW==='function') window.go=function(){ var r=_goW.apply(this,arguments); setTimeout(scan,900); return r; };
     window.addEventListener('resize',function(){ setTimeout(scan,300); });
   }catch(e){}
+})();
+</script>
+
+
+<script>
+// ═══ CANONICAL BUSINESS LOGIC ═══ single source of truth for two facts the
+// acceptance audit found duplicated. Everything that needs "is this invoice
+// outstanding?" or "what is this client's health?" calls these — never its
+// own arithmetic.
+(function(){
+  // OUTSTANDING INVOICE — the one definition. Draft = not yet owed; paid =
+  // settled; everything else with a positive amount is outstanding. This
+  // replaces four divergent inline predicates (status!=='paid' variants).
+  window.ddsIsOutstanding = function(inv){
+    if(!inv) return false;
+    var st = String(inv.status||'').toLowerCase();
+    if(st==='paid'||st==='draft'||st==='void'||st==='canceled'||st==='cancelled') return false;
+    return true;
+  };
+  // CLIENT HEALTH — one reasoner: the server's client_pulse. Cached 5 min per
+  // client. Callers render whatever it returns; the old local ring math stays
+  // ONLY as a clearly-labeled fallback when the engine can't be reached, and
+  // never silently competes with it.
+  var _hc = {};
+  window.ddsHealth = async function(clientId){
+    if(!clientId) return null;
+    var c = _hc[clientId];
+    if(c && (Date.now()-c.at) < 300000) return c.v;
+    try{
+      var jwt = await adminJwt(); if(!jwt) return null;
+      var res = await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'client_pulse',clientId:clientId})});
+      var j = await res.json(); var d = j&&j.data;
+      if(d && d.relationship_health!=null){
+        var v = { score: Math.round(d.relationship_health), note: d.rh_note||'', source:'engine' };
+        _hc[clientId] = { at:Date.now(), v:v }; return v;
+      }
+    }catch(e){}
+    return null; // caller falls back to its labeled local heuristic
+  };
+})();
+</script>
+
+
+<script>
+// ═══ LIFECYCLE ═══ the surface that closes the loop. Thin consumer of the
+// lifecycle_board route (which reuses pulse signals — no new reasoning here).
+// Five stages, each client showing the engine's WHY and WHAT-TO-SAY, one tap
+// into the communication brain to send, and the two loop-closing actions:
+// record a renewal (suggest-and-confirm the next date) and log a referral ask
+// (which becomes a pipeline opportunity — expansion/referral flow back to the
+// funnel the OS already runs).
+(function(){
+  var LC={data:null,loading:false};
+  function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(x){ return esc(x).replace(/'/g,'&#39;'); }
+  async function edge(type,payload){
+    var jwt=await adminJwt(); if(!jwt){ showLogin&&showLogin(); throw new Error('no session'); }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},payload||{}))});
+    var j=await r.json(); if(j&&j.error) throw new Error(j.message||j.detail||j.error); return j;
+  }
+
+  window.loadLifecycle=async function(){
+    var host=document.getElementById('lifecycleBody'); if(!host) return;
+    if(LC.loading) return; LC.loading=true;
+    host.innerHTML='<div class="pt">Lifecycle</div><div class="ibx-sub">Reading the relationship signals\u2026</div><div class="bf-skel" style="height:120px;border-radius:16px;margin-top:14px;"></div>';
+    try{ var j=await edge('lifecycle_board',{}); LC.data=j.data; }
+    catch(e){ host.innerHTML='<div class="pt">Lifecycle</div><div class="ibx-sub">Couldn\u2019t load the board \u2014 <button class="ibx-pill" onclick="loadLifecycle()">retry</button></div>'; LC.loading=false; return; }
+    LC.loading=false; renderLifecycle();
+  };
+
+  var STAGES=[
+    ['renewal','\u23f3 Renewal conversation','#5b3fa0','rgba(91,63,160,.08)','These renew within 45 days. The value recap now locks in the year.'],
+    ['at_risk','\u26a0 Needs attention','#c0392b','#fbecea','Friction before renewal. Address it warmly, first.'],
+    ['expansion','\u2197 Ready to grow','#1a7e49','#e7f6ee','Happy and settled \u2014 the natural moment to widen the work.'],
+    ['referral','\u2726 Ask for a referral','#9a7a1a','#fdf6e3','They told you they\u2019re happy. This is the honest moment to ask.'],
+    ['healthy','\u2713 Steady','#7a6d8e','#f3f0fa','Nothing needs saying today. Momentum is the strategy.']
+  ];
+
+  function renderLifecycle(){
+    var host=document.getElementById('lifecycleBody'); if(!host||!LC.data) return;
+    var b=LC.data.board||{}, c=LC.data.counts||{};
+    var total=Object.keys(c).reduce(function(a,k){return a+(c[k]||0);},0);
+    var acting=(c.renewal||0)+(c.at_risk||0)+(c.expansion||0)+(c.referral||0);
+    var head='<div class="pt">Lifecycle</div>'
+      +'<div class="ibx-sub">The business loop after the report: who to renew, keep, grow, and ask \u2014 from the same signals the rest of the OS already reads.</div>'
+      +'<div class="ivx-stats" style="margin-top:14px;">'
+      +ddsStatTile({icon:'\u21bb',value:total,label:'Recurring relationships'})
+      +ddsStatTile({icon:'\u2691',color:acting?'#5b3fa0':'#7a6d8e',bg:acting?'rgba(91,63,160,.08)':'#f3f0fa',value:acting,label:'Have a next move',deltaText:acting?'ranked below by urgency':'all steady'})
+      +ddsStatTile({icon:'\u23f3',color:(c.renewal?'#5b3fa0':'#7a6d8e'),bg:(c.renewal?'rgba(91,63,160,.08)':'#f3f0fa'),value:(c.renewal||0),label:'Renewing within 45 days'})
+      +ddsStatTile({icon:'\u2726',color:(c.referral?'#9a7a1a':'#7a6d8e'),bg:(c.referral?'#fdf6e3':'#f3f0fa'),value:(c.referral||0),label:'Ready to ask for a referral'})
+      +'</div>';
+
+    var cols=STAGES.map(function(st){
+      var items=b[st[0]]||[];
+      if(!items.length && st[0]==='healthy') return ''; // don't shout the quiet column when empty of interest
+      return '<div class="grx-card" style="margin-top:14px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:13px;font-weight:750;color:'+st[2]+';">'+st[1]+'</span>'
+        +'<span style="font-size:11px;font-weight:800;color:'+st[2]+';background:'+st[3]+';padding:2px 9px;border-radius:100px;">'+items.length+'</span></div>'
+        +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">'+esc(st[4])+'</div>'
+        +(items.length?items.map(function(it){ return lcCard(it,st[0],st[2]); }).join(''):'<div class="grx-empty" style="padding:10px 0;">Nobody here right now.</div>')
+      +'</div>';
+    }).join('');
+
+    host.innerHTML=head+cols;
+  }
+
+  function lcCard(it,stage,col){
+    var actions='';
+    // focus + talk: reuse Focus Mode and the comm brain, never a new workflow
+    actions+='<button class="ibx-pill" onclick="ddsFocusSet(\''+att(String(it.id))+'\',\''+att(it.name)+'\'); go(\'timeline\')">Open \u2192</button> ';
+    if(stage==='renewal'){ actions+='<button class="ibx-pill" style="color:#5b3fa0;" onclick="lcRenew(\''+att(String(it.id))+'\',\''+att(it.name)+'\',\''+att(it.renews_at||'')+'\')">Record renewal</button>'; }
+    if(stage==='referral'){ actions+='<button class="ibx-pill" style="color:#9a7a1a;" onclick="lcReferral(\''+att(String(it.id))+'\',\''+att(it.name)+'\')">Log referral ask</button>'; }
+    if(stage==='expansion'){ actions+='<button class="ibx-pill" style="color:#1a7e49;" onclick="ddsFocusSet(\''+att(String(it.id))+'\',\''+att(it.name)+'\'); go(\'growth\')">Open Growth \u2192</button>'; }
+    return '<div style="padding:10px 0;border-top:1px solid rgba(41,25,66,.05);">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><b style="font-size:13.5px;color:var(--ink);">'+esc(it.name)+'</b>'
+      +(it.monthly?'<span style="font-size:11px;color:var(--muted);">$'+esc(it.monthly)+'/mo</span>':'')+'</div>'
+      +'<div style="font-size:12.5px;color:var(--ink);line-height:1.55;margin:4px 0;">'+esc(it.why)+'</div>'
+      +(it.say?'<div style="font-size:12px;color:'+col+';margin-bottom:6px;">\u201c'+esc(it.say)+'\u201d</div>':'')
+      +'<div>'+actions+'</div>'
+    +'</div>';
+  }
+
+  // ── RECORD RENEWAL ── suggest the next date from real interval history,
+  // ALWAYS require Eric to confirm/edit. AI recommends; Eric decides.
+  window.lcRenew=function(cid,name,curRenews){
+    // suggestion: prior interval if known, else +365 from today or current date
+    var base = curRenews ? new Date(curRenews) : new Date();
+    var suggest;
+    var it=findItem(cid);
+    var interval=(it&&it._interval)||null; // board doesn't send interval; fall back to +1yr
+    var d=new Date(base.getTime()); d.setFullYear(d.getFullYear()+1);
+    suggest=d.toISOString().slice(0,10);
+    var val=prompt('Record renewal for '+name+'.\n\nSuggested next renewal date (from a one-year cadence). Confirm or edit \u2014 you decide, not the system:', suggest);
+    if(!val) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(val)){ toast('Use YYYY-MM-DD'); return; }
+    edge('lifecycle_renew',{clientId:cid, next_renews_at:val}).then(function(){
+      toast('\u2713 Renewal recorded \u2014 timeline updated, next date set'); loadLifecycle();
+    }).catch(function(e){ toast('Couldn\u2019t save: '+e.message); });
+  };
+  window.lcReferral=function(cid,name){
+    if(!confirm('Log that you asked '+name+' for a referral?\n\nThis adds a timeline moment and opens a referral opportunity in your pipeline.')) return;
+    edge('lifecycle_referral',{clientId:cid}).then(function(){
+      toast('\u2713 Referral logged \u2014 it\u2019s now in your pipeline'); loadLifecycle();
+    }).catch(function(e){ toast('Couldn\u2019t save: '+e.message); });
+  };
+  function findItem(cid){ if(!LC.data) return null; var b=LC.data.board||{}; for(var k in b){ var f=(b[k]||[]).find(function(x){return String(x.id)===String(cid);}); if(f) return f; } return null; }
+
+  var _goLc=window.go;
+  window.go=function(dest){ var r=_goLc.apply(this,arguments); try{ if(dest==='lifecycle') loadLifecycle(); }catch(e){} return r; };
 })();
 </script>
 
