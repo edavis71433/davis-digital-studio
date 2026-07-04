@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dds-v3';
+const CACHE_NAME = 'dds-v4'; // bumped: purges the stale cache that was serving old admin HTML
 const PRECACHE = [
   '/about',
   '/services',
@@ -38,7 +38,14 @@ self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+
+  // NEVER intercept the logged-in surfaces or the research instrument.
+  // The admin tool and portal are living apps; serving them stale is a
+  // correctness bug, not a performance win. Let the browser hit the network.
   if (url.pathname.startsWith('/portal') || url.pathname.includes('supabase')) return;
+  if (url.pathname.startsWith('/dds-studio-manage')) return;
+  if (url.pathname === '/dp-mode.js') return;
+  if (url.pathname.startsWith('/set-password')) return;
 
   // Network-first for dynamic/tool pages — always fetch fresh, fall back to cache
   var isNetworkFirst = NETWORK_FIRST.some(function(p) { return url.pathname === p || url.pathname === p + '.html'; });
@@ -57,7 +64,7 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Cache-first for everything else (static assets, other pages)
+  // Cache-first for everything else (static marketing assets/pages)
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       var networkFetch = fetch(e.request).then(function(response) {
