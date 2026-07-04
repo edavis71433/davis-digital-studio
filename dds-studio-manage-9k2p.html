@@ -10850,20 +10850,87 @@ function igxRender(){
   else if(healthy){ summary=healthy+' source'+(healthy===1?'':'s')+' healthy; '+off+' not connected for this client.'; act='Connect the rest only if this client needs them.'; }
   else { summary='No data sources connected for this client yet.'; act='Start with Google Analytics — it feeds the most surfaces.'; }
 
-  // the TRUE dependency map — these flows exist in this codebase
-  var FLOWS={
-    ga4:{flow:'GA4 \u2192 signals \u2192 Analytics \u2192 Reports \u2192 Talking points \u2192 Today brief',breaks:'Analytics interpretations, report highlights, and metric-based talking points go stale.'},
-    gsc:{flow:'Search Console \u2192 signals \u2192 Analytics (search) \u2192 Reports \u2192 SEO recommendations',breaks:'Search visibility reads and SEO lines in reports stop updating.'},
-    gbp:{flow:'Business Profile \u2192 signals \u2192 Analytics (calls/local) \u2192 Reports \u2192 Practice Pulse',breaks:'Call tracking and local-presence insights freeze.'},
-    psi:{flow:'PageSpeed \u2192 site_checks \u2192 Site Monitor \u2192 Maintenance receipts \u2192 Reports',breaks:'Site health scores, receipts, and speed lines in reports stop.'}
+  // ── THE PLATFORM DEPENDENCY MAP ── click a source, see the wiring.
+  // Every branch is a flow that verifiably exists in this codebase; each
+  // carries the business value it creates. Health colors the root.
+  var DEPS={
+    ga4:{label:'Google Analytics 4',branches:[
+      ['Analytics','plain-language interpretations of every metric group'],
+      ['Reports','highlights and executive summary in every monthly report'],
+      ['Talking points','the metric moves you walk into meetings with'],
+      ['Executive brief','the Today-page read on what changed and why'],
+      ['Practice Pulse','the decision queue\u2019s traffic and engagement signals']],
+      breaks:'Interpretations, report highlights, and metric-based talking points go stale.'},
+    gsc:{label:'Search Console',branches:[
+      ['Analytics (search)','clicks, impressions, and visibility reads'],
+      ['Reports','the SEO lines clients see every month'],
+      ['Site Monitor','search-visibility scoring on each site']],
+      breaks:'Search visibility reads and SEO report lines stop updating.'},
+    gbp:{label:'Google Business Profile',branches:[
+      ['Analytics (local)','calls from Google and local presence'],
+      ['Reports','call tracking clients see as direct value'],
+      ['Practice Pulse','call-trend signals in the decision queue']],
+      breaks:'Call tracking and local-presence insights freeze.'},
+    psi:{label:'PageSpeed Insights',branches:[
+      ['Site Monitor','the health scores on every monitored site'],
+      ['Maintenance receipts','the paste-ready proof of ongoing care'],
+      ['Reports','speed improvements as measured wins'],
+      ['Tasks','one-click fix-it tasks from weak metrics']],
+      breaks:'Site health scores, receipts, and speed lines in reports stop.'},
+    stripe:{label:'Stripe',platform:true,branches:[
+      ['Invoices','one-click pay links on every invoice'],
+      ['Client Portal','clients pay without leaving their portal'],
+      ['Thank-you automation','payment lands \u2192 warm email sends itself'],
+      ['Review requests','the thank-you carries the Google review ask'],
+      ['Revenue vitals','the Today page\u2019s money read'],
+      ['Reports','payments become the value-shown number']],
+      breaks:'Payments stop processing; the thank-you \u2192 review chain and revenue vitals go dark.'},
+    resend:{label:'Resend',platform:true,branches:[
+      ['Invoice reminders','overdue money chased automatically'],
+      ['Approval nudges','stalled decisions unblocked on schedule'],
+      ['Anniversary notes','relationship moments surfaced to you'],
+      ['Report nudges','the 1st-of-month reports-due email'],
+      ['Client notifications','every portal event that emails a client'],
+      ['Test sends','the Communication Center\u2019s send-to-me']],
+      breaks:'Every automated email in the platform stops. The single most load-bearing capability.'},
+    anthropic:{label:'Anthropic AI',platform:true,branches:[
+      ['Morning brief','the AI-written Today read'],
+      ['Report narratives','the story-of-the-period paragraphs'],
+      ['Template rewrites','all nine writing-assistant actions'],
+      ['Talking points','meeting and renewal prep'],
+      ['Summaries \u0026 drafts','conversation summaries, reply drafts, triage']],
+      breaks:'Every \u2728 feature falls back to honest templates \u2014 degraded, never broken.'}
   };
-  var flowRows=P.filter(function(x){ return FLOWS[x.id]; }).map(function(x){
-    var f=FLOWS[x.id]; var on=(x.health==='green');
-    return '<div style="padding:10px 0;border-top:1px solid rgba(41,25,66,.05);">'
-      +'<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#1a7e49':x.health==='amber'?'#b8860b':x.health==='red'?'#c0392b':'#cfc9dd')+';flex:none;"></span>'
-      +'<b style="font-size:12.5px;color:var(--ink);">'+esc(x.label||x.id)+'</b></div>'
-      +'<div style="font-size:11.5px;color:var(--muted);margin:4px 0 0 16px;line-height:1.6;">'+f.flow+'</div>'
-      +'<div style="font-size:11px;color:'+(on?'var(--muted)':'#9a2d2d')+';margin:2px 0 0 16px;">If it stops: '+esc(f.breaks)+'</div>'
+  INTEG.igxOpen=INTEG.igxOpen||{};
+  window.igxToggle=function(id){ INTEG.igxOpen[id]=!INTEG.igxOpen[id]; igxRender(); };
+  window.igxCopy=function(id){
+    var d=DEPS[id]; if(!d) return;
+    var txt=d.label+'\n    |\n'+d.branches.map(function(b,i){ return '    '+(i===d.branches.length-1?'\u2514\u2500\u2500 ':'\u251c\u2500\u2500 ')+b[0]; }).join('\n');
+    navigator.clipboard.writeText(txt).then(function(){ toast('\u2713 Map copied'); });
+  };
+  function igxTree(id,health){
+    var d=DEPS[id]; if(!d) return '';
+    var col=health==='green'?'#1a7e49':health==='amber'?'#b8860b':health==='red'?'#c0392b':'#8a7fa0';
+    return '<div style="background:rgba(41,25,66,.03);border-radius:10px;padding:10px 12px;margin:6px 0 4px 16px;">'
+      +'<div style="display:flex;align-items:center;"><span style="font-family:var(--mono,monospace);font-size:11.5px;font-weight:700;color:'+col+';">'+esc(d.label)+'</span>'
+      +'<button class="ibx-pill" style="margin-left:auto;font-size:10px;padding:2px 9px;" onclick="event.stopPropagation();igxCopy(\''+id+'\')">\u29c9 copy</button></div>'
+      +'<div style="font-family:var(--mono,monospace);font-size:11px;line-height:1.85;color:var(--ink);margin-top:2px;">'
+      +'<div style="color:var(--muted);">&nbsp;&nbsp;&nbsp;&nbsp;\u2502</div>'
+      +d.branches.map(function(b,i){
+        var last=(i===d.branches.length-1);
+        return '<div>&nbsp;&nbsp;&nbsp;&nbsp;'+(last?'\u2514\u2500\u2500':'\u251c\u2500\u2500')+' <b>'+esc(b[0])+'</b> <span style="color:var(--muted);font-family:var(--sans,inherit);font-size:10.5px;">\u2014 '+esc(b[1])+'</span></div>';
+      }).join('')
+      +'</div>'
+      +'<div style="font-size:10.5px;color:#9a2d2d;margin-top:6px;">If it disconnects: '+esc(d.breaks)+'</div>'
+    +'</div>';
+  }
+  var flowRows=P.filter(function(x){ return DEPS[x.id]; }).map(function(x){
+    var open=!!INTEG.igxOpen[x.id];
+    return '<div style="padding:9px 0;border-top:1px solid rgba(41,25,66,.05);cursor:pointer;" onclick="igxToggle(\''+esc(x.id)+'\')">'
+      +'<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+(x.health==='green'?'#1a7e49':x.health==='amber'?'#b8860b':x.health==='red'?'#c0392b':'#cfc9dd')+';flex:none;"></span>'
+      +'<b style="font-size:12.5px;color:var(--ink);">'+esc(x.label||x.id)+'</b>'
+      +'<span style="font-size:10px;color:var(--muted);margin-left:auto;">'+(DEPS[x.id].branches.length)+' consumers '+(open?'\u25be':'\u25b8')+'</span></div>'
+      +(open?igxTree(x.id,x.health):'')
     +'</div>';
   }).join('');
   // platform capabilities — env-configured booleans from the server
@@ -10876,10 +10943,14 @@ function igxRender(){
     caps='<div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin:14px 0 2px;">PLATFORM CAPABILITIES \u2014 studio-wide, not per client</div>'
       +CAP.map(function(c){
         var on=!!PF[c[0]];
-        return '<div style="padding:8px 0;border-top:1px solid rgba(41,25,66,.05);">'
+        var hasTree=!!DEPS[c[0]];
+        var open=hasTree&&!!INTEG.igxOpen[c[0]];
+        return '<div style="padding:8px 0;border-top:1px solid rgba(41,25,66,.05);'+(hasTree?'cursor:pointer;':'')+'"'+(hasTree?' onclick="igxToggle(\''+c[0]+'\')"':'')+'>'
           +'<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#1a7e49':'#c0392b')+';flex:none;"></span>'
-          +'<b style="font-size:12.5px;color:var(--ink);">'+c[1]+'</b><span style="font-size:10px;font-weight:700;color:'+(on?'#1a7e49':'#c0392b')+';margin-left:auto;">'+(on?'CONFIGURED':'NOT CONFIGURED')+'</span></div>'
-          +'<div style="font-size:11px;color:var(--muted);margin:3px 0 0 16px;line-height:1.55;">'+c[2]+'</div>'
+          +'<b style="font-size:12.5px;color:var(--ink);">'+c[1]+'</b>'
+          +(hasTree?'<span style="font-size:10px;color:var(--muted);margin-left:8px;">'+DEPS[c[0]].branches.length+' consumers '+(open?'\u25be':'\u25b8')+'</span>':'')
+          +'<span style="font-size:10px;font-weight:700;color:'+(on?'#1a7e49':'#c0392b')+';margin-left:auto;">'+(on?'CONFIGURED':'NOT CONFIGURED')+'</span></div>'
+          +(open?igxTree(c[0],on?'green':'red'):'<div style="font-size:11px;color:var(--muted);margin:3px 0 0 16px;line-height:1.55;">'+c[2]+'</div>')
         +'</div>';
       }).join('');
   }
