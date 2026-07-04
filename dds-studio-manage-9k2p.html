@@ -1710,6 +1710,18 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
         <div class="stats" id="prStats" style="margin-bottom:18px;"></div>
 
         <div class="card">
+          <div class="ch"><div class="ct">🔎 Find businesses</div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input class="fi" id="pd-query" placeholder='e.g. "dentists in Pasadena" or "restaurants near Echo Park"' style="flex:1;min-width:220px;" onkeydown="if(event.key==='Enter')discoverProspects()">
+              <button class="sbtn" id="pd-btn" onclick="discoverProspects()" style="font-size:13px;padding:9px 18px;">Search &amp; add</button>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:7px;">Pulls real businesses from Google Places and adds new ones to your list (already-known businesses are skipped). Ones with no website get High priority automatically.</div>
+            <div id="pd-result" style="display:none;font-size:12.5px;margin-top:9px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
           <div class="ch"><div class="ct">＋ Add a prospect</div></div>
           <div class="cb">
             <div class="two-col">
@@ -7426,7 +7438,28 @@ function toggleProspectExpand(id) {
       var el = document.getElementById('pcase-' + id);
       if (el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
     }, 30);
+    try { loadProspectInsights(id); } catch(e){}
   }
+}
+
+// ── ONE-CLICK CONVERT: prospect → real client, same server flow as leads
+// (auth invite → clients row → contact link → prospect marked Client). ──
+async function convertProspect(id){
+  var p=allProspects.find(function(x){return x.id===id;}); if(!p) return;
+  if(!p.email){ toast('This prospect has no email \u2014 add one first.'); return; }
+  if(!confirm('Convert '+(p.business_name||p.email)+' to a client?\n\nThis creates their client record and emails them an invite to set a password.')) return;
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'lead_convert',leadKind:'prospect',leadId:String(id),name:p.business_name||p.email,email:p.email})});
+    var j=await r.json();
+    if(j&&j.data&&j.data.client_id){
+      toast('\u2713 '+(p.business_name||p.email)+' is now a client. Invite email sent.');
+      try{ await loadProspects(); }catch(e){}
+      go('clients');
+    } else {
+      toast('Convert failed: '+((j&&j.error)||'unknown'));
+    }
+  }catch(e){ toast('Convert failed: '+e.message); }
 }
 
 // Search the REAL case-file content (industry, research, contact log, tags,
@@ -7541,9 +7574,9 @@ function renderProspects() {
     var warmChip = warmth.label ? '<span title="'+warmth.why+'" style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px;background:'+wc.bg+';color:'+wc.fg+';">'+warmth.label+'</span>' : '';
     // meta line: lead with industry (signal), keep it light; absence-noise removed
     var bits = [];
-    if (cf.info.industry) bits.push(cf.info.industry);
-    if (p.email) bits.push(p.email);
-    if (p.website) bits.push(p.website);
+    if (cf.info.industry) bits.push(escHtml(cf.info.industry));
+    if (p.email) bits.push(escHtml(p.email));
+    if (p.website) bits.push(escHtml(p.website));
     var meta = bits.length ? bits.join(' · ') : 'No details yet — click to add';
     // next action chip
     var nextChip = '';
@@ -7564,7 +7597,7 @@ function renderProspects() {
         '<div style="flex:1;min-width:200px;cursor:pointer;" onclick="toggleProspectExpand(\''+p.id+'\')">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
             star +
-            '<span style="font-weight:600;font-size:14px;">'+(p.business_name||'Untitled')+'</span>' +
+            '<span style="font-weight:600;font-size:14px;">'+escHtml(p.business_name||'Untitled')+'</span>' +
             badge +
             warmChip +
             '<span style="font-size:11px;color:var(--muted);">'+(expanded?'▾':'▸')+'</span>' +
@@ -7624,7 +7657,7 @@ function renderCaseFile(p, cf) {
         '<span style="font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--p);">'+(r.cat||'Note')+'</span>'+
         '<span style="font-size:10px;color:var(--muted);">'+(fmtStamp(r.t)||'')+' <button onclick="deleteResearch(\''+p.id+'\','+realIdx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;">×</button></span>'+
       '</div>'+
-      '<div style="font-size:12.5px;color:var(--ink);margin-top:3px;white-space:pre-wrap;">'+(r.body||'')+'</div>'+
+      '<div style="font-size:12.5px;color:var(--ink);margin-top:3px;white-space:pre-wrap;">'+escHtml(r.body||'')+'</div>'+
     '</div>';
   }).join('') || '<p style="font-size:11.5px;color:var(--muted);">No research yet. Capture what you notice — site issues, review patterns, pain points, sales angles.</p>';
   var research =
@@ -7640,7 +7673,7 @@ function renderCaseFile(p, cf) {
   var logEntries = cf.log.slice().reverse().map(function(l){
     return '<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(91,63,160,0.06);">'+
       '<span style="font-size:10px;font-weight:700;color:var(--p);min-width:64px;">'+(l.kind||'Note')+'</span>'+
-      '<span style="font-size:12px;color:var(--ink);flex:1;">'+(l.body||'')+'</span>'+
+      '<span style="font-size:12px;color:var(--ink);flex:1;">'+escHtml(l.body||'')+'</span>'+
       '<span style="font-size:10px;color:var(--muted);white-space:nowrap;">'+(fmtStamp(l.t)||'')+'</span>'+
     '</div>';
   }).join('') || '<p style="font-size:11.5px;color:var(--muted);">No contact logged yet.</p>';
@@ -7661,9 +7694,11 @@ function renderCaseFile(p, cf) {
     '<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'+
       '<button onclick="openOutreach(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:none;background:var(--p);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg> Send email</button>'+
       '<button onclick="analyzeProspect(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid var(--p);background:rgba(91,63,160,0.06);color:var(--p);cursor:pointer;">✨ Analyze prospect</button>'+
+      (p.email && p.status!=='Client' ? '<button onclick="convertProspect(\''+p.id+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid rgba(26,126,73,0.35);background:rgba(26,126,73,0.05);color:#1a7e49;cursor:pointer;">Convert to client →</button>' : '')+
       (p.email ? '<button onclick="markOptedOut(\''+p.id+'\',\''+String(p.email).replace(/'/g,"\\'")+'\')" style="font-size:12px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid rgba(192,57,43,0.35);background:rgba(192,57,43,0.05);color:#c0392b;cursor:pointer;margin-left:8px;">Mark opted out</button>' : '')+
       '<button onclick="deleteProspect(\''+p.id+'\')" style="margin-left:auto;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">Delete prospect</button>'+
     '</div>'+
+    '<div id="pins-'+p.id+'"></div>'+
     '<div id="pai-'+p.id+'"></div>'+
     section('Next action', next) +
     section('Business overview', overview) +
@@ -7687,7 +7722,7 @@ function refreshOpenCard(id) {
   if (!p) return;
   var cf = caseFile(p);
   var holder = document.getElementById('pcasebody-' + id);
-  if (holder) { holder.innerHTML = renderCaseFile(p, cf); }
+  if (holder) { holder.innerHTML = renderCaseFile(p, cf); try { loadProspectInsights(id); } catch(e){} }
   else { renderProspects(); } // card not open (e.g. star toggled from collapsed) — full render is fine
 }
 
@@ -7775,6 +7810,52 @@ async function analyzeProspect(id) {
 var _outreach = null; // { id, prospect, cf, subject, body, generator, sending }
 
 // Call a non-CRUD clever-api route directly (mirrors how lead AI draft calls it).
+// ── PROSPECT DISCOVERY: query Google Places server-side and add the results.
+async function discoverProspects(){
+  var q=(document.getElementById('pd-query').value||'').trim();
+  var out=document.getElementById('pd-result'); var btn=document.getElementById('pd-btn');
+  if(q.length<3){ out.style.display='block'; out.style.color='var(--red)'; out.textContent='Describe what to find, e.g. "plumbers in Glendale".'; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Searching\u2026'; }
+  out.style.display='block'; out.style.color='var(--muted)'; out.textContent='Searching Google Places\u2026';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'prospect_discover',query:q,limit:10})});
+    var j=await r.json();
+    if(j&&j.data){
+      var d=j.data;
+      out.style.color = d.added?'var(--green)':'var(--muted)';
+      out.textContent = 'Found '+d.found+' \u00b7 added '+d.added+' new'+(d.skipped?' \u00b7 skipped '+d.skipped+' (already known or incomplete)':'')+'.';
+      if(d.added){ document.getElementById('pd-query').value=''; try{ await loadProspects(); }catch(e){} }
+    } else {
+      out.style.color='var(--red)';
+      out.textContent=(j&&(j.detail||j.error))||'Search failed.';
+    }
+  }catch(e){ out.style.color='var(--red)'; out.textContent='Search failed: '+e.message; }
+  if(btn){ btn.disabled=false; btn.textContent='Search & add'; }
+}
+
+// ── PROSPECT INSIGHTS: likelihood + value band (anchored to real invoice
+// history) + follow-up timing. Loaded when a card expands; renders as chips.
+async function loadProspectInsights(id){
+  var host=document.getElementById('pins-'+id); if(!host) return;
+  host.innerHTML='<div style="font-size:11.5px;color:var(--muted);padding:4px 0 8px;">Reading signals\u2026</div>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ host.innerHTML=''; return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'prospect_insights',id:String(id)})});
+    var j=await r.json(); var d=(j&&j.data)||null;
+    if(!d){ host.innerHTML=''; return; }
+    var lk={high:{t:'Likely to convert',c:'#1a7e49',bg:'#e7f6ee'},medium:{t:'Worth pursuing',c:'#9a7a1a',bg:'#fdf6e3'},low:{t:'Long shot right now',c:'#7a6d8e',bg:'#f3f0fa'},won:{t:'Already a client',c:'#1a7e49',bg:'#e7f6ee'},dead:{t:'Dead',c:'#7a6d8e',bg:'#f3f0fa'}}[d.likelihood]||null;
+    var money=function(n){return '$'+(Number(n)||0).toLocaleString();};
+    var chips='';
+    if(lk) chips+='<span title="'+escAttr(d.likelihood_why||'')+'" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;color:'+lk.c+';background:'+lk.bg+';cursor:default;">'+lk.t+'</span>';
+    if(d.value_high>0) chips+='<span title="'+escAttr(d.value_basis||'')+'" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:100px;color:var(--p);background:rgba(91,63,160,0.08);cursor:default;">Est. '+money(d.value_low)+'\u2013'+money(d.value_high)+'</span>';
+    else if(d.value_basis) chips+='<span title="'+escAttr(d.value_basis)+'" style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:100px;color:var(--muted);background:rgba(41,25,66,0.05);cursor:default;">Value: see basis</span>';
+    var fu=d.followup?('<div style="font-size:12px;color:var(--ink);margin-top:7px;"><strong style="color:var(--p);font-size:11px;">Follow up:</strong> '+escHtml(d.followup)+'</div>'):'';
+    var why=d.likelihood_why?('<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">'+escHtml(d.likelihood_why)+(d.value_basis&&d.value_high>0?' \u00b7 '+escHtml(d.value_basis):'')+'</div>'):'';
+    host.innerHTML='<div style="padding:2px 0 10px;"><div style="display:flex;gap:7px;flex-wrap:wrap;">'+chips+'</div>'+why+fu+'</div>';
+  }catch(e){ host.innerHTML=''; }
+}
+
 async function outreachApi(payload) {
   var jwt = await adminJwt();
   if (!jwt) { showLogin(); return { error: 'not_signed_in' }; }
