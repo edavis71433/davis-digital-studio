@@ -4065,8 +4065,8 @@ function gpStatusChip(r){
 }
 
 function gpRecCard(r){
-  var pillImpact = '<span class="gp-pill gp-pill-impact">'+gpImpactWord(r.impact)+'</span>';
-  var pillEffort = '<span class="gp-pill gp-pill-effort">'+gpEffortWord(r.effort)+'</span>';
+  // impact/effort pills removed: internal prioritization logic never renders
+  var pillImpact = ''; var pillEffort = '';
   var pillEric  = '<span class="gp-pill gp-pill-eric">Eric handles this</span>';
   var status = r.status === 'accepted' ? 'approved' : (r.status||'shared');
   var rid = esc(r.id);
@@ -4138,169 +4138,118 @@ function gpSection(emoji, title, sub, inner){
 }
 
 function gpRenderPriorities(){
+  // ═══ THE COMPASS ═══ strategy room in journal grammar. No health bars, no
+  // impact/effort pills, no task lists — destinations, advised moves, motion.
   var ws = GP_WS; if(!ws){ return; }
-  var p = ws.partnership;
+  var host = document.getElementById('gp_priorities_body'); if(!host) return;
   var recs = (ws.recommendations||[]);
-  function st(r){ return r.status==='accepted' ? 'approved' : (r.status||'shared'); }
-  var shared = recs.filter(function(r){ return st(r)==='shared'; });
+  var goals = (ws.goals||[]);
+  var tasks = (ws.growth_tasks||ws.tasks||[]);
+  function E(x){ return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function dd(x){ var t=new Date(x); return isFinite(t.getTime())?t.toLocaleDateString('en-US',{month:'short',day:'numeric'}):''; }
 
-  // Classify shared recs into the owner's buckets.
-  var quickWins = shared.filter(function(r){ return (r.effort==='low') && (r.impact==='high'||r.impact==='medium'); });
-  var quickIds = {}; quickWins.forEach(function(r){ quickIds[r.id]=1; });
-  var top = shared.filter(function(r){ return !quickIds[r.id] && (r.priority==='urgent' || r.impact==='high'); });
-  var topIds = {}; top.forEach(function(r){ topIds[r.id]=1; });
-  var opportunities = shared.filter(function(r){ return !quickIds[r.id] && !topIds[r.id]; });
+  var shared = recs.filter(function(r){ return (r.status||'shared')==='shared' && !r.declined_at; });
+  var needsInput = shared.filter(function(r){ return r.needs_client_input; });
+  var lead = needsInput[0] || shared[0] || null;
+  var radar = shared.filter(function(r){ return lead && r.id!==lead.id; });
+  var accepted = recs.filter(function(r){ return r.status==='accepted' && !r.completed_at; });
 
-  // Workflow-state buckets (the rest of the 9-action system).
-  var happeningNow = recs.filter(function(r){ return st(r)==='approved' || st(r)==='in_progress'; });
-  var awaitingEric = recs.filter(function(r){ return st(r)==='quote_requested' || st(r)==='question'; });
-  var scheduled    = recs.filter(function(r){ return st(r)==='scheduled'; });
-  var declined     = recs.filter(function(r){ return st(r)==='declined'; });
-  var completed    = recs.filter(function(r){ return st(r)==='completed'; });
+  var html = '<div class="gx">';
+  html += '<div class="jn-kicker">'+E((ws.partnership&&ws.partnership.client_name)||'')+' \u00b7 Growth Partnership</div>'
+       + '<h2 class="jn-title" style="font-size:30px;">The <em>horizon.</em></h2>'
+       + '<div class="jn-since"><i></i>Where the business could go next \u2014 and what we\u2019d do to get there.</div>';
 
-  // ---- HERO ----  (lead with the intelligent headline from the route)
-  var sharedCount = shared.length;
-  var hl = ws.headline;
-  var lead = sharedCount===0
-    ? 'You\u2019re all caught up. Eric is watching your site and will flag the next worthwhile move here.'
-    : 'Eric reviewed your website and found '+sharedCount+(sharedCount===1?' thing':' things')+' worth doing. Here\u2019s what matters most, in order.';
-  var heroLead = (hl && hl.text) ? hqEsc(hl.text) : lead;
-  var heroTag = (hl && hl.kind==='action') ? '<span class="gp-hero-tag gp-hero-tag-action">Needs you</span>'
-    : (hl && hl.kind==='active') ? '<span class="gp-hero-tag gp-hero-tag-active">In progress</span>'
-    : (hl && hl.kind==='win') ? '<span class="gp-hero-tag gp-hero-tag-win">Recent win</span>' : '';
-  var hero = '<div class="gp-hero">'
-    +'<h2 class="gp-hero-title">Your priorities '+heroTag+'</h2>'
-    +'<p class="gp-hero-sub">'+heroLead+'</p>'
-    +'</div>';
-
-  // ---- TOP PRIORITIES ----
-  var topHtml = top.length ? top.map(gpRecCard).join('') : '';
-  var topSec = gpSection('\uD83D\uDD25','Top priorities','The few things that move the needle most.', topHtml);
-
-  // ---- QUICK WINS ----
-  var qwHtml = quickWins.length ? quickWins.map(gpRecCard).join('') : '';
-  var qwSec = gpSection('\u26A1','Quick wins','Small changes, big payoff. Easy yeses.', qwHtml);
-
-  // ---- WEBSITE HEALTH ----
-  var healthSec = gpHealthSection(ws.site_health);
-
-  // ---- OPPORTUNITIES ----
-  var oppHtml = opportunities.length ? opportunities.map(gpRecCard).join('') : '';
-  var oppSec = gpSection('\uD83C\uDFAF','Opportunities','Ideas for the longer game, when you\u2019re ready.', oppHtml);
-
-  // ---- COMPLETED WINS ----
-  var compSec = '';
-  if(completed.length){
-    var inner = '<div class="gp-done-wrap">'+completed.map(function(r){
-      return '<div class="gp-done"><span class="gp-done-tick">\u2713</span><span>'+esc(r.title||'')+'</span></div>';
-    }).join('')+'</div>';
-    compSec = gpSection('\u2705','Completed wins','Everything already improved on your site.', inner);
-  }
-
-  // ---- HAPPENING NOW (approved + in progress) — full cards so the client can
-  //      track status and still ask questions. ----
-  var nowHtml = happeningNow.length ? happeningNow.map(gpRecCard).join('') : '';
-  var nowSec = gpSection('\uD83D\uDEE0\uFE0F','Happening now','What you approved that Eric is on.', nowHtml);
-
-  // ---- WAITING ON ERIC (quote requested / question asked) ----
-  var waitHtml = awaitingEric.length ? awaitingEric.map(gpRecCard).join('') : '';
-  var waitSec = gpSection('\u23F3','Waiting on Eric','He\u2019ll get back to you on these.', waitHtml);
-
-  // ---- SCHEDULED & SET ASIDE (scheduled + declined, recoverable) ----
-  var laterAll = scheduled.concat(declined);
-  var laterHtml = laterAll.length ? laterAll.map(gpRecCard).join('') : '';
-  var laterSec = gpSection('\uD83D\uDCC6','Scheduled & set aside','Things you parked. Pick any back up anytime.', laterHtml);
-
-  // ---- THIS MONTH'S FOCUS ----
-  var planned = (ws.content||[]).filter(function(c){ return c.status!=='published'; });
-  var review = (ws.reviews||[])[0]||null;
-  var focusInner = '';
-  if(review || planned.length){
-    if(review){
-      focusInner += '<div class="gp-focus-review"><div class="gp-focus-h">'+esc(review.headline||gpPeriodLabel(review.period))+'</div>'
-        +(review.intro?'<div class="gp-focus-p">'+esc(review.intro)+'</div>':'')
-        +'<button class="gp-link" onclick="nav(\'gp_history\')">Read the full update \u2192</button></div>';
-    }
-    if(planned.length){
-      focusInner += '<div class="gp-focus-list">'+planned.slice(0,4).map(function(c){
-        return '<div class="gp-focus-item"><span class="gp-focus-dot"></span><div><div class="gp-focus-it">'+esc(c.title)+'</div><div class="gp-focus-id">'+esc(c.kind||'Update')+(c.scheduled_for?' \u00B7 '+esc(gpShortDate(c.scheduled_for)):'')+'</div></div></div>';
-      }).join('')+'</div>';
-    }
+  // ── TODAY: the one loud entry — a recommendation awaiting your call ──
+  if (lead) {
+    html += '<div class="gx-chap gx-today">'
+      + '<div class="jn-when" style="color:var(--accent,#5b3fa0);">Recommended \u00b7 needs your call</div>'
+      + '<div class="gx-line">'+E(lead.title)+'</div>'
+      + (lead.why ? '<div class="gx-why"><b>Why it matters:</b> '+E(lead.why)+'</div>'
+         : (lead.detail ? '<div class="gx-why">'+E(lead.detail)+'</div>' : ''))
+      + '<div class="gx-acts">'
+      + '<button class="gx-cta" onclick="gpRecAction(\''+E(lead.id)+'\',\'accept\',{})">Let\u2019s do it \u2192</button>'
+      + '<button class="gx-ghost" onclick="gpRecAction(\''+E(lead.id)+'\',\'decline\',{})">Not right now</button>'
+      + '<button class="gx-ghost" onclick="PortalAI.ask(\'Tell me more about the recommendation: '+E(String(lead.title||'')).replace(/'/g,'')+'\')">\u2726 Tell me more first</button>'
+      + '</div></div>';
   } else {
-    focusInner = '<div class="gp-empty">Eric will note here what you\u2019re working on together each month.</div>';
-  }
-  // ---- HOW YOUR WEBSITE PERFORMED (plain-language digest, no charts) ----
-  // Only appears when there are at least two months of real data; every
-  // negative line already carries the plan inside the sentence.
-  var digestSec = '';
-  var digestItems = ws.digest || [];
-  if(digestItems.length){
-    var dInner = '<div class="gp-focus-list">'+digestItems.map(function(dg){
-      var dot = dg.tone==='up' ? '#3F7D5B' : (dg.tone==='down' ? '#B5781D' : 'var(--muted)');
-      return '<div class="gp-focus-item"><span class="gp-focus-dot" style="background:'+dot+'"></span><div><div class="gp-focus-it">'+esc(dg.label)+'</div><div class="gp-focus-id" style="line-height:1.5;white-space:normal;">'+esc(dg.line)+'</div></div></div>';
-    }).join('')+'</div>';
-    digestSec = gpSection('\uD83D\uDCC8','How your website performed','This month versus last, in plain English. Eric handles the numbers behind it.', dInner);
+    html += '<div class="gx-chap gx-today">'
+      + '<div class="jn-when">Today</div>'
+      + '<div class="gx-line gx-green"><span class="jn-tick">\u2713</span>Nothing needs your call.</div>'
+      + '<div class="gx-sub">Every recommendation has been decided. When we spot the next opportunity, it appears here first.</div>'
+      + '</div>';
   }
 
-  var focusSec = gpSection('\uD83D\uDCC5','This month\u2019s focus','What you and Eric are working on right now.', focusInner);
-
-  // ---- WHAT ERIC DID RECENTLY (the value receipt, on the main page) ----
-  // Answers "what did I pay for" in one glance — the single most important
-  // retention question — without making the client dig into history.
-  var recentWork = (ws.work_log||[]).slice(0,3);
-  var didSec = '';
-  if(recentWork.length){
-    var didInner = '<div class="gp-done-wrap">'+recentWork.map(function(w){
-      return '<div class="gp-done"><span class="gp-done-tick">\u2713</span><span>'+esc(w.title||'')+(w.detail?' \u2014 '+esc(w.detail):'')+'</span></div>';
-    }).join('')+'</div>'
-    +'<button class="gp-link" onclick="nav(\'gp_history\')">See everything Eric has done \u2192</button>';
-    didSec = gpSection('\u2705','What Eric did recently','Real work on your site, in plain English.', didInner);
+  // ── WHERE WE'RE HEADED: goals as destinations, words not bars ──
+  if (goals.length) {
+    html += '<div class="gx-chap"><div class="jn-when">Where we\u2019re headed</div>';
+    goals.slice(0,4).forEach(function(g){
+      var word = String(g.status||'').toLowerCase();
+      var w = word==='achieved'||word==='done' ? 'Reached' : word==='active'||word==='in_progress' ? 'Moving' : word ? word.charAt(0).toUpperCase()+word.slice(1).replace(/_/g,' ') : '';
+      html += '<div class="gx-dest"><div class="gx-dn">'+E(g.title)+'</div>'
+        + ((w||g.detail)?'<div class="gx-dw">'+(w?'<b>'+E(w)+'</b>':'')+(w&&g.detail?' \u2014 ':'')+E(g.detail||'')+'</div>':'')
+        + '</div>';
+    });
+    html += '</div>';
+  } else {
+    // calm invitation, never an empty dashboard
+    html += '<div class="gx-chap"><div class="jn-when">Where we\u2019re headed</div>'
+      + '<div class="gx-sub" style="margin-top:2px;">We haven\u2019t written the destinations down together yet \u2014 tell us below where you want the business to go, and it starts here.</div></div>';
   }
 
-  // ---- ASK ERIC (always available) ----
-  var askSec = '<section class="gp-sec"><div class="gp-sec-head"><span class="gp-sec-emoji">\uD83D\uDCAC</span><div><div class="gp-sec-title">Need something?</div><div class="gp-sec-sub">Ask Eric for anything, anytime.</div></div></div>'
-    +'<div class="gp-ask"><input id="gpReqTitle" class="gp-input" placeholder="What do you need? (e.g. Update our holiday hours)">'
-    +'<textarea id="gpReqDetail" class="gp-input" rows="2" placeholder="Any details that help (optional)"></textarea>'
-    +'<button class="gp-btn gp-btn-yes" onclick="gpSubmitRequest()">Send to Eric</button></div>';
-  // existing requests, if any
-  var reqs = ws.requests||[];
-  if(reqs.length){
-    askSec += '<div class="gp-reqs">'+reqs.map(function(rq){ var st=(rq.status||'open').replace('_',' '); return '<div class="gp-req"><div class="gp-req-t">'+esc(rq.title||'')+'</div><span class="gp-pill">'+esc(st)+'</span></div>'; }).join('')+'</div>';
+  // ── ALSO ON OUR RADAR: quieter advised moves ──
+  if (radar.length) {
+    html += '<div class="gx-chap"><div class="jn-when">Also on our radar</div>';
+    radar.slice(0,4).forEach(function(r){
+      html += '<div class="gx-rec"><div class="gx-rn">'+E(r.title)+'</div>'
+        + (r.why?'<div class="gx-rw">'+E(r.why)+'</div>':(r.detail?'<div class="gx-rw">'+E(r.detail)+'</div>':''))
+        + '<div class="gx-racts">'
+        + '<button class="gx-rbtn gx-yes" onclick="gpRecAction(\''+E(r.id)+'\',\'accept\',{})">Interested</button>'
+        + '<button class="gx-rbtn" onclick="gpRecAction(\''+E(r.id)+'\',\'decline\',{})">Not for us</button>'
+        + '<button class="gx-rbtn" onclick="PortalAI.ask(\'Tell me more about: '+E(String(r.title||'')).replace(/'/g,'')+'\')">\u2726 Ask about this</button>'
+        + '</div></div>';
+    });
+    html += '</div>';
   }
-  askSec += '</section>';
 
-  // ---- empty fallback: no recs at all yet ----
-  var anyRecs = top.length||quickWins.length||opportunities.length||happeningNow.length||awaitingEric.length||scheduled.length;
-  var emptyTop = (!anyRecs) ? '<div class="gp-allgood"><div class="gp-allgood-ico">\u2713</div><div class="gp-allgood-t">Nothing needs you right now</div><div class="gp-allgood-d">Eric is keeping an eye on your website. The moment something is worth doing, it\u2019ll appear here, in plain English, with a simple yes or no.</div></div>' : '';
+  // ── IN MOTION: accepted work as client_facing_label sentences only ──
+  var motion = [];
+  accepted.forEach(function(r){
+    var rTasks = tasks.filter(function(t){ return t.recommendation_id===r.id && t.status!=='done' && t.client_facing_label; });
+    if (rTasks.length) rTasks.slice(0,2).forEach(function(t){ motion.push({ label:t.client_facing_label, when:r.started_at }); });
+    else motion.push({ label:r.title, when:r.started_at });
+  });
+  if (motion.length) {
+    html += '<div class="gx-chap"><div class="jn-when">In motion</div>';
+    motion.slice(0,5).forEach(function(m){
+      html += '<div class="gx-mot"><i></i>'+E(m.label)+(m.when?'<span>started '+E(dd(m.when))+'</span>':'')+'</div>';
+    });
+    html += '</div>';
+  }
 
-  document.getElementById('gp_priorities_body').innerHTML =
-    hero + emptyTop + topSec + qwSec + healthSec + digestSec + oppSec + nowSec + waitSec + laterSec + compSec + focusSec + didSec + askSec;
+  // ── THE QUARTERLY STRATEGY PLATE: only when real client-readable content exists ──
+  var strat = ws.strategy || ws.quarterly_strategy || null;
+  if (strat && (strat.body || strat.content)) {
+    html += '<details class="jn-platewrap"><summary class="jn-plate">'
+      + '<div class="jn-pmast">'+E((ws.partnership&&ws.partnership.client_name)||'')+' \u00b7 Strategy'+(strat.quarter?' \u00b7 '+E(strat.quarter):'')+'</div>'
+      + '<div class="jn-ptitle">'+E(strat.title||'The plan, in plain language.')+'</div>'
+      + '<div class="jn-pby">Prepared for you by Davis Digital</div>'
+      + '<div class="jn-popen">Unfold the plan \u2192</div></summary>'
+      + '<div class="jn-pbody">'+E(strat.body||strat.content)+'</div></details>';
+  }
+
+  // ── the standing invitation: existing gp_submit_request ──
+  html += '<div class="gx-invite"><div class="gx-line" style="font-size:19px;">Want something explored?</div>'
+    + '<div class="jn-hbox" style="margin-top:14px;">'
+    + '<input id="gpReqTitle" placeholder="An idea, a competitor, a what-if\u2026" aria-label="What would you like explored?">'
+    + '<button class="jn-hsend" onclick="gpSubmitRequest()">Send</button></div>'
+    + '<input id="gpReqDetail" type="hidden" value="">'
+    + '<div class="gx-sub" style="margin-top:9px;">It goes straight to Eric \u2014 and the answer lands here, or in a recommendation.</div></div>';
+
+  html += '<div class="jn-sig" style="margin-top:38px;padding-top:16px;border-top:1px solid var(--hair,#ece7f2);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);"><span>Recommendations and goals only \u2014 no scores, no projections, nothing invented.</span><span style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);">\u2014 Davis Digital</span></div>';
+  html += '</div>';
+  host.innerHTML = html;
 }
 
-// Website Health — plain words, no scary numbers leading.
-function gpHealthSection(sh){
-  if(!sh) return '';
-  var rows = [
-    ['Speed', sh.performance, 'How fast your site loads'],
-    ['Showing up on Google', sh.visibility, 'How easily people find you'],
-    ['Easy to use for everyone', sh.accessibility, 'Works for all visitors'],
-    ['Safe and secure', sh.security, 'Protected and trustworthy'],
-    ['Listed on Google', sh.local != null ? sh.local : sh.indexing, 'Found in local search']
-  ].filter(function(x){ return x[1]!=null; });
-  if(!rows.length) return '';
-  function word(v){ return v>=80?'Great':v>=60?'Good':v>=40?'Needs work':'Poor'; }
-  function col(v){ return v>=80?'#3F7D5B':v>=60?'#3F7D5B':v>=40?'#B5781D':'#A8443A'; }
-  var inner = '<div class="gp-health">'+rows.map(function(r){
-    return '<div class="gp-health-row"><div><div class="gp-health-name">'+esc(r[0])+'</div><div class="gp-health-desc">'+esc(r[2])+'</div></div>'
-      +'<div class="gp-health-right"><span class="gp-health-word" style="color:'+col(r[1])+'">'+word(r[1])+'</span>'
-      +'<div class="gp-health-bar"><div class="gp-health-fill" style="width:'+Math.max(6,Math.min(100,r[1]))+'%;background:'+col(r[1])+'"></div></div></div></div>';
-  }).join('')+'</div>'
-  +'<div class="gp-health-note">Eric watches all of this for you. Anything that needs fixing becomes a priority above, in plain English.</div>';
-  return gpSection('\uD83D\uDCCA','Website health','A quick read on how your site is doing. Eric handles the rest.', inner);
-}
-
-// Full history page (monthly reviews + complete work log) — kept off the main
-// page so Priorities stays focused.
 function gpRenderHistory(){
   var ws = GP_WS; if(!ws) return;
   var reviews = ws.reviews||[], work = ws.work_log||[];
@@ -4938,7 +4887,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.6';
+  var MY_BUILD='2026-07-04.7';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -5282,6 +5231,41 @@ button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px soli
   .bl .bl-line{ font-size:20px; }
   .bl .bl-cta{ width:100%; justify-content:center; }
   .bl .bl-paybar{ gap:9px; }
+}
+
+/* ═══ THE COMPASS (Growth) ═══ */
+.gx .gx-chap{ padding:24px 0; border-top:1px solid var(--hair,#ece7f2); }
+.gx .gx-chap.gx-today{ padding:26px 0 36px; border-top:none; margin-top:26px; }
+.gx .gx-line{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:450; font-size:22px; letter-spacing:-.35px; line-height:1.3; color:var(--ink); max-width:26ch; }
+.gx .gx-green{ color:#1a7e49; }
+.gx .gx-sub{ font-size:12.5px; color:var(--muted); line-height:1.68; margin-top:8px; max-width:50ch; }
+.gx .gx-why{ margin-top:10px; font-size:13px; line-height:1.7; color:var(--ink); max-width:50ch; }
+.gx .gx-why b{ font-weight:620; }
+.gx .gx-acts{ margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
+.gx .gx-cta{ display:inline-flex; align-items:center; gap:8px; background:var(--accent,#5b3fa0); color:#fff; border:none; border-radius:12px; padding:13px 22px; font-size:13px; font-weight:640; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); box-shadow:0 9px 24px rgba(91,63,160,.28); min-height:46px; }
+.gx .gx-ghost{ display:inline-flex; background:none; color:var(--muted); border:none; font-size:12.5px; font-weight:560; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); padding:13px 8px; min-height:46px; align-items:center; }
+.gx .gx-ghost:hover{ color:var(--ink); }
+.gx .gx-dest{ padding:15px 0; border-top:1px dashed var(--hair,#ece7f2); }
+.gx .gx-dest:first-of-type{ border-top:none; margin-top:2px; }
+.gx .gx-dn{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:17px; font-weight:450; letter-spacing:-.2px; color:var(--ink); }
+.gx .gx-dw{ font-size:12px; color:var(--muted); margin-top:4px; line-height:1.6; }
+.gx .gx-dw b{ color:#1a7e49; font-weight:620; }
+.gx .gx-rec{ padding:17px 0; border-top:1px dashed var(--hair,#ece7f2); }
+.gx .gx-rec:first-of-type{ border-top:none; }
+.gx .gx-rn{ font-size:14.5px; font-weight:580; color:var(--ink); }
+.gx .gx-rw{ font-size:12.5px; color:var(--muted); line-height:1.68; margin-top:5px; max-width:48ch; }
+.gx .gx-racts{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+.gx .gx-rbtn{ border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:100px; padding:8px 15px; font-size:12px; color:var(--muted); cursor:pointer; font-family:var(--sans,'Inter',sans-serif); min-height:36px; }
+.gx .gx-rbtn:hover{ color:var(--accent,#5b3fa0); border-color:rgba(91,63,160,.35); }
+.gx .gx-rbtn.gx-yes{ color:var(--ink); font-weight:620; }
+.gx .gx-mot{ display:flex; gap:11px; align-items:baseline; padding:11px 0; border-top:1px dashed var(--hair,#ece7f2); font-size:13.5px; color:var(--ink); }
+.gx .gx-mot:first-of-type{ border-top:none; }
+.gx .gx-mot i{ width:7px; height:7px; border-radius:50%; background:var(--accent,#5b3fa0); opacity:.55; flex:none; position:relative; top:-1px; }
+.gx .gx-mot span{ color:#a49ab5; font-family:var(--mono,'Geist Mono',monospace); font-size:10.5px; margin-left:auto; white-space:nowrap; }
+.gx .gx-invite{ padding:32px 0 8px; border-top:1px solid var(--hair,#ece7f2); margin-top:14px; }
+@media(max-width:768px){
+  .gx .gx-line{ font-size:19px; }
+  .gx .gx-cta{ width:100%; justify-content:center; }
 }
 </style>
 
