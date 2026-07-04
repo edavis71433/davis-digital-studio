@@ -16377,7 +16377,7 @@ window.ddsFilesCard=async function(mountId, clientId){
 // portal via the proven message+notification path, downloadable as a branded
 // print-to-PDF. No open-rates or satisfaction scores — no such data exists. ═══
 (function(){
-  var RPX={rows:[], clients:[], sel:null, tab:'all', ready:null, showNew:false};
+  var RPX={rows:[], clients:[], sel:null, tab:'all', ready:null, showNew:false, q:'', surveys:[], paid:[]};
   function esc(s){ return String(s==null?'':s).replace(/</g,'&lt;'); }
   function att(s){ return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function agoS(d){ try{ return oppxAgo(d)||''; }catch(e){ return ''; } }
@@ -16401,15 +16401,27 @@ window.ddsFilesCard=async function(mountId, clientId){
     root.innerHTML='<div class="bf-skel" style="height:26px;width:220px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
     var r=await Promise.all([
       safe(function(){ return api('client_reports?select=*&order=created_at.desc&limit=200'); }),
-      safe(function(){ return api('clients?select=*&limit=300'); })
+      safe(function(){ return api('clients?select=*&limit=300'); }),
+      safe(function(){ return api('survey_responses?select=client_id,sentiment_score,created_at&order=created_at.desc&limit=200'); }),
+      safe(function(){ return api('invoices?deleted_at=is.null&status=eq.paid&select=client_id,amount,paid_at&limit=500'); })
     ]);
     RPX.ready=(r[0]!==null);
     RPX.rows=r[0]||[];
     RPX.clients=(r[1]||[]).filter(function(c){ return String(c.status||'').toLowerCase()!=='archived'; });
+    RPX.surveys=r[2]||[]; RPX.paid=r[3]||[];
     if(!RPX.sel&&RPX.rows[0]) RPX.sel=String(RPX.rows[0].id);
     rpxRender();
   };
   window.rpxTab=function(t){ RPX.tab=t; rpxRender(); };
+  window.rpxClone=async function(id){
+    var rep=RPX.rows.find(function(x){ return String(x.id)===String(id); }); if(!rep) return;
+    var row=await api('client_reports','POST',{ client_id:rep.client_id, title:String(rep.title||'Report')+' (copy)', kind:rep.kind||'monthly', status:'draft', body:rep.body });
+    if(row===null){ toast('Clone failed'); return; }
+    toast('\u2713 Cloned as draft');
+    var made=Array.isArray(row)&&row[0]; if(made) RPX.sel=String(made.id);
+    rpxLoad();
+  };
+  window.rpxQ=function(v){ RPX.q=String(v||'').toLowerCase(); rpxRender(); };
   window.rpxSel=function(id){ RPX.sel=id; rpxRender(); };
   window.rpxNewToggle=function(){ RPX.showNew=!RPX.showNew; rpxRender(); };
 
@@ -16429,10 +16441,13 @@ window.ddsFilesCard=async function(mountId, clientId){
       safe(function(){ return api('timeline?client_id=eq.'+encodeURIComponent(cid)+'&select=title,kind,type,status,created_at,updated_at&limit=200'); }),
       safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,updated_at,created_at&limit=100'); })
     ]);
-    var doneTasks=[];
+    var doneTasks=[], workDone=[];
     if(r[1]&&r[1][0]){
-      var tk=await safe(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(r[1][0].id)+'&select=title,status&limit=100'); })||[];
+      var pidG=r[1][0].id;
+      var tk=await safe(function(){ return api('growth_tasks?partnership_id=eq.'+encodeURIComponent(pidG)+'&select=title,status&limit=100'); })||[];
       doneTasks=tk.filter(function(t){ var s=String(t.status||'').toLowerCase(); return s==='done'||s==='completed'; });
+      // the work log is the truest receipt: what Eric actually did this period
+      workDone=(await safe(function(){ return api('work_log?partnership_id=eq.'+encodeURIComponent(pidG)+'&done_at=gte.'+encodeURIComponent(iso)+'&select=title&order=done_at.desc&limit=30'); }))||[];
     }
     var goods=[], warns=[], highlights=[];
     if(an){
@@ -16476,9 +16491,10 @@ window.ddsFilesCard=async function(mountId, clientId){
         if(Lv.https===true) receipts.push('HTTPS verified secure');
       });
     }catch(e){}
+    workDone.forEach(function(w){ if(receipts.length<12) receipts.push(String(w.title||'Work completed')); });
     var data={ period:period, summary:summary, highlights:highlights.slice(0,6), watch:(warns[0]?{label:warns[0].label,text:String(warns[0].text||'').split('.')[0]}:null), next:next,
       confidence:(an&&an.executive_brief&&an.executive_brief.confidence)||'low', tasksDone:doneTasks.length,
-      story:storyRows.slice(0,5), cleared:cleared.slice(0,5), receipts:receipts.slice(0,6) };
+      story:storyRows.slice(0,5), cleared:cleared.slice(0,5), receipts:receipts.slice(0,10) };
     var row=await api('client_reports','POST',{ client_id:cid, title:period+' Performance Report', kind:'monthly', status:'draft', body:JSON.stringify(data) });
     if(row===null){ toast('Couldn\u2019t save \u2014 run 09-reports.sql + redeploy clever-api'); return; }
     RPX.showNew=false;
@@ -16561,19 +16577,41 @@ window.ddsFilesCard=async function(mountId, clientId){
     var delivered=RPX.rows.filter(function(x){ return x.status==='delivered'; });
     var mNow=new Date(); var mIso=new Date(mNow.getFullYear(),mNow.getMonth(),1).toISOString();
     var thisM=RPX.rows.filter(function(x){ return x.created_at>=mIso; });
+    // avg client satisfaction: mean AI sentiment (0-10) of surveys, last 90d — real reads, never invented
+    var since90=new Date(Date.now()-90*86400000).toISOString();
+    var sv=(RPX.surveys||[]).filter(function(x){ return x.created_at>=since90&&isFinite(Number(x.sentiment_score)); });
+    var sat=sv.length?(sv.reduce(function(a,x){return a+Number(x.sentiment_score);},0)/sv.length):null;
+    // value shown to clients: paid invoices inside periods covered by DELIVERED reports
+    var valueShown=0;
+    delivered.forEach(function(x){
+      var d0=parse(x); if(!d0.period) return;
+      var pd=new Date(d0.period+' 1'); if(isNaN(pd)) return;
+      var a=new Date(pd.getFullYear(),pd.getMonth(),1), b=new Date(pd.getFullYear(),pd.getMonth()+1,1);
+      (RPX.paid||[]).forEach(function(i){
+        if(String(i.client_id)!==String(x.client_id)||!i.paid_at) return;
+        var t2=new Date(i.paid_at); if(t2>=a&&t2<b){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); if(isFinite(n)) valueShown+=n; }
+      });
+    });
     var stats='<div class="ivx-stats">'
-      +'<div class="ivx-st"><div class="ivx-sn">'+RPX.rows.length+'</div><div class="ivx-sl">Reports generated</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+(RPX.rows.length-delivered.length)+'</div><div class="ivx-sl">Waiting your review</div></div>'
       +'<div class="ivx-st"><div class="ivx-sn">'+delivered.length+'</div><div class="ivx-sl">Delivered to clients</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+(RPX.rows.length-delivered.length)+'</div><div class="ivx-sl">Drafts</div></div>'
       +'<div class="ivx-st"><div class="ivx-sn">'+thisM.length+'</div><div class="ivx-sl">This month</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+(sat!=null?sat.toFixed(1)+'<span style="font-size:13px;color:var(--muted);">/10</span>':'\u2014')+'</div><div class="ivx-sl">Avg client satisfaction'+(sat!=null?'':' \u00b7 no surveys yet')+'</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+(valueShown?'$'+Math.round(valueShown).toLocaleString():'\u2014')+'</div><div class="ivx-sl">Value shown in delivered reports</div></div>'
+      +'<div class="ivx-st"><div class="ivx-sn">'+RPX.rows.length+'</div><div class="ivx-sl">Generated all-time</div></div>'
     +'</div>';
 
-    var TABS=[['all','All reports'],['draft','Drafts'],['delivered','Delivered']];
-    var list=RPX.rows.filter(function(x){ return RPX.tab==='all'||x.status===RPX.tab; });
+    var TABS=[['all','All reports'],['draft','Drafts'],['delivered','Delivered'],['scheduled','Scheduled']];
+    var list=RPX.rows.filter(function(x){
+      if(RPX.tab!=='all'&&RPX.tab!=='scheduled'&&x.status!==RPX.tab) return false;
+      if(RPX.q&&(String(x.title||'')+' '+cName(x.client_id)).toLowerCase().indexOf(RPX.q)===-1) return false;
+      return true;
+    });
     var tabs='<div class="ivx-tabs">'+TABS.map(function(t){
-      var n=t[0]==='all'?RPX.rows.length:RPX.rows.filter(function(x){return x.status===t[0];}).length;
+      var n=t[0]==='all'?RPX.rows.length:t[0]==='scheduled'?null:RPX.rows.filter(function(x){return x.status===t[0];}).length;
       return '<button class="ibx-tab'+(RPX.tab===t[0]?' on':'')+'" onclick="rpxTab(\''+t[0]+'\')">'+t[1]+(n?' <span class="ibx-tc">'+n+'</span>':'')+'</button>';
-    }).join('')+'<span style="flex:1;"></span></div>';
+    }).join('')+'<span style="flex:1;"></span>'
+    +'<input class="opx-search" style="max-width:210px;" placeholder="Search reports\u2026" value="'+att(RPX.q||'')+'" oninput="rpxQ(this.value)" aria-label="Search reports"></div>';
 
     var newForm=RPX.showNew?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Generate a report \u2014 from real data only</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
@@ -16583,16 +16621,50 @@ window.ddsFilesCard=async function(mountId, clientId){
       +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Composes from analytics, roadmap completions, payments, and deliverables. Templates for Strategy / SEO / Health reports arrive as their data sources connect.</div>'
     +'</div>'):'';
 
-    var listHtml=list.length?list.map(function(x){
-      var d=parse(x);
-      return '<div class="apx-item'+(RPX.sel===String(x.id)?' on':'')+'" onclick="rpxSel(\''+att(String(x.id))+'\')">'
-        +'<div class="ibx-av">'+esc((cName(x.client_id)||'?').charAt(0).toUpperCase())+'</div>'
-        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(x.title||'Report')+'</div>'
-        +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(cName(x.client_id))+' \u00b7 generated '+esc(agoS(x.created_at))+'</div>'
-        +'<span class="ibx-chip" style="display:inline-block;margin-top:7px;'+(x.status==='delivered'?'color:#1a7e49;background:#e7f6ee;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc(String(x.status||'draft').toUpperCase())+'</span></div>'
-      +'</div>';
-    }).join('')
-    :'<div class="grx-empty" style="margin-top:14px;">'+(RPX.rows.length?'Nothing in this tab.':'No reports yet \u2014 generate the first one and it composes itself from this month\u2019s real numbers.')+'</div>';
+    var listHtml='';
+    if(RPX.tab==='scheduled'){
+      // DERIVED schedule, never fake rows: every recurring client is due a
+      // report each month; covered = this month's report already exists.
+      var mLbl=mNow.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      var nextM=new Date(mNow.getFullYear(),mNow.getMonth()+1,1);
+      var schedRows=RPX.clients.filter(function(c){
+        var n=parseFloat(String(c.monthly_amount||'').replace(/[^0-9.]/g,'')); return isFinite(n)&&n>0;
+      }).map(function(c){
+        var has=RPX.rows.some(function(x){ return String(x.client_id)===String(c.id)&&String(x.title||'').indexOf(mLbl)===0; });
+        return {c:c,covered:has};
+      }).sort(function(a,b){ return (a.covered?1:0)-(b.covered?1:0); });
+      listHtml=schedRows.length?('<div style="font-size:11px;color:var(--muted);margin:12px 2px 4px;">Monthly cadence \u00b7 every recurring client \u00b7 the 1st-of-month email nudges you for anyone uncovered</div>'
+        +schedRows.map(function(x){
+          return '<div class="apx-item" '+(x.covered?'':'style="cursor:pointer;" onclick="RPX.showNew=true;rpxRender();setTimeout(function(){var el=document.getElementById(\'rpxNC\');if(el)el.value=\''+att(String(x.c.id))+'\';},50);"')+'>'
+            +'<div class="ibx-av">'+esc((x.c.name||'?').charAt(0).toUpperCase())+'</div>'
+            +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(x.c.name||'Client')+'</div>'
+            +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+(x.covered?(mLbl+' covered \u00b7 next due '+nextM.toLocaleDateString('en-US',{month:'long'})+' 1'):(mLbl+' report due \u2014 tap to generate'))+'</div></div>'
+            +'<span class="ibx-chip" style="'+(x.covered?'color:#1a7e49;background:#e7f6ee;':'color:#c4731a;background:rgba(196,115,26,.1);')+'">'+(x.covered?'COVERED':'DUE')+'</span>'
+          +'</div>';
+        }).join(''))
+      :'<div class="grx-empty" style="margin-top:14px;">No recurring clients yet \u2014 schedules derive from clients with monthly amounts.</div>';
+    } else {
+      // group by month, newest first, with kind badges
+      var groups={}, order=[];
+      list.forEach(function(x){
+        var g=''; try{ g=new Date(x.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'}); }catch(e){ g='Earlier'; }
+        if(!groups[g]){ groups[g]=[]; order.push(g); }
+        groups[g].push(x);
+      });
+      listHtml=list.length?order.map(function(g){
+        return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 2px 4px;">'+esc(g)+'</div>'
+          +groups[g].map(function(x){
+            return '<div class="apx-item'+(RPX.sel===String(x.id)?' on':'')+'" onclick="rpxSel(\''+att(String(x.id))+'\')">'
+              +'<div class="ibx-av">'+esc((cName(x.client_id)||'?').charAt(0).toUpperCase())+'</div>'
+              +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--ink);">'+esc(x.title||'Report')+'</div>'
+              +'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+esc(cName(x.client_id))+' \u00b7 generated '+esc(agoS(x.created_at))+'</div>'
+              +'<span class="ibx-chip" style="display:inline-block;margin-top:7px;color:var(--p);background:rgba(91,63,160,.08);">'+esc(String(x.kind||'monthly').toUpperCase())+'</span> '
+              +'<span class="ibx-chip" style="display:inline-block;margin-top:7px;'+(x.status==='delivered'?'color:#1a7e49;background:#e7f6ee;':'color:#9a7a1a;background:#fdf6e3;')+'">'+esc(String(x.status||'draft').toUpperCase())+'</span></div>'
+            +'</div>';
+          }).join('');
+      }).join('')
+      :'<div class="grx-empty" style="margin-top:14px;">'+(RPX.rows.length?'Nothing matches here.':'No reports yet \u2014 generate the first one and it composes itself from this month\u2019s real numbers.')+'</div>';
+    }
 
     var rep=RPX.rows.find(function(x){ return String(x.id)===RPX.sel; });
     var detail='', rail='';
@@ -16607,6 +16679,7 @@ window.ddsFilesCard=async function(mountId, clientId){
           +'<button class="bf-act primary" onclick="rpxSend(\''+att(String(rep.id))+'\')">Send to portal</button>'
           +'<button class="bf-act" onclick="rpxPdf(\''+att(String(rep.id))+'\')">Download PDF</button>'
           +'<button class="bf-act" onclick="rpxNarrative(\''+att(String(rep.id))+'\')">\u2728 '+(d.narrative?'Rewrite the narrative':'Write the narrative')+'</button>'
+          +'<button class="ibx-pill" onclick="rpxClone(\''+att(String(rep.id))+'\')">Clone</button>'
           +'<button class="ibx-pill" onclick="rpxEmail(\''+att(String(rep.id))+'\')">Draft email \u2192</button>'
         +'</div>'
         +'<div id="rpxNarrOut"></div>'
@@ -16617,6 +16690,11 @@ window.ddsFilesCard=async function(mountId, clientId){
         +'<div class="ivx-block"><div class="ivx-bh">\u2726 AI EXECUTIVE SUMMARY</div>'
           +(d.summary||[]).map(function(s){ return '<div style="font-size:13px;color:var(--ink);line-height:1.6;padding:3px 0;">\u2713 '+esc(s)+'</div>'; }).join('')
         +'</div>'
+        +(d.watch?('<div class="ivx-block"><div class="ivx-bh">OPPORTUNITY \u2014 never a problem without a next step</div>'
+          +'<div style="font-size:13px;color:var(--ink);line-height:1.6;">'+esc(d.watch.label)+' \u2014 '+esc(d.watch.text||'')+'.</div>'
+          +'<div style="font-size:12.5px;color:var(--p);font-weight:600;margin-top:5px;">Recommendation \u00b7 '+esc(d.next||'')+'</div></div>'):'')
+        +(d.next&&!d.watch?('<div class="ivx-block"><div class="ivx-bh">WHAT\u2019S NEXT</div>'
+          +'<div style="font-size:13px;color:var(--ink);line-height:1.6;">'+esc(d.next)+'</div></div>'):'')
         +((d.highlights&&d.highlights.length)?('<div class="ivx-block"><div class="ivx-bh">KEY HIGHLIGHTS</div>'
           +d.highlights.map(function(h){ return '<div class="rpx-hl"><span>'+esc(h.label)+'</span><span style="flex:1;"></span><b>'+esc(String(h.value))+'</b>'+(h.pct!=null?' <span style="font-size:11.5px;font-weight:700;color:'+(h.up?'#1a7e49':'#c0392b')+';">'+(h.up?'\u2191':'\u2193')+Math.abs(h.pct)+'%</span>':'')+'</div>'; }).join('')
         +'</div>'):'')
