@@ -11456,7 +11456,9 @@ function anEngineNote(eng){
         safe(function(){ return api('opportunities?select=*&deleted_at=is.null&limit=300'); }),
         safe(function(){ return api('content_calendar?select=*&limit=120'); }),
         safe(function(){ return api('growth_tasks?select=*&limit=200'); }),
-        safe(function(){ return integApi('calendly_today',{}); })
+        safe(function(){ return integApi('calendly_today',{}); }),
+        safe(function(){ return integApi('revenue_vitals',{}); }),
+        safe(function(){ return integApi('ops_errors_list',{}); })
       ]);
     }catch(e){ results=[null,null,null,null,null]; }
     if(!results[0]&&!results[1]&&!results[2]){
@@ -11511,6 +11513,30 @@ function anEngineNote(eng){
     }
     window.__tdxItems=needs; needs.forEach(function(it,ix){it.__ix=ix;});
 
+    var rv=(results[8]&&results[8].data)||null;
+    var opsz=(results[9]&&results[9].data)||null;
+
+    // ── workload + momentum: one-line reads under the greeting. Workload from
+    // how many things genuinely need Eric; momentum from real paid invoices
+    // this week vs money aging. No extra calls — computed from loaded data. ──
+    var openCount=items.length||needs.length;
+    var wl=openCount===0?{t:'Your plate is clear',c:'#1a7e49',bg:'#e7f6ee'}
+      :openCount<=3?{t:'Light day \u00b7 '+openCount+' open',c:'#1a7e49',bg:'#e7f6ee'}
+      :openCount<=7?{t:'Steady day \u00b7 '+openCount+' open',c:'#9a7a1a',bg:'#fdf6e3'}
+      :{t:'Full day \u00b7 '+openCount+' open',c:'#c0392b',bg:'#fbecea'};
+    var wk=Date.now()-7*86400000;
+    var paid7=invoices.filter(function(i){return i.paid_at&&new Date(i.paid_at).getTime()>=wk;}).length;
+    var aging=(rv&&rv.over30)?rv.over30:0;
+    var mo=aging>0?{t:'Watch aging invoices',c:'#c0392b',bg:'#fbecea'}
+      :paid7>=2?{t:'Ahead this week \u00b7 '+paid7+' paid',c:'#1a7e49',bg:'#e7f6ee'}
+      :paid7>=1?{t:'Good pace \u00b7 '+paid7+' paid',c:'#1a7e49',bg:'#e7f6ee'}
+      :{t:'Holding steady',c:'#7a6d8e',bg:'#f3f0fa'};
+    var stripHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px;">'
+      +'<span style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:100px;color:'+wl.c+';background:'+wl.bg+';">'+esc(wl.t)+'</span>'
+      +'<span style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:100px;color:'+mo.c+';background:'+mo.bg+';">'+esc(mo.t)+'</span>'
+      +(opsz?('<span title="'+esc(opsz.interpretation||'')+'" style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:100px;color:'+(opsz.last24>0?'#c0392b':'#1a7e49')+';background:'+(opsz.last24>0?'#fbecea':'#e7f6ee')+';cursor:default;">'+(opsz.last24>0?('\u26a0 '+opsz.last24+' system error'+(opsz.last24===1?'':'s')+' \u00b7 24h'):'\u2713 Systems quiet')+'</span>'):'')
+    +'</div>';
+
     var h=new Date().getHours();
     var greet=(h<12?'Good morning':h<18?'Good afternoon':'Good evening');
     var dateLine=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
@@ -11542,8 +11568,10 @@ function anEngineNote(eng){
       +'<div class="tdx-pu"><div class="tdx-pn">'+act.length+'</div><div class="tdx-pl">Active clients</div></div>'
       +'<div class="tdx-pu"><div class="tdx-pn">'+money(mrr)+'</div><div class="tdx-pl">MRR</div></div>'
       +'<div class="tdx-pu"><div class="tdx-pn">'+(pipe?money(pipe):openOpp.length)+'</div><div class="tdx-pl">'+(pipe?'Pipeline value':'Open opportunities')+'</div></div>'
-      +'<div class="tdx-pu"><div class="tdx-pn">'+unpaid+'</div><div class="tdx-pl">Invoices awaiting payment</div></div>'
-      +'</div>'+(unpaid===0&&needs.length===0?'<div class="tdx-ok">\u2713 Everything looks healthy</div>':'')+'</div>';
+      +'<div class="tdx-pu"><div class="tdx-pn"'+(rv&&rv.over30>0?' style="color:#c0392b;"':'')+'>'+(rv?money(rv.outstanding):unpaid)+'</div><div class="tdx-pl">'+(rv?('Outstanding'+(rv.over30>0?' \u00b7 '+money(rv.over30)+' 30d+':(rv.over7>0?' \u00b7 '+money(rv.over7)+' 7d+':''))):('Invoices awaiting payment'))+'</div></div>'
+      +'</div>'
+      +(rv&&rv.forecast&&rv.forecast.months&&rv.forecast.months.length?('<div class="tdx-nw" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(41,25,66,0.06);">Next 3 months on current plans: '+rv.forecast.months.map(function(m){return esc(m.label)+' '+money(m.projected);}).join(' \u00b7 ')+'</div>'):'')
+      +(unpaid===0&&needs.length===0?'<div class="tdx-ok">\u2713 Everything looks healthy</div>':'')+'</div>';
 
     var noticedHtml='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u2726 AI NOTICED</div>'
       +(noticed.length?noticed.map(function(n){
@@ -11567,6 +11595,7 @@ function anEngineNote(eng){
       '<div class="tdx-date">'+dateLine+'</div>'
       +'<div class="tdx-greet">'+greet+', Eric.</div>'
       +'<div class="tdx-sub">'+esc(sent)+'</div>'
+      +stripHtml
       +'<div class="tdx-grid">'
         +'<div>'+heroHtml+needsHtml+schedHtml+actHtml+'</div>'
         +'<div>'+pulse+noticedHtml+card20+'</div>'
@@ -11661,9 +11690,11 @@ function anEngineNote(eng){
       safe(function(){ return api('audit_leads?select=id,business_name,url,score,client_email,status,pipeline_stage,created_at&order=created_at.desc&limit=200'); }),
       safe(function(){ return api('messages?select=client_id,from_who,text,created_at&order=created_at.desc&limit=800'); }),
       safe(function(){ return api('clients?select=id,name,contact_email,email,status&limit=300'); }),
-      safe(function(){ return api('prospects?select=id,business_name,email,status,updated_at,created_at&order=updated_at.desc&limit=300'); })
+      safe(function(){ return api('prospects?select=id,business_name,email,status,updated_at,created_at&order=updated_at.desc&limit=300'); }),
+      safe(function(){ return api('growth_messages?from_who=eq.client&is_read=eq.false&select=id,partnership_id,body,created_at&order=created_at.desc&limit=100'); }),
+      safe(function(){ return api('partnerships?select=id,client_id&limit=300'); })
     ]);
-    var leads=r[0]||[], audits=r[1]||[], msgs=r[2]||[], clients=r[3]||[], prospects=r[4]||[];
+    var leads=r[0]||[], audits=r[1]||[], msgs=r[2]||[], clients=r[3]||[], prospects=r[4]||[], gmsgs=r[5]||[], parts=r[6]||[];
     var now=Date.now(), D=86400000;
     var dead={closed:1,archived:1,spam:1,converted:1,won:1,dead:1,client:1,lost:1};
     var items=[];
@@ -11722,6 +11753,28 @@ function anEngineNote(eng){
         type:'Prospect', source:'Outreach reply',
         want:'Replied to your outreach \u2014 the reply itself is in your email inbox', honest:true,
         when:p.updated_at||p.created_at, needs:true, rank:80 });
+    });
+
+    // ── Growth Partnership messages: unread client messages join the queue.
+    var pByCid={}; parts.forEach(function(pp){ pByCid[String(pp.id)]=String(pp.client_id||''); });
+    gmsgs.forEach(function(g){
+      var cid=pByCid[String(g.partnership_id)]; var c=cid?cById[cid]:null;
+      items.push({ kind:'growth', id:String(g.partnership_id), name:(c&&c.name)||'A growth client', email:(c&&(c.contact_email||c.email))||'',
+        type:'Client', source:'Growth message',
+        want:'\u201c'+String(g.body||'').slice(0,110)+'\u201d',
+        when:g.created_at, needs:true, rank:86 });
+    });
+
+    // ── urgency tiers on everything needing a reply: 'today' when urgent
+    // language appears or they've waited 2+ days; 'soon' at 1+ day. The chip
+    // renderer escalates the color; the sort pushes 'today' up. ──
+    var URG=/\b(urgent|asap|as soon as possible|emergency|immediately|right away|today|deadline|time.sensitive)\b/i;
+    items.forEach(function(x){
+      if(!x.needs) return;
+      var wd=(now-new Date(x.when||0).getTime())/D;
+      x.waitDays=isFinite(wd)?Math.max(0,Math.floor(wd)):0;
+      x.urgency = (URG.test(String(x.want||''))||x.waitDays>=2)?'today':(x.waitDays>=1?'soon':'normal');
+      if(x.urgency==='today') x.rank+=6;
     });
 
     items.sort(function(a,b){ return (b.rank-a.rank)||(new Date(b.when)-new Date(a.when)); });
@@ -11789,6 +11842,7 @@ function anEngineNote(eng){
         +'<div class="ibx-av">'+esc((x.name||'?').charAt(0).toUpperCase())+'</div>'
         +'<div class="ibx-main"><div class="ibx-top"><span class="ibx-nm">'+esc(x.name)+'</span>'
           +'<span class="ibx-chip" style="color:'+ch[1]+';background:'+ch[2]+';">'+ch[0]+'</span>'
+          +(x.urgency==='today'?'<span class="ibx-chip" style="color:#c0392b;background:#fbecea;">NEEDS RESPONSE TODAY'+(x.waitDays?(' \u00b7 '+x.waitDays+'D'):'')+'</span>':(x.urgency==='soon'?'<span class="ibx-chip" style="color:#9a7a1a;background:#fdf6e3;">REPLY SOON</span>':''))
           +'<span class="ibx-meta">'+esc(x.source)+'</span></div>'
           +'<div class="ibx-want">'+esc(x.want)+'</div></div>'
         +(x.fit!=null?'<span class="opx6-score">'+x.fit+'</span>':'')
@@ -11828,7 +11882,8 @@ function anEngineNote(eng){
       +(x.honest
         ? '<a class="bf-act primary" style="text-decoration:none;" href="mailto:'+att(x.email)+'">Open in email \u2192</a>'
         : '<button class="bf-act primary" onclick="ibxReply(\''+kind+'\',\''+att(id)+'\')">Reply \u2192</button>')
-      +(x.kind!=='client'?'<button class="bf-act" onclick="ddsPrefillNewClient(\''+att(x.name)+'\',\''+att(x.email)+'\',\''+att(x.name+' \u2014 Website')+'\')">Convert</button>':'')
+      +((x.kind==='lead'||x.kind==='audit')&&x.email?'<button class="bf-act" onclick="ibxConvert(\''+kind+'\',\''+att(id)+'\')">Convert to client \u2192</button>':(x.kind!=='client'&&x.kind!=='growth'?'<button class="bf-act" onclick="ddsPrefillNewClient(\''+att(x.name)+'\',\''+att(x.email)+'\',\''+att(x.name+' \u2014 Website')+'\')">Convert</button>':''))
+      +((x.kind==='lead'||x.kind==='client')?'<button class="bf-act" onclick="ibxSummarize(\''+kind+'\',\''+att(id)+'\')">Summarize</button>':'')
       +(x.kind==='audit'?'<button class="bf-act" onclick="ibxPipeline(true);setTimeout(function(){try{showLeadDetail(\''+att(id)+'\')}catch(e){}},250);">Full audit</button>':'')
       +(x.kind==='lead'||x.kind==='audit'?'<button class="bf-act" onclick="ibxArchive(\''+kind+'\',\''+att(id)+'\')">Archive</button>':'')
     +'</div>';
@@ -11884,6 +11939,56 @@ function anEngineNote(eng){
     try{ oppxPanelClose(); }catch(e){}
     toast('\u2713 Archived');
     ibxRender();
+  };
+
+  // ── ONE-CLICK CONVERT from the inbox panel: server-side lead_convert flow
+  // (auth invite \u2192 client row \u2192 contact link \u2192 source marked won), with the
+  // manual prefill form as fallback if the server call fails. ──
+  window.ibxConvert=async function(kind,id){
+    var x=IBX.items.find(function(i){return i.kind===kind&&String(i.id)===String(id);});
+    if(!x||!x.email){ toast('No email on this one \u2014 add one first.'); return; }
+    if(!confirm('Convert '+x.name+' to a client?\n\nThis creates their client record and emails them an invite to set a password.')) return;
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var lk=kind==='audit'?'audit':'lead';
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'lead_convert',leadKind:lk,leadId:String(id),name:x.name,email:x.email})});
+      var j=await r.json();
+      if(j&&j.data&&j.data.client_id){
+        toast('\u2713 '+x.name+' is now a client. Invite email sent.');
+        try{ oppxPanelClose(); }catch(e){}
+        try{ ibxLoad(); }catch(e){}
+        go('clients');
+      } else {
+        toast('Convert failed: '+((j&&j.error)||'unknown')+' \u2014 opening the manual form.');
+        ddsPrefillNewClient(x.name,x.email,x.name+' \u2014 Website');
+      }
+    }catch(e){ toast('Convert failed \u2014 opening the manual form.'); ddsPrefillNewClient(x.name,x.email,x.name+' \u2014 Website'); }
+  };
+
+  // ── THREAD SUMMARY from the panel: conversation_summary (grounded, with
+  // sentiment + unanswered questions), rendered inside the open panel. ──
+  window.ibxSummarize=async function(kind,id){
+    var host=document.getElementById('ibxSumOut');
+    if(!host){
+      var pane=document.querySelector('#oppxPanelBg .opx3-panel, .opx3-panel'); // the open slide-over panel
+      host=document.createElement('div'); host.id='ibxSumOut';
+      host.style.cssText='margin:12px 16px;padding:12px 14px;background:#f5f2fc;border-radius:12px;font-size:13px;line-height:1.55;';
+      if(pane) pane.appendChild(host); else return;
+    }
+    host.innerHTML='<span style="color:var(--muted);">Reading the conversation\u2026</span>';
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var payload={type:'conversation_summary',kind:(kind==='client'?'client':'lead'),id:String(id)};
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(payload)});
+      var j=await r.json(); var d=(j&&j.data)||null;
+      if(!d){ host.innerHTML='<span style="color:#9a2d2d;">Could not summarize: '+esc((j&&j.error)||'unknown')+'</span>'; return; }
+      var sc={positive:{t:'\ud83d\ude0a Positive',c:'#1a7e49',bg:'#e7f6ee'},neutral:{t:'Neutral',c:'#7a6d8e',bg:'#f3f0fa'},frustrated:{t:'\u26a0 Frustrated',c:'#c0392b',bg:'#fbecea'}}[d.sentiment]||null;
+      host.innerHTML='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px;"><strong style="font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--p);">Summary</strong>'
+        +(sc?'<span title="'+att(d.sentiment_why||'')+'" style="font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:100px;color:'+sc.c+';background:'+sc.bg+';">'+sc.t+'</span>':'')+'</div>'
+        +'<div>'+esc(d.summary||'')+'</div>'
+        +((d.unanswered&&d.unanswered.length)?'<div style="margin-top:6px;"><strong style="font-size:10.5px;color:#c0392b;">Unanswered:</strong> '+d.unanswered.map(function(q){return esc(q);}).join(' \u00b7 ')+'</div>':'')
+        +(d.nextStep?'<div style="margin-top:6px;"><strong style="font-size:10.5px;color:var(--p);">Next step:</strong> '+esc(d.nextStep)+'</div>':'');
+    }catch(e){ host.innerHTML='<span style="color:#9a2d2d;">Could not summarize right now.</span>'; }
   };
 
   __legacyLoadLeads = window.loadLeads;
