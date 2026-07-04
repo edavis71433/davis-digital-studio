@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dds-v4'; // bumped: purges the stale cache that was serving old admin HTML
+const CACHE_NAME = 'dds-v5'; // bumped: purges a cached config.js that was committed by mistake
 const PRECACHE = [
   '/about',
   '/services',
@@ -45,6 +45,7 @@ self.addEventListener('fetch', function(e) {
   if (url.pathname.startsWith('/portal') || url.pathname.includes('supabase')) return;
   if (url.pathname.startsWith('/dds-studio-manage')) return;
   if (url.pathname === '/dp-mode.js') return;
+  if (url.pathname === '/config.js') return; // per-deployment config must NEVER be cache-served
   if (url.pathname.startsWith('/set-password')) return;
 
   // Network-first for dynamic/tool pages — always fetch fresh, fall back to cache
