@@ -16468,6 +16468,25 @@ window.ddsFilesCard=async function(mountId, clientId){
     rpxLoad();
   };
 
+  // ── NARRATIVE PASS: turns the report's stored facts into two client-facing
+  // paragraphs plus presenter notes (Eric-only "if they ask" answers). The
+  // server writes both back into the report body, so portal + PDF carry it.
+  window.rpxNarrative=async function(id){
+    var out=document.getElementById('rpxNarrOut');
+    if(out) out.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;">Writing the narrative from this report\u2019s facts\u2026</div>';
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'report_narrative',report_id:String(id)})});
+      var j=await r.json(); var d=(j&&j.data)||null;
+      if(!d){ if(out) out.innerHTML='<div style="font-size:12px;color:#9a2d2d;padding:8px 0;">'+esc((j&&(j.detail||j.error))||'Could not write the narrative.')+'</div>'; return; }
+      toast('\u2713 Narrative written'+(d.generator==='template'?' (assembled \u2014 AI unavailable)':''));
+      // refresh the row locally so the detail re-renders with narrative
+      var row=RPX.rows.find(function(x){ return String(x.id)===String(id); });
+      if(row){ try{ var b=JSON.parse(row.body||'{}'); b.narrative=d.narrative; b.presenter_notes=d.presenter_notes||[]; row.body=JSON.stringify(b); }catch(e){} }
+      rpxRender();
+    }catch(e){ if(out) out.innerHTML='<div style="font-size:12px;color:#9a2d2d;padding:8px 0;">Could not write the narrative: '+esc(e.message)+'</div>'; }
+  };
+
   window.rpxSend=async function(id){
     var rep=RPX.rows.find(function(x){ return String(x.id)===String(id); }); if(!rep) return;
     var d=parse(rep);
@@ -16490,6 +16509,7 @@ window.ddsFilesCard=async function(mountId, clientId){
     w.document.write('<html><head><title>'+esc(rep.title||'Report')+'</title><style>body{font-family:Georgia,serif;color:#241a38;max-width:640px;margin:40px auto;padding:0 24px;}h1{font-size:26px;}h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#5b3fa0;margin-top:28px;}li{line-height:1.7;font-size:14px;}.hl{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;font-size:14px;}.brand{color:#5b3fa0;font-weight:700;}.next{background:#f5f2fc;border-radius:12px;padding:16px;margin-top:20px;font-size:14px;line-height:1.6;}</style></head><body>'
       +'<div class="brand">Davis Digital Studio</div><h1>'+esc(rep.title||'Performance Report')+'</h1>'
       +'<div style="color:#6b6276;font-size:13px;">Prepared for '+esc(cName(rep.client_id))+' \u00b7 '+esc(d.period||'')+'</div>'
+      +(d.narrative?('<h2>The story of the period</h2><p style="line-height:1.75;font-size:14px;white-space:pre-wrap;">'+esc(d.narrative)+'</p>'):'')
       +'<h2>Executive summary</h2><ul>'+(d.summary||[]).map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'
       +((d.story&&d.story.length)?('<h2>Timeline highlights</h2><ul>'+d.story.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'):'')
       +((d.receipts&&d.receipts.length)?('<h2>Maintenance receipts</h2><ul>'+d.receipts.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>'):'')
@@ -16566,8 +16586,14 @@ window.ddsFilesCard=async function(mountId, clientId){
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
           +'<button class="bf-act primary" onclick="rpxSend(\''+att(String(rep.id))+'\')">Send to portal</button>'
           +'<button class="bf-act" onclick="rpxPdf(\''+att(String(rep.id))+'\')">Download PDF</button>'
+          +'<button class="bf-act" onclick="rpxNarrative(\''+att(String(rep.id))+'\')">\u2728 '+(d.narrative?'Rewrite the narrative':'Write the narrative')+'</button>'
           +'<button class="ibx-pill" onclick="rpxEmail(\''+att(String(rep.id))+'\')">Draft email \u2192</button>'
         +'</div>'
+        +'<div id="rpxNarrOut"></div>'
+        +(d.narrative?('<div class="ivx-block"><div class="ivx-bh">THE STORY OF THE PERIOD <span style="font-weight:400;letter-spacing:0;text-transform:none;">\u2014 client-facing narrative, included in portal &amp; PDF</span></div>'
+          +'<div style="font-size:13.5px;color:var(--ink);line-height:1.7;white-space:pre-wrap;">'+esc(d.narrative)+'</div></div>'):'')
+        +((d.presenter_notes&&d.presenter_notes.length)?('<div class="ivx-block"><div class="ivx-bh">PRESENTER NOTES <span style="font-weight:400;letter-spacing:0;text-transform:none;">\u2014 for you only, never sent</span></div>'
+          +d.presenter_notes.map(function(n){ return '<div style="font-size:12.5px;color:var(--ink);line-height:1.55;padding:3px 0;">\ud83d\udcdd '+esc(n)+'</div>'; }).join('')+'</div>'):'')
         +'<div class="ivx-block"><div class="ivx-bh">\u2726 AI EXECUTIVE SUMMARY</div>'
           +(d.summary||[]).map(function(s){ return '<div style="font-size:13px;color:var(--ink);line-height:1.6;padding:3px 0;">\u2713 '+esc(s)+'</div>'; }).join('')
         +'</div>'
