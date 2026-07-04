@@ -18776,7 +18776,7 @@ window.ddsStatTile=function(opts){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.1';
+  var MY_BUILD='2026-07-04.2';
   setTimeout(async function(){
     try{
       var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},body:JSON.stringify({type:'version'})});

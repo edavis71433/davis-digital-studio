@@ -1214,22 +1214,22 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
         <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Everything about your project in one place — what needs you, where things stand, and what we’ve delivered.</p>
 
         <section id="work-decisions" style="margin-bottom:34px;">
-          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Waiting on you</h3>
-          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Decisions only you can make. When this is empty, everything is on us.</p>
+          <h3 class="work-sec-h">Waiting on you</h3>
+          <p class="work-sec-sub">Decisions only you can make. When this is empty, everything is on us.</p>
 <div id="approvalsBody"></div>
       
         </section>
 
         <section id="work-progress" style="margin-bottom:34px;">
-          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Where things stand</h3>
-          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">What we’re working on now, and what’s coming next.</p>
+          <h3 class="work-sec-h">Where things stand</h3>
+          <p class="work-sec-sub">What we’re working on now, and what’s coming next.</p>
 <div id="timelineBody"></div>
       
         </section>
 
         <section id="work-delivered" style="margin-bottom:34px;">
-          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Delivered</h3>
-          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Everything we’ve completed for you — newest first — plus a place to send us anything we need.</p>
+          <h3 class="work-sec-h">Delivered</h3>
+          <p class="work-sec-sub">Everything we’ve completed for you — newest first — plus a place to send us anything we need.</p>
 <div class="card">
           <div class="card-body">
             <div id="uploadProgressWrap" style="display:none;" class="upload-progress">
@@ -4730,7 +4730,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.1';
+  var MY_BUILD='2026-07-04.2';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -4744,6 +4744,130 @@ function renderHQFallback(){
   },2500);
 })();
 </script>
+
+
+<style id="dds-portal-redesign">
+/* ═══════════════════════════════════════════════════════════════════════════
+   DDS PORTAL · DESIGN LAYER v2 — craftsmanship pass.
+   Inherits the admin OS design system (serif display, purple accent, tile
+   geometry) tuned CALMER for clients: more air, softer elevation, slower
+   motion. Zero structural or behavioral change — this file only paints.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --r-sm:10px; --r-md:14px; --r-lg:18px;
+  --e1:0 1px 2px rgba(27,21,37,.04), 0 2px 8px rgba(27,21,37,.04);
+  --e2:0 2px 6px rgba(27,21,37,.05), 0 10px 28px rgba(27,21,37,.07);
+  --e3:0 8px 20px rgba(27,21,37,.08), 0 24px 60px rgba(27,21,37,.10);
+  --accent:#5b3fa0; --accent-wash:rgba(91,63,160,.07); --accent-wash2:rgba(91,63,160,.12);
+  --ease:cubic-bezier(.22,.8,.3,1);
+}
+
+/* ── READING MEASURE ── a calm page is a narrow page. */
+.main-content{ max-width:820px; margin-left:auto; margin-right:auto; padding:34px 28px 80px; }
+@media(max-width:768px){ .main-content{ padding:20px 16px 96px; } }
+
+/* ── TYPOGRAPHY HIERARCHY ── */
+.page-view > h1, .page-view .room-title,
+.page-view > div > h1{
+  font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:420; font-size:30px;
+  letter-spacing:-.5px; line-height:1.12; color:var(--ink);
+}
+.hq-label, .bill-section-label{
+  font-size:10.5px; font-weight:750; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); opacity:.85;
+}
+
+/* ── CARD LANGUAGE ── one grammar everywhere: hairline, lg radius, e1. */
+.card, .hq-card, details.card, .msg-thread{
+  border:1px solid var(--hair,#E7E1D6) !important;
+  border-radius:var(--r-lg) !important;
+  box-shadow:var(--e1);
+  background:#fff;
+  transition:box-shadow .28s var(--ease), transform .28s var(--ease);
+}
+.card{ padding:24px 26px; }
+@media(max-width:768px){ .card{ padding:18px 18px; } }
+a.card:hover, .card[onclick]:hover, button.card:hover{
+  box-shadow:var(--e2); transform:translateY(-1px);
+}
+
+/* ── THE HEADLINE ── Home's first sentence is the product; stage it. */
+.hq-headline{
+  border-radius:20px !important; box-shadow:var(--e2) !important;
+  padding:28px 28px !important;
+  background:linear-gradient(135deg,#fff 0%, #fdfbff 100%) !important;
+  border:1px solid rgba(91,63,160,.12) !important;
+}
+.hq-headline-text{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:21px !important; font-weight:440 !important; line-height:1.35 !important; letter-spacing:-.2px; }
+.hq-headline-icon{ transform:scale(1.12); }
+.hq-headline-cta{ font-weight:650; }
+
+/* ── NAV: quiet until chosen, then unmistakable. ── */
+.nav-item{ border-radius:var(--r-sm); margin:1px 8px; width:calc(100% - 16px); padding:11px 14px; transition:background .18s var(--ease), color .18s var(--ease), transform .12s var(--ease); position:relative; }
+.nav-item:active{ transform:scale(.985); }
+.nav-item.active{ background:var(--accent-wash2); }
+.nav-item.active::before{ content:''; position:absolute; left:-8px; top:9px; bottom:9px; width:3px; border-radius:3px; background:var(--accent); }
+.nav-badge{ font-size:10px; font-weight:800; min-width:19px; height:19px; display:inline-flex; align-items:center; justify-content:center; border-radius:100px; padding:0 6px; }
+
+/* ── BUTTONS: one voice. ── */
+button:not(.nav-item):not(.dds-modal button){ transition:transform .12s var(--ease), box-shadow .2s var(--ease), background .18s var(--ease); }
+button:not(.nav-item):active{ transform:scale(.975); }
+button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-sm); }
+
+/* ── THE WORK: section grammar. ── */
+#work-decisions, #work-progress, #work-delivered{ margin-bottom:40px !important; }
+.work-sec-h{
+  font-family:var(--serif,'Fraunces',Georgia,serif); font-size:19px; font-weight:460;
+  letter-spacing:-.2px; color:var(--ink); margin-bottom:4px;
+}
+.work-sec-sub{ font-size:12.5px; color:var(--muted); margin-bottom:14px; line-height:1.55; }
+
+/* delivered reports: the details rows breathe and open smoothly */
+#work-delivered details{ transition:box-shadow .25s var(--ease); }
+#work-delivered details[open]{ box-shadow:var(--e2); }
+#work-delivered summary{ min-height:44px; }
+#work-delivered summary::-webkit-details-marker{ display:none; }
+
+/* ── UPLOAD ZONE: invitation, not a form control. ── */
+.upload-zone{
+  border:1.5px dashed rgba(91,63,160,.3) !important; border-radius:var(--r-lg) !important;
+  background:var(--accent-wash) !important; transition:background .2s var(--ease), border-color .2s var(--ease);
+}
+.upload-zone:hover{ background:var(--accent-wash2) !important; border-color:var(--accent) !important; }
+
+/* ── CONVERSATION: the thread feels like paper, the composer floats. ── */
+.msg-thread{ padding:6px 4px; }
+.msg-send{ box-shadow:var(--e2); }
+
+/* ── EMPTY STATES: celebrated, centered, unhurried. ── */
+.hq-check, .empty-state{ line-height:1.65; }
+
+/* ── ENTER MOTION: rooms arrive, gently. Honors reduced-motion. ── */
+@keyframes ddsRise{ from{ opacity:0; transform:translateY(7px);} to{ opacity:1; transform:none;} }
+.page-view.active{ animation:ddsRise .32s var(--ease) both; }
+.hq-anim{ animation:ddsRise .4s var(--ease) both; }
+.hq-anim:nth-child(2){ animation-delay:.05s; } .hq-anim:nth-child(3){ animation-delay:.1s; }
+.hq-anim:nth-child(4){ animation-delay:.15s; } .hq-anim:nth-child(5){ animation-delay:.2s; }
+@media (prefers-reduced-motion: reduce){
+  .page-view.active, .hq-anim{ animation:none; }
+  *, *::before, *::after{ transition-duration:.01ms !important; }
+}
+
+/* ── MOBILE BAR: larger, tinted active, safe-area-safe. ── */
+@media(max-width:768px){
+  .page-view > h1, .page-view .room-title{ font-size:26px; }
+  .hq-headline{ padding:22px 20px !important; }
+  .hq-headline-text{ font-size:18.5px !important; }
+}
+
+/* ── SCROLLBARS (desktop): hairline, on-brand. ── */
+@media(min-width:769px){
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(91,63,160,.18); border-radius:100px; border:3px solid transparent; background-clip:padding-box; }
+  ::-webkit-scrollbar-thumb:hover{ background:rgba(91,63,160,.32); border:3px solid transparent; background-clip:padding-box; }
+}
+</style>
 
 </body>
 </html>
