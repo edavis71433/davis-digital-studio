@@ -18694,5 +18694,26 @@ window.ddsStatTile=function(opts){
 })();
 </script>
 
+
+<style>
+/* ── MOBILE HARDENING (final pass) ─────────────────────────────────────────
+   Fixes the four audited defect classes; no visual redesign. */
+@media(max-width:768px){
+  /* 1. iOS zoom trap: Safari auto-zooms any focused control under 16px.   */
+  input,select,textarea,.fi,.cmdk-input{font-size:16px !important;}
+  /* 3. tap targets: pills and row-action buttons reach ~44px comfortably. */
+  .ibx-pill,.sbtn,.iabtn,button.drawer-close{min-height:42px;padding-top:10px;padding-bottom:10px;}
+  .admin-botnav button{min-height:48px;}
+  /* modals breathe on small screens */
+  .dds-act{max-height:92dvh;border-radius:16px;}
+  .opx3-panel{width:100vw;max-width:100vw;}
+}
+/* 2. iOS 100vh: dynamic viewport units keep fixed panels above the toolbar */
+@supports(height:100dvh){
+  .sidebar{height:100dvh;}
+  .opx3-panel{height:100dvh;}
+}
+</style>
+
 </body>
 </html>

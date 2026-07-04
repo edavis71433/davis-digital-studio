@@ -4644,5 +4644,42 @@ function renderHQFallback(){
 })();
 </script>
 
+
+<style>
+@media(max-width:768px){
+  input,select,textarea{font-size:16px !important;}
+  .ai-panel{max-height:80dvh;}
+  button{min-height:42px;}
+  .nav-btn,.mobile-bar button{min-height:48px;}
+}
+@supports(height:100dvh){ .ai-panel{max-height:80dvh;} }
+</style>
+<script>
+// WIDTH DEBUGGER (ported from admin): open portal.html?debugw=1 on a phone and
+// a panel lists every element whose right edge exceeds the viewport.
+(function(){
+  try{
+    if(!/[?&]debugw=1/.test(location.search)) return;
+    function pathOf(el){ var b=[],n=el; while(n&&n.tagName&&b.length<4){ var t=n.tagName.toLowerCase(); if(n.id)t+='#'+n.id; else if(n.className&&typeof n.className==='string')t+='.'+n.className.trim().split(/\s+/).slice(0,2).join('.'); b.unshift(t); n=n.parentElement; } return b.join(' > '); }
+    function scan(){
+      var vw=window.innerWidth,bad=[];
+      document.querySelectorAll('body *').forEach(function(el){
+        if(!el.offsetParent&&el.tagName!=='BODY')return;
+        var r=el.getBoundingClientRect(),over=Math.round(r.right-vw);
+        if(over>2&&r.width>20)bad.push({over:over,w:Math.round(r.width),p:pathOf(el)});
+      });
+      bad.sort(function(a,b){return b.over-a.over;});
+      var seen={},rows=[];bad.forEach(function(x){if(rows.length<8&&!seen[x.p]){seen[x.p]=1;rows.push(x);}});
+      var d=document.getElementById('wdbg');
+      if(!d){d=document.createElement('div');d.id='wdbg';d.style.cssText='position:fixed;bottom:10px;left:10px;right:10px;z-index:99999;background:#291942;color:#fff;border-radius:12px;padding:12px;font-size:11px;font-family:monospace;max-height:45vh;overflow:auto;';document.body.appendChild(d);}
+      d.innerHTML='<b>WIDTH DEBUG</b> viewport '+vw+'px \u00b7 '+(rows.length?rows.length+' offenders:':'nothing overflows \u2713')+rows.map(function(x){return '<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:6px;">+'+x.over+'px \u00b7 w'+x.w+' \u00b7 '+x.p.replace(/</g,'&lt;')+'</div>';}).join('');
+    }
+    setTimeout(scan,1500);
+    window.addEventListener('resize',function(){setTimeout(scan,300);});
+    var _n=window.nav; if(typeof _n==='function') window.nav=function(){var r=_n.apply(this,arguments);setTimeout(scan,800);return r;};
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
