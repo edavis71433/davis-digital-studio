@@ -961,8 +961,9 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
 
       <!-- LEADS -->
       <div class="page" id="page-leads">
-        <div class="pt">Audit Leads</div>
-        <div class="ps">Everyone who has run a free tool on the site. Click a lead to see the full deep audit, signal table, and findings.</div>
+        <div class="pt">Leads &amp; Inbox</div>
+        <div class="ps">One queue for everything waiting on a reply: contact-form leads, audit leads, client messages, and Growth Partnership messages. Click a lead for the full audit and conversation.</div>
+        <div id="uinbox"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
           <button class="sbtn" onclick="filterLeads('all')" id="lf-all" style="background:var(--p);color:#fff;font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">All</button>
           <button class="sbtn" onclick="filterLeads('audit')" id="lf-audit" style="background:rgba(91,63,160,0.08);color:var(--p);font-size:12px;padding:6px 14px;border-radius:100px;border:none;cursor:pointer;">Site Audit</button>
@@ -2408,6 +2409,70 @@ async function loadLeads() {
   renderLeadsList();
   try { if (_leadView==="board") renderLeadsBoard(); } catch(e){}
   renderLeadsTriage();
+  try { loadUniversalInbox(); } catch(e){}
+}
+
+// ── UNIVERSAL INBOX: one queue for everything waiting on a human reply.
+// Server route universal_inbox merges form leads, audit leads, client portal
+// messages, and unread Growth messages, each with a deterministic urgency.
+// Rendered above the pipeline so "needs response today" is the first read. ──
+async function loadUniversalInbox(){
+  var host=document.getElementById('uinbox'); if(!host) return;
+  host.innerHTML='<div class="bf-skel" style="height:64px;border-radius:14px;margin-bottom:16px;"></div>';
+  var d=null;
+  try{
+    var jwt=await adminJwt(); if(!jwt){ host.innerHTML=''; return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'universal_inbox'})});
+    var j=await r.json(); d=(j&&j.data)||null;
+    if(!d && j && j.error){ host.innerHTML='<div style="font-size:12.5px;color:#9a2d2d;padding:10px 14px;background:#fbecea;border-radius:12px;margin-bottom:16px;">Inbox could not load: '+escHtml(String(j.error))+' <button class="tdx-pill tdx-pill-sm" onclick="loadUniversalInbox()">Retry</button></div>'; return; }
+  }catch(e){ host.innerHTML=''; return; }
+  if(!d){ host.innerHTML=''; return; }
+  var items=d.items||[];
+  if(!items.length){
+    host.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:16px;background:rgba(26,126,73,0.06);border-radius:12px;font-size:14px;color:var(--ink);"><span style="color:#1a7e49;font-weight:700;">\u2713</span>Inbox zero. Nothing is waiting on a reply anywhere.</div>';
+    return;
+  }
+  var chip=function(u){
+    var m={today:{t:'Needs response today',c:'#c0392b',bg:'#fbecea'},soon:{t:'Reply soon',c:'#9a7a1a',bg:'#fdf6e3'},normal:{t:'New',c:'#5b3fa0',bg:'#f3f0fa'}}[u]||{t:'New',c:'#5b3fa0',bg:'#f3f0fa'};
+    return '<span style="flex:none;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;color:'+m.c+';background:'+m.bg+';white-space:nowrap;">'+m.t+'</span>';
+  };
+  var kindLabel={lead:'Contact form',audit:'Audit tool',message:'Client message',growth:'Growth'};
+  var shown=UINBOX.all?items:items.slice(0,5);
+  var rows=shown.map(function(it){
+    var act;
+    if(it.kind==='lead'){ act='<button class="tdx-pill tdx-pill-sm" onclick="uinboxDraft(\''+escAttr(String(it.id))+'\')">Draft reply</button>'; }
+    else if(it.kind==='audit'){ act='<button class="tdx-pill tdx-pill-sm" onclick="showLeadDetail(\''+escAttr(String(it.id))+'\')">Open</button>'; }
+    else if(it.kind==='message'){ act='<button class="tdx-pill tdx-pill-sm" onclick="uinboxOpenClient(\''+escAttr(String(it.id))+'\')">Open</button>'; }
+    else { act='<button class="tdx-pill tdx-pill-sm" onclick="go(\'growth\')">Open</button>'; }
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 2px;border-top:1px solid rgba(41,25,66,0.06);">'
+      +chip(it.urgency)
+      +'<span style="flex:1;min-width:0;font-size:13.5px;color:var(--ink);"><strong style="font-weight:600;">'+escHtml(it.who||'')+'</strong>'
+      +'<span style="color:var(--muted);"> \u00b7 '+escHtml(kindLabel[it.kind]||it.kind)+(it.waitingDays?' \u00b7 waiting '+it.waitingDays+'d':'')+'</span>'
+      +'<div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(it.preview||'')+'</div></span>'
+      +act+'</div>';
+  }).join('');
+  host.innerHTML='<div style="background:#fff;border:1px solid rgba(41,25,66,0.08);border-radius:14px;padding:14px 18px 8px;margin-bottom:18px;">'
+    +'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px;">'
+    +'<span style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);">Inbox</span>'
+    +(d.needsToday?'<span style="font-size:12px;font-weight:700;color:#c0392b;">'+d.needsToday+' need'+(d.needsToday===1?'s':'')+' a response today</span>':'<span style="font-size:12px;color:#1a7e49;font-weight:600;">Nothing urgent</span>')
+    +'<span style="margin-left:auto;font-size:12px;color:var(--muted);">'+d.total+' waiting</span></div>'
+    +rows
+    +(items.length>shown.length?'<button class="bf-whymore" style="margin:8px 0 6px;color:var(--p);" onclick="UINBOX.all=true;loadUniversalInbox();">Show all '+items.length+' \u2192</button>':'')
+  +'</div>';
+}
+var UINBOX={all:false};
+// Open a form lead from the inbox and immediately pre-draft a reply.
+function uinboxDraft(osId){
+  var lead=allLeads.find(function(l){return l.id==='os_'+osId;});
+  if(lead){ showLeadDetail(lead.id); setTimeout(function(){ try{ osDraftReply(osId); }catch(e){} }, 400); }
+  else { loadLeads().then(function(){ var l2=allLeads.find(function(l){return l.id==='os_'+osId;}); if(l2) showLeadDetail(l2.id); }); }
+}
+// Open the Messages page with this client selected.
+function uinboxOpenClient(cid){
+  go('messages');
+  setTimeout(function(){
+    try{ var sel=document.getElementById('sel-messages'); if(sel){ sel.value=cid; onClientChange(cid,'messages'); } }catch(e){}
+  }, 300);
 }
 
 // Triage line: lead with what matters most — hot, uncontacted leads first.
@@ -2573,9 +2638,27 @@ async function leadDrop(e, stageKey){
 
 // Convert a won lead into a real client: prefill the create-client form and jump
 // to it, so it runs the existing (auto-linking) createClient flow.
-function convertLeadToClient(id){
+async function convertLeadToClient(id){
   var lead = allLeads.find(function(l){return String(l.id)===String(id);});
   if (!lead) return;
+  // One-click path: audit leads with an email convert server-side (invite +
+  // client row + contact link + lead marked converted). No email = manual form.
+  var isAudit = !String(lead.id).startsWith('os_');
+  if (isAudit && lead.client_email){
+    if(!confirm('Convert '+(lead.business_name||lead.client_email)+' to a client?\n\nThis creates their client record and emails them an invite to set a password.')) return;
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'lead_convert',leadKind:'audit',leadId:String(lead.id),name:lead.business_name||lead.client_email,email:lead.client_email})});
+      var j=await r.json();
+      if(j&&j.data&&j.data.client_id){
+        toast('\u2713 '+(lead.business_name||lead.client_email)+' is now a client. Invite email sent.');
+        try{ await loadLeads(); }catch(e){}
+        go('clients');
+        return;
+      }
+      toast('Convert failed: '+((j&&j.error)||'unknown')+' \u2014 opening the manual form instead.');
+    }catch(e){ toast('Convert failed \u2014 opening the manual form instead.'); }
+  }
   go('newclient');
   setTimeout(function(){
     try {
@@ -2628,6 +2711,7 @@ async function showOsLeadDetail(lead, detail) {
       '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
         '<button id="osSendBtn" onclick="osSendReply(\''+L.id+'\')" style="background:var(--p);color:#fff;border:none;font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Send reply</button>'+
         '<button id="osDraftBtn" onclick="osDraftReply(\''+L.id+'\')" style="background:#fff;color:var(--ink);border:1px solid rgba(91,63,160,0.2);font-weight:500;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Draft for me</button>'+
+        '<button id="osSumBtn" onclick="osSummarize(\''+L.id+'\')" style="background:#fff;color:var(--ink);border:1px solid rgba(91,63,160,0.2);font-weight:500;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Summarize</button>'+
         '<button onclick="osConvertLead(\''+L.id+'\')" style="background:#fff;color:#1a7e49;border:1px solid rgba(26,126,73,0.35);font-weight:600;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;">Convert to client \u2192</button>'+
       '</div>'+
     '</div>';
@@ -5460,12 +5544,61 @@ function ddsPrefillNewClient(name, email, project){
 }
 
 // form-lead conversion (the contact-form inbox had no convert path at all)
-async function osConvertLead(leadId){
+// ── AI conversation summary: what is this thread about, what did they ask
+// that went unanswered, and what should Eric do next. Grounded server-side. ──
+async function osSummarize(osId){
+  var btn=document.getElementById('osSumBtn');
+  var out=document.getElementById('osSummary');
+  if(!out){
+    out=document.createElement('div'); out.id='osSummary';
+    out.style.cssText='margin:0 0 14px;padding:13px 16px;background:#f5f2fc;border-radius:12px;font-size:13.5px;color:var(--ink);line-height:1.55;';
+    var anchor=btn?btn.closest('div'):null;
+    if(anchor&&anchor.parentNode) anchor.parentNode.insertBefore(out, anchor);
+    else if(btn&&btn.parentNode) btn.parentNode.insertBefore(out, btn);
+  }
+  out.innerHTML='<span style="color:var(--muted);">Reading the conversation\u2026</span>';
+  if(btn){ btn.disabled=true; btn.textContent='Summarizing\u2026'; }
   try{
-    var rows=await api('leads?select=name,email&id=eq.'+leadId+'&limit=1');
-    var l=rows&&rows[0]; if(!l) return;
+    var jwt=await adminJwt();
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'conversation_summary',kind:'lead',id:osId})});
+    var j=await r.json(); var d=(j&&j.data)||null;
+    if(!d){ out.innerHTML='<span style="color:#9a2d2d;">Could not summarize: '+escHtml((j&&j.error)||'unknown')+'</span>'; }
+    else{
+      var un=(d.unanswered&&d.unanswered.length)?('<div style="margin-top:8px;"><strong style="font-size:12px;color:#c0392b;">Unanswered:</strong> '+d.unanswered.map(function(q){return escHtml(q);}).join(' \u00b7 ')+'</div>'):'';
+      var nx=d.nextStep?('<div style="margin-top:8px;"><strong style="font-size:12px;color:var(--p);">Next step:</strong> '+escHtml(d.nextStep)+'</div>'):'';
+      out.innerHTML='<strong style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--p);">Summary</strong><div style="margin-top:4px;">'+escHtml(d.summary||'')+'</div>'+un+nx;
+    }
+  }catch(e){ out.innerHTML='<span style="color:#9a2d2d;">Could not summarize right now.</span>'; }
+  if(btn){ btn.disabled=false; btn.textContent='Summarize'; }
+}
+
+// ── ONE-CLICK CONVERT: lead \u2192 real client. The server does the whole
+// proven flow atomically (auth invite \u2192 clients row \u2192 contact link \u2192 lead
+// marked won) and rolls back the login if the client row fails. The old
+// prefill-a-form path remains as the fallback if the server call errors. ──
+async function osConvertLead(leadId){
+  var rows,l;
+  try{ rows=await api('leads?select=name,email&id=eq.'+leadId+'&limit=1'); l=rows&&rows[0]; }catch(e){}
+  if(!l){ toast('Could not load this lead.'); return; }
+  if(!l.email){ toast('This lead has no email \u2014 add one first.'); return; }
+  if(!confirm('Convert '+(l.name||l.email)+' to a client?\n\nThis creates their client record and emails them an invite to set a password. One click, done.')) return;
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'lead_convert',leadKind:'lead',leadId:String(leadId),name:l.name||l.email,email:l.email})});
+    var j=await r.json();
+    if(j&&j.data&&j.data.client_id){
+      toast('\u2713 '+(l.name||l.email)+' is now a client. Invite email sent.');
+      if(j.data.warnings&&j.data.warnings.length) toast('Note: '+j.data.warnings.join(', '));
+      try{ await loadLeads(); }catch(e){}
+      go('clients');
+    } else {
+      toast('Convert failed: '+((j&&j.error)||'unknown')+' \u2014 opening the manual form instead.');
+      ddsPrefillNewClient(l.name||'', l.email||'', l.name?l.name+' \u2014 Website':'');
+    }
+  }catch(e){
+    toast('Convert failed \u2014 opening the manual form instead.');
     ddsPrefillNewClient(l.name||'', l.email||'', l.name?l.name+' \u2014 Website':'');
-  }catch(e){}
+  }
 }
 
 async function oppxLoadTimeline(id){
