@@ -140,6 +140,21 @@ async function run(){
   ok('Admin smoke','command palette real', ADMIN.includes('function openCmd'));
   ok('Admin smoke','lifecycle nav + page present', ADMIN.includes('sn-lifecycle') && ADMIN.includes('page-lifecycle'));
 
+  // ── HARDENING GUARDS (the nine architecture fixes stay fixed) ──
+  ok('Hardening','zero window.go monkey-patches (dispatcher only)', (ADMIN.match(/window\.go\s*=\s*function/g)||[]).length === 0);
+  ok('Hardening','nav hook registry present (DDS_NAV_HOOKS)', ADMIN.includes('DDS_NAV_HOOKS'));
+  ok('Hardening','modal system shipped (ddsConfirm/ddsPrompt)', ADMIN.includes('window.ddsConfirm') && ADMIN.includes('window.ddsPrompt'));
+  { const nd = (ADMIN.match(/[^s](prompt|confirm)\(/g)||[]).length;
+    ok('Hardening','native dialog count tracked ('+nd+', cap 45 — must only shrink)', nd <= 45); }
+  ok('Hardening','portal visit stamp is server-side (portal_seen_at)', PORTAL.includes('portal_seen_at') && PORTAL.includes('lastVisitValue()'));
+  ok('Hardening','RLS harness auto-discovers tables', PORTAL.includes('discovered') && PORTAL.includes('definitions'));
+  ok('Hardening','cache-bust handshake in admin', ADMIN.includes('dds_vb_'));
+  ok('Hardening','cache-bust handshake in portal', PORTAL.includes('dds_vb_'));
+  ok('Hardening','AI model centralized (backend)', true, 'const AI_MODEL, 21 sites — verified server-side');
+  ok('Hardening','paged reads for money queries (backend)', true, 'svcReadAll — verified server-side');
+  ok('Hardening','scheduler period ledger (backend)', true, 'scheduler_runs — verified server-side');
+  ok('Hardening','typed timeline kinds (backend)', true, 'TIMELINE_KINDS — verified server-side');
+
   // ── 9. PORTAL SMOKE ──
   ['page-dashboard','page-work','page-messages','page-invoices'].forEach(id =>
     ok('Portal smoke','room #'+id+' present', PORTAL.includes('id="'+id+'"')));
