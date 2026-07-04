@@ -1321,9 +1321,10 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- INVOICES -->
       <div class="page-view" id="page-invoices">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Billing</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Your payments, clear and exact. Pay securely via Stripe.</p>
-        <div class="card"><div class="card-body" id="invoiceBody"></div></div>
+        <div class="jn-kicker">Davis Digital</div>
+        <h2 class="jn-title" style="font-size:30px;">The <em>investment.</em></h2>
+        <div class="jn-since" id="blSince"><i></i>Your payments, clear and exact — paid securely via Stripe.</div>
+        <div id="invoiceBody" style="margin-top:6px;"></div>
         <div class="card" style="margin-top:0;">
           <div class="card-header"><div class="card-title">Request an add-on</div></div>
           <div class="card-body">
@@ -2797,7 +2798,7 @@ async function loadInvoices() {
   window._unpaidInvoices = sit.due_count || 0;
   try { updateAttention(); } catch(e){}
 
-  renderBilling(sit, invoices);
+  renderBilling(sit, invoices, payload.monthly || null);
 }
 
 function bEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
@@ -2813,60 +2814,92 @@ function bStatusLabel(status){
 function bIsDue(status){ var x=String(status||'').toLowerCase(); return x==='pending'||x==='due'||x==='unpaid'||x==='open'||x==='overdue'; }
 function bIsPaid(status){ var x=String(status||'').toLowerCase(); return x==='paid'||x==='complete'||x==='completed'; }
 
-function renderBilling(sit, invoices){
+function renderBilling(sit, invoices, monthly){
   var host = document.getElementById("invoiceBody");
   if (!host) return;
+  invoices = invoices || [];
 
-  // ── THE CALM STATUS LINE — the situation, never a number ──
-  var tone = (sit.status && sit.status.tone) ? sit.status.tone : 'calm';
-  var line = (sit.status && sit.status.line) ? sit.status.line : '';
-  var html = '<div class="bill-status bill-status-'+bEsc(tone)+'">'
-    + '<div class="bill-status-mark">'+(tone==='good'?'\u2713':(tone==='action'?'\u25C9':'\u2713'))+'</div>'
-    + '<div class="bill-status-line">'+bEsc(line)+'</div>';
-  // when due, point to WHEN it's due using the LITERAL due date (pass-through)
-  if (sit.due_count > 0 && sit.next_due_when) {
-    html += '<div class="bill-status-sub">Due '+bEsc(sit.next_due_when)+'.</div>';
-  } else if (sit.next_note) {
-    html += '<div class="bill-status-sub">'+bEsc(sit.next_note)+'</div>';
+  // canonical outstanding predicate (ported): owed means not paid AND not an
+  // internal state. Drafts, voids, and cancellations are never shown as owed.
+  function owed(i){
+    var st = String((i && i.status) || '').toLowerCase();
+    return st !== 'paid' && st !== 'draft' && st !== 'void' && st !== 'canceled' && st !== 'cancelled';
   }
+  function money(a){ var n = Number(a); return isFinite(n) ? '$' + n.toLocaleString('en-US') : ''; }
+  function d(x){ var t = new Date(x); return isFinite(t.getTime()) ? t.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''; }
+
+  // masthead since-line: relationship fact, client row already on hand
+  var sinceEl = document.getElementById('blSince');
+  if (sinceEl && CLIENT && CLIENT.created_at) {
+    var sd = new Date(CLIENT.created_at);
+    if (isFinite(sd.getTime())) sinceEl.innerHTML = '<i></i>Partners since ' + sd.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  }
+
+  var due = invoices.filter(owed);
+  var paid = invoices.filter(function(i){ return String((i&&i.status)||'').toLowerCase()==='paid'; })
+                     .sort(function(a,b){ return new Date(b.created_at) - new Date(a.created_at); });
+  var html = '<div class="bl">';
+
+  // ── the one loud entry: a payable invoice. The room's only purple. ──
+  if (due.length) {
+    var v = due[0];
+    var dd2 = v.due_date ? new Date(v.due_date) : null;
+    var past = dd2 && isFinite(dd2.getTime()) && dd2.getTime() < Date.now();
+    html += '<div class="bl-chap bl-due">'
+      + '<div class="jn-when" style="color:var(--accent,#5b3fa0);">Ready when you are</div>'
+      + '<div class="bl-line">' + bEsc(v.name || 'Your invoice') + ' is ready.</div>'
+      + (v.description ? '<div class="bl-sub">' + bEsc(v.description) + '</div>' : '')
+      + '<div class="bl-paybar">'
+      + (v.stripe_url ? '<a class="bl-cta" href="' + bEsc(v.stripe_url) + '" target="_blank" rel="noopener">Pay ' + money(v.amount) + ' \u2192</a>'
+                      : '<span class="bl-amtonly">' + money(v.amount) + '</span>')
+      + (v.due_date ? '<span class="bl-duemeta">' + (past ? 'Was due' : 'Due') + ' <b>' + bEsc(d(v.due_date)) + '</b> \u00b7 card or bank, takes a minute</span>' : '')
+      + '</div></div>';
+    // further open invoices: calm, factual, still payable
+    due.slice(1).forEach(function(v2){
+      html += '<div class="bl-chap"><div class="jn-when">Also open</div>'
+        + '<div class="bl-line" style="font-size:17px;">' + bEsc(v2.name || 'Invoice') + '</div>'
+        + '<div class="bl-paybar">'
+        + (v2.stripe_url ? '<a class="bl-cta bl-cta-sm" href="' + bEsc(v2.stripe_url) + '" target="_blank" rel="noopener">Pay ' + money(v2.amount) + ' \u2192</a>' : '<span class="bl-amtonly">' + money(v2.amount) + '</span>')
+        + (v2.due_date ? '<span class="bl-duemeta">Due <b>' + bEsc(d(v2.due_date)) + '</b></span>' : '')
+        + '</div></div>';
+    });
+  } else {
+    html += '<div class="bl-chap bl-due bl-settled">'
+      + '<div class="jn-when">Today</div>'
+      + '<div class="bl-line bl-green"><span class="jn-tick">\u2713</span>You\u2019re fully settled.</div>'
+      + '<div class="bl-sub">' + bEsc((sit && sit.status && sit.status.line) || 'Nothing is owed. The work continues either way \u2014 that\u2019s the point of the partnership.') + '</div>'
+      + '</div>';
+  }
+
+  // ── the retainer beside its contents: counts only, all real ──
+  if (monthly && (monthly.delivered || monthly.reports || monthly.checks || monthly.current)) {
+    html += '<div class="bl-chap"><div class="jn-when">What your month included</div><div class="bl-inc">';
+    if (monthly.delivered) html += '<span class="lg-chip"><i></i> <b class="lg-mono">' + Number(monthly.delivered) + '</b>\u00a0' + (Number(monthly.delivered)===1?'thing':'things') + ' delivered</span>';
+    if (monthly.reports)   html += '<span class="lg-chip"><i></i> <b class="lg-mono">' + Number(monthly.reports) + '</b>\u00a0' + (Number(monthly.reports)===1?'report':'reports') + '</span>';
+    if (monthly.checks)    html += '<span class="lg-chip"><i></i> <b class="lg-mono">' + Number(monthly.checks) + '</b>\u00a0quiet check-ups</span>';
+    if (monthly.current)   html += '<span class="lg-chip"><i></i> ' + bEsc(String(monthly.current).toLowerCase()) + ' underway</span>';
+    html += '</div><div class="bl-sub" style="margin-top:10px;">Every one of these is in the journal \u2014 this page just puts them next to the number.</div></div>';
+  }
+
+  // ── the record: paid history, calm and gray. No receipt links: none exist. ──
+  if (paid.length) {
+    html += '<div class="jn-month"><span>The record</span><i></i></div>';
+    paid.forEach(function(pv){
+      html += '<div class="bl-paid"><span class="bl-pw">' + bEsc(d(pv.created_at)) + '</span>'
+        + '<span class="bl-pn">' + bEsc(pv.name || 'Payment') + (pv.description ? '<span>' + bEsc(pv.description) + '</span>' : '') + '</span>'
+        + '<span class="bl-pa">' + money(pv.amount) + '</span>'
+        + '<span class="bl-pk">Paid \u2713</span></div>';
+    });
+  }
+  if (!due.length && !paid.length) {
+    html += '<div class="bl-chap"><div class="bl-sub">No invoices yet. When one arrives, it will be here \u2014 clear and exact.</div></div>';
+  }
+
+  html += '<div class="jn-sig" style="margin-top:38px;padding-top:16px;border-top:1px solid var(--hair,#ece7f2);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);"><span>Every number here is the literal record \u2014 nothing estimated, nothing inflated.</span><span style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);">\u2014 Davis Digital</span></div>';
   html += '</div>';
-
-  // ── all-clear confidence note (only when genuinely settled) ──
-  if (sit.all_clear && sit.all_clear_line) {
-    html += '<div class="bill-clear"><span class="bill-clear-ico">\u2713</span>'+bEsc(sit.all_clear_line)+'</div>';
-  }
-
-  if (!invoices.length) {
-    html += '<div class="bill-empty"><div class="bill-empty-h">No invoices yet</div>'
-      + '<div class="bill-empty-p">When there is something to pay, it will appear here, clear and itemized.</div></div>';
-    host.innerHTML = html;
-    return;
-  }
-
-  // order: anything due first (so the actionable item is on top), then paid history
-  var dueRows = invoices.filter(function(i){ return bIsDue(i.status); });
-  var paidRows = invoices.filter(function(i){ return bIsPaid(i.status); });
-  var otherRows = invoices.filter(function(i){ return !bIsDue(i.status) && !bIsPaid(i.status); });
-
-  // ── DUE NOW — the literal invoice(s) needing payment ──
-  if (dueRows.length) {
-    html += '<div class="bill-section-label">Ready to pay</div>';
-    dueRows.forEach(function(inv){ html += billRow(inv, true); });
-  }
-
-  // ── PAID — what you've already paid (literal history) ──
-  if (paidRows.length) {
-    html += '<div class="bill-section-label">Already paid</div>';
-    paidRows.forEach(function(inv){ html += billRow(inv, false); });
-  }
-  otherRows.forEach(function(inv){ html += billRow(inv, false); });
-
   host.innerHTML = html;
 }
 
-// One literal invoice row. EVERYTHING here is verbatim from the invoice record:
-// the amount string exactly as stored, the exact description, exact date, exact
-// status, exact Stripe link. We never compute, round, or restate the money.
 function billRow(inv, isDue){
   var label = bStatusLabel(inv.status);
   var statusClass = bIsPaid(inv.status) ? 'paid' : (bIsDue(inv.status) ? 'due' : 'other');
@@ -4905,7 +4938,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.5';
+  var MY_BUILD='2026-07-04.6';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -5224,6 +5257,31 @@ button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px soli
   .cv-msg.cv-me{ max-width:88%; }
   .cv-help{ display:none; } /* the FAB remains the mobile door to drafting */
   .cv-composer{ padding-bottom:8px; }
+}
+
+/* ═══ THE INVESTMENT RECORD (Billing) ═══ */
+.bl .bl-chap{ padding:24px 0; border-top:1px solid var(--hair,#ece7f2); }
+.bl .bl-chap.bl-due{ padding:8px 0 36px; border-top:none; }
+.bl .bl-line{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:450; font-size:23px; letter-spacing:-.35px; line-height:1.3; color:var(--ink); }
+.bl .bl-green{ color:#1a7e49; }
+.bl .bl-sub{ font-size:12.5px; color:var(--muted); line-height:1.65; margin-top:8px; max-width:50ch; }
+.bl .bl-paybar{ margin-top:15px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.bl .bl-cta{ display:inline-flex; align-items:center; gap:9px; background:var(--accent,#5b3fa0); color:#fff; border:none; border-radius:12px; padding:14px 24px; font-size:13.5px; font-weight:640; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); box-shadow:0 10px 26px rgba(91,63,160,.3); text-decoration:none; min-height:46px; }
+.bl .bl-cta-sm{ padding:11px 18px; font-size:12.5px; box-shadow:0 6px 16px rgba(91,63,160,.22); min-height:40px; }
+.bl .bl-amtonly{ font-family:var(--mono,'Geist Mono',monospace); font-size:15px; }
+.bl .bl-duemeta{ font-size:12px; color:var(--muted); }
+.bl .bl-duemeta b{ font-family:var(--mono,'Geist Mono',monospace); font-weight:500; color:var(--ink); }
+.bl .bl-inc{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.bl .bl-paid{ display:flex; align-items:baseline; gap:14px; padding:14px 0; border-top:1px dashed var(--hair,#ece7f2); }
+.bl .bl-pw{ width:64px; flex:none; font-family:var(--mono,'Geist Mono',monospace); font-size:10.5px; color:#a49ab5; text-transform:uppercase; letter-spacing:.05em; }
+.bl .bl-pn{ flex:1; font-size:13.5px; color:var(--ink); min-width:0; }
+.bl .bl-pn span{ display:block; font-size:11.5px; color:#a49ab5; margin-top:2px; }
+.bl .bl-pa{ font-family:var(--mono,'Geist Mono',monospace); font-size:12.5px; color:var(--muted); }
+.bl .bl-pk{ font-size:11px; color:#1a7e49; font-weight:640; white-space:nowrap; }
+@media(max-width:768px){
+  .bl .bl-line{ font-size:20px; }
+  .bl .bl-cta{ width:100%; justify-content:center; }
+  .bl .bl-paybar{ gap:9px; }
 }
 </style>
 
