@@ -10820,9 +10820,88 @@ async function refreshIntegrations(){
   try{
     var r = await integApi('integrations_status',{clientId:INTEG.clientId});
     INTEG.providers = (r&&r.data&&r.data.providers)||[];
+    INTEG.platform = (r&&r.data&&r.data.platform)||null;
   }catch(e){ INTEG.providers=[]; }
   renderProviderGrid();
   renderSyncHistory();
+  try{ igxRender(); }catch(e){}
+}
+
+// ═══ PLATFORM INTELLIGENCE LAYER ═══
+// Wraps the working per-client provider grid (untouched — it earned its
+// keep) with what was missing: an executive read, real counts, the true
+// dependency map (where each source's data travels and what breaks without
+// it — descriptions of flows that actually exist in this codebase), the
+// platform-level capabilities (Stripe, Resend, Anthropic — configured
+// booleans from the server, never secrets), and derived recommendations.
+function igxRender(){
+  var host=document.getElementById('integrationsBody'); if(!host) return;
+  var P=INTEG.providers||[], PF=INTEG.platform||null;
+  function esc(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+  var healthy=P.filter(function(x){return x.health==='green';}).length;
+  var attn=P.filter(function(x){return x.health==='amber';}).length;
+  var broken=P.filter(function(x){return x.health==='red';}).length;
+  var off=P.filter(function(x){return x.health==='grey';}).length;
+  // executive summary: one sentence, one recommendation — derived
+  var summary, act='';
+  if(broken){ var b=P.find(function(x){return x.health==='red';}); summary=(b.label||'A source')+' is failing — data feeding Analytics and Reports may be stale.'; act='Reauthorize it below.'; }
+  else if(attn){ var a2=P.find(function(x){return x.health==='amber';}); summary=(a2.label||'One source')+' is connected but not delivering signals yet.'; act=(String(a2.status||'')==='connected'&&!a2.property_id)?'Choose its property below — that\u2019s why zero signals came through.':'Run a force sync below.'; }
+  else if(healthy&&!off){ summary='Every connected source is healthy and feeding the platform.'; act='Nothing needs you.'; }
+  else if(healthy){ summary=healthy+' source'+(healthy===1?'':'s')+' healthy; '+off+' not connected for this client.'; act='Connect the rest only if this client needs them.'; }
+  else { summary='No data sources connected for this client yet.'; act='Start with Google Analytics — it feeds the most surfaces.'; }
+
+  // the TRUE dependency map — these flows exist in this codebase
+  var FLOWS={
+    ga4:{flow:'GA4 \u2192 signals \u2192 Analytics \u2192 Reports \u2192 Talking points \u2192 Today brief',breaks:'Analytics interpretations, report highlights, and metric-based talking points go stale.'},
+    gsc:{flow:'Search Console \u2192 signals \u2192 Analytics (search) \u2192 Reports \u2192 SEO recommendations',breaks:'Search visibility reads and SEO lines in reports stop updating.'},
+    gbp:{flow:'Business Profile \u2192 signals \u2192 Analytics (calls/local) \u2192 Reports \u2192 Practice Pulse',breaks:'Call tracking and local-presence insights freeze.'},
+    psi:{flow:'PageSpeed \u2192 site_checks \u2192 Site Monitor \u2192 Maintenance receipts \u2192 Reports',breaks:'Site health scores, receipts, and speed lines in reports stop.'}
+  };
+  var flowRows=P.filter(function(x){ return FLOWS[x.id]; }).map(function(x){
+    var f=FLOWS[x.id]; var on=(x.health==='green');
+    return '<div style="padding:10px 0;border-top:1px solid rgba(41,25,66,.05);">'
+      +'<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#1a7e49':x.health==='amber'?'#b8860b':x.health==='red'?'#c0392b':'#cfc9dd')+';flex:none;"></span>'
+      +'<b style="font-size:12.5px;color:var(--ink);">'+esc(x.label||x.id)+'</b></div>'
+      +'<div style="font-size:11.5px;color:var(--muted);margin:4px 0 0 16px;line-height:1.6;">'+f.flow+'</div>'
+      +'<div style="font-size:11px;color:'+(on?'var(--muted)':'#9a2d2d')+';margin:2px 0 0 16px;">If it stops: '+esc(f.breaks)+'</div>'
+    +'</div>';
+  }).join('');
+  // platform capabilities — env-configured booleans from the server
+  var caps='';
+  if(PF){
+    var CAP=[['stripe','Stripe','Invoice payments \u2192 auto thank-you \u2192 review ask \u2192 revenue vitals \u2192 Today'],
+             ['resend','Resend','Every automated email: reminders, nudges, receipts, report notifications'],
+             ['anthropic','Anthropic AI','All \u2728 features \u2014 briefs, narratives, rewrites; everything degrades to honest templates without it'],
+             ['review_link','Google review link','Payment thank-yous carry the review ask']];
+    caps='<div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin:14px 0 2px;">PLATFORM CAPABILITIES \u2014 studio-wide, not per client</div>'
+      +CAP.map(function(c){
+        var on=!!PF[c[0]];
+        return '<div style="padding:8px 0;border-top:1px solid rgba(41,25,66,.05);">'
+          +'<div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#1a7e49':'#c0392b')+';flex:none;"></span>'
+          +'<b style="font-size:12.5px;color:var(--ink);">'+c[1]+'</b><span style="font-size:10px;font-weight:700;color:'+(on?'#1a7e49':'#c0392b')+';margin-left:auto;">'+(on?'CONFIGURED':'NOT CONFIGURED')+'</span></div>'
+          +'<div style="font-size:11px;color:var(--muted);margin:3px 0 0 16px;line-height:1.55;">'+c[2]+'</div>'
+        +'</div>';
+      }).join('');
+  }
+  var strip='<div class="cx-stats" style="margin-top:0;">'
+    +'<div class="cx-st"><div class="cx-sn">'+P.length+'</div><div class="cx-sl">Sources for this client</div></div>'
+    +'<div class="cx-st"><div class="cx-sn" style="color:#1a7e49;">'+healthy+'</div><div class="cx-sl">Healthy \u00b7 delivering signals</div></div>'
+    +'<div class="cx-st"><div class="cx-sn" style="'+(attn?'color:#b8860b;':'')+'">'+attn+'</div><div class="cx-sl">Need attention</div></div>'
+    +'<div class="cx-st"><div class="cx-sn" style="'+(broken?'color:#c0392b;':'')+'">'+broken+'</div><div class="cx-sl">Failing</div></div>'
+    +'<div class="cx-st"><div class="cx-sn">'+(PF?[PF.stripe,PF.resend,PF.anthropic,PF.review_link].filter(Boolean).length+'/4':'\u2014')+'</div><div class="cx-sl">Platform capabilities live</div></div>'
+  +'</div>';
+  var top=document.getElementById('igxTop');
+  if(!top){ top=document.createElement('div'); top.id='igxTop'; host.insertBefore(top, host.firstChild); }
+  top.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:12px 16px;margin-bottom:12px;">'
+    +'<span style="font-size:10px;font-weight:800;letter-spacing:.05em;color:var(--p);flex:none;">\u2726 PLATFORM READ</span>'
+    +'<span style="flex:1;font-size:12.5px;color:var(--ink);line-height:1.5;">'+esc(summary)+' <b>'+esc(act)+'</b></span>'
+  +'</div>'+strip;
+  var rail=document.getElementById('igxRail');
+  if(!rail){ rail=document.createElement('div'); rail.id='igxRail'; host.appendChild(rail); }
+  rail.innerHTML='<div class="grx-card" style="margin-top:16px;"><div class="grx-h">Where the data goes \u2014 and what breaks without it</div>'
+    +'<div style="font-size:11.5px;color:var(--muted);line-height:1.55;margin-bottom:4px;">These are the real flows in this platform, not a diagram of intentions. Health dots mirror the cards above.</div>'
+    +flowRows+caps
+  +'</div>';
 }
 
 var HEALTH = {
