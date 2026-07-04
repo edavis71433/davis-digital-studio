@@ -130,7 +130,7 @@ function gen(){
   var rows=[['SCHEDULER_SECRET',sec],['ANTHROPIC_KEY','(your key \u2014 managed model provides the AI)'],
     ['RESEND_KEY','(your key for now)'],['OWNER_EMAIL',email],
     ['EMAIL_FROM',name+' <noreply@davisdigitalstudio.com>'],['SITE_URL',siteUrl],['ALLOWED_ORIGINS',siteUrl],
-    ['SUPABASE_ANON_KEY',anon.slice(0,18)+'\u2026 (her API settings)']];
+    ['\u2014 SUPABASE_* values','AUTO-PROVIDED by Supabase \u2014 do NOT add these; the dashboard rejects the prefix']];
   document.getElementById('c-secrets').innerHTML='<tr><th>Secret</th><th>Value</th></tr>'+
     rows.map(function(r){return '<tr><td><b>'+esc(r[0])+'</b></td><td>'+esc(r[1])+'</td></tr>';}).join('');
 
