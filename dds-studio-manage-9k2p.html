@@ -18733,7 +18733,7 @@ window.ddsStatTile=function(opts){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.10';
+  var MY_BUILD='2026-07-04.11';
   setTimeout(async function(){
     try{
       var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},body:JSON.stringify({type:'version'})});
@@ -18748,6 +18748,105 @@ window.ddsStatTile=function(opts){
 })();
 </script>
 
+
+<script>
+// ═══ PRODUCT INTELLIGENCE SETTINGS ═══ one card in the existing Settings
+// area. Operational thresholds only — the Decision Filter and the honesty
+// gates are code, not settings, and do not appear here on purpose.
+(function(){
+  var PRESETS = {
+    early:  { min_events_for_ai:50,   min_feedback_for_ai:3,  min_active_partners:1, min_confidence_responses:3,  max_recommendations:5 },
+    growing:{ min_events_for_ai:300,  min_feedback_for_ai:10, min_active_partners:3, min_confidence_responses:8,  max_recommendations:5 },
+    mature: { min_events_for_ai:1500, min_feedback_for_ai:25, min_active_partners:5, min_confidence_responses:15, max_recommendations:3 }
+  };
+  var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  function fld(label,inner){ return '<div><label style="display:block;font-size:11px;font-weight:600;color:var(--muted,#6B6478);margin:0 0 4px;">'+label+'</label>'+inner+'</div>'; }
+  function num(id,min,max){ return '<input class="fi" id="'+id+'" type="number" min="'+min+'" max="'+max+'" style="width:100%;">'; }
+
+  async function piMount(){
+    var page=document.getElementById('page-team'); if(!page||document.getElementById('piCard')) return;
+    var el=document.createElement('div'); el.className='card'; el.id='piCard'; el.style.marginTop='18px';
+    el.innerHTML =
+      '<h3 style="margin:0 0 4px;">Product Intelligence</h3>'+
+      '<p class="ps" style="margin-bottom:14px;">Evidence thresholds for the weekly report. These tune how strict the honesty gate is — they can never turn it off. The Decision Filter is not configurable.</p>'+
+      '<div style="margin-bottom:12px;">'+fld('Maturity preset (fills the fields — nothing changes until you save)',
+        '<select class="fi" id="pi-preset" style="width:100%;"><option value="">— choose —</option><option value="early">Early validation</option><option value="growing">Growing product</option><option value="mature">Mature product</option></select>')+'</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">'+
+        fld('Min events before AI runs (floor 10)', num('pi-ev',10,100000))+
+        fld('Min feedback notes (floor 1)', num('pi-fb',1,1000))+
+        fld('Min active partners', num('pi-pt',1,100))+
+        fld('Min confidence responses', num('pi-cf',1,500))+
+        fld('Max recommendations (1\u201310)', num('pi-mx',1,10))+
+        fld('Report day', '<select class="fi" id="pi-day" style="width:100%;">'+DAYS.map(function(d,i){return '<option value="'+i+'">'+d+'</option>';}).join('')+'</select>')+
+      '</div>'+
+      '<div style="margin-top:12px;">'+fld('Report recipients (comma-separated emails)','<input class="fi" id="pi-rc" type="text" style="width:100%;">')+'</div>'+
+      '<div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;"><input type="checkbox" id="pi-dp"> Design Agent enabled (research mode on partner deployments)</label>'+
+      '</div>'+
+      '<div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'+
+        '<button class="sbtn" id="pi-save">Save settings</button>'+
+        '<button class="sbtn" id="pi-run" style="background:none;color:var(--p,#5B3FA0);border:1.5px solid var(--p,#5B3FA0);box-shadow:none;">Run report now \u2192</button>'+
+        '<span id="pi-msg" style="font-size:12px;color:var(--muted,#6B6478);"></span>'+
+      '</div>';
+    page.appendChild(el);
+
+    var msg=function(t){ var m=document.getElementById('pi-msg'); if(m){ m.textContent=t; setTimeout(function(){ if(m.textContent===t) m.textContent=''; },4000);} };
+    try{
+      var r=await api('pi_settings?id=eq.1&select=*&limit=1');
+      var s=(r&&r.data&&r.data[0])||(Array.isArray(r)&&r[0])||{};
+      document.getElementById('pi-ev').value=s.min_events_for_ai!=null?s.min_events_for_ai:50;
+      document.getElementById('pi-fb').value=s.min_feedback_for_ai!=null?s.min_feedback_for_ai:3;
+      document.getElementById('pi-pt').value=s.min_active_partners!=null?s.min_active_partners:1;
+      document.getElementById('pi-cf').value=s.min_confidence_responses!=null?s.min_confidence_responses:3;
+      document.getElementById('pi-mx').value=s.max_recommendations!=null?s.max_recommendations:5;
+      document.getElementById('pi-day').value=String(s.report_day!=null?s.report_day:1);
+      document.getElementById('pi-rc').value=s.report_recipients||'';
+      document.getElementById('pi-dp').checked=s.dp_mode_enabled!==false;
+    }catch(e){ msg('Could not load settings \u2014 run 13-pi-configuration.sql first.'); }
+
+    document.getElementById('pi-preset').addEventListener('change',function(){
+      var p=PRESETS[this.value]; if(!p) return;
+      document.getElementById('pi-ev').value=p.min_events_for_ai;
+      document.getElementById('pi-fb').value=p.min_feedback_for_ai;
+      document.getElementById('pi-pt').value=p.min_active_partners;
+      document.getElementById('pi-cf').value=p.min_confidence_responses;
+      document.getElementById('pi-mx').value=p.max_recommendations;
+      msg('Preset loaded \u2014 review and Save to apply.');
+    });
+    document.getElementById('pi-save').addEventListener('click',async function(){
+      var b=this; b.disabled=true;
+      try{
+        await api('pi_settings?id=eq.1','PATCH',{
+          min_events_for_ai:parseInt(document.getElementById('pi-ev').value,10)||50,
+          min_feedback_for_ai:parseInt(document.getElementById('pi-fb').value,10)||3,
+          min_active_partners:parseInt(document.getElementById('pi-pt').value,10)||1,
+          min_confidence_responses:parseInt(document.getElementById('pi-cf').value,10)||3,
+          max_recommendations:parseInt(document.getElementById('pi-mx').value,10)||5,
+          report_day:parseInt(document.getElementById('pi-day').value,10)||1,
+          report_recipients:document.getElementById('pi-rc').value.trim(),
+          dp_mode_enabled:document.getElementById('pi-dp').checked,
+          updated_at:new Date().toISOString()
+        });
+        msg('Saved \u2713 \u2014 next report uses these thresholds.');
+      }catch(e){ msg('Save failed \u2014 is pi_settings in the allowlists (build .11)?'); }
+      b.disabled=false;
+    });
+    document.getElementById('pi-run').addEventListener('click',async function(){
+      var b=this; b.disabled=true; msg('Running\u2026');
+      try{
+        var jwt=await adminJwt();
+        var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'pi_weekly'})});
+        var j=await res.json();
+        if(j&&j.data&&j.data.ok){ msg('Report generated \u2014 check your email ('+(j.data.events_n||0)+' events, '+(j.data.feedback_n||0)+' notes behind it).'); }
+        else{ msg('Run failed: '+((j&&(j.error||j.detail))||'unknown')); }
+      }catch(e){ msg('Run failed \u2014 network.'); }
+      b.disabled=false;
+    });
+  }
+  // mount when the Settings page exists (SPA-safe, same pattern as Contacts)
+  var t=setInterval(function(){ if(document.getElementById('page-team')){ clearInterval(t); piMount(); } },800);
+})();
+</script>
 
 <script src="/dp-mode.js"></script>
 <script>DPMode.init({ app: "admin", url: "https://qksstlqzbhesadrrofgn.supabase.co", anon: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrc3N0bHF6Ymhlc2FkcnJvZmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzMwMDMsImV4cCI6MjA5NzU0OTAwM30.4V94Ua7z5cntPWtvtqN24TUnfY5A6K6-zCxY0iEcgYo" });</script>

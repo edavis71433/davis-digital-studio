@@ -433,6 +433,23 @@
       }
       ready = true;
       stat.session = !!readSession();
+      // Fleet kill switch: the public version route says whether the Design
+      // Agent is enabled (pi_settings.dp_mode_enabled). Fail-open: if the
+      // check errors, research mode stays on; a kill switch that kills on
+      // network blips would be worse than none.
+      try {
+        fetch(cfg.url + '/functions/v1/clever-api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.anon },
+          body: JSON.stringify({ type: 'version' })
+        }).then(function (r) { return r.json(); }).then(function (j) {
+          if (j && j.data && j.data.dp_enabled === false) {
+            ready = false; queue.length = 0;
+            var w = document.getElementById('dp-widget'); if (w) w.remove();
+            var n = document.getElementById('dp-notice'); if (n) n.remove();
+          }
+        }).catch(function () {});
+      } catch (e) {}
       showNoticeOnce();
 
       document.addEventListener('click', onClick, true);
