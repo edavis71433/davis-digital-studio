@@ -3162,6 +3162,50 @@ function hubIsActive(c) {
   return true;
 }
 
+// ── CLIENT PULSE: relationship + business health, happiness trend, cadence,
+// anniversaries, renewal likelihood, upsell gap — the server-side scoring
+// brain (client_pulse), finally on screen. Loaded once with the hub list.
+var HUBPULSE={};
+async function loadHubPulse(){
+  var jwt=await adminJwt(); if(!jwt) return null;
+  var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'client_pulse'})});
+  var j=await r.json(); var rows=(j&&j.data&&j.data.clients)||[];
+  HUBPULSE={}; rows.forEach(function(c){ HUBPULSE[String(c.id)]=c; });
+  return HUBPULSE;
+}
+function hubHealthChip(pu){
+  if(!pu||pu.relationship_health==null) return '';
+  var v=pu.relationship_health;
+  var col=v>=80?'#1a7e49':v>=60?'#9a7a1a':'#c0392b';
+  var bg=v>=80?'#e7f6ee':v>=60?'#fdf6e3':'#fbecea';
+  return '<span title="Relationship health'+(pu.rh_note?': '+escAttr(pu.rh_note):'')+'" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;background:'+bg+';color:'+col+';">'+v+'</span>';
+}
+function hubPulsePanel(pu){
+  if(!pu) return '';
+  var bits=[];
+  if(pu.relationship_health!=null) bits.push('<div><div style="font-size:19px;font-weight:700;color:'+(pu.relationship_health>=80?'#1a7e49':pu.relationship_health>=60?'#9a7a1a':'#c0392b')+';">'+pu.relationship_health+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Relationship'+(pu.rh_note?' · '+escHtml(pu.rh_note):'')+'</div></div>');
+  if(pu.business_health!=null) bits.push('<div><div style="font-size:19px;font-weight:700;color:var(--ink);">'+pu.business_health+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Business health</div></div>');
+  if(pu.happiness&&pu.happiness.recent!=null){
+    var tArrow=pu.happiness.trend==='up'?'↑':pu.happiness.trend==='down'?'↓':'→';
+    var tCol=pu.happiness.trend==='up'?'#1a7e49':pu.happiness.trend==='down'?'#c0392b':'var(--muted)';
+    bits.push('<div><div style="font-size:19px;font-weight:700;color:var(--ink);">'+pu.happiness.recent+'/10 <span style="color:'+tCol+';font-size:15px;">'+tArrow+'</span></div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Happiness · '+pu.happiness.surveys+' survey'+(pu.happiness.surveys===1?'':'s')+'</div></div>');
+  }
+  if(pu.days_since_contact!=null) bits.push('<div><div style="font-size:19px;font-weight:700;color:'+(pu.days_since_contact>21?'#c0392b':'var(--ink)')+';">'+pu.days_since_contact+'d</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Since last contact</div></div>');
+  var notes=[];
+  if(pu.renewal){
+    var rl={likely:{t:'Renewal likely',c:'#1a7e49'},uncertain:{t:'Renewal uncertain',c:'#9a7a1a'},at_risk:{t:'Renewal at risk',c:'#c0392b'},unknown:{t:'Renewal window',c:'var(--muted)'}}[pu.renewal.likelihood]||{t:'Renewal',c:'var(--muted)'};
+    notes.push('<span style="font-size:11.5px;font-weight:700;color:'+rl.c+';">'+rl.t+' · '+pu.renewal.days+'d away</span>');
+  }
+  if(pu.anniversary) notes.push('<span style="font-size:11.5px;color:var(--p);font-weight:600;">🎉 '+pu.anniversary.years+'-year '+(pu.anniversary.basis==='launch'?'launch':'client')+' anniversary in '+pu.anniversary.days_until+'d — a personal note goes far</span>');
+  if(pu.upsell) notes.push('<span style="font-size:11.5px;color:var(--ink);">💡 '+escHtml(pu.upsell)+'</span>');
+  if(!bits.length&&!notes.length) return '';
+  return '<div style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;padding:16px 22px;margin-bottom:14px;">'
+    +'<div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">How this client is doing</div>'
+    +(bits.length?'<div style="display:flex;gap:26px;flex-wrap:wrap;">'+bits.join('')+'</div>':'')
+    +(notes.length?'<div style="display:flex;flex-direction:column;gap:5px;margin-top:'+(bits.length?'12px':'0')+';">'+notes.join('')+'</div>':'')
+  +'</div>';
+}
+
 async function loadHub() {
   var listEl = document.getElementById("hubList");
   if (!listEl) return;
@@ -3169,7 +3213,8 @@ async function loadHub() {
   document.getElementById("hubDetail").style.display = "none";
   var res = await Promise.all([
     api("clients?select=*&order=created_at.desc"),
-    api("audit_leads?select=*&order=created_at.desc&limit=300")
+    api("audit_leads?select=*&order=created_at.desc&limit=300"),
+    loadHubPulse().catch(function(){return null;})
   ]);
   hubClients = res[0] || [];
   hubLeads = res[1] || [];
@@ -3235,6 +3280,7 @@ function renderHub() {
           '</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+          hubHealthChip(HUBPULSE[String(c.id)]) +
           (leadCount>0?'<span style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(91,63,160,0.08);color:var(--p);">'+leadCount+' tool run'+(leadCount>1?'s':'')+'</span>':'') +
           '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;background:var(--pxxxl);color:var(--p);">'+(c.progress||0)+'%</span>' +
           '<span style="color:var(--muted);font-size:18px;">›</span>' +
@@ -3287,6 +3333,7 @@ async function openHubClient(id) {
   var pendingAppr = apprs.filter(function(a){ return (a.status||"")==="pending"; }).length;
 
   var html = '';
+  html += hubPulsePanel(HUBPULSE[String(c.id)]);
   // Header
   html += '<div style="background:#fff;border:1px solid rgba(91,63,160,0.12);border-radius:16px;padding:22px;">';
   html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">';
