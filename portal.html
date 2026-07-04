@@ -1183,9 +1183,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       <div style="padding:8px 0;">
         <!-- PRIMARY SPINE — the calm destinations -->
         <button class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg></span>Home</button>
-        <button class="nav-item" onclick="nav('timeline')" id="nav-timeline"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Progress</button>
-        <button class="nav-item" onclick="nav('approvals')" id="nav-approvals2"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Decisions<span class="nav-badge" id="badge-approvals" style="display:none"></span></button>
-        <button class="nav-item" onclick="nav('files')" id="nav-files"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Files<span class="nav-badge" id="badge-files" style="display:none"></span></button>
+        <button class="nav-item" onclick="nav('work')" id="nav-work"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>The work<span class="nav-badge" id="badge-work" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('messages')" id="nav-messages"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Conversation<span class="nav-badge" id="badge-messages" style="display:none"></span></button>
         <button class="nav-item" onclick="nav('invoices')" id="nav-invoices"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Billing</button>
         <button class="nav-item growth-only" style="display:none" onclick="nav('gp_priorities')" id="nav-gp_priorities"><span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span>Growth<span class="nav-badge" id="badge-gp" style="display:none"></span></button>
@@ -1208,17 +1206,31 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
       </div>
 
       <!-- TIMELINE -->
-      <div class="page-view" id="page-timeline">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Progress</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Where things stand, what we’re working on, and what’s coming next.</p>
-        <div id="timelineBody"></div>
-      </div>
+      
+      <!-- THE WORK — one room: decisions inline where they block work, the
+           phase spine, and everything delivered. One object, one place. -->
+      <div class="page-view" id="page-work">
+        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">The work</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:22px;">Everything about your project in one place — what needs you, where things stand, and what we’ve delivered.</p>
 
-      <!-- FILES -->
-      <div class="page-view" id="page-files">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Your work, delivered</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Everything we’ve completed for you, with a note on what each one is and what to do with it.</p>
-        <div class="card">
+        <section id="work-decisions" style="margin-bottom:34px;">
+          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Waiting on you</h3>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Decisions only you can make. When this is empty, everything is on us.</p>
+<div id="approvalsBody"></div>
+      
+        </section>
+
+        <section id="work-progress" style="margin-bottom:34px;">
+          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Where things stand</h3>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">What we’re working on now, and what’s coming next.</p>
+<div id="timelineBody"></div>
+      
+        </section>
+
+        <section id="work-delivered" style="margin-bottom:34px;">
+          <h3 style="font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:4px;">Delivered</h3>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Everything we’ve completed for you — newest first — plus a place to send us anything we need.</p>
+<div class="card">
           <div class="card-body">
             <div id="uploadProgressWrap" style="display:none;" class="upload-progress">
               <p>Uploading <strong id="uploadFileName"></strong>...</p>
@@ -1238,13 +1250,8 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
             <div class="file-list" id="fileList"><div class="dlv-empty"><div class="dlv-empty-h">Loading your deliveries</div><div class="dlv-empty-p">One moment while we gather everything we've delivered for you.</div></div></div>
           </div>
         </div>
-      </div>
-
-      <!-- APPROVALS -->
-      <div class="page-view" id="page-approvals">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Your decisions</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Everything you need to decide with confidence. Take your time.</p>
-        <div id="approvalsBody"></div>
+      
+        </section>
       </div>
 
       <!-- GUIDE -->
@@ -2705,7 +2712,8 @@ async function loadApprovals() {
   catch(e){ console.error('client_decisions:', e); }
   // Keep the badge + attention counts working from the same source of truth.
   var pending = brief ? brief.count : 0;
-  setBadge("badge-approvals", pending);
+  setBadge("badge-approvals", pending); // legacy element (gone) — safe no-op
+  setBadge("badge-work", pending);      // THE single "needs you" signal
   window._pendingApprovals = pending;
   try { updateAttention(); } catch(e){}
   if (!brief) { renderError("approvalsBody", "loadApprovals()"); return; }
@@ -2887,12 +2895,24 @@ async function forgotPassword(){
 }
 function nav(page) {
   updateLastSeen();
+  // THE WORK MERGE — Progress, Decisions, and Files are one room now.
+  // Old ids keep working forever: they land inside The Work, on the exact
+  // section they used to be, so no saved link or email button ever breaks.
+  var section = null;
+  if (page === "timeline")  { page = "work"; section = "work-progress"; }
+  if (page === "approvals") { page = "work"; section = "work-decisions"; }
+  if (page === "files")     { page = "work"; section = "work-delivered"; }
   document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  document.getElementById("page-"+page).classList.add("active");
-  var navAlias = { approvals:"approvals2" };
-  var el = document.getElementById("nav-"+(navAlias[page]||page));
+  var pv = document.getElementById("page-"+page);
+  if (!pv) { page = "dashboard"; pv = document.getElementById("page-dashboard"); }
+  pv.classList.add("active");
+  var el = document.getElementById("nav-"+page);
   if (el) el.classList.add("active");
+  if (section) {
+    var target = document.getElementById(section);
+    if (target) { target.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
   window.scrollTo(0,0);
 }
 
@@ -4429,7 +4449,7 @@ function renderHQFallback(){
 <!-- Mobile bottom nav -->
 <div style="display:none;" id="mobileNav" class="mobile-nav">
   <button onclick="nav('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg><span>Home</span></button>
-  <button onclick="nav('timeline')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Progress</span></button>
+  <button onclick="nav('work')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg><span>The work</span></button>
   <button onclick="nav('messages')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Conversation</span></button>
   <button onclick="nav('invoices')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Billing</span></button>
   <button onclick="openMoreSheet()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>More</span></button>
@@ -4441,7 +4461,7 @@ function renderHQFallback(){
   <div class="more-sheet-handle"></div>
   <div class="more-sheet-title">Go to</div>
   <div class="more-grid">
-    <button onclick="navMore('files')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Files</span></button>
+    <button onclick="navMore('files')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Delivered</span></button>
     <button onclick="navMore('invoices')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Billing</span></button>
     <button onclick="navMore('gp_priorities')" class="more-growth growth-only" style="display:none;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg><span>Growth</span></button>
   </div>
