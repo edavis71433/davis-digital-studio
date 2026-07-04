@@ -17643,7 +17643,7 @@ window.ddsCommOpen=function(tid,cid){
 // platform doesn't store (2FA state, devices, sessions, failed logins)
 // is named as absent, never simulated.
 (function(){
-  var TMX={members:[],perm:null,clients:[],contacts:[],sel:null,view:'team',loaded:false};
+  var TMX={members:[],perm:null,clients:[],contacts:[],sel:null,view:'team',loaded:false,act:{}};
   function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function att(x){ return esc(x).replace(/'/g,'&#39;'); }
   function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
@@ -17694,9 +17694,22 @@ window.ddsCommOpen=function(tid,cid){
     if(!TMX.sel&&TMX.members.length) TMX.sel=String(TMX.members[0].id);
     TMX.loaded=true;
     tmxRender();
+    try{ tmxActFill(); }catch(e){}
   };
 
-  window.tmxSel=function(id){ TMX.sel=String(id); TMX.view='team'; tmxRender(); };
+  window.tmxSel=function(id){ TMX.sel=String(id); TMX.view='team'; tmxRender(); tmxActFill(); };
+  // attributed activity: what this person has actually done, from the
+  // server-stamped actor trail. Derived, never entered.
+  TMX.act={};
+  async function tmxActFill(){
+    var m=curM(); if(!m||!m.email) return;
+    var em=String(m.email).toLowerCase();
+    if(TMX.act[em]!==undefined){ tmxRender(); return; }
+    TMX.act[em]=null; // loading marker
+    var rows=await safe(function(){ return api('activity_log?actor_email=eq.'+encodeURIComponent(em)+'&select=client_id,action,detail,created_at&order=created_at.desc&limit=60'); });
+    TMX.act[em]=rows||[];
+    tmxRender();
+  }
   window.tmxView=function(v){ TMX.view=v; tmxRender(); };
   function curM(){ return TMX.members.find(function(m){ return String(m.id)===String(TMX.sel); })||null; }
 
@@ -17816,6 +17829,29 @@ window.ddsCommOpen=function(tid,cid){
             +'<div class="cx-kv"><span>Can do</span><b style="font-weight:500;text-align:right;max-width:60%;">'+esc(d2.can[0])+'</b></div>'
             +((d2.cant&&d2.cant[0])?'<div class="cx-kv"><span>Cannot</span><b style="font-weight:500;text-align:right;max-width:60%;">'+esc(d2.cant[0])+'</b></div>':'')
           +'</div>'
+          +(function(){
+            // ── ACCOUNTABILITY ── clients touched, workload, recent actions:
+            // all derived from the server-stamped actor trail.
+            var em=String(m.email||'').toLowerCase();
+            var acts=TMX.act?TMX.act[em]:undefined;
+            if(acts===undefined) return '';
+            if(acts===null) return '<div class="ivx-block"><div class="ivx-bh">ACTIVITY</div><div style="font-size:12px;color:var(--muted);">Reading their trail\u2026</div></div>';
+            var cname=function(cid){ var c=TMX.clients.find(function(x){return String(x.id)===String(cid);}); return c?(c.name||'Client'):''; };
+            var d7=new Date(Date.now()-7*86400000).toISOString(), d30=new Date(Date.now()-30*86400000).toISOString();
+            var wk=acts.filter(function(a){ return a.created_at>=d7; }).length;
+            var touched={}; acts.forEach(function(a){ if(a.client_id&&a.created_at>=d30){ var n=cname(a.client_id); if(n) touched[n]=1; } });
+            var tNames=Object.keys(touched);
+            if(!acts.length) return '<div class="ivx-block"><div class="ivx-bh">ACTIVITY</div><div style="font-size:12px;color:var(--muted);line-height:1.55;">No attributed actions yet \u2014 attribution begins with this deploy; every admin action on a client record is stamped with who did it from here forward. History before today is unattributed by design, not missing.</div></div>';
+            return '<div class="ivx-block"><div class="ivx-bh">WORKING ON \u2014 last 30 days, from their actual trail</div>'
+              +(tNames.length?('<div style="font-size:12.5px;color:var(--ink);line-height:1.7;">'+tNames.slice(0,8).map(esc).join(' \u00b7 ')+'</div>'):'<div style="font-size:12px;color:var(--muted);">No client records touched in 30 days.</div>')
+              +'<div class="cx-kv" style="margin-top:8px;"><span>Actions this week</span><b>'+wk+(wk>40?' \u2014 heavy':'')+'</b></div>'
+            +'</div>'
+            +'<div class="ivx-block"><div class="ivx-bh">RECENT ACTIVITY</div>'
+              +acts.slice(0,8).map(function(a){
+                return '<div class="cx-kv"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(String(a.action||'').replace(/_/g,' '))+(a.client_id&&cname(a.client_id)?' \u00b7 '+esc(cname(a.client_id)):'')+'</span><b style="font-weight:500;color:var(--muted);flex:none;">'+esc(ago(a.created_at))+'</b></div>';
+              }).join('')
+            +'</div>';
+          })()
           +'<div class="ivx-block"><div class="ivx-bh">CHANGE ACCESS \u2014 takes effect on their next request</div>'
             +(isOwnerRow&&M.filter(function(x){return x.role==='owner';}).length===1
               ?'<div style="font-size:12.5px;color:var(--ink);">This is the only owner account \u2014 it can\u2019t be demoted or removed. That\u2019s a safety rail, not a limitation.</div>'
