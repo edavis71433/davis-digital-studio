@@ -14865,6 +14865,20 @@ function anEngineNote(eng){
   window.apxNewToggle=function(){ APX.showNew=!APX.showNew; apxRender(); };
   window.apxQ=function(v){ APX.q=v; apxRender(); };
 
+  // turnaround days for one decided item; median typical decision time per client
+  function apxTurn(it){
+    if(!it.decided||!it.when) return null;
+    var d=(new Date(it.decided)-new Date(it.when))/86400000;
+    return (isFinite(d)&&d>=0)?Math.round(d):null;
+  }
+  function apxTypical(cid){
+    var ds=APX.apps.filter(function(a){ return String(a.client_id)===String(cid)&&String(a.status||'').toLowerCase()!=='pending'&&(a.updated_at||a.decided_at); })
+      .map(function(a){ var d=(new Date(a.updated_at||a.decided_at)-new Date(a.created_at))/86400000; return (isFinite(d)&&d>=0)?d:null; })
+      .filter(function(x){ return x!=null; }).sort(function(x,y){ return x-y; });
+    if(!ds.length) return null;
+    return Math.max(1,Math.round(ds[Math.floor(ds.length/2)]));
+  }
+
   function items(){
     var out=[];
     APX.apps.forEach(function(a){ var st=String(a.status||'pending').toLowerCase();
@@ -15002,7 +15016,23 @@ function anEngineNote(eng){
           +'<div class="rhx-kv"><span>Requested</span><b>'+esc(agoS(it.when)||'\u2014')+'</b></div>'
           +'<div class="rhx-kv"><span>Client</span><b>'+esc(cName(it.client_id))+'</b></div>'
           +'<div class="rhx-kv"><span>Status</span><b>'+esc(it.status)+'</b></div>'
-          +(it.decided?'<div class="rhx-kv"><span>Decided</span><b>'+esc(agoS(it.decided))+'</b></div>':'')
+          +(it.decided?'<div class="rhx-kv"><span>Decided</span><b>'+esc(agoS(it.decided))+(function(){ var t=apxTurn(it); return t!=null?' \u00b7 '+t+'d turnaround':''; })()+'</b></div>':'')
+          +(function(){
+            // predicted response time: median turnaround of THIS client's
+            // decided approvals. Honest when there's no history.
+            if(it.kind!=='a'||it.bucket!=='client') return '';
+            var t=apxTypical(it.client_id);
+            return '<div class="rhx-kv"><span>Typical decision time</span><b>'+(t!=null?('~'+t+' day'+(t===1?'':'s')+' for this client'):'no history yet')+'</b></div>';
+          })()
+          +(function(){
+            // auto-reminder status from the scheduler stamps
+            if(it.kind!=='a'||it.bucket!=='client') return '';
+            var row=APX.apps.find(function(a){return String(a.id)===String(it.id);})||{};
+            var n=Number(row.reminder_count)||0;
+            if(n>0) return '<div class="rhx-kv"><span>Auto-reminders</span><b>'+n+' sent'+(row.last_reminder_at?' \u00b7 last '+esc(agoS(row.last_reminder_at)):'')+(n>=3?' \u00b7 cap reached':'')+'</b></div>';
+            var age=(Date.now()-new Date(it.when))/86400000;
+            return '<div class="rhx-kv"><span>Auto-reminders</span><b>'+(age>=3?'due on the next nightly run':'start after 3 days pending')+'</b></div>';
+          })()
         +'</div>'
         +'<div class="ivx-block"><div class="ivx-bh">WHAT HAPPENS NEXT</div><div style="font-size:12.5px;color:var(--ink);line-height:1.9;">'+next+'</div></div>'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">'
