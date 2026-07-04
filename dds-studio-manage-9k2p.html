@@ -13415,13 +13415,33 @@ function anEngineNote(eng){
     if(GRX.dtab==='strategy'){ main=strategyCard(); setTimeout(function(){ try{ grxStratLoad(); }catch(e){} },0); }
     else if(GRX.dtab==='goals'){ main=goalsCard(true); }
     else if(GRX.dtab==='tasks'){
-      main='<div class="grx-card"><div class="grx-h">Tasks \u2014 '+tDone+' of '+tTot+' complete</div>'
-        +(tasks.length?tasks.map(function(t){
+      // impact-first ordering: open tasks by priority (1=high), then age;
+      // completed sink to the bottom. Priority chips say WHY something is
+      // first; rec-sourced tasks are labeled so the lineage is visible.
+      var tSorted=tasks.slice().sort(function(a,b){
+        var da=done(a)?1:0, db2=done(b)?1:0; if(da!==db2) return da-db2;
+        var pa=Number(a.priority)||2, pb=Number(b.priority)||2; if(pa!==pb) return pa-pb;
+        return new Date(a.created_at||0)-new Date(b.created_at||0);
+      });
+      var prioChip=function(t){
+        var pN=Number(t.priority)||2;
+        var m={1:['HIGH IMPACT','#c0392b','#fbecea'],2:['MEDIUM','#9a7a1a','#fdf6e3'],3:['LOW','#7a6d8e','#f3f0fa']}[pN]||['MEDIUM','#9a7a1a','#fdf6e3'];
+        return '<span style="font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:100px;color:'+m[1]+';background:'+m[2]+';flex:none;">'+m[0]+'</span>';
+      };
+      var recPending=recs.filter(function(r){ return ['suggested','shared','approved'].indexOf(String(r.status||'').toLowerCase())>-1; }).length;
+      main='<div class="grx-card"><div class="grx-h">Tasks \u2014 '+tDone+' of '+tTot+' complete'
+        +'<span style="flex:1;"></span>'
+        +(recPending?'<button class="ibx-pill" onclick="grxTasksGen()" title="Turns every actionable recommendation into a task \u2014 already-tasked recs are skipped">\u26a1 Generate from recommendations ('+recPending+')</button>':'')
+        +'</div>'
+        +'<div id="grxTasksGenOut" style="display:none;font-size:12px;margin-bottom:8px;"></div>'
+        +(tSorted.length?tSorted.map(function(t){
           var isD=done(t);
           return '<div class="grx-task"><input type="checkbox" '+(isD?'checked':'')+' style="width:17px;height:17px;accent-color:#1a7e49;cursor:pointer;" onchange="grxTaskToggle(\''+att(String(t.id))+'\',this.checked)">'
-            +'<span style="flex:1;'+(isD?'color:var(--muted);text-decoration:line-through;':'')+'">'+esc(t.title||'Task')+'</span>'
+            +'<span style="flex:1;min-width:0;'+(isD?'color:var(--muted);text-decoration:line-through;':'')+'">'+esc(t.title||'Task')
+            +(String(t.source||'')==='recommendation'&&!isD?' <span style="font-size:9.5px;color:var(--p);font-weight:700;">\u00b7 from rec</span>':'')+'</span>'
+            +(!isD?prioChip(t):'')
             +'<span class="grx-chip" style="'+(isD?'color:#1a7e49;background:#e7f6ee;':'color:#5b3fa0;background:rgba(91,63,160,.08);')+'">'+(isD?'Completed':esc(String(t.status||'open').replace(/_/g,' ')))+'</span></div>';
-        }).join(''):'<div class="grx-empty">No tasks yet \u2014 checking tasks off moves the progress ring.</div>')
+        }).join(''):'<div class="grx-empty">No tasks yet \u2014 generate them from the recommendations above, or add the first by hand.</div>')
         +'<div class="grx-add"><input class="fi" id="grxTaskIn" placeholder="e.g. Google Business Profile optimization"><button class="bf-act primary" onclick="grxTaskAdd()">Add task</button></div>'
       +'</div>';
     } else if(GRX.dtab==='recs'){
@@ -13538,6 +13558,23 @@ function anEngineNote(eng){
       changed:'Recent completed work on their roadmap', go:'growth', refId:String(GRX.id||''), email:d.client_email||'' });
   }
   window.grxDtab=function(t){ GRX.dtab=t; grxDetail(); };
+  // ── auto-generate: every actionable recommendation becomes a task, once.
+  window.grxTasksGen=async function(){
+    if(!GRX.id) return;
+    var out=document.getElementById('grxTasksGenOut');
+    if(out){ out.style.display='block'; out.style.color='var(--muted)'; out.textContent='Generating tasks from recommendations\u2026'; }
+    try{
+      var r=await gpApi2('tasks_generate',{partnership_id:String(GRX.id)});
+      var d=(r&&r.data)||{};
+      var n=(d.created||[]).length;
+      if(out){
+        out.style.color=n?'var(--green)':'var(--muted)';
+        out.textContent=n?('\u2713 '+n+' task'+(n===1?'':'s')+' created: '+(d.created||[]).slice(0,4).join(', ')+((d.created||[]).length>4?'\u2026':'')):'Nothing to generate \u2014 every actionable recommendation already has a task.';
+      }
+      // reload the partnership so tasks/recs refresh
+      if(n){ setTimeout(function(){ try{ grxOpen(GRX.id); }catch(e){} },900); }
+    }catch(e){ if(out){ out.style.color='var(--red)'; out.textContent='Generate failed: '+e.message; } }
+  };
   window.grxNew=async function(){
     var f=document.getElementById('grxNewForm'); if(!f) return;
     f.style.display=f.style.display==='none'?'':'none';
