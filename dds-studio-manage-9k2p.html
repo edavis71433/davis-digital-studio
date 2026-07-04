@@ -11015,6 +11015,36 @@ function integToast(msg){
 // ════════════════════════════════════════════════════════════════════════════
 var ANALYTICS = { clientId: null, clients: [], data: null, months: null, engine: null };
 
+// ── MEETING / RENEWAL TALKING POINTS: 4-6 things Eric can say or show,
+// built server-side from the client's verified record (work delivered,
+// metric moves, money status). Renewal mode activates automatically inside
+// the 60-day window and frames a value recap.
+function anTalkCopy(btn){
+  try{
+    var ol=btn.parentNode.querySelector('ol'); if(!ol) return;
+    navigator.clipboard.writeText(ol.innerText).then(function(){ toast('\u2713 Copied'); });
+  }catch(e){ toast('Copy failed'); }
+}
+async function anTalkingPoints(){
+  var out=document.getElementById('anTalkOut'); if(!out||!ANALYTICS.clientId) return;
+  out.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;">Reading the record \u2014 work, metrics, money\u2026</div>';
+  try{
+    var r=await integApi('client_talking_points',{clientId:String(ANALYTICS.clientId)});
+    var d=(r&&r.data)||null;
+    if(!d||!d.points){ out.innerHTML='<div style="font-size:12px;color:#9a2d2d;padding:8px 0;">Could not build talking points.</div>'; return; }
+    var mode=d.mode==='renewal'
+      ?'<span style="font-size:10px;font-weight:800;color:#c4731a;background:rgba(196,115,26,.1);padding:3px 10px;border-radius:100px;">RENEWAL MODE \u2014 value recap</span>'
+      :'<span style="font-size:10px;font-weight:800;color:var(--p);background:rgba(91,63,160,.08);padding:3px 10px;border-radius:100px;">MEETING PREP</span>';
+    out.innerHTML='<div style="margin-top:10px;">'+mode
+      +(d.generator==='template'?' <span style="font-size:10.5px;color:var(--muted);">(assembled from records \u2014 AI unavailable)</span>':'')
+      +'<ol style="margin:10px 0 0;padding-left:20px;">'
+      +d.points.map(function(pt){ return '<li style="font-size:13px;line-height:1.6;color:var(--ink);margin-bottom:7px;">'+escHtml(pt)+'</li>'; }).join('')
+      +'</ol>'
+      +'<button class="sbtn sec" style="font-size:11.5px;padding:5px 12px;margin-top:4px;" onclick="anTalkCopy(this)">Copy all</button>'
+    +'</div>';
+  }catch(e){ out.innerHTML='<div style="font-size:12px;color:#9a2d2d;padding:8px 0;">Could not build talking points: '+escHtml(e.message)+'</div>'; }
+}
+
 async function loadAnalytics(){
   var host = document.getElementById('analyticsBody'); if(!host) return;
   host.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">Loading analytics…</div>';
@@ -11258,6 +11288,14 @@ function renderAnalytics(){
     return;
   }
   var html = anBriefBanner(d.executive_brief) + anFreshnessBar(d.executive_brief) + anEngineNote(ANALYTICS.engine);
+  html += '<div style="background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:16px;padding:16px 20px;margin-top:16px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+    + '<div style="font-size:13px;font-weight:700;">\ud83d\udde3 Meeting talking points</div>'
+    + '<span style="font-size:11px;color:var(--muted);">grounded in this client\u2019s real record \u2014 switches to renewal framing inside the 60-day window</span>'
+    + '<button class="sbtn sec" style="margin-left:auto;font-size:11.5px;padding:5px 12px;" onclick="anTalkingPoints()">Generate</button>'
+    + '</div>'
+    + '<div id="anTalkOut"></div>'
+  + '</div>';
   // grid: two columns on wide screens
   html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;margin-top:16px;">';
   html += anGroup('Website analytics', d.website_analytics, d.website_analytics.interpretation, 'sessions');
