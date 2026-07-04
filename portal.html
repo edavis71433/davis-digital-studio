@@ -1301,16 +1301,20 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
 
       <!-- MESSAGES -->
       <div class="page-view" id="page-messages">
-        <h2 style="font-family:var(--serif);font-size:28px;font-weight:400;margin-bottom:6px;">Conversation</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">You and Eric, staying in touch. Everything here is exactly as it was said.</p>
-        <div class="card">
-          <div class="card-body">
-            <div class="msg-thread" id="msgThread"></div>
-            <div class="msg-compose">
-              <textarea aria-label="Message Eric..." class="msg-input" id="msgInput" placeholder="Message Eric..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+        <div class="jn-kicker">Davis Digital</div>
+        <h2 class="jn-title" style="font-size:30px;">The <em>conversation.</em></h2>
+        <p class="cv-doctrine">Everything here is exactly as it was said — nothing summarized, nothing paraphrased.</p>
+        <div class="cv-room">
+          <div class="msg-thread cv-thread" id="msgThread"></div>
+          <div class="cv-composer">
+            <div class="cv-cbox">
+              <button class="cv-attach" aria-label="Send a file with a message" onclick="cvAttach()">＋</button>
+              <textarea aria-label="Message Eric" class="msg-input cv-input" id="msgInput" placeholder="Message Eric…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+              <button class="cv-help" id="cvHelpBtn" onclick="cvHelpWrite()">✦ Help me write this</button>
               <button class="msg-send" id="msgSend" onclick="sendMsg()">Send</button>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:8px;">Eric typically replies within one business day.</div>
+            <div class="cv-cfoot">Files ride along with your message · nothing here is ever auto-written as you or Eric</div>
+            <input type="file" id="cvFileInput" multiple style="display:none;" onchange="cvSendFiles(this.files)">
           </div>
         </div>
       </div>
@@ -2605,62 +2609,133 @@ function renderMessages(msgs) {
   var thread = document.getElementById("msgThread");
   if (!thread) return;
   var o = window._convOrient;
-
   var html = '';
 
-  // ── ORIENTATION STRIP — about the SHAPE of the conversation, never its words ──
+  // ── the concierge opens the room: clearly ✦, never a message ──
   if (o) {
-    html += '<div class="conv-orient conv-orient-'+cEsc(o.status.tone)+'">';
-    html += '<div class="conv-orient-line">'+cEsc(o.status.line)+'</div>';
-    // a pointer to what's waiting — by time, never quoting the message
-    if (o.waiting_on_you && o.waiting_pointer) {
-      html += '<div class="conv-orient-wait"><span class="conv-orient-ico">\u25C9</span>'+cEsc(o.waiting_pointer)+' is below.</div>';
-    }
-    html += '<div class="conv-orient-next">'+cEsc(o.next_step)+'</div>';
-    html += '</div>';
-    // a clear divider that hands off to the literal record
-    if (allMessages.length) {
-      html += '<div class="conv-anchor">'+cEsc(o.read_anchor)+'</div>';
-    }
+    html += '<div class="cv-orient"><div class="cv-orb">\u2726</div><div class="cv-obody">'
+      + '<div class="cv-oline">'+cEsc(o.status.line)+'</div>'
+      + (o.waiting_on_you && o.waiting_pointer ? '<div class="cv-owait">'+cEsc(o.waiting_pointer)+' is below.</div>' : '')
+      + (o.next_step ? '<div class="cv-onext">'+cEsc(o.next_step)+'</div>' : '')
+      + (allMessages.length ? '<div class="cv-onote">\u00b7 '+cEsc(o.read_anchor || 'Your full conversation is below, exactly as it happened.')+' \u00b7</div>' : '')
+      + ((o.unread_since_visit||0) >= 3 ? '<button class="cv-catch" onclick="PortalAI.ask(\'Catch me up on the last '+Number(o.unread_since_visit)+' messages from Eric\')">Catch me up \u2726</button>' : '')
+      + '</div></div>';
   }
 
-  // ── THE LITERAL THREAD — verbatim, exactly as it happened ──
+  // ── the literal record: verbatim, exactly as it happened ──
   if (!allMessages.length) {
     html += '<div class="conv-empty"><div class="conv-empty-h">No messages yet</div>'
       + '<div class="conv-empty-p">Send Eric a note below whenever you have a question or something to share.</div></div>';
   } else {
-    html += '<div class="conv-thread">';
-    var prev = null;
+    var lv = lastVisitValue();
+    var lvT = lv ? new Date(lv).getTime() : null;
+    var unreadShown = false;
+    var prev = null, prevDay = null;
     allMessages.forEach(function(m){
       var mine = m.from_who === "client";
-      var initial = mine ? ((CLIENT && CLIENT.name) ? CLIENT.name[0] : "Y") : "E";
-      // Group with the previous message when it's the same sender within 8
-      // minutes — one avatar + one header per conversational turn, so a long
-      // exchange reads as a conversation instead of a stack of labeled cards.
+      var mT = new Date(m.created_at).getTime();
+
+      // day divider (journal grammar)
+      var day = new Date(m.created_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+      // unread divider: before the first of Eric's messages newer than last visit
+      if (!unreadShown && lvT && !mine && isFinite(mT) && mT > lvT) {
+        html += '<div class="cv-unread"><span>New since your last visit</span><i></i></div>';
+        unreadShown = true;
+      }
+      if (day !== prevDay) {
+        html += '<div class="cv-day"><span>'+cEsc(day)+'</span><i></i></div>';
+        prevDay = day;
+      }
+
+      // cluster: same sender within 8 minutes → one header per turn
       var grouped = false;
       if (prev && prev.from_who === m.from_who) {
-        var dt = new Date(m.created_at).getTime() - new Date(prev.created_at).getTime();
+        var dt = mT - new Date(prev.created_at).getTime();
         if (isFinite(dt) && dt >= 0 && dt < 8 * 60 * 1000) grouped = true;
       }
       prev = m;
-      html += '<div class="conv-msg from-'+cEsc(m.from_who)+(grouped?' grouped':'')+'">'
-        + '<div class="conv-av '+(mine?"client":"")+'">'+cEsc(initial)+'</div>'
-        + '<div class="conv-content">'
-        + '<div class="conv-meta">'+cEsc(m.sender_name)+' \u00B7 '+formatDate(m.created_at)+'</div>'
-        // m.text is rendered VERBATIM (escaped for safety only, never altered)
-        + '<div class="conv-text">'+cEsc(m.text)+'</div>'
-        + '</div></div>';
+
+      // attachment message: a real, client-authored act rendered as an object
+      var fileM = /^\uD83D\uDCCE Sent a file: /.test(m.text || '');
+      var bodyHtml;
+      if (fileM) {
+        var fn = (m.text || '').replace(/^\uD83D\uDCCE Sent a file: /, '');
+        var ext = (fn.split('.').pop() || '').toUpperCase().slice(0,4);
+        bodyHtml = '<div class="cv-mfile"><span class="cv-fp"><span>'+cEsc(ext)+'</span></span><span class="cv-fn">'+cEsc(fn)+'</span></div>';
+      } else {
+        // m.text rendered VERBATIM (escaped for safety only, never altered)
+        bodyHtml = '<div class="cv-body">'+cEsc(m.text)+'</div>';
+      }
+
+      var t = new Date(m.created_at);
+      var tStr = isFinite(t.getTime()) ? t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+      html += '<div class="cv-msg '+(mine?'cv-me':'cv-eric')+(grouped?' cv-grouped':'')+'">'
+        + (grouped ? '' : '<div class="cv-who">'+cEsc(m.sender_name)+'<span class="cv-t">'+cEsc(tStr)+'</span></div>')
+        + bodyHtml
+        + '</div>';
     });
-    html += '</div>';
+  }
+
+  // Delivered — only when the insert just succeeded; there is no read
+  // tracking, so there is never a "Seen".
+  if (window._cvJustSent && (Date.now() - window._cvJustSent) < 60000 && allMessages.length) {
+    var lastM = allMessages[allMessages.length - 1];
+    if (lastM && lastM.from_who === 'client') {
+      var once = '';
+      try {
+        if (!localStorage.getItem('cv_seen_note')) {
+          once = ' \u00b7 Eric sees everything here';
+          localStorage.setItem('cv_seen_note', '1');
+        }
+      } catch(e){}
+      html += '<div class="cv-sent">Delivered'+once+'</div>';
+      window._cvJustSent = null;
+    }
   }
 
   thread.innerHTML = html;
-  // keep the latest in view, as a conversation should
-  var t = document.getElementById("msgThread");
-  if (t) t.scrollTop = t.scrollHeight;
+  var t2 = document.getElementById("msgThread");
+  if (t2) t2.scrollTop = t2.scrollHeight;
 }
 
-var _sendingMsg = false;
+// ═══ THE CORRESPONDENCE — composer assists. Existing writes only. ═══
+function cvAttach(){ var i=document.getElementById('cvFileInput'); if(i) i.click(); }
+
+async function cvSendFiles(files){
+  // one gesture, two real writes per file: the existing storage+files insert,
+  // then a client-authored message row. Nothing is written as anyone else.
+  for (var file of Array.from(files||[])) {
+    try {
+      var ext=(file.name.split('.').pop()||'').toLowerCase();
+      var path=CLIENT.id+'/'+Date.now()+'-'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      var { error: se } = await sb.storage.from('client-files').upload(path, file, { upsert:true });
+      if (se) { showToast('Upload failed: '+se.message); continue; }
+      var size = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : (file.size/1024).toFixed(0)+' KB';
+      await sb.from('files').insert({ client_id:CLIENT.id, name:file.name, size:size, type:ext, from_who:'client', status:'review', storage_path:path });
+      await sb.from('messages').insert({ client_id:CLIENT.id, from_who:'client', sender_name:CLIENT.name, text:'\uD83D\uDCCE Sent a file: '+file.name });
+      window._cvJustSent = Date.now();
+    } catch(e){ showToast('Upload failed. Please try again.'); }
+  }
+  var i=document.getElementById('cvFileInput'); if(i) i.value='';
+  try { await loadMessages(); } catch(e){}
+}
+
+function cvHelpWrite(){
+  // drafts INTO the composer; the client edits and sends it themselves.
+  // Never sends automatically; never writes a message row; never Eric's voice.
+  var input=document.getElementById('msgInput');
+  var btn=document.getElementById('cvHelpBtn');
+  if(!input || !window.PortalAI || !PortalAI.draft) return;
+  var topic=input.value.trim();
+  if(btn){ btn.disabled=true; btn.textContent='\u2726 Drafting\u2026'; }
+  PortalAI.draft(topic, function(text){
+    if(btn){ btn.disabled=false; btn.textContent='\u2726 Help me write this'; }
+    if(text){ input.value=text; input.focus(); }
+    else { showToast("Couldn't draft just now \u2014 write it your way and Eric will get it."); }
+  });
+}
+
+var _sendingMsg = false;var _sendingMsg = false;
 async function sendMsg() {
   if (_sendingMsg) return;                 // guard against double-click / Enter-spam
   var input = document.getElementById("msgInput");
@@ -2684,7 +2759,7 @@ async function sendMsg() {
     if (error) {
       showToast("Message didn't send. Check your connection and try again.");
     } else {
-      ok = true;
+      ok = true; window._cvJustSent = Date.now();
     }
   } catch (e) {
     showToast("Message didn't send. Check your connection and try again.");
@@ -3783,7 +3858,21 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   /* expose namespace for inline handlers */
   var _openAi0 = openAi;
   openAi = function(){ try{ localStorage.setItem("ai_fab_seen","1"); var h=document.getElementById("aiFabHint"); if(h) h.remove(); }catch(e){} return _openAi0.apply(this,arguments); };
-  window.PortalAI = { open:openAi, close:closeAi, send:send, ask:ask };
+  function draft(topic, done){
+    // client-voice drafting via the SAME existing route. The reply goes to the
+    // composer via callback — it is never rendered as a message, never sent.
+    var ask = 'Help me draft a short message from me (the client) to Eric'
+      + (topic ? ' about: ' + topic : ' \u2014 a quick check-in')
+      + '. Write it in my voice, first person, warm and brief. Reply with ONLY the message text, no preamble, no sign-off commentary.';
+    fetch(EDGE_FN, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ type:"ai_project_help", context: buildContext(), messages: [{ role:"user", content: ask }] })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ done((d && (d.reply || d.text)) || null); })
+    .catch(function(){ done(null); });
+  }
+  window.PortalAI = { open:openAi, close:closeAi, send:send, ask:ask, draft:draft };
 })();
 
 
@@ -4816,7 +4905,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.4';
+  var MY_BUILD='2026-07-04.5';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -5077,6 +5166,64 @@ button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px soli
   .jn-plate{ padding:26px 24px 24px; }
   .jn-ptitle{ font-size:22px; }
   .jn-hbox{ max-width:none; }
+}
+
+/* ═══ THE CORRESPONDENCE (Conversation) ═══ letter blocks, not bubbles or
+   email rows. Three voices, three treatments: Eric (serif + accent), you
+   (soft card), concierge (orb + mono caption — never a message). */
+.cv-doctrine{ font-size:12.5px; color:var(--muted); margin:10px 0 22px; }
+.cv-room{ display:flex; flex-direction:column; }
+.cv-thread{ max-height:none !important; height:auto !important; overflow:visible !important; padding:0 !important; border:none !important; background:none !important; }
+
+.cv-orient{ display:flex; gap:13px; padding:6px 0 34px; } /* extra air below, per review */
+.cv-orb{ width:34px; height:34px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#8b6fd0,var(--accent,#5b3fa0)); flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; box-shadow:0 5px 14px rgba(91,63,160,.28); }
+.cv-oline{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:15.5px; font-weight:440; line-height:1.5; max-width:44ch; color:var(--ink); }
+.cv-owait{ font-size:12.5px; color:var(--accent,#5b3fa0); font-weight:560; margin-top:6px; }
+.cv-onext{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.6; max-width:46ch; }
+.cv-onote{ font-size:10.5px; color:#a49ab5; margin-top:8px; font-family:var(--mono,'Geist Mono',monospace); letter-spacing:.03em; }
+.cv-catch{ display:inline-flex; margin-top:11px; border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:100px; padding:8px 14px; font-size:12px; color:var(--muted); cursor:pointer; font-family:var(--sans,'Inter',sans-serif); min-height:36px; align-items:center; }
+.cv-catch:hover{ color:var(--accent,#5b3fa0); border-color:rgba(91,63,160,.35); }
+
+.cv-day{ margin:24px 0 4px; display:flex; align-items:center; gap:14px; }
+.cv-day span{ font-family:var(--mono,'Geist Mono',monospace); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#a49ab5; }
+.cv-day i{ flex:1; height:1px; background:var(--hair,#ece7f2); }
+.cv-unread{ margin:26px 0 4px; display:flex; align-items:center; gap:14px; }
+.cv-unread span{ font-family:var(--mono,'Geist Mono',monospace); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent,#5b3fa0); }
+.cv-unread i{ flex:1; height:1.5px; background:linear-gradient(90deg,rgba(91,63,160,.4),transparent); }
+
+.cv-msg{ padding:14px 0 6px; max-width:56ch; }
+.cv-msg.cv-grouped{ padding-top:2px; }
+.cv-who{ font-size:12px; font-weight:620; color:var(--ink); }
+.cv-t{ font-family:var(--mono,'Geist Mono',monospace); font-size:10px; color:#a49ab5; font-weight:400; margin-left:9px; letter-spacing:.04em; }
+.cv-body{ margin-top:6px; font-size:13.5px; line-height:1.75; color:var(--ink); white-space:pre-wrap; }
+.cv-msg.cv-eric{ border-left:2px solid rgba(91,63,160,.35); padding-left:18px; }
+.cv-msg.cv-eric .cv-who{ font-family:var(--serif,'Fraunces',Georgia,serif); font-size:13.5px; font-weight:500; }
+.cv-msg.cv-me{ margin-left:auto; background:#fff; border:1px solid var(--hair,#ece7f2); border-radius:16px 16px 4px 16px; padding:13px 17px 11px; box-shadow:var(--e1); max-width:48ch; }
+.cv-msg.cv-me .cv-who{ color:var(--muted); font-size:11px; }
+.cv-msg.cv-me .cv-body{ margin-top:4px; font-size:13px; }
+.cv-msg.cv-me.cv-grouped{ border-radius:16px 4px 4px 16px; margin-top:4px; }
+
+.cv-mfile{ display:inline-flex; align-items:center; gap:11px; margin-top:8px; border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:13px; padding:10px 14px; box-shadow:var(--e1); }
+.cv-fp{ width:32px; height:32px; border-radius:9px; background:#fff; border:1px solid var(--hair,#ece7f2); display:inline-flex; align-items:flex-end; padding:4px; }
+.cv-fp span{ font-family:var(--mono,'Geist Mono',monospace); font-size:7.5px; letter-spacing:.1em; color:#a49ab5; }
+.cv-fn{ font-size:12.5px; font-weight:560; color:var(--ink); }
+
+.cv-sent{ font-family:var(--mono,'Geist Mono',monospace); font-size:10px; color:#a49ab5; margin-top:8px; letter-spacing:.04em; text-align:right; }
+
+.cv-composer{ position:sticky; bottom:0; background:linear-gradient(transparent, var(--cream,#faf8f5) 26%); padding:18px 0 14px; margin-top:10px; }
+.cv-cbox{ border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:18px; box-shadow:var(--e2); padding:9px 9px 9px 15px; display:flex; align-items:flex-end; gap:10px; }
+.cv-attach{ width:40px; height:40px; border-radius:12px; border:1.5px dashed rgba(91,63,160,.35); background:rgba(91,63,160,.06); color:var(--accent,#5b3fa0); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex:none; }
+.cv-input{ flex:1; border:none !important; outline:none; font-family:var(--sans,'Inter',sans-serif); font-size:13.5px !important; line-height:1.6; color:var(--ink); background:none !important; resize:none; min-height:24px; max-height:120px; padding:8px 0 !important; }
+.cv-help{ border:none; background:none; color:#a49ab5; font-size:11.5px; font-weight:560; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); padding:11px 4px; white-space:nowrap; min-height:40px; }
+.cv-help:hover{ color:var(--accent,#5b3fa0); }
+.cv-help:disabled{ opacity:.6; cursor:default; }
+.cv-cfoot{ font-size:11px; color:#a49ab5; margin-top:8px; text-align:center; }
+
+@media(max-width:768px){
+  .cv-msg{ max-width:none; }
+  .cv-msg.cv-me{ max-width:88%; }
+  .cv-help{ display:none; } /* the FAB remains the mobile door to drafting */
+  .cv-composer{ padding-bottom:8px; }
 }
 </style>
 
