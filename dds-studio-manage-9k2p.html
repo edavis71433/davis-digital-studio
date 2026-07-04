@@ -1320,6 +1320,22 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
         <div class="pt">Quote Generator</div>
         <div class="ps">Build a branded project quote and download it as a PDF to send to clients.</div>
         <div class="card">
+          <div class="ch"><div class="ct">✨ Build with AI</div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <select class="fi" id="qa-lead" style="max-width:280px;"><option value="">From a conversation (optional)…</option></select>
+              <button class="sbtn sec" onclick="qaLoadLeads()" style="font-size:12px;padding:8px 14px;">Load leads</button>
+            </div>
+            <textarea class="fi" id="qa-brief" rows="2" placeholder='Or describe the scope: "5-page site for a Pasadena bakery, they want online ordering and basic SEO"'></textarea>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+              <button class="sbtn" id="qa-btn" onclick="qaBuild()" style="font-size:13px;padding:9px 18px;">Build quote</button>
+              <span style="font-size:11.5px;color:var(--muted);">Scope from your words or the conversation; pricing anchored to your own paid-invoice history.</span>
+            </div>
+            <div id="qa-result" style="display:none;margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
           <div class="ch"><div class="ct">📝 Quote Details</div></div>
           <div class="cb">
             <div class="two-col">
@@ -1353,7 +1369,14 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
               <iframe id="q-frame" style="width:100%;height:700px;border:none;"></iframe>
             </div>
             <button class="sbtn" id="q-download-btn" onclick="downloadQuote()" style="display:none;margin-top:10px;background:#16a34a;">⬇ Download PDF</button>
+            <button class="sbtn" id="q-share-btn" onclick="saveAndShareQuote()" style="margin-top:10px;margin-left:8px;">🔗 Save &amp; get share link</button>
+            <div id="q-share-result" style="display:none;font-size:12.5px;margin-top:10px;"></div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">The share link is a private client-facing page. Opens are tracked below (note: opening it yourself counts as a view).</div>
           </div>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="ch"><div class="ct">📤 Sent quotes</div><button class="sbtn sec" onclick="loadSentQuotes()" style="font-size:11.5px;padding:5px 12px;margin-left:auto;">↻ Refresh</button></div>
+          <div class="cb"><div id="q-sent-list"><p style="font-size:12.5px;color:var(--muted);">Saved quotes with open tracking land here.</p></div></div>
         </div>
       </div>
 
@@ -7169,6 +7192,109 @@ function toast(msg) { var t=document.getElementById("toast"); t.textContent=msg;
 // ── QUOTE GENERATOR ──
 var quoteLines = [];
 
+// ── QUOTES: AI build + save/share + engagement tracking ──
+var QA={leads:[]};
+async function qaLoadLeads(){
+  var sel=document.getElementById('qa-lead'); if(!sel) return;
+  sel.innerHTML='<option value="">Loading…</option>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'lead_list'})});
+    var j=await r.json(); QA.leads=(j&&j.data)||[];
+    sel.innerHTML='<option value="">From a conversation (optional)…</option>'+QA.leads.map(function(l){
+      return '<option value="'+escAttr(String(l.id))+'">'+escHtml((l.name||l.email||'Lead')+(l.subject?' — '+String(l.subject).slice(0,40):''))+'</option>';
+    }).join('');
+  }catch(e){ sel.innerHTML='<option value="">Could not load leads</option>'; }
+}
+async function qaBuild(){
+  var btn=document.getElementById('qa-btn'); var out=document.getElementById('qa-result');
+  var brief=(document.getElementById('qa-brief').value||'').trim();
+  var leadId=document.getElementById('qa-lead').value||'';
+  if(!brief && !leadId){ out.style.display='block'; out.innerHTML='<span style="color:var(--red);font-size:12.5px;">Describe the scope, or pick a lead conversation.</span>'; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Building…'; }
+  out.style.display='block'; out.innerHTML='<span style="color:var(--muted);font-size:12.5px;">Reading scope and your pricing history…</span>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var payload={type:'quote_ai_build'}; if(brief) payload.brief=brief; if(leadId) payload.leadId=leadId;
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(payload)});
+    var j=await r.json(); var d=(j&&j.data)||null;
+    if(!d){ out.innerHTML='<span style="color:var(--red);font-size:12.5px;">'+escHtml((j&&(j.detail||j.error))||'Build failed.')+'</span>'; }
+    else{
+      // fill the form
+      if(d.client_name){ var el=document.getElementById('q-client'); if(el&&!el.value) el.value=d.client_name; }
+      if(d.client_email){ var el2=document.getElementById('q-email'); if(el2&&!el2.value) el2.value=d.client_email; }
+      if(d.project){ var el3=document.getElementById('q-project'); if(el3) el3.value=d.project; }
+      if(d.notes){ var el4=document.getElementById('q-notes'); if(el4) el4.value=d.notes; }
+      quoteLines=[]; (d.lines||[]).forEach(function(l){ addQuoteLine(l.item+(l.desc?' — '+l.desc:''), 1, l.amount); });
+      QA.explainer=d.pricing_explainer||'';
+      var ups=(d.upsells||[]).map(function(u,i){
+        return '<button class="tdx-pill tdx-pill-sm" style="margin:0 6px 6px 0;" onclick="qaAddUpsell('+i+')">+ '+escHtml(u.item)+' ('+('$'+(Number(u.amount)||0).toLocaleString())+')</button>';
+      }).join('');
+      QA.upsells=d.upsells||[];
+      out.innerHTML='<div style="font-size:12.5px;color:var(--green);font-weight:600;">✓ Quote built'+(j.generator==='template'?' (template — AI unavailable)':'')+'. Line items filled below — review before sending.</div>'
+        +(QA.explainer?'<div style="font-size:12.5px;color:var(--ink);background:rgba(91,63,160,0.05);border-radius:10px;padding:10px 13px;margin-top:8px;line-height:1.55;"><strong style="font-size:11px;color:var(--p);">Why this price:</strong> '+escHtml(QA.explainer)+'</div>':'')
+        +(ups?'<div style="margin-top:10px;"><span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Optional upsells</span><div style="margin-top:6px;">'+ups+'</div></div>':'');
+    }
+  }catch(e){ out.innerHTML='<span style="color:var(--red);font-size:12.5px;">Build failed: '+escHtml(e.message)+'</span>'; }
+  if(btn){ btn.disabled=false; btn.textContent='Build quote'; }
+}
+function qaAddUpsell(i){
+  var u=(QA.upsells||[])[i]; if(!u) return;
+  addQuoteLine(u.item+(u.desc?' — '+u.desc:''), 1, u.amount);
+  toast('✓ Added '+u.item+' to the quote');
+}
+async function saveAndShareQuote(){
+  var btn=document.getElementById('q-share-btn'); var out=document.getElementById('q-share-result');
+  var clientName=(document.getElementById('q-client').value||'').trim();
+  var lines=quoteLines.map(function(l){ return { item:String(l.desc||'').split(' — ')[0]||String(l.desc||''), desc:String(l.desc||'').split(' — ').slice(1).join(' — '), amount:Math.round((Number(l.qty)||1)*(parseFloat(String(l.rate).replace(/[^0-9.]/g,''))||0)) }; }).filter(function(l){return l.item;});
+  if(!clientName||!lines.length){ out.style.display='block'; out.style.color='var(--red)'; out.textContent='Client name and at least one line item are required.'; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+  out.style.display='block'; out.style.color='var(--muted)'; out.textContent='Saving…';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+    var quote={ client_name:clientName, client_email:(document.getElementById('q-email').value||'').trim(),
+      project:(document.getElementById('q-project').value||'').trim(), lines:lines,
+      notes:(document.getElementById('q-notes').value||'').trim(), pricing_explainer:QA.explainer||'',
+      expires:(document.getElementById('q-expires').value||'') };
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_save',quote:quote})});
+    var j=await r.json();
+    if(j&&j.data&&j.data.share_url){
+      out.style.color='var(--green)';
+      out.innerHTML='✓ Saved. Share link: <a href="'+escAttr(j.data.share_url)+'" target="_blank" rel="noopener" style="color:var(--p);word-break:break-all;">'+escHtml(j.data.share_url)+'</a> <button class="tdx-pill tdx-pill-sm" onclick="navigator.clipboard.writeText(\''+escAttr(j.data.share_url)+'\');toast(\'✓ Link copied\')">Copy</button>';
+      try{ loadSentQuotes(); }catch(e){}
+    } else {
+      out.style.color='var(--red)'; out.textContent=(j&&(j.detail||j.error))||'Save failed.';
+    }
+  }catch(e){ out.style.color='var(--red)'; out.textContent='Save failed: '+e.message; }
+  if(btn){ btn.disabled=false; btn.textContent='🔗 Save & get share link'; }
+}
+async function loadSentQuotes(){
+  var host=document.getElementById('q-sent-list'); if(!host) return;
+  host.innerHTML='<p style="font-size:12.5px;color:var(--muted);">Loading…</p>';
+  try{
+    var jwt=await adminJwt(); if(!jwt){ host.innerHTML=''; return; }
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_list'})});
+    var j=await r.json(); var qs=(j&&j.data&&j.data.quotes)||null;
+    if(!qs){ host.innerHTML='<p style="font-size:12.5px;color:var(--muted);">'+escHtml((j&&(j.detail||j.error))||'Could not load.')+'</p>'; return; }
+    if(!qs.length){ host.innerHTML='<p style="font-size:12.5px;color:var(--muted);">No saved quotes yet. Build one above and hit Save &amp; share.</p>'; return; }
+    var eng=function(q){
+      var m={accepted:{c:'#1a7e49',bg:'#e7f6ee'},viewed:{c:'#1a7e49',bg:'#e7f6ee'},never_opened:{c:'#7a6d8e',bg:'#f3f0fa'},ignored:{c:'#c0392b',bg:'#fbecea'}}[q.engagement]||{c:'#7a6d8e',bg:'#f3f0fa'};
+      return '<span style="font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;color:'+m.c+';background:'+m.bg+';white-space:nowrap;">'+escHtml(q.engagement_label||'')+'</span>';
+    };
+    host.innerHTML=qs.map(function(q){
+      return '<div style="padding:11px 2px;border-top:1px solid rgba(41,25,66,0.06);">'
+        +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+        +'<strong style="font-size:13.5px;">'+escHtml(q.client_name||'')+'</strong>'
+        +'<span style="font-size:12px;color:var(--muted);">'+escHtml(q.project||'')+' · $'+(Number(q.total)||0).toLocaleString()+' · sent '+q.age_days+'d ago</span>'
+        +eng(q)
+        +'<button class="tdx-pill tdx-pill-sm" style="margin-left:auto;" onclick="navigator.clipboard.writeText(\''+escAttr(q.share_url)+'\');toast(\'✓ Link copied\')">Copy link</button>'
+        +'</div>'
+        +(q.followup?'<div style="font-size:12px;color:var(--ink);margin-top:5px;"><strong style="color:var(--p);font-size:11px;">Follow up:</strong> '+escHtml(q.followup)+'</div>':'')
+      +'</div>';
+    }).join('');
+  }catch(e){ host.innerHTML='<p style="font-size:12.5px;color:#9a2d2d;">Could not load: '+escHtml(e.message)+'</p>'; }
+}
+
 function addQuoteLine(desc, qty, rate) {
   var id = Date.now();
   quoteLines.push({ id, desc: desc||"", qty: qty||1, rate: rate||"" });
@@ -11989,7 +12115,7 @@ function anEngineNote(eng){
   window.loadQuoteStudio=qbxLoad;
   // page hook: go('quote') has no loader today (static form), so hook nav
   var _go=window.go;
-  window.go=function(dest){ var r=_go.apply(this,arguments); try{ if(dest==='quote') qbxLoad(); }catch(e){} return r; };
+  window.go=function(dest){ var r=_go.apply(this,arguments); try{ if(dest==='quote'){ qbxLoad(); loadSentQuotes(); } }catch(e){} return r; };
 })();
 </script>
 
