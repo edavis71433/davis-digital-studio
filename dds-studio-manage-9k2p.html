@@ -17380,7 +17380,7 @@ window.ddsCommOpen=function(tid,cid){
       var r=await Promise.all([
         safe(function(){ return cxEdge('client_pulse',{clientId:cid}); }),
         safe(function(){ return cxEdge('client_timeline',{clientId:cid}); }),
-        safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&deleted_at=is.null&select=amount,status,paid_at,due_date&order=created_at.desc&limit=50'); }),
+        safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&deleted_at=is.null&select=amount,status,paid_at,due_date&order=created_at.desc&limit=300'); }),
         safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,created_at&order=created_at.desc&limit=50'); }),
         safe(function(){ return api('studio_tasks?client_id=eq.'+encodeURIComponent(cid)+'&status=eq.open&select=id&limit=50'); }),
         safe(function(){ return api('client_reports?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,created_at&order=created_at.desc&limit=5'); })
@@ -17445,7 +17445,51 @@ window.ddsCommOpen=function(tid,cid){
         +'<div style="flex:1;min-width:200px;"><div style="font-size:19px;font-weight:750;color:var(--ink);">'+esc(p.name)+' <span class="cx-type" style="color:'+tc[0]+';background:'+tc[1]+';vertical-align:middle;">'+p.type.toUpperCase()+'</span>'+(p.portal&&p.type==='Client'?' <span class="cx-type" style="color:#7a6d8e;background:#f3f0fa;vertical-align:middle;">PORTAL ACCESS</span>':'')+'</div>'
         +'<div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(p.company&&p.company!==p.name?p.company:(p.subject||''))+(p.created_at?' \u00b7 known since '+esc(new Date(p.created_at).toLocaleDateString('en-US',{month:'short',year:'numeric'})):'')+(p.last?' \u00b7 last activity '+esc(ago(p.last)):'')+'</div></div>'
       +'</div>'
-      +'<div style="margin-top:12px;">'+chips+'</div>';
+      +'<div style="margin-top:12px;">'+chips+'</div>'
+      +(function(){
+        // ── THE FIVE-SECOND READ ── everything that matters, one glance:
+        // lifetime business, this year, happiness, last spoke, health.
+        // Below it: the next move, ALWAYS present — brain suggestion when a
+        // signal fires, an honest derived one when nothing is urgent.
+        if(!p.cid) return '';
+        if(!cache) return '<div class="bf-skel" style="height:58px;width:100%;border-radius:12px;margin-top:12px;"></div>';
+        var toN=function(v){ var n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; };
+        var paidRows=(cache.inv||[]).filter(function(i){ return i.status==='paid'; });
+        var life=paidRows.reduce(function(a,i){ return a+toN(i.amount); },0);
+        var y0=new Date(new Date().getFullYear(),0,1);
+        var yr=paidRows.filter(function(i){ return i.paid_at&&new Date(i.paid_at)>=y0; }).reduce(function(a,i){ return a+toN(i.amount); },0);
+        var hap=(pulse&&pulse.happiness&&pulse.happiness.recent!=null)?pulse.happiness.recent+'/10':null;
+        var dsc=(pulse&&pulse.days_since_contact!=null)?pulse.days_since_contact:(p.last?Math.floor((Date.now()-new Date(p.last))/86400000):null);
+        var hv=(pulse&&pulse.relationship_health!=null)?Number(pulse.relationship_health):null;
+        var hl=hv!=null?clientHealthLabel(hv):null;
+        var cell=function(v,l,c2){ return '<div style="flex:1;min-width:96px;padding:10px 12px;"><div style="font-size:16px;font-weight:750;color:'+(c2||'var(--ink)')+';">'+v+'</div><div style="font-size:10px;color:var(--muted);margin-top:1px;">'+l+'</div></div>'; };
+        var strip='<div style="display:flex;flex-wrap:wrap;background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;margin-top:12px;">'
+          +cell(life?'$'+Math.round(life).toLocaleString():'\u2014','Lifetime business')
+          +cell(yr?'$'+Math.round(yr).toLocaleString():'\u2014','This year')
+          +cell(hap||'\u2014','Happiness'+(hap?' (surveyed)':''))
+          +cell(dsc!=null?(dsc===0?'Today':dsc+'d ago'):'\u2014','Last spoke',dsc!=null&&dsc>21?'#c0392b':undefined)
+          +cell(hv!=null?String(hv):'\u2014','Health'+(hl?' \u00b7 '+hl[0]:''),hl?hl[1]:undefined)
+        +'</div>';
+        // next move: brain first, then derived, never absent
+        var mv=null;
+        try{
+          var br=((window.DDS_COMM&&window.DDS_COMM.cache)||[]).find(function(x){ return String(x.cid)===String(p.cid); });
+          if(br) mv={txt:br.ask, tid:String(br.t.id)};
+        }catch(e){}
+        if(!mv){
+          var pend=(cache.apr||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; });
+          var owed=(cache.inv||[]).filter(function(i){ return i.status!=='paid'&&i.status!=='draft'; }).reduce(function(a,i){ return a+toN(i.amount); },0);
+          if(pend.length) mv={txt:'Unblock the pending approval \u201c'+String(pend[0].title||'Approval')+'\u201d \u2014 it\u2019s the only thing waiting on them.'};
+          else if(owed>0) mv={txt:'$'+Math.round(owed).toLocaleString()+' is outstanding \u2014 a gentle nudge keeps it from aging.'};
+          else if(dsc!=null&&dsc>21) mv={txt:'Quiet for '+dsc+' days \u2014 a no-agenda check-in keeps this warm.'};
+          else mv={txt:'Nothing needed \u2014 this relationship is current. Momentum is the strategy.'};
+        }
+        return strip+'<div style="display:flex;align-items:center;gap:10px;background:rgba(91,63,160,.05);border-radius:12px;padding:10px 14px;margin-top:8px;">'
+          +'<span style="font-size:10px;font-weight:800;letter-spacing:.05em;color:var(--p);flex:none;">NEXT MOVE</span>'
+          +'<span style="flex:1;font-size:12.5px;color:var(--ink);line-height:1.5;">'+esc(mv.txt)+'</span>'
+          +(mv.tid?'<button class="ibx-pill" style="flex:none;" onclick="ddsCommOpen(\''+att(mv.tid)+'\',\''+att(p.cid)+'\')">Open \u2192</button>':'')
+        +'</div>';
+      })();
       var tabs='<div class="ivx-tabs" style="margin-top:6px;">'
         +'<button class="ibx-tab'+(CX.tab==='ov'?' on':'')+'" onclick="cxTab(\'ov\')">Overview</button>'
         +(p.cid?'<button class="ibx-tab'+(CX.tab==='act'?' on':'')+'" onclick="cxTab(\'act\')">Activity</button>':'')
