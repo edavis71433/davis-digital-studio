@@ -11206,7 +11206,69 @@ async function loadAnalytics(){
   if(!ANALYTICS.clientId && ANALYTICS.clients.length) ANALYTICS.clientId = ANALYTICS.clients[0].id;
   renderAnalyticsShell();
   loadPracticePulse();
+  loadAnAcross();
   if(ANALYTICS.clientId) await refreshAnalytics();
+}
+
+// ── ACROSS EVERY CLIENT ── one comparison table from stored signals +
+// real payments: sessions (with 30-day movement and an inline SVG spark
+// drawn from the actual series), conversions, calls from Google, and
+// revenue paid this month. Sorted by revenue, then traffic. Clicking a
+// row opens that client's deep dive. Dependency-free — the sparkline is
+// a 12-point path, not a charting library.
+async function loadAnAcross(){
+  var mount=document.getElementById('anAcross'); if(!mount) return;
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  var mStart=new Date(); mStart=new Date(mStart.getFullYear(),mStart.getMonth(),1).toISOString();
+  var since=new Date(Date.now()-90*86400000).toISOString();
+  var r=await Promise.all([
+    safe(function(){ return api('signals?observed_at=gte.'+encodeURIComponent(since)+'&metric=in.(sessions,conversions,gbp_calls)&select=client_id,metric,value,observed_at&order=observed_at.asc&limit=2000'); }),
+    safe(function(){ return api('invoices?deleted_at=is.null&status=eq.paid&paid_at=gte.'+encodeURIComponent(mStart)+'&select=client_id,amount&limit=300'); })
+  ]);
+  var sigs=r[0], paid=r[1]||[];
+  if(sigs===null){ mount.innerHTML=''; return; } // signals not readable yet — redeploy clever-api
+  var by={}; // client -> metric -> series
+  (sigs||[]).forEach(function(g){
+    var c=String(g.client_id||''); if(!c) return;
+    (by[c]=by[c]||{}); (by[c][g.metric]=by[c][g.metric]||[]).push(Number(g.value)||0);
+  });
+  var toN=function(v){ var n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,'')); return isFinite(n)?n:0; };
+  var rev={}; paid.forEach(function(i){ var c=String(i.client_id||''); rev[c]=(rev[c]||0)+toN(i.amount); });
+  function spark(series){
+    var pts=series.slice(-12); if(pts.length<2) return '';
+    var mx=Math.max.apply(null,pts), mn=Math.min.apply(null,pts); var rg=(mx-mn)||1;
+    var W=64,H=20;
+    var d=pts.map(function(v,i){ return (i?'L':'M')+(i*(W/(pts.length-1))).toFixed(1)+','+(H-2-((v-mn)/rg)*(H-4)).toFixed(1); }).join(' ');
+    var up=pts[pts.length-1]>=pts[0];
+    return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block;"><path d="'+d+'" fill="none" stroke="'+(up?'#1a7e49':'#c0392b')+'" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  }
+  function esc(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+  var rows=ANALYTICS.clients.map(function(c){
+    var m=by[String(c.id)]||{};
+    var ses=m.sessions||[], cv=m.conversions||[], cl=m.gbp_calls||[];
+    var last=function(a){ return a.length?a[a.length-1]:null; };
+    var delta=null;
+    if(ses.length>=2){ var a0=ses[0], b0=ses[ses.length-1]; if(a0>0) delta=Math.round((b0-a0)/a0*100); }
+    return {c:c, ses:last(ses), sesArr:ses, delta:delta, conv:last(cv), calls:last(cl), rev:rev[String(c.id)]||0};
+  }).filter(function(x){ return x.ses!=null||x.conv!=null||x.calls!=null||x.rev>0; })
+    .sort(function(a,b){ return (b.rev-a.rev)||((b.ses||0)-(a.ses||0)); });
+  if(!rows.length){ mount.innerHTML=''; return; }
+  mount.innerHTML='<div style="background:#fff;border:1px solid var(--line,#e9e4f3);border-radius:16px;padding:16px 20px;margin-top:14px;">'
+    +'<div style="font-size:13px;font-weight:700;margin-bottom:2px;">Across every client</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Latest stored readings + payments this month \u00b7 spark = the actual sessions series \u00b7 click a row for the deep dive</div>'
+    +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;">'
+    +'<tr style="color:var(--muted);font-size:10px;letter-spacing:.05em;text-align:left;"><th style="padding:6px 8px;">CLIENT</th><th style="padding:6px 8px;">VISITS</th><th style="padding:6px 8px;">TREND</th><th style="padding:6px 8px;">CONVERSIONS</th><th style="padding:6px 8px;">CALLS</th><th style="padding:6px 8px;text-align:right;">PAID THIS MONTH</th></tr>'
+    +rows.map(function(x){
+      return '<tr style="border-top:1px solid rgba(41,25,66,.05);cursor:pointer;" onclick="anSelectClient(\''+esc(String(x.c.id))+'\')">'
+        +'<td style="padding:8px;font-weight:650;color:var(--ink);">'+esc(x.c.name||'Client')+'</td>'
+        +'<td style="padding:8px;">'+(x.ses!=null?Number(x.ses).toLocaleString():'\u2014')+(x.delta!=null?' <span style="font-size:10.5px;font-weight:700;color:'+(x.delta>=0?'#1a7e49':'#c0392b')+';">'+(x.delta>=0?'\u2191':'\u2193')+Math.abs(x.delta)+'%</span>':'')+'</td>'
+        +'<td style="padding:8px;">'+spark(x.sesArr)+'</td>'
+        +'<td style="padding:8px;">'+(x.conv!=null?Number(x.conv).toLocaleString():'\u2014')+'</td>'
+        +'<td style="padding:8px;">'+(x.calls!=null?Number(x.calls).toLocaleString():'\u2014')+'</td>'
+        +'<td style="padding:8px;text-align:right;font-weight:650;">'+(x.rev?'$'+Math.round(x.rev).toLocaleString():'\u2014')+'</td>'
+      +'</tr>';
+    }).join('')
+    +'</table></div></div>';
 }
 
 // ── PRACTICE PULSE — the operator layer. Six lists, every line is a decision
@@ -11310,6 +11372,7 @@ function renderAnalyticsShell(){
     + '</div>'
     + '</div>'
     + '<div id="pulseBody" style="margin-top:18px;"></div>'
+    + '<div id="anAcross" style="margin-top:4px;"></div>'
     + '<div id="anBody" style="margin-top:4px;"></div>';
 }
 function anSelectClient(id){ ANALYTICS.clientId=id; refreshAnalytics(); }
