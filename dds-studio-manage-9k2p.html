@@ -14134,6 +14134,7 @@ function anEngineNote(eng){
         +msRow('Website launched', launched)
         +msRow('Growth partnership', partStart)
       +'</div>'
+      +'<div id="tlxComm"></div>'
       +'<div id="tlxFilesMount"></div>'
       +'<div class="grx-card"><div class="grx-h">Quick add</div>'
         +'<div class="tlx-qa" onclick="tlxAdd(\'note\')">\u270E Add note<span class="c">\u203A</span></div>'
@@ -14174,6 +14175,22 @@ function anEngineNote(eng){
         +(list.length>shown.length?'<div style="text-align:center;margin-top:16px;"><button class="ibx-pill" onclick="tlxMore()">\u21BB Load more events</button></div>':'')
       +'</div><div class="tlx-rail">'+rail+'</div></div>';
     try{ ddsFilesCard('tlxFilesMount', TLX.cid); }catch(e){}
+    // ── the communication brain, inline on the story ── "invoice paid \u2192
+    // ask for the review", "quiet 30d \u2192 check-in ready" \u2014 the same recs as
+    // Today, scoped to this client, one tap into the pre-filled template.
+    (async function(){
+      try{
+        if(typeof ddsCommBrain!=='function') return;
+        var rc=(await ddsCommBrain()).filter(function(x){ return String(x.cid)===String(TLX.cid); });
+        var m=document.getElementById('tlxComm');
+        if(!m||!rc.length) return;
+        m.innerHTML='<div class="grx-card"><div class="grx-h">\u2726 Suggested from the story</div>'
+          +rc.slice(0,2).map(function(x){
+            return '<div style="font-size:12.5px;color:var(--ink);line-height:1.55;padding:7px 0;border-top:1px solid rgba(41,25,66,.05);">'+esc(x.ask)
+              +'<div style="margin-top:4px;"><button class="ibx-pill" onclick="ddsCommOpen(\''+att(String(x.t.id))+'\',\''+att(String(x.cid))+'\')">'+esc(x.t.name)+' \u2192</button></div></div>';
+          }).join('')+'</div>';
+      }catch(e){}
+    })();
     try{ tlxStoryFill(); }catch(e){}
   }
 
@@ -16132,6 +16149,7 @@ window.ddsFilesCard=async function(mountId, clientId){
     toast(body===null?'Couldn\u2019t create the task':'\u2713 Task created \u2014 it\u2019s in the queue');
   };
 
+  window.smxIssueOpen=function(k){ SMX.sel=k; smxRender(); };
   function smxRender(){
     var root=document.getElementById('smxRoot'); if(!root) return;
     var rows=SMX.rows;
@@ -16151,6 +16169,32 @@ window.ddsFilesCard=async function(mountId, clientId){
       : !scored.length?'Sites are watched but unchecked \u2014 run checks to get real PageSpeed scores.'
       : attn===0?'All '+scored.length+' checked websites are healthy. Nothing needs you.'
       : attn+' website'+(attn===1?'':'s')+' below 80 \u2014 the workspace explains what it means in business terms and what to do.';
+
+    // ── TOP ISSUES across every site ── aggregated from the same real check
+    // data, worst first. Critical <50, warning <80, plus missing HTTPS and
+    // never-checked sites. Each row opens that site's workspace.
+    var issues=[];
+    rows.forEach(function(r0){
+      var L0=r0.latest, nm=(clientFor(r0.site&&r0.site.url)||{}).name||host(r0.site&&r0.site.url), k0=keyOf(r0);
+      if(!L0||L0.overall==null){ issues.push({sev:1,label:'Never checked',site:nm,key:k0,detail:'No real scores yet \u2014 run the first check.'}); return; }
+      if(L0.https===false) issues.push({sev:0,label:'No HTTPS',site:nm,key:k0,detail:'Browsers warn visitors away \u2014 the single highest-priority fix.'});
+      [['performance','Slow pages'],['mobile','Weak mobile experience'],['visibility','Poor search visibility'],['local','Weak local presence']].forEach(function(pr){
+        var v=metric(L0,[pr[0]]); if(v==null) return;
+        if(v<50) issues.push({sev:0,label:pr[1],site:nm,key:k0,detail:'Score '+v+' \u2014 critical.'});
+        else if(v<80) issues.push({sev:1,label:pr[1],site:nm,key:k0,detail:'Score '+v+'.'});
+      });
+    });
+    issues.sort(function(a,b){ return a.sev-b.sev; });
+    var topIssues=issues.length?('<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Top issues \u2014 every site, worst first</div>'
+      +issues.slice(0,6).map(function(iss){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(41,25,66,.05);cursor:pointer;" onclick="smxIssueOpen(\''+att(iss.key)+'\')">'
+          +'<span style="font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:100px;flex:none;'+(iss.sev===0?'color:#c0392b;background:#fbecea;':'color:#9a7a1a;background:#fdf6e3;')+'">'+(iss.sev===0?'CRITICAL':'WARNING')+'</span>'
+          +'<span style="flex:1;min-width:0;font-size:12.5px;color:var(--ink);"><b>'+esc(iss.label)+'</b> \u00b7 '+esc(iss.site)+' <span style="color:var(--muted);font-size:11.5px;">\u2014 '+esc(iss.detail)+'</span></span>'
+          +'<span style="color:var(--p);font-size:12px;flex:none;">open \u2192</span>'
+        +'</div>';
+      }).join('')
+      +(issues.length>6?'<div style="font-size:11px;color:var(--muted);margin-top:6px;">'+(issues.length-6)+' more \u2014 the per-site workspaces have the rest.</div>':'')
+    +'</div>'):'';
 
     var listHtml=rows.length?rows.map(function(r){
       var L=r.latest, o=L&&L.overall!=null?L.overall:null, c=clientFor(r.site&&r.site.url);
@@ -16267,6 +16311,7 @@ window.ddsFilesCard=async function(mountId, clientId){
       +'<div id="smxAddBox" style="display:none;margin-top:10px;"><div style="display:flex;gap:8px;"><input class="fi" id="smxAddIn" style="margin:0;flex:1;" placeholder="example.com"><button class="bf-act primary" onclick="smxAddGo()">Add &amp; watch</button></div></div>'
       +stats
       +'<div style="font-size:13px;color:var(--muted);margin-top:10px;">'+esc(sentence)+'</div>'
+      +topIssues
       +'<div class="smx-grid"><div>'+listHtml+'</div><div>'+work+'</div><div>'+rail+'</div></div>';
     var r3=rows.find(function(x){ return keyOf(x)===SMX.sel; });
     var c3=r3&&clientFor(r3.site&&r3.site.url);
