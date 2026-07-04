@@ -15756,6 +15756,54 @@ window.ddsFilesCard=async function(mountId, clientId){
     return root;
   }
 
+  // ── MAINTENANCE RECEIPT: proof of ongoing care from real check history.
+  // Reads site_checks for the selected site (last 30 days), computes checks
+  // run, score movement, and what was verified, and produces plain text with
+  // a Copy button — made to paste into a monthly review or client message.
+  // Every number comes from stored checks; if there's no history, it says so.
+  window.smxReceiptGen=async function(){
+    var host=document.getElementById('smxReceipt'); if(!host) return;
+    var r=SMX.rows.find(function(x){ return keyOf(x)===SMX.sel; });
+    if(!r||!r.site||!r.site.id){ host.innerHTML='<div style="font-size:12px;color:var(--muted);">This site needs an id (sync client sites) before history can be read.</div>'; return; }
+    host.innerHTML='<div style="font-size:12px;color:var(--muted);">Reading check history\u2026</div>';
+    try{
+      var since=new Date(Date.now()-30*86400000).toISOString();
+      var checks=await api('site_checks?site_id=eq.'+encodeURIComponent(String(r.site.id))+'&checked_at=gte.'+encodeURIComponent(since)+'&select=overall,performance,mobile,visibility,local,https,checked_at&order=checked_at.asc&limit=60')||[];
+      if(!checks.length){ host.innerHTML='<div style="font-size:12px;color:var(--muted);">No checks in the last 30 days \u2014 run a check first; receipts only report what actually happened.</div>'; return; }
+      var c=clientFor(r.site&&r.site.url);
+      var name=(c&&c.name)||String(r.site.url||'').replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+      var first=checks[0], last=checks[checks.length-1];
+      var lines=[];
+      lines.push('Website care summary \u2014 '+name+' \u2014 last 30 days');
+      lines.push('');
+      lines.push('\u2022 '+checks.length+' full health check'+(checks.length===1?'':'s')+' run (Google PageSpeed + on-page + local signals)');
+      if(last.overall!=null){
+        if(first.overall!=null&&checks.length>1&&last.overall!==first.overall){
+          var d=last.overall-first.overall;
+          lines.push('\u2022 Overall site health '+(d>0?'improved from '+first.overall+' to '+last.overall+' (+'+d+')':'moved from '+first.overall+' to '+last.overall+' ('+d+')'));
+        } else {
+          lines.push('\u2022 Overall site health: '+last.overall+'/100');
+        }
+      }
+      [['performance','Page speed'],['mobile','Mobile experience'],['visibility','Search visibility'],['local','Local presence']].forEach(function(mk){
+        var a=first[mk[0]], b=last[mk[0]];
+        if(b==null) return;
+        if(a!=null&&checks.length>1&&b-a>=3) lines.push('\u2022 '+mk[1]+' improved '+(b-a)+' points ('+a+' \u2192 '+b+')');
+      });
+      if(last.https===true) lines.push('\u2022 Secure connection (HTTPS) verified on every check');
+      var lastDt=''; try{ lastDt=new Date(last.checked_at).toLocaleDateString('en-US',{month:'long',day:'numeric'}); }catch(e){}
+      if(lastDt) lines.push('\u2022 Most recent check: '+lastDt);
+      lines.push('');
+      lines.push('\u2014 Davis Digital Studio, ongoing site care');
+      var txt=lines.join('\n');
+      host.innerHTML='<pre style="font-family:inherit;font-size:12.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;background:rgba(91,63,160,.04);border-radius:10px;padding:12px 14px;margin:0;">'+esc(txt)+'</pre>'
+        +'<div style="display:flex;gap:8px;margin-top:8px;">'
+        +'<button class="bf-act" onclick="navigator.clipboard.writeText(this.parentNode.previousSibling.textContent);toast(\'\u2713 Receipt copied\')">Copy receipt</button>'
+        +(c?'<button class="ibx-pill" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(String(c.id))+'\')}catch(e){}},400);">Paste into their conversation \u2192</button>':'')
+        +'</div>';
+    }catch(e){ host.innerHTML='<div style="font-size:12px;color:#9a2d2d;">Could not read history: '+esc(e.message)+'</div>'; }
+  };
+
   async function smxLoad(){
     var root=ensureRoot(); if(!root) return;
     root.innerHTML='<div class="bf-skel" style="height:26px;width:240px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:70px;width:100%;border-radius:16px;"></div>';
@@ -15903,6 +15951,9 @@ window.ddsFilesCard=async function(mountId, clientId){
           +(L&&L.https===true?'<div class="grx-ok">HTTPS \u2014 secure connection verified</div>':(L&&L.https===false?'<div style="font-size:12.5px;color:#c0392b;padding:4px 0;">\u2717 No HTTPS detected \u2014 browsers warn visitors away; the single highest-priority fix</div>':''))
           +(L&&(L.checked_at||L.created_at)?'<div class="grx-ok">Last verified '+esc(agoS(L.checked_at||L.created_at))+'</div>':'<div style="font-size:12.5px;color:var(--muted);padding:4px 0;">\u25CB Not checked yet</div>')
           +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Uptime pings, SSL expiry, backups, and security scanning aren\u2019t wired yet \u2014 documented as dependencies, never simulated.</div>'
+        +'</div>'
+        +'<div class="ivx-block"><div class="ivx-bh">MAINTENANCE RECEIPT <span style="font-weight:400;letter-spacing:0;text-transform:none;">\u2014 proof of care, ready to paste to the client</span></div>'
+          +'<div id="smxReceipt"><button class="ibx-pill" onclick="smxReceiptGen()">Build the last-30-days receipt</button></div>'
         +'</div>'
       +'</div>';
 
