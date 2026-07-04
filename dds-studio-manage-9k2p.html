@@ -11636,8 +11636,24 @@ function anEngineNote(eng){
       +stripHtml
       +'<div class="tdx-grid">'
         +'<div>'+heroHtml+needsHtml+schedHtml+actHtml+'</div>'
-        +'<div>'+pulse+noticedHtml+card20+'</div>'
+        +'<div>'+pulse+'<div id="tdxComm"></div>'+noticedHtml+card20+'</div>'
       +'</div>';
+    // ── the communication brain, on the surface Eric opens every morning.
+    // "Client paid \u2192 review ask?", "quiet 30d \u2192 check-in ready" \u2014 fail-soft.
+    (async function(){
+      try{
+        if(typeof ddsCommBrain!=='function') return;
+        var rc=await ddsCommBrain();
+        var hostC=document.getElementById('tdxComm');
+        if(!hostC||!rc||!rc.length) return;
+        hostC.innerHTML='<div class="tdx-card" style="margin-top:16px;"><div class="tdx-ph">\u2709 NEXT BEST COMMUNICATION</div>'
+          +rc.slice(0,3).map(function(x){
+            return '<div style="padding:8px 0;border-top:1px solid rgba(41,25,66,.05);font-size:12.5px;line-height:1.5;color:var(--ink);">'+esc(x.ask)
+              +'<div style="margin-top:4px;"><button class="tdx-pill" onclick="ddsCommOpen(\''+esc(String(x.t.id))+'\',\''+esc(x.cid)+'\')">'+esc(x.t.name)+' \u2192</button></div></div>';
+          }).join('')
+        +'</div>';
+      }catch(e){}
+    })();
   }
   window.loadBrief=loadTodayX;
   window.loadSalesMoves=function(){};
@@ -12215,6 +12231,7 @@ function anEngineNote(eng){
   // route invoice_health; deterministic. Fail-soft: absent on any error. ──
   var IVXH={loaded:false};
   async function ivxHealth(){
+    try{ if(typeof ddsCommBrain==='function'&&!(window.DDS_COMM&&window.DDS_COMM.bySig)) await ddsCommBrain(); }catch(e){}
     var host=document.getElementById('ivxHealth'); if(!host) return;
     if(IVXH.cache){ host.innerHTML=IVXH.cache; return; }
     try{
@@ -12239,6 +12256,7 @@ function anEngineNote(eng){
           +'<strong style="font-size:12.5px;">'+esc(a.client)+'</strong>'
           +'<span style="font-size:11px;color:var(--muted);">$'+(Number(a.amount)||0).toLocaleString()+' \u00b7 '+a.overdue_days+'d overdue'+(a.reminders?' \u00b7 '+a.reminders+' auto-reminder'+(a.reminders===1?'':'s')+' sent':'')+'</span>'
           +'<button class="ibx-pill" style="margin-left:auto;" onclick="ivxRemind(\''+att(String(a.id))+'\')">Draft the chase</button>'
+          +((window.DDS_COMM&&window.DDS_COMM.bySig&&window.DDS_COMM.bySig.invoice_overdue)?'<button class="ibx-pill" onclick="ddsCommOpen(\''+att(String(window.DDS_COMM.bySig.invoice_overdue.id))+'\',\''+att(String(a.client_id||''))+'\')">Reminder template \u2192</button>':'')
           +'</div>'
           +(a.suggestion?'<div style="font-size:11.5px;color:var(--ink);margin-top:3px;"><b style="color:var(--p);font-size:10px;">SUGGESTION:</b> '+esc(a.suggestion)+'</div>':'')
         +'</div>';
@@ -12990,6 +13008,7 @@ function anEngineNote(eng){
   async function rhxPulseFill(id){
     var host=document.getElementById('rhxPulse'); if(!host) return;
     try{
+      try{ if(typeof ddsCommBrain==='function'&&!(window.DDS_COMM&&window.DDS_COMM.bySig)) await ddsCommBrain(); }catch(e0){}
       if(!RHXP.cache || (Date.now()-RHXP.at)>5*60*1000){
         var jwt=await adminJwt(); if(!jwt) return;
         var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'client_pulse'})});
@@ -13006,7 +13025,8 @@ function anEngineNote(eng){
       }
       if(pu.renewal){
         var rl={likely:['Renewal likely','#1a7e49'],uncertain:['Renewal uncertain','#9a7a1a'],at_risk:['Renewal at risk','#c0392b'],unknown:['In renewal window','var(--muted)']}[pu.renewal.likelihood]||['Renewal','var(--muted)'];
-        bits.push('<div class="rhx-kv"><span>Renews in '+pu.renewal.days+'d</span><b style="color:'+rl[1]+';">'+rl[0]+'</b></div>');
+        var rTpl=(window.DDS_COMM&&window.DDS_COMM.bySig&&window.DDS_COMM.bySig.renewal_window)||null;
+        bits.push('<div class="rhx-kv"><span>Renews in '+pu.renewal.days+'d'+(rTpl?' \u00b7 <a href="#" style="color:var(--p);font-weight:600;" onclick="ddsCommOpen(\''+esc(String(rTpl.id))+'\',\''+esc(String(id))+'\');return false;">renewal email \u2192</a>':'')+'</span><b style="color:'+rl[1]+';">'+rl[0]+'</b></div>');
       }
       if(pu.anniversary) bits.push('<div class="rhx-kv"><span>\ud83c\udf89 '+pu.anniversary.years+'-year '+(pu.anniversary.basis==='launch'?'launch':'client')+' anniversary</span><b>in '+pu.anniversary.days_until+'d</b></div>');
       if(pu.relationship_health!=null) bits.push('<div class="rhx-kv"><span>Signals-brain relationship score</span><b>'+pu.relationship_health+(pu.rh_note?' \u00b7 '+esc(pu.rh_note):'')+'</b></div>');
@@ -16708,6 +16728,76 @@ window.ddsFilesCard=async function(mountId, clientId){
 })();
 </script>
 
+<script>
+// ═══ COMMUNICATION BRAIN ═══
+// One shared recommender: reads live records (templates, clients, invoices,
+// messages, sent quotes) and answers "what should Eric send right now?" as
+// human questions. Cached 5 minutes; every consumer fails soft. Surfaces on
+// Today, Invoices, the client pulse, and the Communication Center itself.
+window.DDS_COMM={cache:null,at:0,busy:false};
+window.ddsCommBrain=async function(){
+  var C=window.DDS_COMM;
+  if(C.cache&&(Date.now()-C.at)<5*60*1000) return C.cache;
+  if(C.busy) return C.cache||[];
+  C.busy=true;
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  try{
+    var r=await Promise.all([
+      safe(function(){ return api('email_templates?archived=eq.false&auto_signal=not.is.null&select=id,name,auto_signal&limit=100'); }),
+      safe(function(){ return api('clients?select=id,name,launched_at,renews_at,created_at&limit=300'); }),
+      safe(function(){ return api('invoices?deleted_at=is.null&select=client_id,amount,status,due_date&order=created_at.desc&limit=300'); }),
+      safe(function(){ return api('messages?select=client_id,created_at&order=created_at.desc&limit=600'); }),
+      safe(async function(){ var jwt=await adminJwt(); if(!jwt) return null;
+        var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'quote_list'})});
+        var j=await res.json(); return (j&&j.data&&j.data.quotes)||null; })
+    ]);
+    var tpls=r[0]||[], clients=r[1]||[], invoices=r[2]||[], msgs=r[3]||[], quotes=r[4]||[];
+    var bySig={}; tpls.forEach(function(t){ bySig[t.auto_signal]=t; });
+    window.DDS_COMM.bySig=bySig;
+    var lastMsg={}; msgs.forEach(function(m){ var k=String(m.client_id); if(!lastMsg[k]) lastMsg[k]=m; });
+    var now=Date.now(), D=86400000, out=[];
+    var eh=function(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    clients.forEach(function(c){
+      var cid=String(c.id), nm=c.name||'A client';
+      if(bySig.invoice_overdue){
+        var od=invoices.find(function(i){ return String(i.client_id)===cid&&i.status!=='paid'&&i.status!=='draft'&&i.due_date&&(function(){try{return invcDue(i.due_date)<now-5*D;}catch(e){return false;}})(); });
+        if(od) out.push({t:bySig.invoice_overdue,cid:cid,cname:nm,rank:90,ask:'Invoice overdue \u2014 send '+nm+' a friendly payment reminder?'});
+      }
+      if(c.launched_at){
+        var ld=(now-new Date(c.launched_at))/D;
+        if(bySig.client_launched&&ld>=0&&ld<=5) out.push({t:bySig.client_launched,cid:cid,cname:nm,rank:85,ask:nm+' just launched \u2014 celebrate it?'});
+        else if(bySig.invoice_paid&&ld>5&&ld<=21) out.push({t:bySig.invoice_paid,cid:cid,cname:nm,rank:70,ask:'Warm review window for '+nm+' \u2014 ask for the review?'});
+      }
+      if(bySig.quiet_client){
+        var m=lastMsg[cid];
+        if(m){ var qd=(now-new Date(m.created_at))/D;
+          if(qd>=14&&qd<=60) out.push({t:bySig.quiet_client,cid:cid,cname:nm,rank:55,ask:nm+' has been quiet '+Math.floor(qd)+' days \u2014 check-in email ready.'}); }
+      }
+      if(bySig.renewal_window&&c.renews_at){
+        var rd=(new Date(c.renews_at)-now)/D;
+        if(rd>=0&&rd<=45) out.push({t:bySig.renewal_window,cid:cid,cname:nm,rank:80,ask:nm+' renews in '+Math.round(rd)+'d \u2014 open the renewal conversation?'});
+      }
+    });
+    if(bySig.quote_cold&&quotes){
+      quotes.forEach(function(qt){
+        if((qt.engagement==='never_opened'||qt.engagement==='ignored')&&Number(qt.age_days)>=4&&Number(qt.age_days)<=45){
+          var c2=clients.find(function(x){ return String(x.name||'').toLowerCase()===String(qt.client_name||'').toLowerCase(); });
+          out.push({t:bySig.quote_cold,cid:c2?String(c2.id):'',cname:qt.client_name||'A prospect',rank:75,ask:'Proposal to '+(qt.client_name||'them')+' unanswered '+qt.age_days+'d \u2014 draft the follow-up?'});
+        }
+      });
+    }
+    out.sort(function(a,b){ return b.rank-a.rank; });
+    C.cache=out.slice(0,6); C.at=Date.now();
+  }catch(e){ C.cache=C.cache||[]; }
+  C.busy=false;
+  return C.cache;
+};
+// one-tap handoff: open the Communication Center with template + client set
+window.ddsCommOpen=function(tid,cid){
+  window.TPX_PENDING={tid:String(tid||''),cid:String(cid||'')};
+  go('templates');
+};
+</script>
 <style>
 /* COMMUNICATION CENTER — templates as client experiences, not documents. */
 #page-templates #tpxRoot{max-width:1380px;}
@@ -16782,6 +16872,13 @@ window.ddsFilesCard=async function(mountId, clientId){
       return;
     }
     TPX.rows=r[0]||[]; TPX.clients=r[1]||[]; TPX.invoices=r[2]||[]; TPX.msgs=r[3]||[];
+    // contextual handoff from any surface: land on the right template,
+    // pre-filled for the right client
+    if(window.TPX_PENDING){
+      var pd=window.TPX_PENDING; window.TPX_PENDING=null;
+      if(pd.tid&&TPX.rows.some(function(t){return String(t.id)===pd.tid;})) TPX.sel=pd.tid;
+      if(pd.cid) TPX.clientId=pd.cid;
+    }
     if(!TPX.sel&&TPX.rows.length) TPX.sel=String(TPX.rows[0].id);
     TPX.loaded=true;
     tpxRender();
