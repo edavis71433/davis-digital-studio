@@ -18431,5 +18431,64 @@ window.ddsStatTile=function(opts){
 })();
 </script>
 
+
+<style>
+/* ── MOBILE WIDTH HARDENING for surfaces added in the OS passes ── */
+@media(max-width:768px){
+  .ivx-stats,.cx-stats{gap:8px;}
+  .ivx-st,.cx-st{min-width:calc(50% - 4px);padding:14px;}
+  .ivx-sn,.cx-sn{font-size:20px;}
+  .dds-tico{width:32px;height:32px;font-size:14px;}
+  .tmx-grid,.cx-grid,.smx-grid,.msx-grid{grid-template-columns:1fr !important;}
+  /* Focus ribbon: tabs become a swipeable strip instead of a tall wrap */
+  #ddsRibbon{border-radius:0;margin:0 -14px 12px;padding:8px 10px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  #ddsRibbon .fx-x{position:sticky;right:0;}
+  table{display:block;overflow-x:auto;max-width:100%;}
+}
+</style>
+<script>
+// ── WIDTH DEBUGGER ── evidence over guessing, no DevTools required.
+// Open any page with ?debugw=1 and a panel lists every element whose right
+// edge exceeds the viewport, worst first, with enough of a selector to fix
+// it. Silent unless summoned.
+(function(){
+  try{
+    if(!/[?&]debugw=1/.test(location.search)) return;
+    function pathOf(el){
+      var bits=[]; var n=el;
+      while(n&&n.tagName&&bits.length<4){
+        var b=n.tagName.toLowerCase();
+        if(n.id) b+='#'+n.id;
+        else if(n.className&&typeof n.className==='string') b+='.'+n.className.trim().split(/\s+/).slice(0,2).join('.');
+        bits.unshift(b); n=n.parentElement;
+      }
+      return bits.join(' > ');
+    }
+    function scan(){
+      var vw=window.innerWidth, bad=[];
+      document.querySelectorAll('body *').forEach(function(el){
+        if(!el.offsetParent&&el.tagName!=='BODY') return; // skip hidden
+        var r=el.getBoundingClientRect();
+        var over=Math.round(r.right-vw);
+        if(over>2&&r.width>20) bad.push({over:over,w:Math.round(r.width),p:pathOf(el)});
+      });
+      bad.sort(function(a,b){ return b.over-a.over; });
+      var seen={}, rows=[];
+      bad.forEach(function(x){ if(rows.length<8&&!seen[x.p]){ seen[x.p]=1; rows.push(x); } });
+      var d=document.getElementById('wdbg');
+      if(!d){ d=document.createElement('div'); d.id='wdbg';
+        d.style.cssText='position:fixed;bottom:10px;left:10px;right:10px;z-index:9999;background:#291942;color:#fff;border-radius:12px;padding:12px;font-size:11px;font-family:monospace;max-height:45vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.4);';
+        document.body.appendChild(d); }
+      d.innerHTML='<b>WIDTH DEBUG</b> viewport '+vw+'px \u00b7 '+(rows.length?rows.length+' offenders (right edge past viewport):':'nothing overflows on this page \u2713')
+        +rows.map(function(x){ return '<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:6px;">+'+x.over+'px \u00b7 w'+x.w+' \u00b7 '+x.p.replace(/</g,'&lt;')+'</div>'; }).join('')
+        +'<div style="margin-top:8px;opacity:.7;">re-scans on nav \u00b7 remove ?debugw=1 to hide</div>';
+    }
+    setTimeout(scan,1200);
+    var _goW=window.go; if(typeof _goW==='function') window.go=function(){ var r=_goW.apply(this,arguments); setTimeout(scan,900); return r; };
+    window.addEventListener('resize',function(){ setTimeout(scan,300); });
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>

@@ -1121,7 +1121,7 @@ input:focus, textarea:focus, select:focus{ border-color:var(--p); box-shadow:0 0
   <div class="login-card">
     <a href="/" class="login-brand">Davis<span>Digital</span> Studio</a>
     <div class="login-eyebrow">Client portal</div>
-    <h1 class="login-h1">Welcome back</h1>
+    <h1 class="login-h1">Welcome</h1>
     <p class="login-intro">Sign in to see your project, files, and what's next.</p>
     <label class="login-label" for="loginUser">Email</label>
     <input class="login-input" id="loginUser" type="email" placeholder="you@yourbusiness.com" onkeydown="if(event.key==='Enter')login()">
@@ -1644,7 +1644,7 @@ async function login() {
   btn.disabled = true;
   err.style.display = "none";
 
-  function reset() { btn.innerHTML = "Sign in to your portal →"; btn.style.opacity = "1"; btn.disabled = false; }
+  function reset() { btn.innerHTML = "Sign in →"; btn.style.opacity = "1"; btn.disabled = false; }
 
   // Step 1: authenticate. Same call the admin login uses (which works).
   var data, error;
@@ -3408,6 +3408,17 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
 
     var fab = document.createElement("button");
     fab.id = "aiFab"; fab.className = "ai-fab"; fab.setAttribute("aria-label","Ask about your project");
+    // first-visit hint: the bubble introduces itself once, then stays quiet
+    try {
+      if (!localStorage.getItem("ai_fab_seen")) {
+        var hint = document.createElement("div");
+        hint.id = "aiFabHint";
+        hint.style.cssText = "position:fixed;bottom:92px;right:20px;z-index:998;background:#291942;color:#fff;font-size:12.5px;padding:10px 14px;border-radius:12px;box-shadow:0 8px 24px rgba(41,25,66,.25);max-width:220px;line-height:1.45;";
+        hint.innerHTML = "Questions about your project? Tap here anytime — I\u2019ll answer right away.";
+        document.body.appendChild(hint);
+        setTimeout(function(){ var h=document.getElementById("aiFabHint"); if(h) h.remove(); }, 20000);
+      }
+    } catch (e) {}
     fab.innerHTML =
       '<span class="ai-fab-pulse"></span>'+
       '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>';
@@ -3459,8 +3470,32 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   function renderSuggestions(){
     var host = document.getElementById("aiSuggest");
     if (!host) return;
-    var chips = ["What's the status of my project?","What do you need from me?","When will it be done?","Do I have anything to approve?"];
-    host.innerHTML = chips.map(function(c){ return '<button onclick="PortalAI.ask(this.textContent)">'+c+'</button>'; }).join("");
+    // ── STATE-AWARE GUIDANCE ── the suggestions come from the client's real
+    // situation (the same briefs The Work renders), so the assistant meets
+    // them where they are: a waiting decision suggests asking what happens
+    // after approval; a fresh delivery suggests asking what to do with it.
+    // Generic questions only fill the gaps. Reassure and guide, not prompt-
+    // engineer the client.
+    var chips = [];
+    try {
+      var dec = window.WQ_decisions;
+      if (dec && dec.decisions && dec.decisions.length) {
+        var t = String(dec.decisions[0].title || "this").slice(0, 40);
+        chips.push('What happens after I approve "' + t + '"?');
+      }
+      var dl = window.WQ_deliveries;
+      if (dl && dl.deliveries && dl.deliveries.length && dl.deliveries[0].is_new) {
+        chips.push('What should I do with "' + String(dl.deliveries[0].name || "the new file").slice(0, 36) + '"?');
+      }
+      var pr = window.WQ_progress;
+      if (pr && pr.current && pr.current.label && !pr.current.is_complete) {
+        chips.push('What does the ' + String(pr.current.label).slice(0, 32) + ' phase involve?');
+      }
+    } catch (e) {}
+    ["What's the status of my project?","What do you need from me?","When will it be done?"].forEach(function(g){
+      if (chips.length < 4) chips.push(g);
+    });
+    host.innerHTML = chips.slice(0,4).map(function(c){ return '<button onclick="PortalAI.ask(this.textContent)">'+c.replace(/</g,"&lt;")+'</button>'; }).join("");
   }
 
   function addBot(text){
@@ -3601,6 +3636,8 @@ if (_svcModalEl) _svcModalEl.addEventListener("click", function(e) {
   });
 
   /* expose namespace for inline handlers */
+  var _openAi0 = openAi;
+  openAi = function(){ try{ localStorage.setItem("ai_fab_seen","1"); var h=document.getElementById("aiFabHint"); if(h) h.remove(); }catch(e){} return _openAi0.apply(this,arguments); };
   window.PortalAI = { open:openAi, close:closeAi, send:send, ask:ask };
 })();
 
