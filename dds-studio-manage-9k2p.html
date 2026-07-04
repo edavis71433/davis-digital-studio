@@ -13921,12 +13921,85 @@ function anEngineNote(eng){
         +'<div style="text-align:right;"><div class="grx-meta">Relationship health</div></div>'
         +'<div class="rhx-ring" style="border-color:'+hl[1]+';color:'+hl[1]+';margin-left:12px;"><span>'+hs+'</span><span class="rhx-rl">'+esc(hl[0])+'</span></div>'
       +'</div>'
+      +'<div id="tlxStory"></div>'
       +'<div class="tlx-chips">'+CH.map(function(f){ return '<button class="tlx-chip'+(TLX.filter===f[0]?' on':'')+'" onclick="tlxFilter(\''+f[0]+'\')">'+f[1]+'</button>'; }).join('')+'</div>'
       +'<div class="tlx-grid"><div>'+stream
         +(list.length>shown.length?'<div style="text-align:center;margin-top:16px;"><button class="ibx-pill" onclick="tlxMore()">\u21BB Load more events</button></div>':'')
       +'</div><div class="tlx-rail">'+rail+'</div></div>';
     try{ ddsFilesCard('tlxFilesMount', TLX.cid); }catch(e){}
+    try{ tlxStoryFill(); }catch(e){}
   }
+
+  // ── STORY, MILESTONES, SEARCH & EXPORT: one client_timeline call returns
+  // the derived full history (messages, files, invoices created/paid,
+  // approvals, work, tool runs, admin log) with detected milestones and a
+  // story paragraph built from facts. Search runs server-side; export is a
+  // CSV of the full derived history. Fail-soft: absent on error. ──
+  var TLXS={data:null, cid:null, timer:null};
+  async function tlxStoryFetch(q){
+    var jwt=await adminJwt(); if(!jwt) return null;
+    var payload={type:'client_timeline', client_id:String(TLX.cid)};
+    if(q) payload.q=q;
+    var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(payload)});
+    var j=await r.json(); return (j&&j.data)||null;
+  }
+  async function tlxStoryFill(){
+    var host=document.getElementById('tlxStory'); if(!host||!TLX.cid) return;
+    try{
+      if(TLXS.cid!==String(TLX.cid)){ TLXS.data=await tlxStoryFetch(''); TLXS.cid=String(TLX.cid); }
+      var d=TLXS.data; if(!d) return;
+      var miles=(d.items||[]).filter(function(i){ return i.milestone; }).slice(0,6);
+      host.innerHTML='<div class="grx-card" style="margin-top:12px;">'
+        +(d.story?'<div style="font-size:13.5px;line-height:1.6;color:var(--ink);">'+esc(d.story)+'</div>':'')
+        +(miles.length?'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;">'+miles.map(function(m){
+          var dt=''; try{ dt=new Date(m.ts).toLocaleDateString('en-US',{month:'short',year:'numeric'}); }catch(e){}
+          return '<span style="font-size:10.5px;font-weight:800;color:#c4731a;background:rgba(196,115,26,.09);padding:3px 10px;border-radius:100px;">\u2605 '+esc(m.milestone_label||m.title)+(dt?' \u00b7 '+dt:'')+'</span>';
+        }).join('')+'</div>':'')
+        +'<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">'
+          +'<input id="tlxSearch" class="opx-search" style="flex:1;min-width:160px;margin:0;" placeholder="Search the full history\u2026" oninput="tlxSearchGo(this.value)" aria-label="Search history">'
+          +'<button class="ibx-pill" onclick="tlxExport()">\u2913 Export CSV</button>'
+        +'</div>'
+        +'<div id="tlxSearchOut"></div>'
+      +'</div>';
+    }catch(e){ /* absent on error */ }
+  }
+  window.tlxSearchGo=function(v){
+    clearTimeout(TLXS.timer);
+    TLXS.timer=setTimeout(async function(){
+      var out=document.getElementById('tlxSearchOut'); if(!out) return;
+      var q=String(v||'').trim();
+      if(!q){ out.innerHTML=''; return; }
+      out.innerHTML='<div style="font-size:12px;color:var(--muted);padding:6px 0;">Searching\u2026</div>';
+      try{
+        var d=await tlxStoryFetch(q);
+        var items=(d&&d.items)||[];
+        out.innerHTML=items.length?items.slice(0,12).map(function(it){
+          var dt=''; try{ dt=new Date(it.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}); }catch(e){}
+          return '<div style="display:flex;gap:9px;align-items:baseline;padding:5px 0;border-top:1px solid rgba(41,25,66,.05);font-size:12.5px;">'
+            +'<span style="flex:none;font-size:10.5px;font-weight:700;color:var(--muted);min-width:62px;">'+esc(dt)+'</span>'
+            +'<span><b style="font-weight:650;">'+esc(it.title)+'</b>'+(it.detail?' <span style="color:var(--muted);">\u2014 '+esc(it.detail)+'</span>':'')+'</span>'
+          +'</div>';
+        }).join('')+((d.total>items.length)?'<div style="font-size:11px;color:var(--muted);padding:4px 0;">Top matches shown.</div>':'')
+        :'<div style="font-size:12px;color:var(--muted);padding:6px 0;">No matches in the history.</div>';
+      }catch(e){ out.innerHTML=''; }
+    },350);
+  };
+  window.tlxExport=async function(){
+    try{
+      var d=TLXS.data && TLXS.cid===String(TLX.cid) ? TLXS.data : await tlxStoryFetch('');
+      if(!d||!d.items||!d.items.length){ toast('Nothing to export yet.'); return; }
+      var cs=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
+      var rows=[['date','kind','title','detail','actor','milestone']].concat(d.items.map(function(it){
+        return [it.ts,it.kind,it.title,it.detail,it.actor,it.milestone?(it.milestone_label||'yes'):''];
+      }));
+      var blob=new Blob([rows.map(function(r2){return r2.map(cs).join(',');}).join('\r\n')],{type:'text/csv;charset=utf-8'});
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download=String((d.client&&d.client.name)||'client').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-timeline.csv';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+      toast('\u2713 Timeline exported');
+    }catch(e){ toast('Export failed'); }
+  };
 
   window.tlxUpload=function(){
     if(!TLX.cid){ toast('Open a client\u2019s timeline first'); return; }
@@ -14062,6 +14135,28 @@ function anEngineNote(eng){
     try{ MSX.thread=(await api('messages?select=*&client_id=eq.'+encodeURIComponent(cid)+'&order=created_at.asc&limit=200'))||[]; }catch(e){}
   }
 
+  // ── CONVERSATION SUMMARY: grounded server read of the whole thread —
+  // what it's about, questions of theirs Eric hasn't answered, how THEY are
+  // feeling (their side only), and the suggested next step. ──
+  window.msxSummarize=async function(){
+    if(!MSX.cid) return;
+    var out=document.getElementById('msxSumOut'); if(!out) return;
+    out.style.display='block';
+    out.innerHTML='<span style="color:var(--muted);">Reading the whole thread\u2026</span>';
+    try{
+      var jwt=await adminJwt(); if(!jwt){ showLogin(); return; }
+      var r=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify({type:'conversation_summary',kind:'client',id:String(MSX.cid)})});
+      var j=await r.json(); var d=(j&&j.data)||null;
+      if(!d){ out.innerHTML='<span style="color:#9a2d2d;">Could not summarize: '+esc((j&&j.error)||'unknown')+'</span>'; return; }
+      var sc={positive:['\ud83d\ude0a Positive','#1a7e49','#e7f6ee'],neutral:['Neutral','#7a6d8e','#f3f0fa'],frustrated:['\u26a0 Frustrated','#c0392b','#fbecea']}[d.sentiment]||null;
+      out.innerHTML='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:3px;"><b style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--p);">Summary</b>'
+        +(sc?'<span title="'+att(d.sentiment_why||'')+'" style="font-size:10px;font-weight:800;padding:2px 9px;border-radius:100px;color:'+sc[1]+';background:'+sc[2]+';">'+sc[0]+'</span>':'')+'</div>'
+        +'<div>'+esc(d.summary||'')+'</div>'
+        +((d.unanswered&&d.unanswered.length)?'<div style="margin-top:5px;"><b style="font-size:10px;color:#c0392b;">THEY ASKED, UNANSWERED:</b> '+d.unanswered.map(function(q){return esc(q);}).join(' \u00b7 ')+'</div>':'')
+        +(d.nextStep?'<div style="margin-top:5px;"><b style="font-size:10px;color:var(--p);">NEXT STEP:</b> '+esc(d.nextStep)+'</div>':'');
+    }catch(e){ out.innerHTML='<span style="color:#9a2d2d;">Could not summarize right now.</span>'; }
+  };
+
   window.msxOpen=async function(cid){ MSX.cid=String(cid); await msxThread(cid); MSX.mode='reply'; msxRender();
     setTimeout(function(){ var t=document.getElementById('msxStream'); if(t) t.scrollTop=t.scrollHeight; },50); };
   window.msxTab=function(t){ MSX.tab=t; msxRender(); };
@@ -14150,6 +14245,7 @@ function anEngineNote(eng){
           +'<button class="ibx-pill" onclick="tlxOpen&&(go(\'timeline\'),tlxOpen(\''+att(String(c.id))+'\'))">Timeline \u2192</button>'
         +'</div>'
         +'<div class="msx-snap">\u2726 <b>Conversation snapshot</b> \u00b7 '+snap+'</div>'
+        +'<div id="msxSumOut" style="display:none;font-size:12.5px;line-height:1.55;background:#f5f2fc;border-radius:12px;padding:11px 14px;margin-top:8px;"></div>'
         +'<div id="msxStream" style="flex:1;overflow:auto;max-height:420px;padding-right:4px;">'+(stream||'<div class="grx-empty">The thread starts with your first message.</div>')+'</div>'
         +'<div class="msx-qr">'+quick.map(function(t2){ return '<button class="ibx-pill" onclick="msxQuick(\''+att(t2)+'\')">'+esc(t2.split(' \u2014')[0])+'</button>'; }).join('')+'</div>'
         +'<div class="msx-box">'
@@ -14175,6 +14271,7 @@ function anEngineNote(eng){
       +'</div>'
       +'<div class="grx-card" style="margin-top:16px;"><div class="grx-h">\u2726 Suggestions</div>'
         +'<div class="tlx-qa" onclick="msxDraft()">Draft a response with AI<span class="c">\u203A</span></div>'
+        +'<div class="tlx-qa" onclick="msxSummarize()">Summarize this conversation<span class="c">\u203A</span></div>'
         +'<div class="tlx-qa" onclick="msxTask()">Turn this into a task<span class="c">\u203A</span></div>'
         +'<div class="tlx-qa" onclick="msxMode(\'note\');document.getElementById(\'msxTa\')&&document.getElementById(\'msxTa\').focus();">Log an internal note<span class="c">\u203A</span></div>'
       +'</div>'
@@ -14361,6 +14458,20 @@ function anEngineNote(eng){
       return true;
     });
 
+    // ── derived version groups: same base name (extension + v2/final/(1)/copy/
+    // timestamp noise stripped) within the same client = versions of one file.
+    // Newest carries the badge; the rail lists the older ones. ──
+    function fsxBase(f){
+      var n=String(f.name||'').toLowerCase().replace(/\.[a-z0-9]+$/,'');
+      n=n.replace(/[\s_-]*(\(\d+\)|v\d+|final|copy|edited|new|\d{6,})[\s_-]*$/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+      return String(f.client_id||'')+'|'+(n||String(f.name||''));
+    }
+    var fsxGroups={};
+    sorted.forEach(function(f){ var k=fsxBase(f); (fsxGroups[k]=fsxGroups[k]||[]).push(f); });
+    FSX.groups=fsxGroups;
+    function fsxVers(f){ var g=fsxGroups[fsxBase(f)]||[]; return {n:g.length, older:g.filter(function(x){ return String(x.id)!==String(f.id); })}; }
+    FSX.vers=fsxVers;
+
     var now=Date.now();
     var recentN=FSX.rows.filter(function(f){ return (now-new Date(f.created_at))/86400000<=30; }).length;
     var totalBytes=FSX.rows.reduce(function(s,f){ return s+(Number(f.size||f.bytes)||0); },0);
@@ -14408,7 +14519,8 @@ function anEngineNote(eng){
         +'<div class="fsx-th">'+th+'</div>'
         +'<div class="fsx-fb"><div class="fsx-fn">'+esc(f.name||'File')+'</div>'
         +'<div class="fsx-fm">'+esc(labelOf(t,f))+(sizeOf(f)?' \u00b7 '+sizeOf(f):'')+' \u00b7 '+esc(agoS(f.created_at))
-        +(f.status&&String(f.status).toLowerCase()==='pending'?' \u00b7 <span style="color:#9a7a1a;font-weight:700;">AWAITING REVIEW</span>':'')+'</div>'
+        +(f.status&&String(f.status).toLowerCase()==='pending'?' \u00b7 <span style="color:#9a7a1a;font-weight:700;">AWAITING REVIEW</span>':'')
+        +(function(){ var v=FSX.vers?FSX.vers(f):{n:1}; return v.n>1&&String((v.older[0]||{}).created_at||'')<String(f.created_at||'')?' \u00b7 <span style="color:#c4731a;font-weight:800;">V'+v.n+'</span>':''; })()+'</div>'
         +(FSX.cid==='all'&&cName[String(f.client_id)]?'<div class="fsx-fm" style="color:var(--p);">'+esc(cName[String(f.client_id)])+'</div>':'')
         +'</div></div>';
     }).join('')+'</div>')
@@ -14426,6 +14538,25 @@ function anEngineNote(eng){
         +'<div class="rhx-kv" style="margin-top:12px;"><span>Client</span><b>'+esc(cName[String(f.client_id)]||'\u2014')+'</b></div>'
         +'<div class="rhx-kv"><span>Uploaded</span><b>'+esc(agoS(f.created_at)||'\u2014')+'</b></div>'
         +'<div class="rhx-kv"><span>Shared with client</span><b style="color:#1a7e49;">Yes \u2014 in their portal</b></div>'
+        +(function(){
+          var n=String(f.name||'').toLowerCase(); var cat=
+            /contract|agreement|sow|terms|nda/.test(n)?'The agreement governing this work \u2014 the reference when scope questions come up.':
+            /invoice|receipt|payment|quote|estimate/.test(n)?'Money paperwork \u2014 keep for records and tax time.':
+            /logo|brand|font|palette/.test(n)?'Brand asset \u2014 the source of truth for how their business looks.':
+            /\.(png|jpe?g|gif|webp|svg|heic)$/.test(n)?'Visual asset for the site or project.':
+            /\.(csv|xlsx?)$/.test(n)?'Structured data \u2014 likely content or records feeding the site.':
+            /\.(docx?|txt|md|pdf)$/.test(n)?'Written content or reference for the project.':'';
+          return cat?'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;"><b style="font-size:9.5px;color:var(--p);letter-spacing:.05em;">WHY IT MATTERS</b><br>'+cat+'</div>':'';
+        })()
+        +(function(){
+          var v=FSX.vers?FSX.vers(f):{n:1,older:[]};
+          if(v.n<2) return '';
+          return '<div style="margin-top:10px;"><div style="font-size:9.5px;font-weight:800;color:var(--muted);letter-spacing:.06em;">OLDER VERSIONS ('+v.older.length+')</div>'
+            +v.older.slice(0,5).map(function(o){
+              return '<div style="display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--muted);padding:3px 0;"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">\u21b3 '+esc(o.name||'')+' \u00b7 '+esc(agoS(o.created_at))+'</span>'
+              +(o.url?'<a href="'+att(o.url)+'" target="_blank" rel="noopener" style="color:var(--p);font-weight:600;text-decoration:none;flex:none;">Open</a>':'')+'</div>';
+            }).join('')+'</div>';
+        })()
         +(f.status?'<div class="rhx-kv"><span>Status</span><b style="'+(String(f.status).toLowerCase()==='pending'?'color:#9a7a1a;':'color:#1a7e49;')+'">'+esc(String(f.status).toUpperCase())+'</b></div>':'')
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">'
           +(f.url?'<button class="ibx-pill" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+att(f.url)+'\');toast(\'\\u2713 Link copied\')">Copy link</button>':'')
