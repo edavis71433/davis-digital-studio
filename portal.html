@@ -4391,124 +4391,114 @@ async function loadHQ(){
 // the literal artifact one tap beneath. Confidence is built from evidence, never
 // asserted. Sections stay silent when empty (silence is a valid, calm answer).
 function renderHQ(b){
+  // ═══ THE LEDGER ═══ Concept E, implemented exactly. Zero containers, zero
+  // section labels: chronology is the structure, type scale is the hierarchy.
+  // Every element maps 1:1 onto the brief; a door renders only when the brain
+  // attached a real source (hqSourceNav destination) — arrows-only-on-real-
+  // doors is enforced by the data, not by discipline.
   var first=(b.contact_first||(CLIENT&&CLIENT.name?CLIENT.name.split(' ')[0]:''))||'';
-  var html='<div class="hq">';
+  var todo=b.todo||[], changed=b.changed||[], done=b.done||[], calm=b.calm||[];
+  var hasNeed=todo.length>0;
 
-  // ── THE HEADLINE — the one most important thing right now ──
-  if(b.headline&&b.headline.text){
-    var ht=b.headline.tone||'calm';
-    var dest=(b.headline.source?hqSourceNav(b.headline.source.kind):null);
-    html+='<div class="hq-headline"><span class="hq-headline-icon" style="color:'+hqToneColor(ht)+'">'+hqToneIcon(ht)+'</span>'
-      +'<span class="hq-headline-text">'+hqEsc(b.headline.text)+'</span>'
-      +(dest?'<button class="hq-headline-cta" onclick="nav(\''+dest+'\')">'+hqEsc((b.headline.source&&b.headline.source.label)||'Open')+'</button>':'')
-      +'</div>';
+  function greet(){ var h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
+  function door(src, extra){
+    if(!src||!src.kind) return '';
+    var lbl=fEsc(src.label||'Open');
+    return '<button class="lg-door" onclick="hqSourceNav(\''+fAtt(String(src.kind))+'\')">'+lbl+' \u2192</button>'+(extra||'');
+  }
+  function entry(margin, bodyHtml, cls){
+    return '<div class="lg-entry hq-anim'+(cls?' '+cls:'')+'"><div class="lg-date">'+margin+'</div><div class="lg-body">'+bodyHtml+'</div></div>';
   }
 
-  // ── Q1 GOING — how things are going: one honest status line ──
-  if(b.going&&b.going.text){
-    var gw=(b.health&&b.health.word)||'healthy';
-    html+='<div class="hq-band1"><div class="hq-pill"><span class="hq-dot"></span>'+hqEsc(gw)+'</div>'
-      +'<div class="hq-confidence">'+hqEsc(b.going.text)+'</div></div>';
+  // ── STANDING — state-varied, honesty-first: a brain-flagged problem leads
+  //    even when nothing is waiting on the client. Never an invented claim.
+  var standing;
+  if(hasNeed){
+    standing = 'It\u2019s all in motion \u2014 '+(todo.length===1?'one thing':'a couple of things')+' from you, and we keep moving.';
+  } else if(b.headline && (b.headline.tone==='watch'||b.headline.tone==='win') && b.headline.text){
+    standing = fEsc(b.headline.text);
+  } else {
+    standing = 'It\u2019s all on our side of the table.';
   }
 
-  // ── Q2 CHANGED — what changed since you were last here (curated diff) ──
-  if(b.changed&&b.changed.length){
-    html+='<div class="hq-anim"><div class="hq-label">Since you were last here</div><div class="hq-card">';
-    b.changed.forEach(function(a){
-      html+='<div class="hq-did"><span class="hq-check" style="color:'+hqToneColor(a.tone)+'">'+hqToneIcon(a.tone)+'</span>'
-        +'<span>'+hqEsc(a.text)+(a.source&&hqSourceNav(a.source.kind)?' '+hqSourceLink(a.source):'')+'</span></div>';
+  var html='<div class="hq lg">';
+  html+='<div class="lg-kicker hq-anim">'+greet()+', '+fEsc(first)+'</div>';
+  html+='<div class="lg-standing hq-anim">'+standing+'</div>';
+  if(b.going && b.going.text){ html+='<p class="lg-lede hq-anim">'+fEsc(b.going.text)+'</p>'; }
+
+  html+='<div class="lg-ledger">';
+
+  // ── FIRST ENTRY: the thing that needs you (loud by scale), or the
+  //    celebrated all-clear. The page\u2019s only filled button lives here.
+  if(hasNeed){
+    var t0=todo[0];
+    var cta = t0.source && t0.source.kind
+      ? '<button class="lg-cta" onclick="hqSourceNav(\''+fAtt(String(t0.source.kind))+'\')">'+fEsc((t0.source.label||'Review and decide'))+' \u2192</button>'
+      : '<button class="lg-cta" onclick="nav(\'work\')">Review and decide \u2192</button>';
+    html+=entry('Today',
+      '<div class="lg-t">'+fEsc(t0.text)+'</div>'
+      +'<div class="lg-s">'+(todo.length===1?'This is the only thing waiting on you.':'The first of '+todo.length+' things waiting on you.')+'</div>'
+      +cta, 'lg-needs');
+    // any further todos: regular entries, same margin, real doors only
+    todo.slice(1,4).forEach(function(t){
+      html+=entry('Today','<div class="lg-t">'+fEsc(t.text)+'</div>'+door(t.source));
     });
-    html+='</div></div>';
+  } else {
+    var clearLine = (calm[0]&&calm[0].text) ? fEsc(calm[0].text) : 'Everything is on our side of the table. We\u2019ll write here the moment that changes.';
+    html+=entry('Today',
+      '<div class="lg-t lg-clear"><span class="lg-tick">\u2713</span>Nothing needs you.</div>'
+      +'<div class="lg-s">'+clearLine+'</div>', 'lg-needs');
   }
 
-  // ── Q3 DONE — what we've accomplished (proof of work) ──
-  if(b.done&&b.done.length){
-    html+='<div class="hq-anim"><div class="hq-label">What we\u2019ve done</div><div class="hq-card"><div class="hq-intro">Recently, we:</div>';
-    b.done.forEach(function(a){
-      html+='<div class="hq-did"><span class="hq-check">\u2713</span><span>'+hqEsc(a.text)+'</span></div>';
+  // ── SINCE-LAST-VISIT: the changed[] diff as dated-margin entries. The brief
+  //    carries no per-entry dates, so the margin says what is true: New.
+  changed.slice(0,5).forEach(function(c){
+    var isNew=true;
+    html+=entry('New','<div class="lg-t">'+fEsc(c.text)+(isNew?' <span class="lg-pip">NEW</span>':'')+'</div>'+door(c.source));
+  });
+  // first visit (no diff yet): proof of work stands in
+  if(!changed.length && done.length){
+    done.slice(0,3).forEach(function(d){
+      html+=entry('Done','<div class="lg-t">'+fEsc(d.text)+'</div>'+door(d.source));
     });
-    html+=hqSourceLink({kind:'project',label:'See all the work'});
-    html+='</div></div>';
   }
 
-  // ── Q4 TODO — what you need to do (the only real to-do; empty = good) ──
-  if(b.todo&&b.todo.length){
-    html+='<div class="hq-anim"><div class="hq-label">What needs you</div><div class="hq-card hq-todo">';
-    b.todo.forEach(function(a){
-      var dest=a.source?hqSourceNav(a.source.kind):null;
-      html+='<div class="hq-todo-row"><span class="hq-todo-dot"></span><span class="hq-todo-text">'+hqEsc(a.text)+'</span>'
-        +(dest?'<button class="hq-todo-btn" onclick="nav(\''+dest+'\')">'+hqEsc((a.source&&a.source.label)||'Open')+'</button>':'')+'</div>';
-    });
-    html+='</div></div>';
+  // ── NOW: what\u2019s in our hands. No progress bar \u2014 the brief carries no
+  //    percentage, and we do not invent numbers.
+  if(b.next && b.next.length && b.next[0].text){
+    html+=entry('Now','<div class="lg-t">In our hands: '+fEsc(String(b.next[0].text).replace(/\.$/,''))+'.</div>'+door(b.next[0].source));
   }
 
-  // ── Q6 CALM — what you can stop worrying about (the trust closer) ──
-  // Placed before "next" so the client feels handled before looking forward.
-  if(b.calm&&b.calm.length){
-    html+='<div class="hq-anim"><div class="hq-label">You can stop worrying about</div><div class="hq-card hq-calm">';
-    b.calm.forEach(function(a){
-      html+='<div class="hq-did"><span class="hq-check" style="color:var(--ok,#3F7D5B)">\u2713</span><span>'+hqEsc(a.text)+'</span></div>';
-    });
-    html+='</div></div>';
+  // ── THE QUIET WORK: the counted care line from real checks, with the four
+  //    measured dimensions as chips. Renders only when the count is real.
+  var qw=null;
+  calm.forEach(function(c){ if(!qw && c.text && /checked \d+ time/.test(c.text)) qw=c; });
+  if(qw){
+    var m=qw.text.match(/checked (\d+) time/);
+    var n=m?m[1]:null;
+    html+=entry('Week',
+      '<div class="lg-t">The quiet work: '+(n?'<span class="lg-mono">'+n+'</span> automatic check-ups, ':'')+'all clean.</div>'
+      +'<div class="lg-chips">'
+      +'<span class="lg-chip"><i></i> performance</span>'
+      +'<span class="lg-chip"><i></i> search visibility</span>'
+      +'<span class="lg-chip"><i></i> HTTPS certificate</span>'
+      +'<span class="lg-chip"><i></i> overall health</span>'
+      +'</div>'
+      +'<div class="lg-s" style="margin-top:9px;">Each check-up covers all four. That\u2019s it \u2014 we\u2019ll keep watching.</div>');
+  } else if(!hasNeed && calm.length>1 && calm[1].text){
+    html+=entry('Week','<div class="lg-t">'+fEsc(calm[1].text)+'</div>');
   }
 
-  // ── Q5 NEXT — what we're recommending (the expert's forward view) ──
-  if(b.next&&b.next.length){
-    html+='<div class="hq-anim"><div class="hq-label">What we\u2019re recommending</div><div class="hq-card">';
-    b.next.forEach(function(a){
-      html+='<div class="hq-next"><span class="hq-arrow">\u2192</span><span>'+hqEsc(a.text)
-        +(a.detail?'<span class="hq-next-detail">'+hqEsc(a.detail)+'</span>':'')
-        +(a.source&&hqSourceNav(a.source.kind)?' '+hqSourceLink(a.source):'')+'</span></div>';
-    });
-    html+='</div></div>';
-  }
+  html+='</div>'; // /lg-ledger
 
-  // ── Q7 CONFIDENCE — why you should feel confident: assembled evidence ──
-  // The line summarizes; the evidence proves. We never assert "good choice";
-  // we show the facts and let the client conclude it.
-  if(b.confidence&&(b.confidence.line||(b.confidence.evidence&&b.confidence.evidence.length))){
-    var lvl=b.confidence.level||'building';
-    html+='<div class="hq-anim"><div class="hq-label">Why you can feel confident</div>'
-      +'<div class="hq-card hq-conf hq-conf-'+hqEsc(lvl)+'">';
-    if(b.confidence.line){ html+='<div class="hq-conf-line">'+hqEsc(b.confidence.line)+'</div>'; }
-    if(b.confidence.evidence&&b.confidence.evidence.length){
-      html+='<div class="hq-conf-ev">';
-      b.confidence.evidence.forEach(function(a){
-        html+='<div class="hq-did"><span class="hq-check" style="color:'+hqToneColor(a.tone)+'">'+hqToneIcon(a.tone)+'</span>'
-          +'<span>'+hqEsc(a.text)+(a.source&&hqSourceNav(a.source.kind)?' '+hqSourceLink(a.source):'')+'</span></div>';
-      });
-      html+='</div>';
-    }
-    html+='</div></div>';
-  }
+  // ── SIGNATURE: the confidence line is brain-authored evidence, so it signs.
+  var sigLeft=(b.confidence&&b.confidence.line)?fEsc(b.confidence.line):'Written for you from live project data \u2014 updated as it happens.';
+  html+='<div class="lg-sig hq-anim"><span>'+sigLeft+'</span><span class="lg-dd">\u2014 Davis Digital</span></div>';
 
-  // Anxiety floor: if the brief existed but produced nothing meaningful (e.g. a
-  // heads-down week with no client-facing events logged), never leave the client
-  // staring at an empty home — silence reads as "stalled" to someone paying
-  // thousands. Show an honest, non-fabricated reassurance instead.
-  var meaningful = !!(
-    (b.headline && b.headline.text) ||
-    (b.going && b.going.text) ||
-    (b.changed && b.changed.length) ||
-    (b.done && b.done.length) ||
-    (b.todo && b.todo.length) ||
-    (b.next && b.next.length)
-  );
-  if (!meaningful) {
-    html += '<div class="hq-anim"><div class="hq-card" style="text-align:center;padding:28px 20px;">'
-      + '<div class="hq-pill" style="margin:0 auto 12px;"><span class="hq-dot"></span>on track</div>'
-      + '<div style="font-size:15px;color:var(--ink);font-weight:600;margin-bottom:6px;">Eric is heads-down on your project.</div>'
-      + '<div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:380px;margin:0 auto;">No action is needed from you right now. The next update will appear here the moment there\u2019s something to show \u2014 and you can always reach Eric in your conversation.</div>'
-      + '<button onclick="nav(\'messages\')" style="margin-top:16px;background:transparent;color:var(--p);border:1px solid var(--p);border-radius:100px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;">Message Eric</button>'
-      + '</div></div>';
-  }
-
-  html+='<div class="hq-foot">This is your Digital Headquarters.<br>We\u2019re always here, working on your business.</div></div>';
+  html+='</div>';
   document.getElementById('hqHost').innerHTML=html;
 }
 
-// Onboarding state — a calm welcome that already shows work underway, so the
-// relationship starts with evidence, not promises.
 function renderHQOnboarding(b){
   var first=(b.contact_first||(CLIENT&&CLIENT.name?CLIENT.name.split(' ')[0]:''))||'';
   var html='<div class="hq"><div class="hq-welcome"><div class="hq-pill"><span class="hq-dot"></span>getting started</div>'
@@ -4730,7 +4720,7 @@ function renderHQFallback(){
 // silent breakage class. On boot, compare our embedded build with the server;
 // on mismatch, hard-reload ONCE with a cache-busting query.
 (function(){
-  var MY_BUILD='2026-07-04.2';
+  var MY_BUILD='2026-07-04.3';
   setTimeout(async function(){
     try{
       var r=await fetch(SUPABASE_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({type:'version'})});
@@ -4866,6 +4856,46 @@ button:focus-visible, a:focus-visible, .nav-item:focus-visible{ outline:2px soli
   ::-webkit-scrollbar{ width:10px; }
   ::-webkit-scrollbar-thumb{ background:rgba(91,63,160,.18); border-radius:100px; border:3px solid transparent; background-clip:padding-box; }
   ::-webkit-scrollbar-thumb:hover{ background:rgba(91,63,160,.32); border:3px solid transparent; background-clip:padding-box; }
+}
+
+/* ═══ THE LEDGER (Home) ═══ Concept E type system. No containers, no labels.
+   Chronology is structure; scale is hierarchy; doors only where they open. */
+.lg .lg-kicker{ font-size:11px; font-weight:700; letter-spacing:.11em; color:var(--accent,#5b3fa0); text-transform:uppercase; }
+.lg .lg-standing{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:400; font-size:34px; letter-spacing:-.6px; line-height:1.14; margin-top:10px; max-width:17ch; color:var(--ink); }
+.lg .lg-lede{ font-size:14px; line-height:1.7; color:var(--muted); margin-top:14px; max-width:52ch; }
+.lg .lg-ledger{ margin-top:38px; }
+.lg .lg-entry{ display:flex; gap:24px; padding:20px 0; border-top:1px solid var(--hair,#ece7f2); }
+.lg .lg-date{ width:62px; flex:none; font-family:var(--mono,'Geist Mono',monospace); font-size:10.5px; color:#9a8fae; padding-top:5px; letter-spacing:.05em; text-transform:uppercase; }
+.lg .lg-body{ flex:1; min-width:0; }
+.lg .lg-t{ font-size:14.5px; font-weight:560; line-height:1.5; color:var(--ink); }
+.lg .lg-s{ font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:4px; max-width:50ch; }
+.lg .lg-door{ margin-top:9px; display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:640; color:var(--accent,#5b3fa0); background:none; border:none; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); padding:4px 2px; min-height:32px; }
+.lg .lg-pip{ display:inline-block; font-size:9px; font-weight:800; letter-spacing:.06em; color:#1a7e49; background:#e9f6ef; border-radius:100px; padding:2px 8px; margin-left:8px; vertical-align:2px; }
+.lg .lg-mono{ font-family:var(--mono,'Geist Mono',monospace); }
+
+/* the first entry: loud by scale, never by box */
+.lg .lg-entry.lg-needs{ padding:28px 0 30px; }
+.lg .lg-entry.lg-needs .lg-date{ color:var(--accent,#5b3fa0); font-weight:500; }
+.lg .lg-entry.lg-needs .lg-t{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:460; font-size:22px; letter-spacing:-.3px; line-height:1.28; }
+.lg .lg-entry.lg-needs .lg-s{ font-size:13px; margin-top:7px; }
+.lg .lg-cta{ margin-top:15px; display:inline-flex; align-items:center; gap:9px; background:var(--accent,#5b3fa0); color:#fff; border:none; border-radius:12px; padding:13px 22px; font-size:13.5px; font-weight:640; cursor:pointer; font-family:var(--sans,'Inter',sans-serif); box-shadow:0 8px 22px rgba(91,63,160,.30); transition:transform .12s var(--ease); min-height:46px; }
+.lg .lg-cta:active{ transform:scale(.97); }
+.lg .lg-t.lg-clear{ font-family:var(--serif,'Fraunces',Georgia,serif); font-weight:440; font-size:22px; letter-spacing:-.3px; color:#1a7e49; }
+.lg .lg-tick{ display:inline-flex; width:28px; height:28px; border-radius:50%; background:#1a7e49; color:#fff; align-items:center; justify-content:center; font-size:13px; margin-right:10px; vertical-align:-6px; }
+
+.lg .lg-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.lg .lg-chip{ display:inline-flex; align-items:center; gap:7px; border:1px solid var(--hair,#ece7f2); background:#fff; border-radius:100px; padding:6px 12px; font-size:11.5px; color:var(--muted); }
+.lg .lg-chip i{ width:7px; height:7px; border-radius:50%; background:#1a7e49; }
+
+.lg .lg-sig{ margin-top:36px; padding-top:18px; border-top:1px solid var(--hair,#ece7f2); display:flex; align-items:baseline; justify-content:space-between; gap:14px; font-size:12.5px; color:var(--muted); line-height:1.6; flex-wrap:wrap; }
+.lg .lg-dd{ font-family:var(--serif,'Fraunces',Georgia,serif); font-style:italic; font-size:15px; color:var(--ink); flex:none; }
+
+@media(max-width:768px){
+  .lg .lg-standing{ font-size:27px; }
+  .lg .lg-entry{ flex-direction:column; gap:0; padding:18px 0; }
+  .lg .lg-date{ width:auto; padding:0 0 5px; }
+  .lg .lg-cta{ width:100%; justify-content:center; }
+  .lg .lg-entry.lg-needs .lg-t{ font-size:20px; }
 }
 </style>
 
