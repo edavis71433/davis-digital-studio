@@ -9869,7 +9869,7 @@ function modal(title, sub, innerHTML, actions){
    ============================================================================ */
 
 const DTABS = [
-  ['overview','Overview'],['goals','Goals'],['work','Work log'],['review','Reviews'],
+  ['overview','Overview'],['strategy','Strategy'],['goals','Goals'],['work','Work log'],['review','Reviews'],
   ['recs','Recommendations'],['content','Content'],['health','Health'],['notes','Notes'],
 ];
 
@@ -9940,7 +9940,7 @@ function drawDetail(){
   const body = el('div',{id:'dbody'});
   main.append(body);
   ({
-    overview:tabOverview, goals:tabGoals, work:tabWork, review:tabReview,
+    overview:tabOverview, strategy:tabStrategy, goals:tabGoals, work:tabWork, review:tabReview,
     recs:tabRecs, content:tabContent, health:tabHealth, notes:tabNotes,
   }[GP.dtab]||tabOverview)(body, d);
 }
@@ -9959,6 +9959,49 @@ async function growthToHub(clientId){
 }
 
 /* ---------- OVERVIEW ---------- */
+/* ── STRATEGY TAB: the quarter in one read. Generated on demand from the
+   gp_quarterly_strategy route: where we are, the wins, next quarter's top
+   priorities, an investment recommendation, and an honest ROI line (framed
+   as correlation, never causation). Cached per partnership per session. ── */
+function tabStrategy(root, d){
+  GP.cache.strategy = GP.cache.strategy || {};
+  const cached = GP.cache.strategy[GP.detail];
+  const wrap = el('div',{class:'card',style:'padding:20px 22px;'});
+  root.append(wrap);
+  const render = (sd)=>{
+    const pr = (sd.priorities||[]).map((x,i)=>`<div style="padding:10px 0;border-top:1px solid rgba(41,25,66,0.06);">
+      <div style="font-weight:600;font-size:14px;">${i+1}. ${gpEsc(x.title)}${x.effort?` <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">· ${gpEsc(x.effort)}</span>`:''}</div>
+      ${x.why?`<div style="font-size:12.5px;color:var(--muted);margin-top:2px;">${gpEsc(x.why)}</div>`:''}
+    </div>`).join('');
+    const wins = (sd.wins||[]).map(w=>`<div style="font-size:13px;padding:3px 0;"><span style="color:#1a7e49;font-weight:700;">✓</span> ${gpEsc(w)}</div>`).join('');
+    wrap.innerHTML = `
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--p);">${gpEsc(sd.quarter||'')} strategy</div>
+        ${sd.generator==='template'?'<span style="font-size:10.5px;color:var(--muted);">(assembled from records — AI unavailable)</span>':''}
+        <button class="btn btn-sm" id="stratRegen" style="margin-left:auto;">↻ Regenerate</button>
+      </div>
+      <div style="font-size:14.5px;line-height:1.6;margin-top:10px;">${gpEsc(sd.where_we_are||'')}</div>
+      ${sd.roi_line?`<div style="font-size:12.5px;color:var(--ink);background:rgba(91,63,160,0.05);border-radius:10px;padding:10px 14px;margin-top:12px;line-height:1.55;"><strong style="font-size:10.5px;color:var(--p);text-transform:uppercase;letter-spacing:.05em;">Investment & return</strong><br>${gpEsc(sd.roi_line)}</div>`:''}
+      ${wins?`<div style="margin-top:14px;"><div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Wins this quarter</div>${wins}</div>`:''}
+      ${pr?`<div style="margin-top:14px;"><div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Next quarter's priorities</div>${pr}</div>`:''}
+      ${sd.investment_recommendation?`<div style="font-size:13px;margin-top:14px;"><strong style="color:var(--p);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Recommendation:</strong> ${gpEsc(sd.investment_recommendation)}</div>`:''}
+    `;
+    const rg = wrap.querySelector('#stratRegen');
+    if(rg) rg.addEventListener('click', ()=>{ delete GP.cache.strategy[GP.detail]; tabStrategy(root, d); root.innerHTML=''; root.append(wrap); });
+  };
+  const load = async ()=>{
+    wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">Reading the quarter — goals, work, recommendations, invoices, and health metrics…</div>';
+    try{
+      const r = await gpApi('gp_quarterly_strategy',{partnership_id: GP.detail});
+      const sd = (r&&r.data)||null;
+      if(!sd){ wrap.innerHTML = '<div style="font-size:13px;color:var(--red);">Could not build the strategy right now.</div>'; return; }
+      GP.cache.strategy[GP.detail] = sd;
+      render(sd);
+    }catch(e){ wrap.innerHTML = '<div style="font-size:13px;color:var(--red);">Could not build the strategy: '+gpEsc(e.message)+'</div>'; }
+  };
+  if(cached) render(cached); else load();
+}
+
 function tabOverview(root, d){
   const p = d.partnership;
   const stat=(n,l)=>`<div class="stat"><div class="n">${gpEsc(String(n))}</div><div class="l">${gpEsc(l)}</div></div>`;
