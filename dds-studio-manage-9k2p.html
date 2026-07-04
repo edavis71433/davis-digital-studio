@@ -10955,11 +10955,11 @@ function igxRender(){
       }).join('');
   }
   var strip='<div class="cx-stats" style="margin-top:0;">'
-    +'<div class="cx-st"><div class="cx-sn">'+P.length+'</div><div class="cx-sl">Sources for this client</div></div>'
-    +'<div class="cx-st"><div class="cx-sn" style="color:#1a7e49;">'+healthy+'</div><div class="cx-sl">Healthy \u00b7 delivering signals</div></div>'
-    +'<div class="cx-st"><div class="cx-sn" style="'+(attn?'color:#b8860b;':'')+'">'+attn+'</div><div class="cx-sl">Need attention</div></div>'
-    +'<div class="cx-st"><div class="cx-sn" style="'+(broken?'color:#c0392b;':'')+'">'+broken+'</div><div class="cx-sl">Failing</div></div>'
-    +'<div class="cx-st"><div class="cx-sn">'+(PF?[PF.stripe,PF.resend,PF.anthropic,PF.review_link].filter(Boolean).length+'/4':'\u2014')+'</div><div class="cx-sl">Platform capabilities live</div></div>'
+    +ddsStatTile({icon:'\u26d3',value:P.length,label:'Sources for this client'})
+    +ddsStatTile({icon:'\u2713',color:'#1a7e49',bg:'#e7f6ee',value:healthy,label:'Healthy \u00b7 delivering signals'})
+    +ddsStatTile({icon:'\u26a0',color:attn?'#b8860b':'#7a6d8e',bg:attn?'#fdf6e3':'#f3f0fa',value:attn,label:'Need attention',deltaText:attn?'the read above says what to do':null})
+    +ddsStatTile({icon:'\u2717',color:broken?'#c0392b':'#7a6d8e',bg:broken?'#fbecea':'#f3f0fa',value:broken,label:'Failing'})
+    +ddsStatTile({icon:'\u26e8',color:'#1a5c7e',bg:'rgba(26,92,126,.08)',value:(PF?[PF.stripe,PF.resend,PF.anthropic,PF.review_link].filter(Boolean).length+'/4':'\u2014'),label:'Platform capabilities live',deltaText:'configured server-side'})
   +'</div>';
   var top=document.getElementById('igxTop');
   if(!top){ top=document.createElement('div'); top.id='igxTop'; host.insertBefore(top, host.firstChild); }
@@ -15251,11 +15251,11 @@ function anEngineNote(eng){
     var rate=(apprN+declN)>0?Math.round(apprN/(apprN+declN)*100):null;
 
     var stats='<div class="ivx-stats">'
-      +'<div class="ivx-st"><div class="ivx-sn'+(youN?' red':'')+'">'+youN+'</div><div class="ivx-sl">Waiting on you</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+clientN+'</div><div class="ivx-sl">Waiting on the client</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+apprN+'</div><div class="ivx-sl">Approved</div></div>'
-      +(avg!=null?'<div class="ivx-st"><div class="ivx-sn">'+avg.toFixed(1)+'</div><div class="ivx-sl">Avg days to approve</div></div>':'')
-      +(rate!=null?'<div class="ivx-st"><div class="ivx-sn">'+rate+'%</div><div class="ivx-sl">Approval rate</div></div>':'')
+      +ddsStatTile({icon:'\u270e',color:youN?'#c0392b':'#7a6d8e',bg:youN?'#fbecea':'#f3f0fa',value:youN,label:'Waiting on you',deltaText:youN?'the actionable number':'clear'})
+      +ddsStatTile({icon:'\u29d6',color:'#9a7a1a',bg:'#fdf6e3',value:clientN,label:'Waiting on the client',deltaText:'auto-reminders running'})
+      +ddsStatTile({icon:'\u2713',color:'#1a7e49',bg:'#e7f6ee',value:apprN,label:'Approved'})
+      +(avg!=null?ddsStatTile({icon:'\u23f1',value:avg.toFixed(1),label:'Avg days to approve',deltaText:'median of real decisions'}):'')
+      +(rate!=null?ddsStatTile({icon:'%',value:rate+'%',label:'Approval rate'}):'')
     +'</div>';
 
     var TABS=[['all','All'],['you','Waiting on you'],['client','Waiting on client'],['approved','Approved']];
@@ -15637,13 +15637,15 @@ function anEngineNote(eng){
     var doneWithDue=allTasks().filter(function(t){ return t.status==='done'&&t.done_at&&t.due; });
     var onTime=doneWithDue.length>=3?Math.round(doneWithDue.filter(function(t){ return new Date(t.done_at)<=new Date(new Date(t.due).getTime()+86399000); }).length/doneWithDue.length*100):null;
 
+    var donePrev7=allTasks().filter(function(t){ if(t.status!=='done'||!t.done_at) return false; var d=(Date.now()-new Date(t.done_at))/86400000; return d>7&&d<=14; }).length;
+    var donePct=donePrev7?((done7.length-donePrev7)/donePrev7*100):null;
     var stats='<div class="ivx-stats">'
-      +'<div class="ivx-st"><div class="ivx-sn'+(overdue.length?' red':'')+'">'+overdue.length+'</div><div class="ivx-sl">Overdue</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+dueToday.length+'</div><div class="ivx-sl">Due today</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+doing.length+'</div><div class="ivx-sl">In progress</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn">'+done7.length+'</div><div class="ivx-sl">Completed this week</div></div>'
-      +(onTime!=null?'<div class="ivx-st"><div class="ivx-sn">'+onTime+'%</div><div class="ivx-sl">On-time rate</div></div>':'')
-      +(sugg.length?'<div class="ivx-st"><div class="ivx-sn">\u2726 '+sugg.length+'</div><div class="ivx-sl">Suggested</div></div>':'')
+      +ddsStatTile({icon:'\u26a0',color:overdue.length?'#c0392b':'#7a6d8e',bg:overdue.length?'#fbecea':'#f3f0fa',value:overdue.length,label:'Overdue',deltaText:overdue.length?'ranked by consequence':'clean'})
+      +ddsStatTile({icon:'\u23f0',color:'#9a7a1a',bg:'#fdf6e3',value:dueToday.length,label:'Due today'})
+      +ddsStatTile({icon:'\u21bb',color:'#1a5c7e',bg:'rgba(26,92,126,.08)',value:doing.length,label:'In progress'})
+      +ddsStatTile({icon:'\u2713',color:'#1a7e49',bg:'#e7f6ee',value:done7.length,label:'Completed this week',deltaPct:donePct,deltaLabel:'vs prior week'})
+      +(onTime!=null?ddsStatTile({icon:'%',value:onTime+'%',label:'On-time rate',deltaText:doneWithDue.length+' tasks with due-date history'}):'')
+      +(sugg.length?ddsStatTile({icon:'\u2726',value:sugg.length,label:'Suggested',deltaText:'from live signals'}):'')
       +(function(){
         // value attached to open work: unpaid balances of clients with open
         // revenue tasks + monthly amounts of clients with open launch tasks.
@@ -16221,11 +16223,14 @@ window.ddsFilesCard=async function(mountId, clientId){
     var attn=scored.filter(function(r){ return r.latest.overall<80; }).length;
     var lastChecked=scored.map(function(r){ return r.latest.checked_at||r.latest.created_at; }).filter(Boolean).sort().reverse()[0];
 
+    var prevScored=rows.filter(function(r0){ return r0.previous&&r0.previous.overall!=null; });
+    var prevAvg=prevScored.length?Math.round(prevScored.reduce(function(a,r0){ return a+r0.previous.overall; },0)/prevScored.length):null;
+    var avgPct=(avg!=null&&prevAvg)?((avg-prevAvg)/prevAvg*100):null;
     var stats='<div class="ivx-stats">'
-      +(avg!=null?'<div class="ivx-st"><div class="ivx-sn" style="color:'+col(avg)+';">'+avg+'</div><div class="ivx-sl">Overall health (avg)</div></div>':'')
-      +'<div class="ivx-st"><div class="ivx-sn">'+rows.length+'</div><div class="ivx-sl">Sites monitored</div></div>'
-      +'<div class="ivx-st"><div class="ivx-sn'+(attn?' red':'')+'">'+attn+'</div><div class="ivx-sl">Need attention (&lt;80)</div></div>'
-      +(lastChecked?'<div class="ivx-st"><div class="ivx-sn" style="font-size:15px;">'+esc(agoS(lastChecked))+'</div><div class="ivx-sl">Last check</div></div>':'')
+      +(avg!=null?ddsStatTile({icon:'\u2764',color:col(avg),bg:'rgba(91,63,160,.06)',value:avg,label:'Overall health (avg)',deltaPct:avgPct,deltaLabel:'vs previous checks'}):'')
+      +ddsStatTile({icon:'\u25c9',value:rows.length,label:'Sites monitored'})
+      +ddsStatTile({icon:'\u26a0',color:attn?'#c0392b':'#7a6d8e',bg:attn?'#fbecea':'#f3f0fa',value:attn,label:'Need attention (<80)',deltaText:attn?'workspaces explain why':'all healthy'})
+      +(lastChecked?ddsStatTile({icon:'\u23f1',value:'<span style="font-size:15px;">'+esc(agoS(lastChecked))+'</span>',label:'Last check',deltaText:'nightly auto-sync'}):'')
     +'</div>';
 
     var sentence = !rows.length?'No sites watched yet \u2014 sync your client sites and run the first checks.'
@@ -17730,12 +17735,15 @@ window.ddsCommOpen=function(tid,cid){
     var root=document.getElementById('cxRoot'); if(!root) return;
     var counts={Client:0,Lead:0,Prospect:0,Portal:0};
     CX.people.forEach(function(p){ counts[p.type]=(counts[p.type]||0)+1; });
+    var d30=Date.now()-30*86400000;
+    var newIn30=function(ty){ return CX.people.filter(function(x){ return (ty==='all'||x.type===ty)&&x.created_at&&new Date(x.created_at)>d30; }).length; };
+    var nt=function(n){ return n?('+'+n+' in 30 days'):null; };
     var stats='<div class="cx-stats">'
-      +'<div class="cx-st"><div class="cx-sn">'+CX.people.length+'</div><div class="cx-sl">People connected to the studio</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+counts.Client+'</div><div class="cx-sl">Clients</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+counts.Lead+'</div><div class="cx-sl">Leads</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+counts.Prospect+'</div><div class="cx-sl">Prospects</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+counts.Portal+'</div><div class="cx-sl">Portal-only identities</div></div>'
+      +ddsStatTile({icon:'\u2665',value:CX.people.length,label:'People connected to the studio',deltaText:nt(newIn30('all'))||'the whole book'})
+      +ddsStatTile({icon:'\u2605',color:'#1a7e49',bg:'#e7f6ee',value:counts.Client,label:'Clients',deltaText:nt(newIn30('Client'))})
+      +ddsStatTile({icon:'\u2709',color:'#9a7a1a',bg:'#fdf6e3',value:counts.Lead,label:'Leads',deltaText:nt(newIn30('Lead'))})
+      +ddsStatTile({icon:'\u25c9',value:counts.Prospect,label:'Prospects',deltaText:nt(newIn30('Prospect'))})
+      +ddsStatTile({icon:'\u26bf',color:'#7a6d8e',bg:'#f3f0fa',value:counts.Portal,label:'Portal-only identities'})
     +'</div>';
 
     var list=CX.people.filter(function(p){
@@ -18076,11 +18084,11 @@ window.ddsCommOpen=function(tid,cid){
     var portalUsers=TMX.contacts.map(function(ct){ return {name:ct.name||ct.email, email:ct.email, client:clientEmails[String(ct.email||'').toLowerCase()]||null, since:ct.created_at}; });
 
     var stats='<div class="cx-stats">'
-      +'<div class="cx-st"><div class="cx-sn">'+M.length+'</div><div class="cx-sl">Admin accounts</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+activeN+'</div><div class="cx-sl">Have signed in</div></div>'
-      +'<div class="cx-st"><div class="cx-sn" style="'+(pendingN?'color:#c4731a;':'')+'">'+pendingN+'</div><div class="cx-sl">Pending invitations</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+portalUsers.length+'</div><div class="cx-sl">Client portal users</div></div>'
-      +'<div class="cx-st"><div class="cx-sn">'+(TMX.perm?TMX.perm.total_privileged_routes:'\u2014')+'</div><div class="cx-sl">Permission-gated operations</div></div>'
+      +ddsStatTile({icon:'\u265b',value:M.length,label:'Admin accounts'})
+      +ddsStatTile({icon:'\u2713',color:'#1a7e49',bg:'#e7f6ee',value:activeN,label:'Have signed in'})
+      +ddsStatTile({icon:'\u2709',color:pendingN?'#c4731a':'#7a6d8e',bg:pendingN?'rgba(196,115,26,.1)':'#f3f0fa',value:pendingN,label:'Pending invitations',deltaText:pendingN?'stale invites are risk':'none outstanding'})
+      +ddsStatTile({icon:'\u26bf',value:portalUsers.length,label:'Client portal users'})
+      +ddsStatTile({icon:'\u26e8',color:'#1a5c7e',bg:'rgba(26,92,126,.08)',value:(TMX.perm?TMX.perm.total_privileged_routes:'\u2014'),label:'Permission-gated operations',deltaText:'from live enforcement'})
     +'</div>';
 
     // ── LEFT: people + invite ──
