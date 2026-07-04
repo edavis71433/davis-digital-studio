@@ -48,6 +48,8 @@
   var ready = false;
   // on-screen diagnostics (this machine may block DevTools; never rely on console)
   var stat = { sent: 0, fails: 0, lastFlush: 0, lastErr: null, session: false, cfgOk: false };
+  var pendingSearch = null;      // {sel, timer} — outcome tracked, query NEVER read
+  var askedThisSession = false;  // confidence check-in: hard cap of one per session
 
   function now() { return Date.now(); }
   function uuid() {
@@ -146,6 +148,7 @@
       Object.keys(repeatCounts).forEach(function (k) { if (repeatCounts[k] > repeats) repeats = repeatCounts[k]; });
       track('page_leave', { ms: visibleMs, repeats: repeats });
       abandonOpenFlows('page_change');
+      resolveSearch('search_abandon');
       pageTrail.push({ page: curPage, ms: visibleMs });
       if (pageTrail.length > 6) pageTrail.shift();
       // backtrack: A -> B -> A with short dwell on B
@@ -212,8 +215,10 @@
     var key = ev.type === 'submit' ? flowKeyFor(el) :
       (el.closest && el.closest('button[type="submit"], .sbtn') ? flowKeyFor(el) : null);
     if (key && openFlows[key]) {
-      track('flow_complete', { flow: key, ms: now() - openFlows[key] });
+      var fms = now() - openFlows[key];
+      track('flow_complete', { flow: key, ms: fms });
       delete openFlows[key];
+      maybeCheckin(key, fms);
     }
   }
   function abandonOpenFlows(reason) {
@@ -238,6 +243,74 @@
     } else {
       visibleSince = t;
     }
+  }
+
+  // ── search outcomes: searched-then-found vs searched-then-gave-up ─────
+  // Constitution: we record that a search happened and how it ended.
+  // We NEVER read the query. No .value access anywhere in this block.
+  function isSearchField(el) {
+    if (!el || !/^input$/i.test(el.tagName || '')) return false;
+    if ((el.type || '') === 'search') return true;
+    var ph = (el.getAttribute('placeholder') || '') + ' ' + (el.getAttribute('aria-label') || '');
+    return /search|jump to/i.test(ph) || el.hasAttribute('data-dp-search');
+  }
+  function resolveSearch(outcome) {
+    if (!pendingSearch) return;
+    clearTimeout(pendingSearch.timer);
+    track(outcome, { sel: pendingSearch.sel });
+    pendingSearch = null;
+  }
+  function onSearchKey(ev) {
+    var el = ev.target;
+    if (!isSearchField(el) || (el.closest && el.closest('#dp-widget'))) return;
+    if (pendingSearch) clearTimeout(pendingSearch.timer);
+    var sel = selectorOf(el);
+    if (!pendingSearch || pendingSearch.sel !== sel) track('search', { sel: sel });
+    pendingSearch = { sel: sel, timer: setTimeout(function () { resolveSearch('search_abandon'); }, 12000) };
+  }
+  function onSearchOutcomeClick(ev) {
+    if (!pendingSearch) return;
+    var el = ev.target;
+    if (isSearchField(el) || (el.closest && el.closest('#dp-widget'))) return;
+    resolveSearch('search_click');
+  }
+
+  // ── confidence check-in: one tap, only at meaningful moments ──────────
+  // Fires only after the FIRST completion of a flow that took >= 20s.
+  // Max one ask per session; never the same flow twice, ever; gone in 15s.
+  function maybeCheckin(flowName, ms) {
+    if (askedThisSession || ms < 20000) return;
+    if (persist('dpCk_' + flowName)) return;
+    askedThisSession = true;
+    persist('dpCk_' + flowName, '1');
+    var el = document.createElement('div');
+    el.id = 'dp-checkin';
+    el.innerHTML = '<span style="font-size:12px;margin-right:8px;">Quick one \u2014 how confident did that feel?</span>' +
+      '<span id="dp-ck-btns"></span>' +
+      '<button id="dp-ck-skip" type="button" style="background:none;border:none;color:rgba(255,255,255,.55);font-size:11px;cursor:pointer;margin-left:6px;">skip</button>';
+    var btns = el.querySelector('#dp-ck-btns');
+    for (var i = 1; i <= 5; i++) (function (v) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = v;
+      b.style.cssText = 'width:26px;height:26px;margin:0 2px;border:1px solid rgba(255,255,255,.35);background:none;color:#fff;border-radius:6px;font-size:12px;cursor:pointer;';
+      b.addEventListener('click', function () {
+        var sess = readSession();
+        if (sess) {
+          fetch(cfg.url + '/rest/v1/dp_feedback', {
+            method: 'POST',
+            headers: { 'apikey': cfg.anon, 'Authorization': 'Bearer ' + sess.token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ session_id: sessionId, user_id: sess.userId, email: sess.email, app: cfg.app, page: curPage, trying_to: flowName, confidence: v })
+          }).catch(function () {});
+        }
+        el.innerHTML = '<span style="font-size:12px;">Thanks \u2014 noted.</span>';
+        setTimeout(function () { el.remove(); }, 1200);
+      });
+      btns.appendChild(b);
+    })(i);
+    el.querySelector('#dp-ck-skip').addEventListener('click', function () { el.remove(); });
+    el.style.cssText = 'position:fixed;z-index:99999;right:18px;bottom:64px;background:var(--ink,#1B1525);color:#fff;border-radius:12px;padding:10px 14px;font-family:Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(27,21,37,.3);display:flex;align-items:center;';
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 15000);
   }
 
   // ── the feedback widget ───────────────────────────────────────────────
@@ -366,6 +439,8 @@
       document.addEventListener('focusin', onFocusIn, true);
       document.addEventListener('submit', onSubmitLike, true);
       document.addEventListener('click', onSubmitLike, true);
+      document.addEventListener('keyup', onSearchKey, true);
+      document.addEventListener('click', onSearchOutcomeClick, true);
       document.addEventListener('visibilitychange', onVisibility);
       window.addEventListener('error', onError);
       window.addEventListener('unhandledrejection', onError);
@@ -384,7 +459,7 @@
     },
     page: function (name) { setPage(name); },
     flowStart: function (name) { if (name && !openFlows[name]) { openFlows[name] = now(); track('flow_start', { flow: name }); } },
-    flowComplete: function (name) { if (name && openFlows[name]) { track('flow_complete', { flow: name, ms: now() - openFlows[name] }); delete openFlows[name]; } },
+    flowComplete: function (name) { if (name && openFlows[name]) { var fms = now() - openFlows[name]; track('flow_complete', { flow: name, ms: fms }); delete openFlows[name]; maybeCheckin(name, fms); } },
     event: function (type, detail) { track(String(type).slice(0, 30), detail || {}); },
     openFeedback: function () { var p = document.getElementById('dp-panel'); if (p) p.style.display = 'block'; }
   };
