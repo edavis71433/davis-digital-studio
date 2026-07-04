@@ -910,6 +910,7 @@ input:focus, textarea:focus, select:focus, .login-input:focus{
       <button class="sn" data-dest="tools" onclick="go('visibility')" id="sn-visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Site monitor</button>
       <button class="sn" data-dest="tools" onclick="go('reports')" id="sn-reports"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports</button>
       <button class="sn" data-dest="tools" onclick="go('templates')" id="sn-templates"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email templates</button>
+      <button class="sn" data-dest="tools" onclick="go('contacts')" id="sn-contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Contacts</button>
       <button class="sn" data-dest="tools" onclick="go('contracts')" id="sn-contracts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Contracts</button>
       <button class="sn" data-dest="tools" onclick="go('disclosures')" id="sn-disclosures"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Disclosures</button>
 
@@ -1892,6 +1893,7 @@ This SOW is a summary. Full terms are governed by the Project Agreement signed i
       <div class="page" id="page-integrations"><div id="integrationsBody"></div></div>
       <div class="page" id="page-analytics"><div id="analyticsBody"></div></div>
 
+      <div class="page" id="page-contacts"></div>
       <div class="page" id="page-templates">
         <div class="pt">Email Templates</div>
         <div class="ps">Your outreach copy, ready to paste into your sending tool. These lead with a free site review, not a hard pitch. Fill in the brackets per business. Your CAN-SPAM footer is already included.</div>
@@ -17247,6 +17249,326 @@ window.ddsCommOpen=function(tid,cid){
   // own the surface
   var _goT=window.go;
   window.go=function(dest){ var r=_goT.apply(this,arguments); try{ if(dest==='templates') tpxLoad(); }catch(e){} return r; };
+})();
+</script>
+
+
+<style>
+/* RELATIONSHIP INTELLIGENCE CENTER — contacts are relationships, not rows. */
+#page-contacts #cxRoot{max-width:1380px;}
+.cx-grid{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.55fr) minmax(250px,.85fr);gap:16px;margin-top:16px;align-items:start;}
+@media(max-width:1150px){.cx-grid{grid-template-columns:1fr;}}
+.cx-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+.cx-st{background:#fff;border:1px solid rgba(41,25,66,.07);border-radius:14px;padding:14px 16px;}
+.cx-sn{font-size:22px;font-weight:750;color:var(--ink);}
+.cx-sl{font-size:11px;color:var(--muted);margin-top:2px;}
+.cx-chipf{display:inline-flex;align-items:center;font-size:11px;font-weight:650;padding:5px 12px;border-radius:100px;border:1px solid rgba(91,63,160,.14);color:var(--ink);cursor:pointer;margin:0 6px 6px 0;background:#fff;}
+.cx-chipf.on{background:rgba(91,63,160,.09);border-color:rgba(91,63,160,.3);color:var(--p);}
+.cx-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;}
+.cx-item:hover{background:rgba(91,63,160,.04);}
+.cx-item.on{background:rgba(91,63,160,.08);}
+.cx-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#5b3fa0,#8a6fd0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none;}
+.cx-type{font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:100px;flex:none;}
+.cx-hav{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#5b3fa0,#8a6fd0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex:none;}
+.cx-cc{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);background:#fff;border:1px solid rgba(41,25,66,.08);border-radius:10px;padding:8px 12px;margin:0 8px 8px 0;cursor:pointer;}
+.cx-cc:hover{border-color:rgba(91,63,160,.3);}
+.cx-ring{width:70px;height:70px;border-radius:50%;border:5px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;}
+.cx-kv{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:6px 0;border-top:1px solid rgba(41,25,66,.05);color:var(--ink);}
+.cx-qa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.cx-qab{border:1px solid rgba(91,63,160,.12);background:#fff;border-radius:12px;padding:10px 6px;text-align:center;font-size:10.5px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;line-height:1.4;}
+.cx-qab:hover{border-color:rgba(91,63,160,.35);background:rgba(91,63,160,.03);}
+</style>
+<script>
+// ═══ RELATIONSHIP INTELLIGENCE CENTER ═══
+// One directory for every person connected to the studio, unified from the
+// four places people actually live: clients, leads, prospects, and portal
+// contacts. Type is DERIVED from the record, never guessed. Portal contacts
+// whose email matches a client fold INTO that client as "portal access" —
+// one person, one relationship. Health for clients comes from the real
+// scoring engine (client_pulse) with its reasons; activity from the real
+// derived timeline; suggestions from the communication brain. Anything not
+// measurable (photos, timezones, reply-time patterns) is absent, not faked.
+(function(){
+  var CX={people:[],sel:null,type:'all',q:'',tab:'ov',cache:{},msgLast:{},loaded:false};
+  function esc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function att(x){ return esc(x).replace(/'/g,'&#39;'); }
+  function safe(fn){ return (async function(){ try{ return await fn(); }catch(e){ return null; } })(); }
+  function ago(d){ try{ var s=(Date.now()-new Date(d))/1000; if(s<3600) return Math.max(1,Math.round(s/60))+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }catch(e){ return ''; } }
+  function ini(n){ var p=String(n||'?').trim().split(/\s+/); return ((p[0]||'?').charAt(0)+(p[1]?p[1].charAt(0):'')).toUpperCase(); }
+  var TYPES={Client:['#1a7e49','#e7f6ee'],Lead:['#9a7a1a','#fdf6e3'],Prospect:['#5b3fa0','rgba(91,63,160,.08)'],Portal:['#7a6d8e','#f3f0fa']};
+
+  function ensureRoot(){
+    var page=document.getElementById('page-contacts'); if(!page) return null;
+    var root=document.getElementById('cxRoot');
+    if(!root){ root=document.createElement('div'); root.id='cxRoot'; page.appendChild(root); }
+    return root;
+  }
+
+  async function cxEdge(type,payload){
+    var jwt=await adminJwt(); if(!jwt) throw new Error('no session');
+    var res=await fetch(SB_URL+'/functions/v1/clever-api',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'x-dds-user-jwt':jwt},body:JSON.stringify(Object.assign({type:type},payload||{}))});
+    var j=await res.json(); if(j&&j.error) throw new Error(j.detail||j.error); return j;
+  }
+
+  window.cxLoad=async function(){
+    var root=ensureRoot(); if(!root) return;
+    root.innerHTML='<div class="bf-skel" style="height:26px;width:320px;margin:6px 0 12px;"></div><div class="bf-skel" style="height:80px;width:100%;border-radius:16px;"></div>';
+    var r=await Promise.all([
+      safe(function(){ return api('clients?deleted_at=is.null&select=id,name,email,contact_email,website,project_name,project_status,monthly_amount,launched_at,renews_at,status,created_at&order=name.asc&limit=300'); }),
+      safe(function(){ return api('contacts?deleted_at=is.null&select=id,name,email,stage,source,created_at&limit=300'); }),
+      safe(function(){ return api('leads?select=id,name,email,subject,status,created_at&order=created_at.desc&limit=200'); }),
+      safe(function(){ return api('prospects?select=id,business_name,contact_name,email,phone,website,priority,status,created_at&order=created_at.desc&limit=200'); }),
+      safe(function(){ return api('messages?select=client_id,created_at&order=created_at.desc&limit=800'); })
+    ]);
+    var clients=r[0]||[], contacts=r[1]||[], leads=r[2]||[], prospects=r[3]||[];
+    CX.msgLast={}; (r[4]||[]).forEach(function(m){ var k=String(m.client_id); if(!CX.msgLast[k]) CX.msgLast[k]=m.created_at; });
+    var byEmail={};
+    var people=[];
+    clients.forEach(function(c){
+      if(String(c.status||'').toLowerCase()==='archived') return;
+      var em=String(c.contact_email||c.email||'').toLowerCase();
+      var p={key:'c:'+c.id, type:'Client', name:c.name||'Client', email:em, company:c.name||'',
+        website:c.website||'', cid:String(c.id), created_at:c.created_at, portal:false, raw:c,
+        last:CX.msgLast[String(c.id)]||null, recurring:(parseFloat(String(c.monthly_amount||'').replace(/[^0-9.]/g,''))>0)};
+      people.push(p); if(em) byEmail[em]=p;
+    });
+    contacts.forEach(function(ct){
+      var em=String(ct.email||'').toLowerCase();
+      if(em&&byEmail[em]){ byEmail[em].portal=true; return; } // fold portal identity into the client — one person, one relationship
+      people.push({key:'p:'+ct.id, type:'Portal', name:ct.name||em||'Portal user', email:em, company:'', website:'', cid:'', created_at:ct.created_at, portal:true, raw:ct, last:null});
+    });
+    leads.forEach(function(l){
+      var em=String(l.email||'').toLowerCase();
+      if(em&&byEmail[em]) return; // already a client
+      people.push({key:'l:'+l.id, type:'Lead', name:l.name||em||'Lead', email:em, company:'', website:'', cid:'', created_at:l.created_at, subject:l.subject||'', status:l.status||'', raw:l, last:l.created_at});
+    });
+    prospects.forEach(function(pr){
+      var em=String(pr.email||'').toLowerCase();
+      if(em&&byEmail[em]) return;
+      people.push({key:'pr:'+pr.id, type:'Prospect', name:pr.contact_name||pr.business_name||'Prospect', email:em, company:pr.business_name||'', website:pr.website||'', phone:pr.phone||'', cid:'', created_at:pr.created_at, status:pr.status||'', raw:pr, last:pr.created_at});
+    });
+    CX.people=people;
+    if(!CX.sel&&people.length) CX.sel=people[0].key;
+    CX.loaded=true;
+    try{ if(typeof ddsCommBrain==='function') ddsCommBrain(); }catch(e){}
+    cxRender();
+    cxDetailFill();
+  };
+
+  function cur(){ return CX.people.find(function(p){ return p.key===CX.sel; })||null; }
+  window.cxSel=function(k){ CX.sel=k; CX.tab='ov'; cxRender(); cxDetailFill(); };
+  window.cxType=function(t){ CX.type=t; cxRender(); };
+  window.cxQ=function(v){ CX.q=String(v||'').toLowerCase(); cxRender(); };
+  window.cxTab=function(t){ CX.tab=t; cxRender(); cxDetailFill(); };
+
+  // health label for non-clients: recency-based, always explained
+  function simpleHealth(p){
+    var d=p.last?Math.floor((Date.now()-new Date(p.last))/86400000):null;
+    if(d==null) return {label:'New', color:'#7a6d8e', why:'No interactions recorded yet.'};
+    if(d<=7) return {label:'Active', color:'#1a7e49', why:'Last touch '+d+'d ago.'};
+    if(d<=21) return {label:'Cooling', color:'#9a7a1a', why:'Quiet for '+d+' days \u2014 worth a touch.'};
+    return {label:'Dormant', color:'#c0392b', why:'No contact in '+d+' days.'};
+  }
+  function clientHealthLabel(v){ return v>=80?['Excellent','#1a7e49']:v>=65?['Healthy','#1a7e49']:v>=45?['Needs attention','#9a7a1a']:['At risk','#c0392b']; }
+
+  // per-person deep data, cached: pulse + timeline + related counts
+  async function cxDetailFill(){
+    var p=cur(); if(!p||!p.cid) return;
+    var cid=p.cid;
+    if(!CX.cache[cid]){
+      CX.cache[cid]={t:Date.now()};
+      var r=await Promise.all([
+        safe(function(){ return cxEdge('client_pulse',{clientId:cid}); }),
+        safe(function(){ return cxEdge('client_timeline',{clientId:cid}); }),
+        safe(function(){ return api('invoices?client_id=eq.'+encodeURIComponent(cid)+'&deleted_at=is.null&select=amount,status,paid_at,due_date&order=created_at.desc&limit=50'); }),
+        safe(function(){ return api('approvals?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,created_at&order=created_at.desc&limit=50'); }),
+        safe(function(){ return api('studio_tasks?client_id=eq.'+encodeURIComponent(cid)+'&status=eq.open&select=id&limit=50'); }),
+        safe(function(){ return api('client_reports?client_id=eq.'+encodeURIComponent(cid)+'&select=title,status,created_at&order=created_at.desc&limit=5'); })
+      ]);
+      CX.cache[cid].pulse=(r[0]&&r[0].data)||null;
+      CX.cache[cid].tl=(r[1]&&r[1].data)||null;
+      CX.cache[cid].inv=r[2]||[];
+      CX.cache[cid].apr=r[3]||[];
+      CX.cache[cid].tasks=r[4]||[];
+      CX.cache[cid].reports=r[5]||[];
+    }
+    cxRender();
+  }
+
+  function cxRender(){
+    var root=document.getElementById('cxRoot'); if(!root) return;
+    var counts={Client:0,Lead:0,Prospect:0,Portal:0};
+    CX.people.forEach(function(p){ counts[p.type]=(counts[p.type]||0)+1; });
+    var stats='<div class="cx-stats">'
+      +'<div class="cx-st"><div class="cx-sn">'+CX.people.length+'</div><div class="cx-sl">People connected to the studio</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+counts.Client+'</div><div class="cx-sl">Clients</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+counts.Lead+'</div><div class="cx-sl">Leads</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+counts.Prospect+'</div><div class="cx-sl">Prospects</div></div>'
+      +'<div class="cx-st"><div class="cx-sn">'+counts.Portal+'</div><div class="cx-sl">Portal-only identities</div></div>'
+    +'</div>';
+
+    var list=CX.people.filter(function(p){
+      if(CX.type!=='all'&&p.type!==CX.type) return false;
+      if(CX.q&&(p.name+' '+p.email+' '+p.company).toLowerCase().indexOf(CX.q)===-1) return false;
+      return true;
+    }).sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+
+    var left='<div class="grx-card" style="padding:14px;">'
+      +'<input class="opx-search" style="width:100%;box-sizing:border-box;margin-bottom:8px;" placeholder="Search people, companies, emails\u2026" value="'+att(CX.q)+'" oninput="cxQ(this.value)" aria-label="Search people">'
+      +'<div>'+[['all','All'],['Client','Clients'],['Lead','Leads'],['Prospect','Prospects'],['Portal','Portal']].map(function(t){
+        return '<span class="cx-chipf'+(CX.type===t[0]?' on':'')+'" onclick="cxType(\''+t[0]+'\')">'+t[1]+'</span>';
+      }).join('')+'</div>'
+      +(list.length?list.map(function(p){
+        var tc=TYPES[p.type]||TYPES.Portal;
+        return '<div class="cx-item'+(p.key===CX.sel?' on':'')+'" onclick="cxSel(\''+att(p.key)+'\')">'
+          +'<div class="cx-av">'+esc(ini(p.name))+'</div>'
+          +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(p.name)+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(p.company||p.email||'')+'</div></div>'
+          +'<span class="cx-type" style="color:'+tc[0]+';background:'+tc[1]+';">'+p.type.toUpperCase()+(p.portal&&p.type==='Client'?' \u00b7 PORTAL':'')+'</span>'
+        +'</div>';
+      }).join(''):'<div class="grx-empty" style="margin-top:12px;">Nobody matches.</div>')
+    +'</div>';
+
+    var p=cur(); var center='', rail='';
+    if(!p){ center='<div class="grx-card"><div class="grx-empty">Pick a person.</div></div>'; }
+    else{
+      var tc=TYPES[p.type]||TYPES.Portal;
+      var cache=p.cid?CX.cache[p.cid]:null;
+      var pulse=cache&&cache.pulse?cache.pulse:null;
+      // header
+      var chips='';
+      if(p.email) chips+='<span class="cx-cc" onclick="navigator.clipboard.writeText(\''+att(p.email)+'\');toast(\'\u2713 Email copied\')">\u2709 '+esc(p.email)+'</span>';
+      if(p.phone) chips+='<span class="cx-cc" onclick="navigator.clipboard.writeText(\''+att(p.phone)+'\');toast(\'\u2713 Copied\')">\u260e '+esc(p.phone)+'</span>';
+      if(p.website) chips+='<a class="cx-cc" style="text-decoration:none;" href="'+att(/^https?:/.test(p.website)?p.website:'https://'+p.website)+'" target="_blank" rel="noopener">\ud83c\udf10 '+esc(String(p.website).replace(/^https?:\/\//,''))+' \u2197</a>';
+      var head='<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">'
+        +'<div class="cx-hav">'+esc(ini(p.name))+'</div>'
+        +'<div style="flex:1;min-width:200px;"><div style="font-size:19px;font-weight:750;color:var(--ink);">'+esc(p.name)+' <span class="cx-type" style="color:'+tc[0]+';background:'+tc[1]+';vertical-align:middle;">'+p.type.toUpperCase()+'</span>'+(p.portal&&p.type==='Client'?' <span class="cx-type" style="color:#7a6d8e;background:#f3f0fa;vertical-align:middle;">PORTAL ACCESS</span>':'')+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(p.company&&p.company!==p.name?p.company:(p.subject||''))+(p.created_at?' \u00b7 known since '+esc(new Date(p.created_at).toLocaleDateString('en-US',{month:'short',year:'numeric'})):'')+(p.last?' \u00b7 last activity '+esc(ago(p.last)):'')+'</div></div>'
+      +'</div>'
+      +'<div style="margin-top:12px;">'+chips+'</div>';
+      var tabs='<div class="ivx-tabs" style="margin-top:6px;">'
+        +'<button class="ibx-tab'+(CX.tab==='ov'?' on':'')+'" onclick="cxTab(\'ov\')">Overview</button>'
+        +(p.cid?'<button class="ibx-tab'+(CX.tab==='act'?' on':'')+'" onclick="cxTab(\'act\')">Activity</button>':'')
+      +'</div>';
+      var body='';
+      if(CX.tab==='act'&&p.cid){
+        var tl=cache&&cache.tl?cache.tl:null;
+        var items=(tl&&tl.items)||[];
+        body=tl===null?'<div style="font-size:12px;color:var(--muted);padding:10px 0;">Loading the relationship story\u2026</div>'
+          :(items.length?('<div style="margin-top:8px;">'+(tl.story?'<div style="font-size:13px;color:var(--ink);line-height:1.6;background:rgba(91,63,160,.04);border-radius:12px;padding:12px 14px;margin-bottom:10px;">\u2726 '+esc(tl.story)+'</div>':'')
+            +items.slice(0,25).map(function(it){
+              return '<div class="cx-kv"><span style="flex:1;min-width:0;">'+esc(it.title||it.kind||'Event')+'</span><b style="font-weight:500;color:var(--muted);flex:none;">'+esc(it.ts?ago(it.ts):'')+'</b></div>';
+            }).join('')+'</div>')
+          :'<div class="grx-empty" style="margin-top:12px;">No recorded activity yet.</div>');
+      } else {
+        // OVERVIEW — answers the five questions in order
+        var healthBlock='';
+        if(p.cid){
+          if(pulse&&pulse.relationship_health!=null){
+            var rv=Number(pulse.relationship_health)||0;
+            var lab=clientHealthLabel(rv);
+            var dsc=pulse.days_since_contact;
+            var dormant=(dsc!=null&&dsc>45);
+            healthBlock='<div class="ivx-block"><div class="ivx-bh">RELATIONSHIP HEALTH \u2014 scored from the record, reasons included</div>'
+              +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">'
+              +'<div class="cx-ring" style="border-color:'+lab[1]+';color:'+lab[1]+';"><span style="font-size:20px;font-weight:750;">'+rv+'</span></div>'
+              +'<div style="flex:1;min-width:200px;"><div style="font-size:14px;font-weight:700;color:'+lab[1]+';">'+(dormant?'Dormant':lab[0])+'</div>'
+              +(pulse.rh_note?'<div style="font-size:12.5px;color:var(--ink);line-height:1.55;margin-top:3px;">'+esc(pulse.rh_note)+'</div>':'')
+              +(pulse.business_health!=null?'<div class="cx-kv" style="margin-top:8px;"><span>Business health</span><b>'+esc(String(pulse.business_health))+'</b></div>':'')
+              +(pulse.happiness&&pulse.happiness.recent!=null?'<div class="cx-kv"><span>Satisfaction (surveyed)</span><b>'+esc(String(pulse.happiness.recent))+'/10'+(pulse.happiness.trend?' \u00b7 '+esc(String(pulse.happiness.trend)):'')+'</b></div>':'')
+              +(pulse.renewal?'<div class="cx-kv"><span>Renews in '+esc(String(pulse.renewal.days))+'d</span><b>'+esc(String(pulse.renewal.likelihood||'').replace(/_/g,' '))+'</b></div>':'')
+              +(dsc!=null?'<div style="font-size:11.5px;color:var(--muted);padding:4px 0 0;">Last contact '+dsc+'d ago \u2014 the score already reflects it.</div>':'')
+              +'</div></div></div>';
+          } else {
+            healthBlock='<div class="ivx-block"><div class="ivx-bh">RELATIONSHIP HEALTH</div><div style="font-size:12px;color:var(--muted);">'+(cache?'Scoring from the record\u2026':'Loading\u2026')+'</div></div>';
+          }
+        } else {
+          var sh=simpleHealth(p);
+          healthBlock='<div class="ivx-block"><div class="ivx-bh">RELATIONSHIP STATUS</div>'
+            +'<div style="font-size:14px;font-weight:700;color:'+sh.color+';">'+sh.label+(p.status?' \u00b7 '+esc(String(p.status))+'':'')+'</div>'
+            +'<div style="font-size:12.5px;color:var(--ink);margin-top:3px;">'+esc(sh.why)+' Health scoring deepens once they become a client \u2014 leads and prospects are read by recency and pipeline status only.</div></div>';
+        }
+        // waiting-on: what THIS relationship is blocked on, both directions
+        var waitBlock='';
+        if(p.cid&&cache){
+          var waits=[];
+          (cache.apr||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; }).slice(0,3)
+            .forEach(function(a){ waits.push(['They owe a decision','\u201c'+String(a.title||'Approval')+'\u201d pending '+ago(a.created_at)]); });
+          var owed=(cache.inv||[]).filter(function(i){ return i.status!=='paid'&&i.status!=='draft'; })
+            .reduce(function(s2,i){ var n=parseFloat(String(i.amount||'').replace(/[^0-9.]/g,'')); return s2+(isFinite(n)?n:0); },0);
+          if(owed>0) waits.push(['They owe payment','$'+Math.round(owed).toLocaleString()+' outstanding']);
+          if((cache.tasks||[]).length) waits.push(['You owe work',(cache.tasks.length)+' open task'+(cache.tasks.length===1?'':'s')+' on your side']);
+          waitBlock='<div class="ivx-block"><div class="ivx-bh">WHAT\u2019S WAITING \u2014 both directions</div>'
+            +(waits.length?waits.map(function(w){ return '<div class="cx-kv"><span>'+esc(w[0])+'</span><b style="font-weight:600;">'+esc(w[1])+'</b></div>'; }).join('')
+            :'<div style="font-size:12.5px;color:#1a7e49;">Nothing pending in either direction \u2014 clean slate.</div>')+'</div>';
+        }
+        var about='<div class="ivx-block"><div class="ivx-bh">THE RELATIONSHIP</div>'
+          +(p.type==='Client'?('<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">'+esc(p.raw.project_name||'Client')+(p.raw.project_status?' \u00b7 '+esc(p.raw.project_status):'')
+            +(p.recurring?' \u00b7 recurring partnership':' \u00b7 project engagement')
+            +(p.raw.launched_at?' \u00b7 launched '+esc(new Date(p.raw.launched_at).toLocaleDateString('en-US',{month:'short',year:'numeric'})):'')
+            +(p.raw.renews_at?' \u00b7 renews '+esc(new Date(p.raw.renews_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})):'')+'</div>')
+          :p.type==='Lead'?('<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">Inbound lead'+(p.subject?' \u2014 wrote about \u201c'+esc(p.subject)+'\u201d':'')+'. Convert from Leads &amp; Inbox when ready.</div>')
+          :p.type==='Prospect'?('<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">Researched prospect'+(p.company?' at '+esc(p.company):'')+'. Outreach runs from Opportunities.</div>')
+          :'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;">Portal identity not yet linked to a client record.</div>')
+        +'</div>';
+        body=about+healthBlock+waitBlock;
+      }
+      center='<div class="grx-card">'+head+tabs+body+'</div>';
+
+      // RIGHT RAIL: intelligence + related + quick actions
+      var recs=[];
+      try{ recs=((window.DDS_COMM&&window.DDS_COMM.cache)||[]).filter(function(x){ return p.cid&&String(x.cid)===String(p.cid); }); }catch(e){}
+      var insight='';
+      if(p.last){ var dd=Math.floor((Date.now()-new Date(p.last))/86400000); insight=dd<=2?'In active conversation right now.':dd<=14?'Last touch '+dd+' days ago \u2014 healthy cadence.':'No communication in '+dd+' days.'; }
+      else insight='No interaction history recorded yet.';
+      rail='<div class="grx-card"><div class="grx-h">\u2726 Relationship intelligence</div>'
+        +'<div style="font-size:12.5px;color:var(--ink);line-height:1.6;background:rgba(91,63,160,.05);border-radius:10px;padding:10px 12px;">'+esc(insight)+'</div>'
+        +(recs.length?('<div style="font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin:12px 0 4px;">SUGGESTED ACTIONS</div>'
+          +recs.slice(0,3).map(function(x){
+            return '<div style="font-size:12px;color:var(--ink);line-height:1.5;padding:7px 0;border-top:1px solid rgba(41,25,66,.05);">'+esc(x.ask)
+              +'<div style="margin-top:4px;"><button class="ibx-pill" onclick="ddsCommOpen(\''+att(String(x.t.id))+'\',\''+att(String(x.cid))+'\')">'+esc(x.t.name)+' \u2192</button></div></div>';
+          }).join('')):(p.cid?'<div style="font-size:11.5px;color:var(--muted);margin-top:10px;">No signals firing for them right now \u2014 suggestions appear from real events: overdue invoices, launches, silence, renewals.</div>':''))
+      +'</div>';
+      if(p.cid&&cache){
+        var lastPaid=(cache.inv||[]).find(function(i){ return i.status==='paid'&&i.paid_at; });
+        var pend=(cache.apr||[]).filter(function(a){ return String(a.status||'').toLowerCase()==='pending'; }).length;
+        var lastRep=(cache.reports||[])[0];
+        rail+='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Related</div>'
+          +'<div class="cx-kv"><span>Project</span><b style="font-weight:600;text-align:right;">'+esc(p.raw.project_name||'\u2014')+'</b></div>'
+          +'<div class="cx-kv"><span>Last invoice paid</span><b>'+(lastPaid?esc(new Date(lastPaid.paid_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})):'\u2014')+'</b></div>'
+          +'<div class="cx-kv"><span>Open tasks</span><b>'+((cache.tasks||[]).length)+'</b></div>'
+          +'<div class="cx-kv"><span>Pending approvals</span><b>'+pend+'</b></div>'
+          +'<div class="cx-kv"><span>Latest report</span><b>'+(lastRep?esc(String(lastRep.status||'').toUpperCase()):'\u2014')+'</b></div>'
+        +'</div>';
+        rail+='<div class="grx-card" style="margin-top:14px;"><div class="grx-h">Quick actions</div><div class="cx-qa">'
+          +'<button class="cx-qab" onclick="go(\'messages\');setTimeout(function(){try{msxOpen(\''+att(p.cid)+'\')}catch(e){}},400);">\u2709<br>Message</button>'
+          +'<button class="cx-qab" onclick="ddsCommOpen(\'\',\''+att(p.cid)+'\')">\u2726<br>Email template</button>'
+          +'<button class="cx-qab" onclick="cxTask(\''+att(p.cid)+'\',\''+att(p.name)+'\')">\u2713<br>New task</button>'
+          +'<button class="cx-qab" onclick="go(\'invoices\')">$<br>Invoices</button>'
+          +'<button class="cx-qab" onclick="go(\'reports\')">\u25a4<br>Reports</button>'
+          +'<button class="cx-qab" onclick="go(\'hub\')">\u2764<br>Client hub</button>'
+        +'</div></div>';
+      }
+    }
+
+    root.innerHTML='<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;"><div><div class="pt">Contacts</div>'
+      +'<div class="ibx-sub">Every person connected to the studio \u2014 unified from clients, leads, prospects, and portal identities. One person, one relationship.</div></div></div>'
+      +stats
+      +'<div class="cx-grid"><div>'+left+'</div><div>'+center+'</div><div>'+rail+'</div></div>';
+  }
+
+  window.cxTask=async function(cid,name){
+    var t=prompt('Task for '+name+':'); if(!t) return;
+    var r=await api('studio_tasks','POST',{title:t, client_id:cid, priority:'medium', impact:'none', status:'open', source:'contact'});
+    if(r===null){ toast('Task create failed'); return; }
+    toast('\u2713 Task created');
+    if(CX.cache[cid]) delete CX.cache[cid];
+    cxDetailFill();
+  };
+
+  // surface ownership: nav dispatch
+  var _goC=window.go;
+  window.go=function(dest){ var r=_goC.apply(this,arguments); try{ if(dest==='contacts') cxLoad(); }catch(e){} return r; };
 })();
 </script>
 
